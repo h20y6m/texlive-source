@@ -777,6 +777,8 @@ enable_pmp
 enable_upmp
 enable_xetex
 enable_xetex_synctex
+enable_nptex
+enable_nptex_synctex
 enable_mf
 enable_mf_nowin
 enable_mflua
@@ -1576,6 +1578,8 @@ Optional Features:
   --disable-upmp            do not compile and install upMetaPost
   --disable-xetex           do not compile and install XeTeX
   --disable-xetex-synctex     build XeTeX without SyncTeX support
+  --disable-nptex           do not compile and install npTeX
+  --disable-nptex-synctex     build npTeX without SyncTeX support
   --disable-mf              do not compile and install METAFONT
   --disable-mf-nowin          do not build a separate non-window-capable
                               METAFONT
@@ -2213,9 +2217,7 @@ struct stat;
 /* Most of the following tests are stolen from RCS 5.7 src/conf.sh.  */
 struct buf { int x; };
 struct buf * (*rcsopen) (struct buf *, struct stat *, int);
-static char *e (p, i)
-     char **p;
-     int i;
+static char *e (char **p, int i)
 {
   return p[i];
 }
@@ -2266,6 +2268,7 @@ extern int puts (const char *);
 extern int printf (const char *, ...);
 extern int dprintf (int, const char *, ...);
 extern void *malloc (size_t);
+extern void free (void *);
 
 // Check varargs macros.  These examples are taken from C99 6.10.3.5.
 // dprintf is used instead of fprintf to avoid needing to declare
@@ -4759,6 +4762,32 @@ test "x$enable_web2c:$enable_xetex" = xyes:yes && {
   need_freetype2=yes
   need_teckit=yes
   need_harfbuzz=yes
+}
+# Check whether --enable-nptex was given.
+if test ${enable_nptex+y}
+then :
+  enableval=$enable_nptex;
+fi
+case $enable_nptex in #(
+  yes | no) :
+     ;; #(
+  *) :
+    enable_nptex=yes ;;
+esac
+
+# Check whether --enable-nptex-synctex was given.
+if test ${enable_nptex_synctex+y}
+then :
+  enableval=$enable_nptex_synctex;
+fi
+
+test "x$enable_web2c:$enable_nptex" = xyes:yes && {
+  need_pplib=yes
+  need_libpng=yes
+  need_freetype2=yes
+  need_teckit=yes
+  need_harfbuzz=yes
+  need_ptexenc=yes
 }
 ## configure options for MF
 # Check whether --enable-mf was given.

@@ -303,6 +303,9 @@ include $(srcdir)/luatexdir/am/luaharfbuzz.am
 ## XeTeX
 include $(srcdir)/xetexdir/am/xetex.am
 
+## npTeX
+include $(srcdir)/nptexdir/am/nptex.am
+
 ## omegaware web programs
 include $(srcdir)/omegaware/am/omegaware.am
 
