@@ -5189,15 +5189,26 @@ be pushed onto |nest| if necessary.
 
 @<Types...@>=
 @!list_state_record=record@!mode_field:-mmode..mmode;@+
-  @!head_field,@!tail_field: pointer;
+  @!dir_field,@!adj_dir_field: -dir_yoko..dir_yoko;
+  @!pdisp_field: scaled;
+  @!head_field,@!tail_field,@!pnode_field,@!last_jchr_field: pointer;
+  @!disp_called_field: boolean;
+  @!inhibit_glue_flag_field: integer;
   @!eTeX_aux_field: pointer;
   @!pg_field,@!ml_field: integer;@+
   @!aux_field: memory_word;
   end;
 
 @ @d mode==cur_list.mode_field {current mode}
+@d direction==cur_list.dir_field {current direction}
+@d adjust_dir==cur_list.adj_dir_field {current adjust direction}
 @d head==cur_list.head_field {header node of current list}
 @d tail==cur_list.tail_field {final node on current list}
+@d prev_node==cur_list.pnode_field {previous to last |disp_node|}
+@d prev_disp==cur_list.pdisp_field {displacemant at |prev_node|}
+@d last_jchr==cur_list.last_jchr_field {final jchar node on current list}
+@d disp_called==cur_list.disp_called_field {is a |disp_node| present in the current list?}
+@d inhibit_glue_flag==cur_list.inhibit_glue_flag_field {is \.{\\inhibitglue} specified at the current list?}
 @d eTeX_aux==cur_list.eTeX_aux_field {auxiliary data for \eTeX}
 @d LR_save==eTeX_aux {LR stack when a paragraph is interrupted}
 @d LR_box==eTeX_aux {prototype box for display}
@@ -5878,17 +5889,25 @@ that will be defined later.
 @d floating_penalty_code=42 {penalty for insertions held over after a split}
 @d global_defs_code=43 {override \.{\\global} specifications}
 @d cur_fam_code=44 {current family}
-@d escape_char_code=45 {escape character for token output}
-@d default_hyphen_char_code=46 {value of \.{\\hyphenchar} when a font is loaded}
-@d default_skew_char_code=47 {value of \.{\\skewchar} when a font is loaded}
-@d end_line_char_code=48 {character placed at the right end of the buffer}
-@d new_line_char_code=49 {character that prints as |print_ln|}
-@d language_code=50 {current hyphenation table}
-@d left_hyphen_min_code=51 {minimum left hyphenation fragment size}
-@d right_hyphen_min_code=52 {minimum right hyphenation fragment size}
-@d holding_inserts_code=53 {do not remove insertion nodes from \.{\\box255}}
-@d error_context_lines_code=54 {maximum intermediate line pairs shown}
-@d tex_int_pars=55 {total number of \TeX's integer parameters}
+@d cur_jfam_code=45 {current family}
+@d escape_char_code=46 {escape character for token output}
+@d default_hyphen_char_code=47 {value of \.{\\hyphenchar} when a font is loaded}
+@d default_skew_char_code=48 {value of \.{\\skewchar} when a font is loaded}
+@d end_line_char_code=49 {character placed at the right end of the buffer}
+@d new_line_char_code=50 {character that prints as |print_ln|}
+@d language_code=51 {current hyphenation table}
+@d left_hyphen_min_code=52 {minimum left hyphenation fragment size}
+@d right_hyphen_min_code=53 {minimum right hyphenation fragment size}
+@d holding_inserts_code=54 {do not remove insertion nodes from \.{\\box255}}
+@d error_context_lines_code=55 {maximum intermediate line pairs shown}
+@d jchr_widow_penalty_code=56
+            {penalty for creating a widow KANJI character line}
+@d text_baseline_shift_factor_code=57
+@d script_baseline_shift_factor_code=58
+@d scriptscript_baseline_shift_factor_code=59
+@d ptex_lineend_code=60
+@d ptex_tracing_fonts_code=61
+@d tex_int_pars=62 {total number of \TeX's integer parameters}
 @#
 @d etex_int_base=tex_int_pars {base for \eTeX's integer parameters}
 @d tracing_assigns_code=etex_int_base {show assignments}
@@ -5960,6 +5979,7 @@ that will be defined later.
 @d floating_penalty==int_par(floating_penalty_code)
 @d global_defs==int_par(global_defs_code)
 @d cur_fam==int_par(cur_fam_code)
+@d cur_jfam==int_par(cur_jfam_code)
 @d escape_char==int_par(escape_char_code)
 @d default_hyphen_char==int_par(default_hyphen_char_code)
 @d default_skew_char==int_par(default_skew_char_code)
@@ -5970,6 +5990,12 @@ that will be defined later.
 @d right_hyphen_min==int_par(right_hyphen_min_code)
 @d holding_inserts==int_par(holding_inserts_code)
 @d error_context_lines==int_par(error_context_lines_code)
+@d jchr_widow_penalty==int_par(jchr_widow_penalty_code)
+@d text_baseline_shift_factor==int_par(text_baseline_shift_factor_code)
+@d script_baseline_shift_factor==int_par(script_baseline_shift_factor_code)
+@d scriptscript_baseline_shift_factor==int_par(scriptscript_baseline_shift_factor_code)
+@d ptex_lineend==int_par(ptex_lineend_code)
+@d ptex_tracing_fonts==int_par(ptex_tracing_fonts_code)
 @#
 @d tracing_assigns==int_par(tracing_assigns_code)
 @d tracing_groups==int_par(tracing_groups_code)
@@ -6038,6 +6064,7 @@ hang_after_code:print_esc("hangafter");
 floating_penalty_code:print_esc("floatingpenalty");
 global_defs_code:print_esc("globaldefs");
 cur_fam_code:print_esc("fam");
+cur_jfam_code:print_esc("jfam");
 escape_char_code:print_esc("escapechar");
 default_hyphen_char_code:print_esc("defaulthyphenchar");
 default_skew_char_code:print_esc("defaultskewchar");
@@ -6048,6 +6075,12 @@ left_hyphen_min_code:print_esc("lefthyphenmin");
 right_hyphen_min_code:print_esc("righthyphenmin");
 holding_inserts_code:print_esc("holdinginserts");
 error_context_lines_code:print_esc("errorcontextlines");
+jchr_widow_penalty_code:print_esc("jcharwidowpenalty");
+text_baseline_shift_factor_code:print_esc("textbaselineshiftfactor");
+script_baseline_shift_factor_code:print_esc("scriptbaselineshiftfactor");
+scriptscript_baseline_shift_factor_code:print_esc("scriptscriptbaselineshiftfactor");
+ptex_lineend_code:print_esc("ptexlineendmode");
+ptex_tracing_fonts_code:print_esc("ptextracingfonts");
 XeTeX_linebreak_penalty_code:print_esc("XeTeXlinebreakpenalty");
 XeTeX_protrude_chars_code:print_esc("XeTeXprotrudechars");
 @/@<Cases for |print_param|@>@/
@@ -6151,6 +6184,8 @@ primitive("globaldefs",assign_int,int_base+global_defs_code);@/
 @!@:global_defs_}{\.{\\globaldefs} primitive@>
 primitive("fam",assign_int,int_base+cur_fam_code);@/
 @!@:fam_}{\.{\\fam} primitive@>
+primitive("jfam",assign_int,int_base+cur_jfam_code);@/
+@!@:cur_jfam_}{\.{\\jfam} primitive@>
 primitive("escapechar",assign_int,int_base+escape_char_code);@/
 @!@:escape_char_}{\.{\\escapechar} primitive@>
 primitive("defaulthyphenchar",assign_int,int_base+default_hyphen_char_code);@/
@@ -6171,6 +6206,18 @@ primitive("holdinginserts",assign_int,int_base+holding_inserts_code);@/
 @!@:holding_inserts_}{\.{\\holdinginserts} primitive@>
 primitive("errorcontextlines",assign_int,int_base+error_context_lines_code);@/
 @!@:error_context_lines_}{\.{\\errorcontextlines} primitive@>
+primitive("jcharwidowpenalty",assign_int,int_base+jchr_widow_penalty_code);@/
+@!@:jchr_widow_penalty}{\.{\\jcharwidowpenalty} primitive@>
+primitive("textbaselineshiftfactor",assign_int,int_base+text_baseline_shift_factor_code);@/
+@!@:text_baseline_shift_factor}{\.{\\textbaselineshiftfactor} primitive@>
+primitive("scriptbaselineshiftfactor",assign_int,int_base+script_baseline_shift_factor_code);@/
+@!@:script_baseline_shift_factor}{\.{\\scriptbaselineshiftfactor} primitive@>
+primitive("scriptscriptbaselineshiftfactor",assign_int,int_base+scriptscript_baseline_shift_factor_code);@/
+@!@:scriptscript_baseline_shift_factor}{\.{\\scriptscriptbaselineshiftfactor} primitive@>
+primitive("ptexlineendmode",assign_int,int_base+ptex_lineend_code);@/
+@!@:ptex_lineend_mode_}{\.{\\ptexlineendmode} primitive@>
+primitive("ptextracingfonts",assign_int,int_base+ptex_tracing_fonts_code);@/
+@!@:ptex_tracing_fonts_}{\.{\\ptextracingfonts} primitive@>
 primitive("XeTeXlinebreakpenalty",assign_int,int_base+XeTeX_linebreak_penalty_code);@/
 @!@:XeTeX_linebreak_penalty_}{\.{\\XeTeXlinebreakpenalty} primitive@>
 primitive("XeTeXprotrudechars",assign_int,int_base+XeTeX_protrude_chars_code);@/
@@ -6763,6 +6810,10 @@ primitive("expandafter",expand_after,0);@/
 @!@:expand_after_}{\.{\\expandafter} primitive@>
 primitive("font",def_font,0);@/
 @!@:font_}{\.{\\font} primitive@>
+primitive("jfont",def_jfont,0);@/
+@!@:jfont_}{\.{\\jfont} primitive@>
+primitive("tfont",def_tfont,0);@/
+@!@:tfont_}{\.{\\tfont} primitive@>
 primitive("fontdimen",assign_font_dimen,0);@/
 @!@:font_dimen_}{\.{\\fontdimen} primitive@>
 primitive("halign",halign,0);@/
@@ -6852,6 +6903,8 @@ break_penalty: print_esc("penalty");
 char_num: print_esc("char");
 cs_name: print_esc("csname");
 def_font: print_esc("font");
+def_jfont: print_esc("jfont");
+def_tfont: print_esc("tfont");
 delim_num: if chr_code=1 then print_esc("Udelimiter")
   else print_esc("delimiter");
 divide: print_esc("divide");
@@ -9802,7 +9855,8 @@ XeTeX_def_code:
       scanned_result(0)(int_val);
     end;
   end;
-toks_register,assign_toks,def_family,set_font,def_font: @<Fetch a token list or
+toks_register,assign_toks,def_family,set_font,def_font,def_jfont,def_tfont:
+@<Fetch a token list or
   font identifier, provided that |level=tok_val|@>;
 assign_int: scanned_result(eqtb[m].int)(int_val);
 assign_dimen: scanned_result(eqtb[m].sc)(dimen_val);
@@ -10713,6 +10767,10 @@ if scan_keyword("em") then v:=(@<The em width for |cur_font|@>)
 @.em@>
 else if scan_keyword("ex") then v:=(@<The x-height for |cur_font|@>)
 @.ex@>
+else if scan_keyword("zw") then @<The KANJI width for |cur_jfont|@>
+@.zw@>
+else if scan_keyword("zh") then @<The KANJI height for |cur_jfont|@>
+@.zh@>
 else goto not_found;
 @<Scan an optional space@>;
 found:cur_val:=nx_plus_y(save_cur_val,v,xn_over_d(v,f,@'200000));
@@ -10766,6 +10824,10 @@ else if scan_keyword("dd") then set_conversion(1238)(1157)
 @.dd@>
 else if scan_keyword("cc") then set_conversion(14856)(1157)
 @.cc@>
+else if scan_keyword("H") then set_conversion(7227)(10160)
+@.H@>
+else if scan_keyword("Q") then set_conversion(7227)(10160)
+@.Q@>
 else if scan_keyword("sp") then goto done
 @.sp@>
 else @<Complain about unknown unit and |goto done2|@>;
@@ -10778,7 +10840,7 @@ done2:
 begin print_err("Illegal unit of measure ("); print("pt inserted)");
 @.Illegal unit of measure@>
 help6("Dimensions can be in units of em, ex, in, pt, pc,")@/
-  ("cm, mm, dd, cc, bp, or sp; but yours is a new one!")@/
+  ("cm, mm, dd, cc, bp, H, Q, or sp; but yours is a new one!")@/
   ("I'll assume that you meant to say pt, for printer's points.")@/
   ("To recover gracefully from this error, it's best to")@/
   ("delete the erroneous units; e.g., type `2' to delete")@/
@@ -13301,7 +13363,7 @@ until later.
 
 @<Use size fields to allocate font information@>=
 if jfm_flag<>dir_default then
-  lf:=lf-7-lh  {If \.{JFM}, |lf| holds more two-16bit records than \.{TFM}}
+  lf:=lf-7-lh {If \.{JFM}, |lf| holds more two-16bit records than \.{TFM}}
 else
   lf:=lf-6-lh; {|lf| words should be loaded into |font_info|}
 if np<7 then lf:=lf+7-np; {at least seven parameters will appear}
@@ -13336,7 +13398,8 @@ end
 @ Only the first two words of the header are needed by \TeX82.
 
 @<Read the {\.{TFM}} header@>=
-begin if lh<2 then abort;
+begin print("AA");
+if lh<2 then abort;
 store_four_quarters(font_check[f]);
 fget; read_sixteen(z); {this rejects a negative design size}
 fget; z:=z*@'400+fbyte; fget; z:=(z*@'20)+(fbyte div@'20);
@@ -13349,9 +13412,11 @@ if s<>-1000 then
   if s>=0 then z:=s
   else z:=xn_over_d(z,-s,1000);
 font_size[f]:=z;
-end
+end;
+print("BB");
 
 @ @<Read character data@>=
+print("CC"); print_int(jfm_flag); print(" ");
 if jfm_flag<>dir_default then
   for k:=ctype_base[f] to ctype_base[f]+nt-1 do
     begin
@@ -13363,7 +13428,7 @@ if jfm_flag<>dir_default then
     fget; cx:=fbyte;
     font_info[k].hh.lhfield:=tonum(cx); {|kchar_type|}
     end;
-for k:=fmem_ptr to width_base[f]-1 do
+for k:=char_base[f] to width_base[f]-1 do
   begin store_four_quarters(font_info[k].qqqq);
   if (a>=nw)or(b div @'20>=nh)or(b mod @'20>=nd)or
     (c div 4>=ni) then abort;
@@ -13373,7 +13438,8 @@ for k:=fmem_ptr to width_base[f]-1 do
   list_tag: @<Check for charlist cycle@>;
   othercases do_nothing {|no_tag|}
   endcases;
-  end
+  end;
+print("DD");
 
 @ We want to make sure that there is no cycle of characters linked together
 by |list_tag| entries, since such a cycle would get \TeX\ into an endless
@@ -27562,6 +27628,8 @@ any_mode(XeTeX_def_code),
 any_mode(def_family),
 any_mode(set_font),
 any_mode(def_font),
+any_mode(def_jfont),
+any_mode(def_tfont),
 any_mode(register),
 any_mode(advance),
 any_mode(multiply),
@@ -27579,7 +27647,8 @@ any_mode(set_interaction):prefixed_command;
 silently accepted.
 
 @<Declare act...@>=
-@t\4@>@<Declare subprocedures for |prefixed_command|@>@t@>@;@/
+@t\4@>@<Declare the function called |scan_keyword_noexpand|@>
+@<Declare subprocedures for |prefixed_command|@>@t@>@;@/
 procedure prefixed_command;
 label done,exit;
 var a:small_number; {accumulated prefix codes so far}
@@ -27684,7 +27753,14 @@ text(frozen_protection):="inaccessible";
 (Unfortunately, they aren't all as simple as this.)
 
 @<Assignments@>=
-set_font: define(cur_font_loc,data,cur_chr);
+set_font: begin
+  if font_dir[cur_chr]=dir_yoko then
+    define(cur_jfont_loc,data,cur_chr)
+  else if font_dir[cur_chr]=dir_tate then
+    define(cur_tfont_loc,data,cur_chr)
+  else
+    define(cur_font_loc,data,cur_chr)
+end;
 
 @ When a |def| command has been scanned,
 |cur_chr| is odd if the definition is supposed to be global, and
@@ -28393,7 +28469,7 @@ endcases;
 @ Here is where the information for a new font gets loaded.
 
 @<Assignments@>=
-def_font: new_font(a);
+def_tfont,def_jfont,def_font: new_font(a);
 
 @ @<Declare subprocedures for |prefixed_command|@>=
 procedure new_font(@!a:small_number);
@@ -28407,6 +28483,7 @@ var u:pointer; {user's font identifier}
 begin if job_name=0 then open_log_file;
   {avoid confusing \.{texput} with the font name}
 @.texput@>
+@<Scan the font encoding specification@>;
 get_r_token; u:=cur_cs;
 if u>=hash_base then t:=text(u)
 else if u>=single_base then
@@ -34475,6 +34552,101 @@ else  begin if cur_val>penalty(equiv(m)) then cur_val:=penalty(equiv(m));
   cur_val:=penalty(equiv(m)+cur_val);
   end;
 end
+
+@* \[54] System-dependent changes for Japanese typesetting, based on \pTeX.
+@<Declare procedures that scan font-related stuff@>=
+function get_jfm_pos(@!kcode:UTF16_code;@!f:internal_font_number):eight_bits;
+var @!jc:UTF16_code; {temporary register for KANJI}
+@!sp,@!mp,@!ep:pointer;
+begin@/
+if f=null_font then
+  begin get_jfm_pos:=kchar_type(null_font)(0); return;
+  end;
+jc:=kcode;
+sp:=1; { start position }
+ep:=font_num_ext[f]-1; { end position }
+if (ep>=1) then { nt is larger than 1; |char_type| is non-empty }
+if font_enc[f]=0 then { |kchar_code| are ordered; faster search }
+begin if (kchar_code(f)(sp)<=jc)and(jc<=kchar_code(f)(ep)) then
+  begin while (sp <= ep) do
+    begin mp:=sp+((ep-sp) div 2);
+    if jc<kchar_code(f)(mp) then ep:=mp-1
+    else if jc>kchar_code(f)(mp) then sp:=mp+1
+    else
+      begin get_jfm_pos:=kchar_type(f)(mp); return;
+      end;
+    end;
+  end;
+end
+else { TFM-DVI encoding conversion; whole search }
+  begin while (sp <= ep) do
+    if jc=kchar_code(f)(sp) then
+      begin get_jfm_pos:=kchar_type(f)(sp); return;
+      end
+    else incr(sp);
+  end;
+get_jfm_pos:=kchar_type(f)(0);
+end;
+
+@ The function |scan_keyword_noexpand| is used to scan a keyword
+preceding possibly undefined control sequence.
+It is used while scanning \.{\\font} with JFM encoding specification.
+
+@<Declare the function called |scan_keyword_noexpand|@>=
+function scan_keyword_noexpand(@!s:str_number):boolean;
+label exit;
+var p:pointer; {tail of the backup list}
+@!q:pointer; {new node being added to the token list via |store_new_token|}
+@!k:pool_pointer; {index into |str_pool|}
+begin p:=backup_head; link(p):=null; k:=str_start[s];
+while k<str_start[s+1] do
+  begin get_token; {no expansion}
+  if (cur_cs=0)and@|
+   ((cur_chr=so(str_pool[k]))or(cur_chr=so(str_pool[k])-"a"+"A")) then
+    begin store_new_token(cur_tok); incr(k);
+    end
+  else if (cur_cmd<>spacer)or(p<>backup_head) then
+    begin back_input;
+    if p<>backup_head then back_list(link(backup_head));
+    scan_keyword_noexpand:=false; return;
+    end;
+  end;
+flush_list(link(backup_head)); scan_keyword_noexpand:=true;
+exit:end;
+
+@ @<Scan the font encoding specification@>=
+begin jfm_enc:=0;
+if scan_keyword_noexpand("in") then
+  if scan_keyword_noexpand("jis") then jfm_enc:=1
+  else if scan_keyword_noexpand("ucs") then jfm_enc:=2
+  else begin
+    print_err("Unknown TFM encoding");
+@.Unknown TFM encoding@>
+    help1("TFM encoding specification is ignored.");@/
+    error;
+  end;
+end
+
+@ Following codes are used to calculate a KANJI width and height.
+
+@<Local variables for dimension calculations@>=
+@!t: eight_bits;
+
+@ @<The KANJI width for |cur_jfont|@>=
+if direction=dir_tate then
+  v:=char_width(cur_tfont)(orig_char_info(cur_tfont)(qi(0)))
+else
+  v:=char_width(cur_jfont)(orig_char_info(cur_jfont)(qi(0)))
+
+@ @<The KANJI height for |cur_jfont|@>=
+if direction=dir_tate then begin
+  t:=height_depth(orig_char_info(cur_tfont)(qi(0)));
+  v:=char_height(cur_tfont)(t)+char_depth(cur_tfont)(t);
+end else begin
+  t:=height_depth(orig_char_info(cur_jfont)(qi(0)));
+  v:=char_height(cur_jfont)(t)+char_depth(cur_jfont)(t);
+end
+
 
 @* \[54] System-dependent changes.
 This section should be replaced, if necessary, by any special

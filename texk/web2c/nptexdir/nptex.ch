@@ -153,6 +153,12 @@ last_node_type:=-1;
 @d int_base=char_sub_code_base+number_usvs {beginning of region 5}
 @z
 
+@x [17.236]
+@d tex_int_pars=55 {total number of \TeX's integer parameters}
+@y
+@d tex_int_pars=62 {total number of \TeX's integer parameters}
+@z
+
 @x [17.236] l.4960 - first web2c, then e-TeX additional integer parameters
 @d int_pars=web2c_int_pars {total number of integer parameters}
 @#
@@ -666,6 +672,26 @@ font_info:=xmalloc_array(fmemory_word, font_mem_size);
 font_info:=xmalloc_array(memory_word, font_mem_size);
 @z
 
+@x [50.1320] l.24988 - pTeX:
+@ @<Dump the array info for internal font number |k|@>=
+begin
+dump_things(font_check[null_font], font_ptr+1-null_font);
+@y
+@ @<Dump the array info for internal font number |k|@>=
+begin
+dump_things(font_dir[null_font], font_ptr+1-null_font);
+dump_things(font_enc[null_font], font_ptr+1-null_font);
+dump_things(font_num_ext[null_font], font_ptr+1-null_font);
+dump_things(font_check[null_font], font_ptr+1-null_font);
+@z
+
+@x [50.1321] l.25000 - pTeX:
+dump_things(char_base[null_font], font_ptr+1-null_font);
+@y
+dump_things(ctype_base[null_font], font_ptr+1-null_font);
+dump_things(char_base[null_font], font_ptr+1-null_font);
+@z
+
 @x [50.1322] l.24000 - Make dumping/undumping more efficient - tfm
   print_file_name(font_name[k],font_area[k],"");
 @y
@@ -684,6 +710,9 @@ font_info:=xmalloc_array(memory_word, font_mem_size);
 begin {Allocate the font arrays}
 @y
 begin {Allocate the font arrays}
+font_dir:=xmalloc_array(eight_bits, font_max);
+font_enc:=xmalloc_array(eight_bits, font_max);
+font_num_ext:=xmalloc_array(integer, font_max);
 font_mapping:=xmalloc_array(void_pointer, font_max);
 font_layout_engine:=xmalloc_array(void_pointer, font_max);
 font_flags:=xmalloc_array(char, font_max);
@@ -698,11 +727,28 @@ font_bc:=xmalloc_array(UTF16_code, font_max);
 font_ec:=xmalloc_array(UTF16_code, font_max);
 @z
 
+@x [50.1322] l.25040 - pTeX:
+char_base:=xmalloc_array(integer, font_max);
+@y
+ctype_base:=xmalloc_array(integer, font_max);
+char_base:=xmalloc_array(integer, font_max);
+@z
+
 @x [50.1322] l.24031 - Make dumping/undumping more efficient - tfm
 undump_things(font_check[null_font], font_ptr+1-null_font);
 @y
 for k:=null_font to font_ptr do font_mapping[k]:=0;
+undump_things(font_dir[null_font], font_ptr+1-null_font);
+undump_things(font_enc[null_font], font_ptr+1-null_font);
+undump_things(font_num_ext[null_font], font_ptr+1-null_font);
 undump_things(font_check[null_font], font_ptr+1-null_font);
+@z
+
+@x [50.1322] l.25064 - pTeX:
+undump_things(char_base[null_font], font_ptr+1-null_font);
+@y
+undump_things(ctype_base[null_font], font_ptr+1-null_font);
+undump_things(char_base[null_font], font_ptr+1-null_font);
 @z
 
 @x [51.1332] l.24203 - make the main program a procedure, for eqtb hack.
@@ -756,6 +802,9 @@ undump_things(font_check[null_font], font_ptr+1-null_font);
   {Allocate and initialize font arrays}
 @y
   {Allocate and initialize font arrays}
+  font_dir:=xmalloc_array(eight_bits, font_max);
+  font_enc:=xmalloc_array(eight_bits, font_max);
+  font_num_ext:=xmalloc_array(integer, font_max);
   font_mapping:=xmalloc_array(void_pointer, font_max);
   font_layout_engine:=xmalloc_array(void_pointer, font_max);
   font_flags:=xmalloc_array(char, font_max);
@@ -770,11 +819,27 @@ undump_things(font_check[null_font], font_ptr+1-null_font);
   font_ec:=xmalloc_array(UTF16_code, font_max);
 @z
 
+@x [51.1337] l.25577 - pTeX:
+  char_base:=xmalloc_array(integer, font_max);
+@y
+  ctype_base:=xmalloc_array(integer, font_max);
+  char_base:=xmalloc_array(integer, font_max);
+@z
+
+@x [51.1337] l.25594 - pTeX:
+  char_base[null_font]:=0; width_base[null_font]:=0;
+@y
+  ctype_base[null_font]:=0; char_base[null_font]:=0; width_base[null_font]:=0;
+@z
+
 @x [51.1337] l.24371 - Allocate hyphenation tries, do char translation, MLTeX
   param_base[null_font]:=-1;
 @y
   font_mapping[null_font]:=0;
   param_base[null_font]:=-1;
+  font_dir[null_font]:=dir_default;
+  font_enc[null_font]:=0;
+  font_num_ext[null_font]:=0;
 @z
 
 @x [53.1348] (do_extension) Remove unused variables
@@ -958,3 +1023,16 @@ exit:end;
 @#
 @<Declare subroutines for |new_character|@>@;
 @z
+
+@x
+@* \[54] System-dependent changes.
+@y
+@* \[55] System-dependent changes.
+@z
+
+@x
+@* \[55] Index.
+@y
+@* \[56] Index.
+@z
+

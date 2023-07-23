@@ -24,7 +24,7 @@
 @z
 
 @x [17.236] l.4960 - first web2c, then e-TeX additional integer parameters
-@d tex_int_pars=55 {total number of \TeX's integer parameters}
+@d tex_int_pars=62 {total number of \TeX's integer parameters}
 @y
 @d int_pars=55 {total number of integer parameters}
 @z
