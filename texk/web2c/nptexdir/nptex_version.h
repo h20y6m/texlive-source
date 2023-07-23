@@ -1,0 +1,1 @@
+#define NPTEX_VERSION "0.00000"

@@ -46,6 +46,7 @@ m4_define([kpse_tex_progs], [dnl
 [[pmp],       [yes], [],    [pMetaPost],  [mpfr cairo libpng ptexenc]],
 [[upmp],      [yes], [],    [upMetaPost], [mpfr cairo libpng ptexenc]],
 [[xetex],     [yes], [yes], [XeTeX],      [pplib libpng freetype2 teckit harfbuzz]],
+[[nptex],     [yes], [yes], [npTeX],      [pplib libpng freetype2 teckit harfbuzz ptexenc]],
 ])[]dnl
 m4_foreach([Kpse_Prog], [kpse_tex_progs],
            [m4_ifset([Kpse_Prog],

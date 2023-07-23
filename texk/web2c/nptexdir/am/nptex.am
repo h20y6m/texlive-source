@@ -1,0 +1,92 @@
+## $Id$
+## texk/web2c/nptexdir/am/nptex.am: Makefile fragment for npTeX.
+##
+## Copyright 2017-2022 Karl Berry <tex-live@tug.org>
+## Copyright 2009-2015 Peter Breitenlohner <tex-live@tug.org>
+## You may freely use, modify and/or distribute this file.
+
+## npTeX
+##
+if NPTEX
+bin_PROGRAMS += nptex
+endif NPTEX
+EXTRA_PROGRAMS += nptex
+
+# Force Automake to use CXXLD for linking
+nodist_EXTRA_nptex_SOURCES = dummy.cxx
+
+np_tangle = WEBINPUTS=.:$(srcdir)/nptexdir AM_V_P=$(AM_V_P) $(SHELL) ./tangle-sh $@ $(OTANGLE)
+
+nptex_cppflags = $(xetex_cppflags) -I$(srcdir)/nptexdir $(PTEXENC_INCLUDES)
+nptex_ldadd = $(xetex_ldadd) $(PTEXENC_LIBS)
+nptex_dependencies = $(xetex_dependencies) $(PTEXENC_DEPEND)
+
+nptex_CPPFLAGS = $(nptex_cppflags)
+nptex_CFLAGS = $(WARNING_CFLAGS)
+nptex_CXXFLAGS = # $(WARNING_CXXFLAGS)
+nptex_LDADD = $(xetex_ldadd) $(LDADD) $(ipc_socketlibs) $(PTEXENC_LIBS)
+
+nptex_prereq = $(libxetex) nptexdir/etex_version.h nptexdir/xetex_version.h nptexdir/nptex_version.h
+$(nptex_OBJECTS): $(nptex_prereq)
+
+## npTeX C sources
+nptex_c_h = nptexini.c nptex0.c nptexcoerce.h nptexd.h
+nodist_nptex_SOURCES = $(nptex_c_h) nptex-pool.c
+dist_nptex_SOURCES = nptexdir/nptexextra.c nptexdir/nptexextra.h \
+	nptexdir/etex_version.h nptexdir/xetex_version.h  nptexdir/nptex_version.h
+
+# We must create nptexd.h and nptexdir/*_version.h before building the ptex_OBJECTS.
+nptex_prereq = nptexd.h nptexdir/etex_version.h nptexdir/xetex_version.h  nptexdir/nptex_version.h
+$(nptex_OBJECTS): $(ptex_prereq)
+
+$(nptex_c_h): nptex-web2c
+	@$(web2c) nptex
+nptex-web2c: nptex.p $(web2c_texmf) nptexdir/nptex.defines
+	@$(web2c) nptex
+
+nptex-pool.c: nptex.pool nptexd.h $(makecpool_stamp)
+	$(makecpool) nptex >$@ || rm -f $@
+
+## Tangling npteX
+nptex.p nptex.pool: nptex-tangle
+	$(np_tangle) nptex nptex-final
+nptex-tangle: otangle$(EXEEXT) nptexdir/nptex.web nptex-final.ch tangle-sh
+	$(np_tangle) nptex nptex-final
+
+# Extract etex version
+$(srcdir)/nptexdir/etex_version.h: @MAINTAINER_MODE_TRUE@ nptexdir/nptex.web
+	$(AM_V_GEN)grep '^@d eTeX_version_string==' $(srcdir)/nptexdir/nptex.web \
+	  | sed "s/^.*'-/#define ETEX_VERSION \"/;s/'.*$$/\"/" >$@
+
+## Extract nptex version
+$(srcdir)/nptexdir/xetex_version.h: @MAINTAINER_MODE_TRUE@ nptexdir/nptex.web
+	$(AM_V_GEN)grep '^@d XeTeX_version_string==' $(srcdir)/nptexdir/nptex.web \
+	  | sed "s/^.*'-/#define XETEX_VERSION \"/;s/'.*$$/\"/" >$@
+
+## Extract nptex version
+$(srcdir)/nptexdir/nptex_version.h: @MAINTAINER_MODE_TRUE@ nptexdir/nptex.web
+	$(AM_V_GEN)grep '^@d npTeX_version_string==' $(srcdir)/nptexdir/nptex.web \
+	  | sed "s/^.*'-/#define NPTEX_VERSION \"/;s/'.*$$/\"/" >$@
+
+## Generate nptex-final.ch
+nptex-final.ch: tie$(EXEEXT) $(nptex_ch_srcs)
+	$(tie_c) $(nptex_ch_srcs)
+nptex_ch_srcs = \
+	nptexdir/nptex.web \
+	nptexdir/tex.ch0 \
+	tex.ch \
+	tracingstacklevels.ch \
+	partoken.ch \
+	showstream.ch \
+	$(nptex_ch_synctex) \
+	nptexdir/nptex.ch \
+	$(nptex_post_ch_synctex) \
+	xetexdir/char-warning-xetex.ch \
+	tex-binpool.ch
+
+##
+EXTRA_DIST += $(nptex_web_srcs) $(nptex_ch_srcs) nptexdir/nptex.defines
+
+DISTCLEANFILES += $(nodist_nptex_SOURCES) nptex.web nptex-final.ch \
+  nptex-web2c nptex.p nptex.pool nptex-tangle
+

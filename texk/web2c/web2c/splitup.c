@@ -153,6 +153,9 @@ main (int argc, string *argv)
   } else if (STREQ (output_name, "xetex")) {
     fputs ("#define INITEX\n#define TeX\n#define XeTeX\n", out);
     coerce = "xetexcoerce.h";
+  } else if (STREQ (output_name, "nptex")) {
+    fputs ("#define INITEX\n#define TeX\n#define npTeX\n", out);
+    coerce = "nptexcoerce.h";
   } else
     FATAL1 ("Can only split mf, tex, aleph, eptex, euptex, etex, pdftex, ptex, uptex, or xetex,\n not %s", output_name);
   

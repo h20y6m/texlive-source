@@ -27,7 +27,7 @@
    point.  */
 extern strnumber getjobname (strnumber);
 
-#ifdef XeTeX
+#if defined(XeTeX) || defined(npTeX)
 /* XeTeX redefines "ASCII" types.... */
 typedef packedUTF16code packedASCIIcode;
 #endif
@@ -54,7 +54,7 @@ extern void remembersourceinfo (strnumber, int);
 #include <pdftexdir/pdftex.h>
 #endif /* pdfTeX */
 
-#ifdef XeTeX
+#if defined(XeTeX) || defined(npTeX)
 #include <xetexdir/xetex.h>
 #endif /* XeTeX */
 

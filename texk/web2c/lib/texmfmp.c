@@ -73,6 +73,9 @@
 #define IS_pTeX 1
 #define IS_upTeX 1
 #include <euptexdir/euptexextra.h>
+#elif defined (npTeX)
+#define IS_eTeX 1
+#include <nptexdir/nptexextra.h>
 #else
 #define BANNER "This is TeX, Version 3.141592653"
 #define COPYRIGHT_HOLDER "D.E. Knuth"
@@ -132,7 +135,7 @@
    Borrowed from LuaTeX.
 */
 #if defined(_WIN32)
-#if defined(pdfTeX) || defined(upTeX) || defined(eupTeX) || defined(XeTeX)
+#if defined(pdfTeX) || defined(upTeX) || defined(eupTeX) || defined(XeTeX) || defined(npTeX)
 #define W32USYNCTEX 1
 #endif
 #endif
@@ -718,10 +721,10 @@ runpopen (char *cmd, const char *mode)
   return f;
 }
 #endif /* ENABLE_PIPES */
-
+
 /* The main program, etc.  */
 
-#ifdef XeTeX
+#if defined(XeTeX) || defined(npTeX)
 #include "xetexdir/XeTeX_ext.h"
 #endif
 
@@ -789,7 +792,7 @@ void
 maininit (int ac, string *av)
 {
   string main_input_file;
-#if (IS_upTeX || defined(XeTeX) || defined(pdfTeX)) && defined(WIN32)
+#if (IS_upTeX || defined(XeTeX) || defined(npTeX) || defined(pdfTeX)) && defined(WIN32)
   string enc;
 #endif
   /* Save to pass along to topenin.  */
@@ -818,10 +821,10 @@ maininit (int ac, string *av)
   kpse_set_program_name (argv[0], NULL);
   initkanji (); ptenc_ptex_mode(true);
 #endif
-#if (defined(XeTeX) || defined(pdfTeX)) && defined(WIN32)
+#if (defined(XeTeX) || defined(pdfTeX) || defined(npTeX)) && defined(WIN32)
   kpse_set_program_name (argv[0], NULL);
 #endif
-#if (IS_upTeX || defined(XeTeX) || defined(pdfTeX)) && defined(WIN32)
+#if (IS_upTeX || defined(XeTeX) || defined(pdfTeX) || defined(npTeX)) && defined(WIN32)
 /* 
    -cnf-line=command_line_encoding=value cannot give effect because
    command_line_encoding is read here before parsing the command
@@ -853,13 +856,13 @@ maininit (int ac, string *av)
   /* If the user says --help or --version, we need to notice early.  And
      since we want the --ini option, have to do it before getting into
      the web (which would read the base file, etc.).  */
-#if ((IS_upTeX || defined(XeTeX) || defined(pdfTeX)) && defined(WIN32))
+#if ((IS_upTeX || defined(XeTeX) || defined(pdfTeX) || defined(npTeX)) && defined(WIN32))
   parse_options (argc, argv);
 #else
   parse_options (ac, av);
 #endif
 
-#if IS_pTeX || ((defined(XeTeX) || defined(pdfTeX)) && defined(WIN32))
+#if IS_pTeX || ((defined(XeTeX) || defined(pdfTeX) || defined(npTeX)) && defined(WIN32))
   /* In pTeX and friends, or in WIN32, texmf.cnf is not recorded in
      the case of --recorder, because parse_options() is executed
      after the start of kpathsea due to special initializations.
@@ -885,7 +888,7 @@ maininit (int ac, string *av)
   /* Do this early so we can inspect kpse_invocation_name and
      kpse_program_name below, and because we have to do this before
      any path searching.  */
-#if IS_pTeX || ((defined(XeTeX) || defined(pdfTeX)) && defined(WIN32))
+#if IS_pTeX || ((defined(XeTeX) || defined(pdfTeX) || defined(npTeX)) && defined(WIN32))
   if (user_progname)
     kpse_reset_program_name (user_progname);
 #else
@@ -924,7 +927,7 @@ maininit (int ac, string *av)
 #ifdef WIN32
   if (main_input_file == NULL) {
     string name;
-#ifndef XeTeX
+#if !defined(XeTeX)&&!defined(npTeX)
     boolean quoted;
 #endif
 
@@ -941,7 +944,7 @@ maininit (int ac, string *av)
         }
       }
       name = normalize_quotes(argv[argc-1], "argument");
-#ifdef XeTeX
+#if defined(XeTeX)||defined(npTeX)
       main_input_file = kpse_find_file(argv[argc-1], INPUT_FORMAT, false);
       argv[argc-1] = name;
 #else
@@ -1038,7 +1041,7 @@ maininit (int ac, string *av)
     if (mltexp) {
       fprintf(stderr, "-mltex only works with -ini\n");
     }
-#if !defined(XeTeX) && !IS_pTeX
+#if !defined(XeTeX) && !defined(npTeX) && !IS_pTeX
     if (enctexp) {
       fprintf(stderr, "-enc only works with -ini\n");
     }
@@ -1205,7 +1208,7 @@ topenin (void)
 {
   int i;
 
-#ifdef XeTeX
+#if defined(XeTeX)||defined(npTeX)
   static UFILE termin_file;
   if (termin == 0) {
     termin = &termin_file;
@@ -1223,7 +1226,7 @@ topenin (void)
   if (optind < argc) { /* We have command line arguments.  */
     int k = first;
     for (i = optind; i < argc; i++) {
-#ifdef XeTeX
+#if defined(XeTeX)||defined(npTeX)
       unsigned char *ptr = (unsigned char *)&(argv[i][0]);
       /* need to interpret UTF8 from the command line */
       UInt32 rval;
@@ -1272,7 +1275,7 @@ topenin (void)
 
   /* One more time, this time converting to TeX's internal character
      representation.  */
-#if !defined(Aleph) && !defined(XeTeX)
+#if !defined(Aleph) && !defined(XeTeX) && !defined(npTeX)
   for (i = first; i < last; i++)
     buffer[i] = xord[buffer[i]];
 #endif
@@ -1549,7 +1552,7 @@ ipcpage (int is_eof)
 
 #if defined (TeX) || defined (MF)
   /* TCX and Aleph&Co get along like sparks and gunpowder. */
-#if !defined(Aleph) && !defined(XeTeX)
+#if !defined(Aleph) && !defined(XeTeX) && !defined(npTeX)
 
 /* Return the next number following START, setting POST to the following
    character, as in strtol.  Issue a warning and return -1 if no number
@@ -1648,10 +1651,10 @@ readtcxfile (void)
     WARNING1 ("Could not open char translation file `%s'", orig_filename);
   }
 }
-#endif /* !Aleph && !XeTeX */
+#endif /* !Aleph && !XeTeX && !npTeX */
 #endif /* TeX || MF [character translation] */
 
-#ifdef XeTeX /* XeTeX handles this differently, and allows odd quotes within names */
+#if defined(XeTeX) || defined(npTeX) /* XeTeX handles this differently, and allows odd quotes within names */
 static string
 normalize_quotes (const_string name, const_string mesg)
 {
@@ -1737,7 +1740,7 @@ get_input_file_name (void)
   if (argv[optind] && argv[optind][0] != '&' && argv[optind][0] != '\\') {
     /* Not &format, not \input, so assume simple filename. */    
     string name;
-#ifndef XeTeX
+#if !defined(XeTeX) && !defined(npTeX)
     boolean quoted;
 #endif
 
@@ -1754,7 +1757,7 @@ get_input_file_name (void)
     }
 #endif
     name = normalize_quotes(argv[optind], "argument");
-#ifdef XeTeX
+#if defined(XeTeX) || defined(npTeX)
     input_file_name = kpse_find_file(argv[optind], INPUT_FORMAT, false);
 #else
     quoted = (name[0] == '"');
@@ -1805,7 +1808,7 @@ static struct option long_options[]
 #endif /* IPC */
 #if !defined(Aleph)
       { "mltex",                     0, &mltexp, 1 },
-#if !defined(XeTeX) && !IS_pTeX
+#if !defined(XeTeX) && !defined(npTeX) && !IS_pTeX
       { "enc",                       0, &enctexp, 1 },
 #endif
 #endif /* !Aleph */
@@ -1844,11 +1847,11 @@ static struct option long_options[]
       { "default-translate-file",    1, 0, 0 },
       { "8bit",                      0, &eightbitp, 1 },
 #endif /* !Aleph */
-#if defined(XeTeX)
+#if defined(XeTeX) || defined(npTeX)
       { "no-pdf",                    0, &nopdfoutput, 1 },
       { "output-driver",             1, 0, 0 },
       { "papersize",                 1, 0, 0 },
-#endif /* XeTeX */
+#endif /* XeTeX || npTeX */
       { "mktex",                     1, 0, 0 },
       { "no-mktex",                  1, 0, 0 },
 #endif /* TeX or MF */
@@ -1881,7 +1884,7 @@ parse_options (int argc, string *argv)
     if (ARGUMENT_IS ("kpathsea-debug")) {
       kpathsea_debug |= atoi (optarg);
 
-#ifdef XeTeX
+#if defined(XeTeX) || defined(npTeX)
     } else if (ARGUMENT_IS ("papersize")) {
       papersize = optarg;
     } else if (ARGUMENT_IS ("output-driver")) {
@@ -1903,7 +1906,7 @@ parse_options (int argc, string *argv)
       user_cnf_lines[user_cnf_nlines-1] = xstrdup (optarg);
 
     } else if (ARGUMENT_IS ("jobname")) {
-#ifdef XeTeX
+#if defined(XeTeX) || defined(npTeX)
       c_job_name = optarg;
 #else
       c_job_name = normalize_quotes (optarg, "jobname");
@@ -2037,7 +2040,7 @@ parse_options (int argc, string *argv)
 
     } else if (ARGUMENT_IS ("version")) {
         char *versions;
-#if defined (pdfTeX) || defined(XeTeX)
+#if defined (pdfTeX) || defined(XeTeX) || defined(npTeX)
         initversionstring(&versions); 
 #else
         versions = NULL;
@@ -2234,7 +2237,7 @@ open_in_or_pipe (FILE **f_ptr, int filefmt, const_string fopen_mode)
     return open_input(f_ptr,filefmt,fopen_mode) ;
 }
 
-#ifdef XeTeX
+#if defined(XeTeX) || defined(npTeX)
 boolean
 u_open_in_or_pipe(unicodefile* f, integer filefmt, const_string fopen_mode, integer mode, integer encodingData)
 {
@@ -2349,7 +2352,7 @@ close_file_or_pipe (FILE *f)
   close_file(f);
 }
 
-#ifdef XeTeX
+#if defined(XeTeX) || defined(npTeX)
 
 #include <unicode/ucnv.h>
 
@@ -2520,7 +2523,7 @@ WARNING1 ("invalid value (expected 0 or 1) for environment variable $FORCE_SOURC
   }
 }
 
-#if defined(pdfTeX) || defined(epTeX) || defined(eupTeX) || defined(XeTeX)
+#if defined(pdfTeX) || defined(epTeX) || defined(eupTeX) || defined(XeTeX) || defined(npTeX)
 /*
  Getting a high resolution time.
  */
@@ -2550,7 +2553,7 @@ get_seconds_and_micros (integer *seconds,  integer *micros)
    to eof.  Otherwise, we return `true' and set last = first +
    length(line except trailing whitespace).  */
 
-#ifndef XeTeX /* for XeTeX, we have a replacement function in XeTeX_ext.c */
+#if !defined(XeTeX) && !defined(npTeX) /* for XeTeX, we have a replacement function in XeTeX_ext.c */
 boolean
 input_line (FILE *f)
 {
@@ -2662,7 +2665,7 @@ input_line (FILE *f)
 
   return true;
 }
-#endif /* !XeTeX */
+#endif /* !XeTeX && !npTeX */
 
 /* This string specifies what the `e' option does in response to an
    error message.  */ 
@@ -2763,7 +2766,7 @@ calledit (packedASCIIcode *filename,
         exit (1);
       }
       
-#ifdef XeTeX
+#if defined(XeTeX) || defined(npTeX)
       f = inputfile[if_ptr]->f;
 #else
       f = inputfile[if_ptr];
@@ -3051,14 +3054,14 @@ checkpoolpointer (poolpointer poolptr, size_t len)
   }
 }
 
-#ifndef XeTeX	/* XeTeX uses this from XeTeX_ext.c */
+#if !defined(XeTeX) && !defined(npTeX)	/* XeTeX uses this from XeTeX_ext.c */
 static
 #endif
 int
 maketexstring(const_string s)
 {
   size_t len;
-#ifdef XeTeX
+#if defined(XeTeX) || defined(npTeX)
   UInt32 rval;
   const unsigned char *cp = (const unsigned char *)s;
 #endif
@@ -3070,7 +3073,7 @@ maketexstring(const_string s)
 #endif
   len = strlen(s);
   checkpoolpointer (poolptr, len); /* in the XeTeX case, this may be more than enough */
-#ifdef XeTeX
+#if defined(XeTeX) || defined(npTeX)
   while ((rval = *(cp++)) != 0) {
     UInt16 extraBytes = bytesFromUTF8[rval];
     switch (extraBytes) { /* note: code falls through cases! */
@@ -3090,10 +3093,10 @@ maketexstring(const_string s)
     else
       strpool[poolptr++] = rval;
   }
-#else /* ! XeTeX */
+#else /* !XeTeX && !npTeX */
   while (len-- > 0)
     strpool[poolptr++] = 0xFF&(*s++);
-#endif /* ! XeTeX */
+#endif /* !XeTeX && !npTeX */
 
   return makestring();
 }
@@ -3155,7 +3158,7 @@ compare_paths (const_string p1, const_string p2)
   return ret;
 }
 
-#ifdef XeTeX /* the string pool is UTF-16 but we want a UTF-8 string */
+#if defined(XeTeX) || defined(npTeX)  /* the string pool is UTF-16 but we want a UTF-8 string */
 
 string
 gettexstring (strnumber s)
@@ -3234,7 +3237,7 @@ gettexstring (strnumber s)
   return name;
 }
 
-#endif /* not XeTeX */
+#endif /* !XeTeX && ! npTeX */
 
 boolean
 isnewsource (strnumber srcfilename, int lineno)
@@ -3282,7 +3285,7 @@ makesrcspecial (strnumber srcfilename, int lineno)
 }
 
 /* pdfTeX routines also used for e-pTeX, e-upTeX, and XeTeX */
-#if defined (pdfTeX) || defined (epTeX) || defined (eupTeX) || defined(XeTeX)
+#if defined (pdfTeX) || defined (epTeX) || defined (eupTeX) || defined(XeTeX) || defined(npTeX)
 
 #include <kpathsea/c-stat.h>
 #include "md5.h"
@@ -3425,7 +3428,7 @@ find_input_file(integer s)
 #if IS_pTeX && !defined(WIN32)
     string fname0; string fname1 = NULL;
 #endif
-#if defined(XeTeX)
+#if defined(XeTeX) || defined(npTeX)
     filename = gettexstring(s);
 #else
     filename = makecfilename(s);
@@ -3465,7 +3468,7 @@ find_input_file(integer s)
 #endif
 }
 
-#if !defined(XeTeX)
+#if !defined(XeTeX) && !defined(npTeX)
 char *
 makecstring(integer s)
 {
@@ -3520,13 +3523,13 @@ makecfilename(integer s)
     *q = '\0';
     return name;
 }
-#endif /* !XeTeX */
+#endif /* !XeTeX && !npTeX */
 
 void
 getcreationdate(void)
 {
     size_t len;
-#if defined(XeTeX) || IS_pTeX
+#if defined(XeTeX) || defined(npTeX) || IS_pTeX
     int i;
 #endif
     initstarttime();
@@ -3542,7 +3545,7 @@ getcreationdate(void)
         return;
     }
 
-#if defined(XeTeX) || IS_pTeX
+#if defined(XeTeX) || defined(npTeX) || IS_pTeX
     for (i = 0; i < len; i++)
         strpool[poolptr++] = (uint16_t)start_time_str[i];
 #else
@@ -3576,7 +3579,7 @@ getfilemoddate(integer s)
             poolptr = poolsize;
             /* error by str_toks that calls str_room(1) */
         } else {
-#if defined(XeTeX) || IS_pTeX
+#if defined(XeTeX) || defined(npTeX) || IS_pTeX
             int i;
 
             for (i = 0; i < len; i++)
@@ -3622,7 +3625,7 @@ getfilesize(integer s)
             poolptr = poolsize;
             /* error by str_toks that calls str_room(1) */
         } else {
-#if defined(XeTeX) || IS_pTeX
+#if defined(XeTeX) || defined(npTeX) || IS_pTeX
             for (i = 0; i < len; i++)
                 strpool[poolptr++] = (uint16_t)buf[i];
 #else
@@ -3641,7 +3644,7 @@ getfiledump(integer s, int offset, int length)
 {
     FILE *f;
     int read, i;
-#if defined(XeTeX) || IS_pTeX
+#if defined(XeTeX) || defined(npTeX) || IS_pTeX
     unsigned char *readbuffer;
     char strbuf[3];
     int j, k;
@@ -3679,7 +3682,7 @@ getfiledump(integer s, int offset, int length)
         xfree(file_name);
         return;
     }
-#if defined(XeTeX) || IS_pTeX
+#if defined(XeTeX) || defined(npTeX) || IS_pTeX
     readbuffer = (unsigned char *)xmalloc (length + 1);
     read = fread(readbuffer, sizeof(char), length, f);
     fclose(f);
@@ -3741,7 +3744,7 @@ getmd5sum(strnumber s, boolean file)
     md5_byte_t digest[DIGEST_SIZE];
     char outbuf[2 * DIGEST_SIZE + 1];
     int len = 2 * DIGEST_SIZE;
-#if defined(XeTeX) || IS_pTeX
+#if defined(XeTeX) || defined(npTeX) || IS_pTeX
     char *xname;
     int i;
 #endif
@@ -3777,7 +3780,7 @@ getmd5sum(strnumber s, boolean file)
     } else {
         /* s contains the data */
         md5_init(&state);
-#if defined(XeTeX) || IS_pTeX
+#if defined(XeTeX) || defined(npTeX) || IS_pTeX
         xname = gettexstring (s);
         md5_append(&state,
                    (md5_byte_t *) xname,
@@ -3796,7 +3799,7 @@ getmd5sum(strnumber s, boolean file)
         return;
     }
     convertStringToHexString((char *) digest, outbuf, DIGEST_SIZE);
-#if defined(XeTeX) || IS_pTeX
+#if defined(XeTeX) || defined(npTeX) || IS_pTeX
     for (i = 0; i < 2 * DIGEST_SIZE; i++)
         strpool[poolptr++] = (uint16_t)outbuf[i];
 #else
@@ -3805,7 +3808,7 @@ getmd5sum(strnumber s, boolean file)
 #endif
 }
 
-#endif /* pdfTeX or e-pTeX or e-upTeX or XeTeX */
+#endif /* pdfTeX or e-pTeX or e-upTeX or XeTeX or npTeX */
 #endif /* TeX */
 
 /* Metafont/MetaPost fraction routines. Replaced either by assembler or C.

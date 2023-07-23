@@ -6,7 +6,7 @@
 #include <kpathsea/c-pathch.h> /* for IS_DIR_SEP, used in the change files */
 #include <kpathsea/tex-make.h> /* for kpse_make_tex_discard_errors */
 
-#ifdef XeTeX
+#if defined(XeTeX) || defined(npTeX)
 #ifdef XETEX_MAC
 /* include this here to avoid conflict between clang's emmintrin.h and
  * texmfmem.h. Should be removed once a fixed clang is widely available
@@ -58,6 +58,10 @@ typedef void* voidpointer;
 #elif defined (XeTeX)
 #define TEXMFPOOLNAME "xetex.pool"
 #define TEXMFENGINENAME "xetex"
+#elif defined (npTeX)
+#define TEXMFPOOLNAME "nptex.pool"
+#define TEXMFENGINENAME "nptex"
+#include "ptexenc/ptexenc.h"
 #elif defined (Aleph)
 #define TEXMFPOOLNAME "aleph.pool"
 #define TEXMFENGINENAME "aleph"
@@ -119,18 +123,18 @@ typedef void* voidpointer;
 /* Hacks for TeX that are better not to #ifdef, see lib/openclose.c.  */
 extern int tfmtemp, texinputtype;
 
-/* pdfTeX routines also used for e-pTeX, e-upTeX, and XeTeX */
-#if defined (pdfTeX) || defined (epTeX) || defined (eupTeX) || defined(XeTeX)
+/* pdfTeX routines also used for e-pTeX, e-upTeX, XeTeX and npTeX */
+#if defined (pdfTeX) || defined (epTeX) || defined (eupTeX) || defined(XeTeX) || defined(npTeX)
 #if !defined (pdfTeX)
 extern void pdftex_fail(const char *fmt, ...);
 #endif
 extern char start_time_str[];
 extern void initstarttime(void);
 extern string find_input_file(integer s);
-#if !defined(XeTeX)
+#if !defined(XeTeX) && !defined(npTeX)
 extern char *makecstring(integer s);
 extern char *makecfilename(integer s);
-#endif /* !XeTeX */
+#endif /* !XeTeX && !npTeX */
 extern void getcreationdate(void);
 extern void getfilemoddate(integer s);
 extern void getfilesize(integer s);
@@ -211,7 +215,7 @@ extern void ipcpage (int);
 
 /* Read a line of input as quickly as possible.  */
 #define	inputln(stream, flag) input_line (stream)
-#ifdef XeTeX
+#if defined(XeTeX) || defined(npTeX)
 extern boolean input_line (UFILE *);
 #else
 extern boolean input_line (FILE *);
@@ -221,7 +225,7 @@ extern boolean input_line (FILE *);
 #define	dateandtime(i,j,k,l) get_date_and_time (&(i), &(j), &(k), &(l))
 extern void get_date_and_time (integer *, integer *, integer *, integer *);
 
-#if defined(pdfTeX) || defined(epTeX) || defined(eupTeX) || defined(XeTeX)
+#if defined(pdfTeX) || defined(epTeX) || defined(eupTeX) || defined(XeTeX) || defined(npTeX)
 /* Get high-res time info. */
 #define secondsandmicros(i,j) get_seconds_and_micros (&(i), &(j))
 extern void get_seconds_and_micros (integer *, integer *);
@@ -252,7 +256,7 @@ extern void topenin (void);
 #if defined(pTeX) || defined(epTeX) || defined(upTeX) || defined(eupTeX)
 #define FMT_COMPRESS 1
 #endif
-#if defined(eTeX) || defined(pdfTeX) || defined(XeTeX)
+#if defined(eTeX) || defined(pdfTeX) || defined(XeTeX) || defined(npTeX)
 #define FMT_COMPRESS 1
 #endif
 
@@ -280,7 +284,7 @@ extern void topenin (void);
 #define wclose		aclose
 #endif
 
-#ifdef XeTeX
+#if defined(XeTeX) || defined(npTeX)
 #if ENABLE_PIPES
 extern boolean u_open_in_or_pipe(unicodefile* f, integer filefmt, const_string fopen_mode, integer mode, integer encodingData);
 extern void u_close_file_or_pipe(unicodefile* f);
