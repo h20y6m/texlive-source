@@ -62,6 +62,7 @@ typedef void* voidpointer;
 #define TEXMFPOOLNAME "nptex.pool"
 #define TEXMFENGINENAME "nptex"
 #include "ptexenc/ptexenc.h"
+#include "nptexdir/kanji.h"
 #elif defined (Aleph)
 #define TEXMFPOOLNAME "aleph.pool"
 #define TEXMFENGINENAME "aleph"

@@ -129,7 +129,7 @@ has been detected. It has five possible values: |spotless|, |warning_issued|,
 @x [15.209] l.4165
 @d shorthand_def=95 {code definition ( \.{\\chardef}, \.{\\countdef}, etc.~)}
 @y
-@d shorthand_def=99 {code definition ( \.{\\chardef}, \.{\\countdef}, etc.~)}
+@d shorthand_def=let+1 {code definition ( \.{\\chardef}, \.{\\countdef}, etc.~)}
 @z
 
 @x [16.215] - e-TeX last_node_type
@@ -523,6 +523,90 @@ ec:=effective_char(false,f,qi(c));
 label reswitch, move_past, fin_rule, next_p, continue, found;
 @y
 label reswitch, move_past, fin_rule, next_p, continue, found, check_next, end_node_run;
+@z
+
+@x [32.622] l.12945 - pTeX: chain
+@<Output node |p| for |hlist_out|...@>=
+reswitch: if is_char_node(p) then
+  begin synch_h; synch_v;
+  repeat f:=font(p); c:=character(p);
+  if (p<>lig_trick) and (font_mapping[f]<>nil) then c:=apply_tfm_font_mapping(font_mapping[f],c);
+  if f<>dvi_f then @<Change font |dvi_f| to |f|@>;
+  if font_ec[f]>=qo(c) then if font_bc[f]<=qo(c) then
+    if char_exists(orig_char_info(f)(c)) then  {N.B.: not |char_info|}
+      begin if c>=qi(128) then dvi_out(set1);
+      dvi_out(qo(c));@/
+      cur_h:=cur_h+char_width(f)(orig_char_info(f)(c));
+      goto continue;
+      end;
+  if mltex_enabled_p then
+    @<Output a substitution, |goto continue| if not possible@>;
+continue:
+  prev_p:=link(prev_p); {N.B.: not |prev_p:=p|, |p| might be |lig_trick|}
+  p:=link(p);
+  until not is_char_node(p);
+  dvi_h:=cur_h;
+  end
+else @<Output the non-|char_node| |p| for |hlist_out|
+    and move to the next node@>
+@y
+@<Output node |p| for |hlist_out|...@>=
+reswitch: if is_char_node(p) then
+  begin synch_h; synch_v;
+  chain:=false;
+  repeat f:=font(p); c:=character(p);
+  if (p<>lig_trick) and (font_mapping[f]<>nil) then c:=apply_tfm_font_mapping(font_mapping[f],c);
+  if f<>dvi_f then @<Change font |dvi_f| to |f|@>;
+  if font_dir[f]=dir_default then
+    begin chain:=false;
+    if font_ec[f]>=qo(c) then if font_bc[f]<=qo(c) then
+      if char_exists(orig_char_info(f)(c)) then  {N.B.: not |char_info|}
+        begin if c>=qi(128) then dvi_out(set1);
+        dvi_out(qo(c));@/
+        cur_h:=cur_h+char_width(f)(orig_char_info(f)(c));
+        goto continue;
+        end;
+    if mltex_enabled_p then
+      @<Output a substitution, |goto continue| if not possible@>;
+continue:
+    end
+  else
+    begin if chain=false then chain:=true
+    else begin cur_h:=cur_h+width(ksp_ptr);
+      if g_sign<>normal then
+        begin  if g_sign=stretching then
+          begin  if stretch_order(ksp_ptr)=g_order then
+            cur_h:=cur_h+round(float(glue_set(this_box))*stretch(ksp_ptr));
+@^real multiplication@>
+          end
+        else
+          begin  if shrink_order(ksp_ptr)=g_order then
+            cur_h:=cur_h-round(float(glue_set(this_box))*shrink(ksp_ptr));
+@^real multiplication@>
+          end;
+        end;
+      synch_h;
+      end;
+    prev_p:=link(prev_p); {N.B.: not |prev_p:=p|, |p| might be |lig_trick|}
+    p:=link(p);
+    jc:=KANJI(info(p)) mod max_char_val;
+    if font_enc[f]=1 then {JIS-encoded TFM}
+      begin if toJIS(jc)=0 then char_warning_jis(f,jc);
+      jc:=toJIS(jc); end;
+    if (jc<@"10000) then begin
+      dvi_out(set2);
+    end else begin
+      dvi_out(set3); dvi_out(jc div @"10000);
+    end;
+    dvi_out((jc div @"100)mod @"100); dvi_out(jc mod @"100);
+    cur_h:=cur_h+char_width(f)(orig_char_info(f)(c)); {not |jc|}
+    end;
+  dvi_h:=cur_h; p:=link(p);
+  until not is_char_node(p);
+  chain:=false;
+  end
+else @<Output the non-|char_node| |p| for |hlist_out|
+    and move to the next node@>
 @z
 
 @x

@@ -162,6 +162,7 @@
 }
 \def\XeTeX{X\kern-.125em\lower.5ex\hbox{\mirror{E}}\kern-.1667em\TeX}
 \def\npTeX{np\TeX}
+\def\pTeX{p\TeX}
 
 \def\eTeX{$\varepsilon$-\TeX}
 \font\revrm=xbmc10 % for right-to-left text
@@ -328,7 +329,7 @@ known as `\eTeX'.
 @d npTeX_version_string=='-0.0000' {current \npTeX\ version}
 @#
 @d npTeX_banner=='This is npTeX, Version 3.141592653',eTeX_version_string,XeTeX_version_string,npTeX_version_string
-  {printed when \XnpeX\ starts}
+  {printed when \npTeX\ starts}
 @#
 @d banner=='This is TeX, Version 3.141592653' {printed when \TeX\ starts}
 @#
@@ -3021,6 +3022,7 @@ The values defined here are recommended for most 32-bit computers.
 @d max_quarterword=@"FFFF {largest allowable value in a |quarterword|}
 @d min_halfword==-@"FFFFFFF {smallest allowable value in a |halfword|}
 @d max_halfword==@"3FFFFFFF {largest allowable value in a |halfword|}
+@d max_char_val=@"200000 {to separate char and command code}
 
 @ Here are the inequalities that the quarterword and halfword values
 must satisfy (or rather, the inequalities that they mustn't satisfy):
@@ -3058,6 +3060,7 @@ macros are simplified in the obvious way when |min_quarterword=0|.
   {to put a sixteen-bit item into a halfword}
 @d ho(#)==#-min_halfword
   {to take a sixteen-bit item from a halfword}
+@d KANJI(#)==# {pTeX: to output a KANJI code}
 @d tokanji(#)==# {pTeX: to take a KANJI code from a halfword}
 @d tonum(#)==# {pTeX: to put a KANJI code into a halfword}
 
@@ -3499,8 +3502,10 @@ In \eTeX\ the |subtype| field records the box direction mode |box_lr|.
 
 @d hlist_node=0 {|type| of hlist nodes}
 @d box_node_size=8 {number of words to allocate for a box node}
-@d box_dir(#) == (qo(subtype(#))-dir_max) {direction of a box}
-@d set_box_dir(#) == subtype(#):=set_box_dir_end
+@#
+@d dir_max = 5 {the maximal absolute value of direction}
+@d box_dir(#) == ((qo(subtype(#)))mod 16 - dir_max) {direction of a box}
+@d set_box_dir(#) == subtype(#):=box_lr(#)*16+set_box_dir_end
 @d set_box_dir_end(#) == qi(#)+dir_max
 @#
 @d dir_default = 0 {direction of the box, default Left to Right}
@@ -3541,6 +3546,8 @@ begin p:=get_node(box_node_size); type(p):=hlist_node;
 subtype(p):=min_quarterword;
 width(p):=0; depth(p):=0; height(p):=0; shift_amount(p):=0; list_ptr(p):=null;
 glue_sign(p):=normal; glue_order(p):=normal; set_glue_ratio_zero(glue_set(p));
+space_ptr(p):=zero_glue; xspace_ptr(p):=zero_glue; set_box_dir(p)(dir_default);
+add_glue_ref(zero_glue); add_glue_ref(zero_glue);
 new_null_box:=p;
 end;
 
@@ -3549,6 +3556,10 @@ contains a vertical list.
 
 @d vlist_node=1 {|type| of vlist nodes}
 
+@ A |dir_node| stands for direction change.
+
+@d dir_node=2 {|type| of dir nodes}
+
 @ A |rule_node| stands for a solid black rectangle; it has |width|,
 |depth|, and |height| fields just as in an |hlist_node|. However, if
 any of these dimensions is $-2^{30}$, the actual value will be determined
@@ -3556,7 +3567,7 @@ by running the rule up to the boundary of the innermost enclosing box.
 This is called a ``running dimension.'' The |width| is never running in
 an hlist; the |height| and |depth| are never running in a~vlist.
 
-@d rule_node=2 {|type| of rule nodes}
+@d rule_node=3 {|type| of rule nodes}
 @d rule_node_size=4 {number of words to allocate for a rule node}
 @d null_flag==-@'10000000000 {$-2^{30}$, signifies a missing item}
 @d is_running(#) == (#=null_flag) {tests for a running dimension}
@@ -3585,17 +3596,25 @@ will be used if this insertion floats to a subsequent page after a
 split insertion of the same class.  There is one more field, the
 |ins_ptr|, which points to the beginning of the vlist for the insertion.
 
-@d ins_node=3 {|type| of insertion nodes}
-@d ins_node_size=5 {number of words to allocate for an insertion}
+@d ins_node=4 {|type| of insertion nodes}
+@d ins_node_size=6 {number of words to allocate for an insertion}
 @d float_cost(#)==mem[#+1].int {the |floating_penalty| to be used}
 @d ins_ptr(#)==info(#+4) {the vertical list to be inserted}
 @d split_top_ptr(#)==link(#+4) {the |split_top_skip| to be used}
+@d ins_dir(#)==(subtype(#+5)-dir_max) {direction of |ins_node|}
+@d set_ins_dir(#) == subtype(#+5):=set_box_dir_end
+
+@ A |disp_node| has a |disp_dimen| field that points to the displacement
+distance of the baselineshift between Latin characters and Kanji chatacters.
+
+@d disp_node=5 {|type| of a displace node}
+@d disp_dimen(#)==mem[#+1].sc
 
 @ A |mark_node| has a |mark_ptr| field that points to the reference count
 of a token list that contains the user's \.{\\mark} text.
 In addition there is a |mark_class| field that contains the mark class.
 
-@d mark_node=4 {|type| of a mark node}
+@d mark_node=6 {|type| of a mark node}
 @d small_node_size=2 {number of words to allocate for most node types}
 @d mark_ptr(#)==link(#+1) {head of the token list for a mark}
 @d mark_class(#)==info(#+1) {the mark class}
@@ -3606,7 +3625,7 @@ vertical list; i.e., it is used to implement \TeX's `\.{\\vadjust}'
 operation.  The |adjust_ptr| field points to the vlist containing this
 material.
 
-@d adjust_node=5 {|type| of an adjust node}
+@d adjust_node=7 {|type| of an adjust node}
 @d adjust_pre == subtype  {|if subtype <>0| it is pre-adjustment}
 @#{|append_list| is used to append a list to |tail|}
 @d append_list(#) == begin link(tail):=link(#); append_list_end
@@ -3628,7 +3647,7 @@ retained in other nodes.)
 The |subtype| field is 0, plus 2 and/or 1 if the original source of the
 ligature included implicit left and/or right boundaries.
 
-@d ligature_node=6 {|type| of a ligature node}
+@d ligature_node=8 {|type| of a ligature node}
 @d lig_char(#)==#+1 {the word where the ligature is to be found}
 @d lig_ptr(#)==link(lig_char(#)) {the list of characters}
 
@@ -3668,7 +3687,7 @@ decides to make the break, and the discretionary node will disappear at
 that time; thus, the output routine sees only discretionaries that were
 not chosen.
 
-@d disc_node=7 {|type| of a discretionary node}
+@d disc_node=9 {|type| of a discretionary node}
 @d replace_count==subtype {how many subsequent nodes to replace}
 @d pre_break==llink {text that precedes a discretionary break}
 @d post_break==rlink {text that follows a discretionary break}
@@ -3696,7 +3715,7 @@ The present implementation of \TeX\ treats the features associated with
 illustrate how such routines might be coded. We shall defer further
 discussion of extensions until the end of this program.
 
-@d whatsit_node=8 {|type| of special extension nodes}
+@d whatsit_node=10 {|type| of special extension nodes}
 
 @ To support ``native'' fonts, we build |native_word_node|s, which are variable
 size whatsits.  These have the same |width|, |depth|, and |height| fields as a
@@ -3787,7 +3806,7 @@ In addition a |math_node| with |subtype>after| and |width=0| will be
 discarded at a line break or one of the text direction primitives (
 \.{\\beginL}, \.{\\endL}, \.{\\beginR}, and \.{\\endR} ).
 
-@d math_node=9 {|type| of a math node}
+@d math_node=11 {|type| of a math node}
 @d before=0 {|subtype| for math node that introduces a formula}
 @d after=1 {|subtype| for math node that winds up a formula}
 @#
@@ -3847,7 +3866,7 @@ instead of scaled \.{pt}); and |cond_math_glue| denotes the `\.{\\nonscript}'
 feature that cancels the glue node immediately following if it appears
 in a subscript.
 
-@d glue_node=10 {|type| of node that points to a glue specification}
+@d glue_node=12 {|type| of node that points to a glue specification}
 @d cond_math_glue=98 {special |subtype| to suppress glue in the next node}
 @d mu_glue=99 {|subtype| for math glue}
 @d a_leaders=100 {|subtype| for aligned leaders}
@@ -3945,9 +3964,10 @@ kerns inserted from font information or math mode calculations) or |explicit|
 (for kerns inserted from non-math accents) or |mu_glue| (for kerns
 inserted from \.{\\mkern} specifications in math formulas).
 
-@d kern_node=11 {|type| of a kern node}
-@d explicit=1 {|subtype| of kern nodes from \.{\\kern} and \.{\\/}}
+@d kern_node=13 {|type| of a kern node}
+@d explicit=1 {|subtype| of kern nodes from \.{\\kern}}
 @d acc_kern=2 {|subtype| of kern nodes from accents}
+@d ita_kern=3 {|subtype| of kern nodes from \.{\\/}}
 @d space_adjustment=3 {|subtype| of kern nodes from \.{\\XeTeXinterwordspaceshaping} adjustment}
 
 @# {memory structure for marginal kerns}
@@ -3993,7 +4013,9 @@ treated as infinity, and no break will be allowed for such high values.
 Similarly, any penalty |<=-10000| is treated as negative infinity, and a
 break will be forced.
 
-@d penalty_node=12 {|type| of a penalty node}
+@d penalty_node=14 {|type| of a penalty node}
+@d widow_pena=1 {|subtype| of penalty nodes from \.{\\jcharwidowpenalty}}
+@d kinsoku_pena=2 {|subtype| of penalty nodes from kinsoku}
 @d inf_penalty=inf_bad {``infinite'' penalty value}
 @d eject_penalty=-inf_penalty {``negatively infinite'' penalty value}
 @d penalty(#) == mem[#+1].int {the added cost of breaking a list here}
@@ -4022,13 +4044,13 @@ The |subtype| field is called |span_count|; an unset box typically
 contains the data for |qo(span_count)+1| columns.
 Unset nodes will be changed to box nodes when alignment is completed.
 
-@d unset_node=13 {|type| for an unset node}
+@d unset_node=15 {|type| for an unset node}
 @d glue_stretch(#)==mem[#+glue_offset].sc {total stretch in an unset node}
 @d glue_shrink==shift_amount {total shrink in an unset node}
 @d span_count==subtype {indicates the number of spanned columns}
 
 @ In fact, there are still more types coming. When we get to math formula
-processing we will see that a |style_node| has |type=14|; and a number
+processing we will see that a |style_node| has |type=16|; and a number
 of larger type codes will also be defined, for use in math mode only.
 
 @ Warning: If any changes are made to these data structure layouts, such as
@@ -4345,7 +4367,10 @@ begin while p>mem_min do
         else @<Print the font identifier for |font(p)|@>;
         print_char(" "); font_in_short_display:=font(p);
         end;
-      print_ASCII(qo(character(p)));
+      if font_dir[font(p)]<>dir_default then 
+        begin p:=link(p); print_char(info(p) mod max_char_val);
+        end
+      else print_ASCII(qo(character(p)));
       end;
     end
   else @<Print a short indication of the contents of node |p|@>;
@@ -4394,7 +4419,10 @@ begin if p>mem_end then print_esc("CLOBBERED.")
 else  begin if (font(p)<font_base)or(font(p)>font_max) then print_char("*")
 @.*\relax@>
   else @<Print the font identifier for |font(p)|@>;
-  print_char(" "); print_ASCII(qo(character(p)));
+  print_char(" "); 
+  if font_dir[font(p)]<>dir_default then
+    begin p:=link(p); print_char(info(p) mod max_char_val); end
+  else print_ASCII(qo(character(p)));
   end;
 end;
 @#
@@ -4497,6 +4525,7 @@ begin if cur_length>depth_threshold then
 n:=0;
 while p>mem_min do
   begin print_ln; print_current_string; {display the nesting history}
+  print_int(p);
   if p>mem_end then {pointer out of range}
     begin print("Bad link, display aborted."); return;
 @.Bad link...@>
@@ -4512,12 +4541,17 @@ exit:
 end;
 
 @ @<Display node |p|@>=
-if is_char_node(p) then print_font_and_char(p)
+if is_char_node(p) then 
+  begin print_font_and_char(p);
+  if font_dir[font(p)]<>dir_default then p:=link(p)
+  end
 else  case type(p) of
-  hlist_node,vlist_node,unset_node: @<Display box |p|@>;
+  hlist_node,vlist_node,dir_node,unset_node: @<Display box |p|@>;
   rule_node: @<Display rule |p|@>;
   ins_node: @<Display insertion |p|@>;
   whatsit_node: @<Display the whatsit node |p|@>;
+  disp_node: begin print_esc("displace "); print_scaled(disp_dimen(p));
+    end;
   glue_node: @<Display glue |p|@>;
   kern_node: @<Display kern |p|@>;
   margin_kern_node: begin
@@ -4765,7 +4799,9 @@ begin while p<>null do
   begin q:=link(p);
   if is_char_node(p) then free_avail(p)
   else  begin case type(p) of
-    hlist_node,vlist_node,unset_node: begin flush_node_list(list_ptr(p));
+    hlist_node,vlist_node,dir_node,unset_node: begin flush_node_list(list_ptr(p));
+      fast_delete_glue_ref(space_ptr(p));
+      fast_delete_glue_ref(xspace_ptr(p));
       free_node(p,box_node_size); goto done;
       end;
     rule_node: begin free_node(p,rule_node_size); goto done;
@@ -4778,7 +4814,7 @@ begin while p<>null do
     glue_node: begin fast_delete_glue_ref(glue_ptr(p));
       if leader_ptr(p)<>null then flush_node_list(leader_ptr(p));
       end;
-    kern_node,math_node,penalty_node: do_nothing;
+    disp_node,kern_node,math_node,penalty_node: do_nothing;
     margin_kern_node: begin
         free_node(p, margin_kern_node_size);
         goto done;
@@ -4995,59 +5031,76 @@ expanded by `\.{\\the}'.
 @d end_cs_name=67 {end control sequence ( \.{\\endcsname} )}
 @d min_internal=68 {the smallest code that can follow \.{\\the}}
 @d char_given=68 {character code defined by \.{\\chardef}}
-@d math_given=69 {math code defined by \.{\\mathchardef}}
-@d XeTeX_math_given=70 {extended math code defined by \.{\\Umathchardef}}
-@d last_item=71 {most recent item ( \.{\\lastpenalty},
+@d achar_given=69 {character code defined by \.{\\achardef}}
+@d kchar_given=70 {character code defined by \.{\\kchardef}}
+@d math_given=71 {math code defined by \.{\\mathchardef}}
+@d XeTeX_math_given=72 {extended math code defined by \.{\\Umathchardef}}
+@d last_item=73 {most recent item ( \.{\\lastpenalty},
   \.{\\lastkern}, \.{\\lastskip} )}
-@d max_non_prefixed_command=71 {largest command code that can't be \.{\\global}}
+@d inhibit_glue=last_item+1 {inhibit adjust glue ( \.{\\inhibitglue} )}
+@d chg_dir=inhibit_glue+1 {change dir mode by \.{\\tate}, \.{\\yoko}}
+@d max_non_prefixed_command=chg_dir {largest command code that can't be \.{\\global}}
 
 @ The next codes are special; they all relate to mode-independent
 assignment of values to \TeX's internal registers or tables.
 Codes that are |max_internal| or less represent internal quantities
 that might be expanded by `\.{\\the}'.
 
-@d toks_register=72 {token list register ( \.{\\toks} )}
-@d assign_toks=73 {special token list ( \.{\\output}, \.{\\everypar}, etc.~)}
-@d assign_int=74 {user-defined integer ( \.{\\tolerance}, \.{\\day}, etc.~)}
-@d assign_dimen=75 {user-defined length ( \.{\\hsize}, etc.~)}
-@d assign_glue=76 {user-defined glue ( \.{\\baselineskip}, etc.~)}
-@d assign_mu_glue=77 {user-defined muglue ( \.{\\thinmuskip}, etc.~)}
-@d assign_font_dimen=78 {user-defined font dimension ( \.{\\fontdimen} )}
-@d assign_font_int=79 {user-defined font integer ( \.{\\hyphenchar},
-  \.{\\skewchar} )}
-@d set_aux=80 {specify state info ( \.{\\spacefactor}, \.{\\prevdepth} )}
-@d set_prev_graf=81 {specify state info ( \.{\\prevgraf} )}
-@d set_page_dimen=82 {specify state info ( \.{\\pagegoal}, etc.~)}
-@d set_page_int=83 {specify state info ( \.{\\deadcycles},
+@d toks_register=max_non_prefixed_command+1 {token list register ( \.{\\toks} )}
+@d assign_toks=toks_register+1
+  {special token list ( \.{\\output}, \.{\\everypar}, etc.~)}
+@d assign_int=assign_toks+1
+  {user-defined integer ( \.{\\tolerance}, \.{\\day}, etc.~)}
+@d assign_dimen=assign_int+1 {user-defined length ( \.{\\hsize}, etc.~)}
+@d assign_glue=assign_dimen+1 {user-defined glue ( \.{\\baselineskip}, etc.~)}
+@d assign_mu_glue=assign_glue+1 {user-defined muglue ( \.{\\thinmuskip}, etc.~)}
+@d assign_font_dimen=assign_mu_glue+1
+  {user-defined font dimension ( \.{\\fontdimen} )}
+@d assign_font_int=assign_font_dimen+1
+  {user-defined font integer ( \.{\\hyphenchar}, \.{\\skewchar} )}
+@d assign_kinsoku=assign_font_int+1
+  {user-defined kinsoku character ( \.{\\prebreakpenalty},
+   \.{\\postbreakpenalty} )}
+@d assign_inhibit_xsp_code=assign_kinsoku+1
+  {user-defined inhibit xsp character ( \.{\\inhibitxspcode} )}
+@d set_kansuji_char=assign_inhibit_xsp_code+1
+  {user-defined kansuji character ( \.{\\kansujichar} )}
+@d set_aux=set_kansuji_char+1
+  {specify state info ( \.{\\spacefactor}, \.{\\prevdepth} )}
+@d set_prev_graf=set_aux+1 {specify state info ( \.{\\prevgraf} )}
+@d set_page_dimen=set_prev_graf+1 {specify state info ( \.{\\pagegoal}, etc.~)}
+@d set_page_int=set_page_dimen+1 {specify state info ( \.{\\deadcycles},
   \.{\\insertpenalties} )}
   {( or \.{\\interactionmode} )}
-@d set_box_dimen=84 {change dimension of box ( \.{\\wd}, \.{\\ht}, \.{\\dp} )}
-@d set_shape=85 {specify fancy paragraph shape ( \.{\\parshape} )}
-  {(or \.{\\interlinepenalties}, etc.~)}
-@d def_code=86 {define a character code ( \.{\\catcode}, etc.~)}
-@d XeTeX_def_code=87 {\.{\\Umathcode}, \.{\\Udelcode}}
-@d def_family=88 {declare math fonts ( \.{\\textfont}, etc.~)}
-@d set_font=89 {set current font ( font identifiers )}
-@d def_font=90 {define a font file ( \.{\\font} )}
+@d set_box_dimen=set_page_int+1 {change dimension of box ( \.{\\wd}, \.{\\ht}, \.{\\dp} )}
+@d set_shape=set_box_dimen+1 {specify fancy paragraph shape ( \.{\\parshape} )}
+@d def_code=set_shape+1 {define a character code ( \.{\\catcode}, etc.~)}
+@d XeTeX_def_code=def_code+1 {\.{\\Umathcode}, \.{\\Udelcode}}
+@d def_family=XeTeX_def_code+1 {declare math fonts ( \.{\\textfont}, etc.~)}
+@d set_font=def_family+1 {set current font ( font identifiers )}
+@d def_font=set_font+1 {define a font file ( \.{\\font} )}
 @d def_jfont=def_font+1 {define a font file ( \.{\\jfont} )}
 @d def_tfont=def_jfont+1 {define a font file ( \.{\\tfont} )}
-@d register=93 {internal register ( \.{\\count}, \.{\\dimen}, etc.~)}
-@d max_internal=93 {the largest code that can follow \.{\\the}}
-@d advance=94 {advance a register or parameter ( \.{\\advance} )}
-@d multiply=95 {multiply a register or parameter ( \.{\\multiply} )}
-@d divide=96 {divide a register or parameter ( \.{\\divide} )}
-@d prefix=97 {qualify a definition ( \.{\\global}, \.{\\long}, \.{\\outer} )}
+@d register=def_tfont+1 {internal register ( \.{\\count}, \.{\\dimen}, etc.~)}
+@d max_internal=register {the largest code that can follow \.{\\the}}
+@d advance=max_internal+1 {advance a register or parameter ( \.{\\advance} )}
+@d multiply=advance+1 {multiply a register or parameter ( \.{\\multiply} )}
+@d divide=multiply+1 {divide a register or parameter ( \.{\\divide} )}
+@d prefix=divide+1 {qualify a definition ( \.{\\global}, \.{\\long}, \.{\\outer} )}
   {( or \.{\\protected} )}
-@d let=98 {assign a command code ( \.{\\let}, \.{\\futurelet} )}
-@d shorthand_def=99 {code definition ( \.{\\chardef}, \.{\\countdef}, etc.~)}
-@d read_to_cs=100 {read into a control sequence ( \.{\\read} )}
+@d let=prefix+1 {assign a command code ( \.{\\let}, \.{\\futurelet} )}
+@d shorthand_def=let+1 {code definition ( \.{\\chardef}, \.{\\countdef}, etc.~)}
+  {or \.{\\charsubdef}}
+@d read_to_cs=shorthand_def+1 {read into a control sequence ( \.{\\read} )}
   {( or \.{\\readline} )}
-@d def=101 {macro definition ( \.{\\def}, \.{\\gdef}, \.{\\xdef}, \.{\\edef} )}
-@d set_box=102 {set a box ( \.{\\setbox} )}
-@d hyph_data=103 {hyphenation data ( \.{\\hyphenation}, \.{\\patterns} )}
-@d set_interaction=104 {define level of interaction ( \.{\\batchmode}, etc.~)}
-@d partoken_name=105 {set |par_token| name}
-@d max_command=105 {the largest command code seen at |big_switch|}
+@d def=read_to_cs+1 {macro definition ( \.{\\def}, \.{\\gdef}, \.{\\xdef}, \.{\\edef} )}
+@d set_box=def+1 {set a box ( \.{\\setbox} )}
+@d hyph_data=set_box+1 {hyphenation data ( \.{\\hyphenation}, \.{\\patterns} )}
+@d set_interaction=hyph_data+1 {define level of interaction ( \.{\\batchmode}, etc.~)}
+@d set_auto_spacing=set_interaction+1 {set auto spacing mode
+  ( \.{\\autospacing}, \.{\\noautospacing}, \.{\\autoxspacing}, \.{\\noautoxspacing} )}
+@d partoken_name=set_auto_spacing+1 {set |par_token| name}
+@d max_command=partoken_name {the largest command code seen at |big_switch|}
 
 @ The remaining command codes are extra special, since they cannot get through
 \TeX's scanner to the main control routine. They have been given values higher
@@ -5477,10 +5530,13 @@ as well as the glue parameters defined here. It is important that the
 @d xspace_skip_code=13 {glue after sentences (if not |zero_glue|)}
 @d par_fill_skip_code=14 {glue on last line of paragraph}
 @d XeTeX_linebreak_skip_code=15 {glue introduced at potential linebreak location}
-@d thin_mu_skip_code=16 {thin space in math formula}
-@d med_mu_skip_code=17 {medium space in math formula}
-@d thick_mu_skip_code=18 {thick space in math formula}
-@d glue_pars=19 {total number of glue parameters}
+@d kanji_skip_code=16 {between kanji-kanji space}
+@d xkanji_skip_code=17 {between latin-kanji or kanji-latin space}
+@d thin_mu_skip_code=18 {thin space in math formula}
+@d med_mu_skip_code=19 {medium space in math formula}
+@d thick_mu_skip_code=20 {thick space in math formula}
+@d jfm_skip=21 {space refer from JFM}
+@d glue_pars=22 {total number of glue parameters}
 @d skip_base=glue_base+glue_pars {table of |number_regs| ``skip'' registers}
 @d mu_skip_base=skip_base+number_regs
    {table of |number_regs| ``muskip'' registers}
@@ -5655,10 +5711,18 @@ registers.
 @d cur_font_loc=box_base+number_regs {internal font number outside math mode}
 @d cur_jfont_loc=cur_font_loc+1 {internal Japanese font number (YOKO direction) }
 @d cur_tfont_loc=cur_jfont_loc+1 {internal Japanese font number (TATE direction) }
-@d math_font_base=cur_tfont_loc+1 {table of |number_math_fonts| math font numbers}
+@d auto_spacing_code=cur_tfont_loc+1
+@d auto_xspacing_code=auto_spacing_code+1
+@d math_font_base=auto_xspacing_code+1 {table of |number_math_fonts| math font numbers}
 @d cat_code_base=math_font_base+number_math_fonts
   {table of |number_usvs| command codes (the ``catcodes'')}
-@d lc_code_base=cat_code_base+number_usvs {table of |number_usvs| lowercase mappings}
+@d cjkx_code_base=cat_code_base+number_usvs {table of |number_usvs| cjkx mappings}
+@d pre_break_penalty_base=cjkx_code_base+number_usvs
+@d post_break_penalty_base=pre_break_penalty_base+number_usvs
+@d auto_xsp_code_base=post_break_penalty_base+number_usvs {table of 256 auto spacer flag}
+@d inhibit_xsp_code_base=auto_xsp_code_base+256
+@d kansuji_base=inhibit_xsp_code_base+1024 {table of 10 kansuji mappings}
+@d lc_code_base=kansuji_base+10 {table of |number_usvs| lowercase mappings}
 @d uc_code_base=lc_code_base+number_usvs {table of |number_usvs| uppercase mappings}
 @d sf_code_base=uc_code_base+number_usvs {table of |number_usvs| spacefactor mappings}
 @d math_code_base=sf_code_base+number_usvs {table of |number_usvs| math mode mappings}
@@ -5681,11 +5745,20 @@ registers.
 @d cur_tfont==equiv(cur_tfont_loc)
 @d fam_fnt(#)==equiv(math_font_base+#)
 @d cat_code(#)==equiv(cat_code_base+#)
+@d cjkx_code(#)==equiv(cjkx_code_base+#)
+@d pre_break_penalty(#)==equiv(pre_break_penalty_base+#)
+@d post_break_penalty(#)==equiv(post_break_penalty_base+#)
 @d lc_code(#)==equiv(lc_code_base+#)
 @d uc_code(#)==equiv(uc_code_base+#)
 @d sf_code(#)==equiv(sf_code_base+#)
 @d math_code(#)==equiv(math_code_base+#)
   {Note: |math_code(c)| is the true math code plus |min_halfword|}
+@d auto_spacing==equiv(auto_spacing_code)
+@d auto_xspacing==equiv(auto_xspacing_code)
+@d auto_xsp_code(#)==equiv(auto_xsp_code_base+#)
+@d inhibit_xsp_type(#)==eq_type(inhibit_xsp_code_base+#)
+@d inhibit_xsp_code(#)==equiv(inhibit_xsp_code_base+#)
+@d kansuji_char(#)==equiv(kansuji_base+#)
 
 @<Put each...@>=
 primitive("output",assign_toks,output_routine_loc);
@@ -5757,19 +5830,35 @@ eq_level(cat_code_base):=level_one;@/
 for k:=cat_code_base+1 to int_base-1 do eqtb[k]:=eqtb[cat_code_base];
 for k:=0 to number_usvs-1 do
   begin cat_code(k):=other_char; math_code(k):=hi(k); sf_code(k):=1000;
+  cjkx_code(k):=0; pre_break_penalty(k):=0; post_break_penalty(k):=0; auto_xsp_code(k):=0;
+  end;
+for k:=0 to 1023 do
+  begin inhibit_xsp_code(k):=0; inhibit_xsp_type(k):=0;
   end;
 cat_code(carriage_return):=car_ret; cat_code(" "):=spacer;
 cat_code("\"):=escape; cat_code("%"):=comment;
 cat_code(invalid_code):=invalid_char; cat_code(null_code):=ignore;
-for k:="0" to "9" do math_code(k):=hi(k + set_class_field(var_fam_class));
+for k:="0" to "9" do begin
+  math_code(k):=hi(k + set_class_field(var_fam_class)); auto_xsp_code(k):=3;
+end;
 for k:="A" to "Z" do
   begin cat_code(k):=letter; cat_code(k+"a"-"A"):=letter;@/
   math_code(k):=hi(k + set_family_field(1) + set_class_field(var_fam_class));
   math_code(k+"a"-"A"):=hi(k+"a"-"A" + set_family_field(1) + set_class_field(var_fam_class));@/
   lc_code(k):=k+"a"-"A"; lc_code(k+"a"-"A"):=k+"a"-"A";@/
   uc_code(k):=k; uc_code(k+"a"-"A"):=k;@/
-  sf_code(k):=999;
+  sf_code(k):=999; auto_xsp_code(k):=3; auto_xsp_code(k+"a"-"A"):=3;
   end;
+kansuji_char(0):=12295;
+kansuji_char(1):=19968;
+kansuji_char(2):=20108;
+kansuji_char(3):=19977;
+kansuji_char(4):=22235;
+kansuji_char(5):=20116;
+kansuji_char(6):=20845;
+kansuji_char(7):=19971;
+kansuji_char(8):=20843;
+kansuji_char(9):=20061;
 
 @ @<Show equivalent |n|, in region 4@>=
 if (n=par_shape_loc) or ((n>=etex_pen_base) and (n<etex_pens)) then
@@ -5817,8 +5906,35 @@ end
 
 @ @<Show the halfword code in |eqtb[n]|@>=
 if n<math_code_base then
-  begin if n<lc_code_base then
+  begin if n<cjkx_code_base then
     begin print_esc("catcode"); print_int(n-cat_code_base);
+    end
+  else if n<pre_break_penalty_base then
+    begin print_esc("cjkxcode"); print_int(n-cjkx_code_base);
+    end
+  else if n<post_break_penalty_base then
+    begin print_esc("prebreakpenalty"); print_int(n-pre_break_penalty_base);
+    end
+  else if n<auto_xsp_code_base then
+    begin print_esc("postbreakpenalty"); print_int(n-post_break_penalty_base);
+    end
+  else if n<inhibit_xsp_code_base then
+    begin print_esc("xspcode"); print_int(n-auto_xsp_code_base);
+    end
+  else if n<kansuji_base then
+    begin print("inhibitxspcode table "); print_int(n-inhibit_xsp_code_base);
+      print(", type=");
+      case eq_type(n) of
+        0: print("both");   { |inhibit_both| }
+        1: print("before"); { |inhibit_previous| }
+        2: print("after");  { |inhibit_after| }
+        3: print("none");   { |inhibit_none| }
+        4: print("unused"); { |inhibit_unused| }
+      end; {there are no other cases}
+      print(", code");
+    end
+  else if n<lc_code_base then
+    begin print_esc("kansujichar"); print_int(n-kansuji_base);
     end
   else if n<uc_code_base then
     begin print_esc("lccode"); print_int(n-lc_code_base);
@@ -5833,6 +5949,16 @@ if n<math_code_base then
 else  begin print_esc("mathcode"); print_int(n-math_code_base);
   print_char("="); print_int(ho(equiv(n)));
   end
+
+@ $|cjkx_code|(p)$
+ bit 1: \.{jchrwidowpenalty}
+ bit 2: a linebreak after the character $p$ does NOT emits a space
+ bit 3: Japanese character
+
+@d is_cjkx_jachar(#)==(cjkx_code(#)>=4)
+@d is_cjkx_nolinebreak(#)==((cjkx_code(#) div 2)mod 2==1)
+@d is_cjkx_widowpenalty(#)==(cjkx_code(#) mod 2==1)
+
 
 @ Region 5 of |eqtb| contains the integer parameters and registers defined
 here, as well as the |del_code| table. The latter table differs from the
@@ -6325,7 +6451,9 @@ here, and the |number_regs| \.{\\dimen} registers.
 @d emergency_stretch_code=20 {reduces badnesses on final pass of line-breaking}
 @d pdf_page_width_code=21 {page width of the PDF output}
 @d pdf_page_height_code=22 {page height of the PDF output}
-@d dimen_pars=23 {total number of dimension parameters}
+@d t_baseline_shift_code=23 {shift amount when mixing TATE-kumi and Alphabet}
+@d y_baseline_shift_code=24 {shift amount when mixing YOKO-kumi and Alphabet}
+@d dimen_pars=25 {total number of dimension parameters}
 @d scaled_base=dimen_base+dimen_pars
   {table of |number_regs| user-defined \.{\\dimen} registers}
 @d eqtb_size=scaled_base+biggest_reg {largest subscript of |eqtb|}
@@ -6355,6 +6483,8 @@ here, and the |number_regs| \.{\\dimen} registers.
 @d emergency_stretch==dimen_par(emergency_stretch_code)
 @d pdf_page_width    == dimen_par(pdf_page_width_code)
 @d pdf_page_height   == dimen_par(pdf_page_height_code)
+@d t_baseline_shift==dimen_par(t_baseline_shift_code)
+@d y_baseline_shift==dimen_par(y_baseline_shift_code)
 
 @p procedure print_length_param(@!n:integer);
 begin case n of
@@ -6381,6 +6511,8 @@ v_offset_code:print_esc("voffset");
 emergency_stretch_code:print_esc("emergencystretch");
 pdf_page_width_code:    print_esc("pdfpagewidth");
 pdf_page_height_code:   print_esc("pdfpageheight");
+t_baseline_shift_code:print_esc("tbaselineshift");
+y_baseline_shift_code:print_esc("ybaselineshift");
 othercases print("[unknown dimen parameter!]")
 endcases;
 end;
@@ -6435,6 +6567,11 @@ primitive("pdfpagewidth",assign_dimen,dimen_base+pdf_page_width_code);@/
 @!@:pdf_page_width_}{\.{\\pdfpagewidth} primitive@>
 primitive("pdfpageheight",assign_dimen,dimen_base+pdf_page_height_code);@/
 @!@:pdf_page_height_}{\.{\\pdfpageheight} primitive@>
+
+primitive("tbaselineshift",assign_dimen,dimen_base+t_baseline_shift_code);@/
+@!@:t_baseline_shift_}{\.{\\tbaselineshift} primitive@>
+primitive("ybaselineshift",assign_dimen,dimen_base+y_baseline_shift_code);@/
+@!@:y_baseline_shift_}{\.{\\ybaselineshift} primitive@>
 
 @ @<Cases of |print_cmd_chr|...@>=
 assign_dimen: if chr_code<scaled_base then
@@ -6791,6 +6928,10 @@ primitive("aftergroup",after_group,0);@/
 primitive("begingroup",begin_group,0);@/
 @!@:begin_group_}{\.{\\begingroup} primitive@>
 primitive("char",char_num,0);@/
+@!@:char_}{\.{\\char} primitive@>
+primitive("achar",char_num,1);@/
+@!@:char_}{\.{\\char} primitive@>
+primitive("kchar",char_num,2);@/
 @!@:char_}{\.{\\char} primitive@>
 primitive("csname",cs_name,0);@/
 @!@:cs_name_}{\.{\\csname} primitive@>
@@ -7375,7 +7516,6 @@ and a few others.
 
 @d cs_token_flag=@"1FFFFFF {amount added to the |eqtb| location in a
   token that stands for a control sequence; is a multiple of~|@"10000|, less~1}
-@d max_char_val=@"200000 {to separate char and command code}
 @d left_brace_token=@"200000 {$2^{21}\cdot|left_brace|$}
 @d left_brace_limit=@"400000 {$2^{21}\cdot(|left_brace|+1)$}
 @d right_brace_token=@"400000 {$2^{21}\cdot|right_brace|$}
@@ -9819,7 +9959,8 @@ the internal quantity to be scanned; an error will be signalled if
 @d char_class_ignored == char_class_limit
 @d char_class_boundary == (char_class_ignored - 1)
 
-@p procedure scan_something_internal(@!level:small_number;@!negative:boolean);
+@p @t\4@>@<Declare procedures needed in |scan_something_internal|@>@t@>@/
+procedure scan_something_internal(@!level:small_number;@!negative:boolean);
   {fetch an internal parameter}
 label exit, restart;
 var m:halfword; {|chr_code| part of the operand token}
@@ -9830,6 +9971,8 @@ var m:halfword; {|chr_code| part of the operand token}
 @!p:0..nest_size; {index into |nest|}
 begin restart: m:=cur_chr;
 case cur_cmd of
+assign_inhibit_xsp_code: @<Fetch inhibit type from some table@>;
+{ set_kansuji_char: <Fetch kansuji char code from some table>; }
 def_code: @<Fetch a character code from some table@>;
 XeTeX_def_code:
   begin
@@ -14046,6 +14189,8 @@ the following commands are used in \.{XDV} files.
 
 @ @d set_char_0=0 {typeset character 0 and move right}
 @d set1=128 {typeset a character and move right}
+@d set2=129 {typeset a character and move right}
+@d set3=130 {typeset a character and move right}
 @d set_rule=132 {typeset a rule and move right}
 @d put_rule=137 {typeset a rule}
 @d nop=138 {no operation}
@@ -14071,6 +14216,7 @@ the following commands are used in \.{XDV} files.
 @d pre=247 {preamble}
 @d post=248 {postamble beginning}
 @d post_post=249 {postamble ending}
+@d dirchg=255 {direction change}
 
 @d define_native_font=252 {define native font}
 @d set_glyphs=253 {sequence of glyphs with individual x-y coordinates}
@@ -14265,13 +14411,14 @@ values of these variables are not needed during recursive calls.
 @!doing_leaders:boolean; {are we inside a leader box?}
 @#
 @!c,@!f:quarterword; {character and font in current |char_node|}
+@!dir_used:boolean; {Is this dvi extended?}
 @!rule_ht,@!rule_dp,@!rule_wd:scaled; {size of current rule being output}
 @!g:pointer; {current glue specification}
 @!lq,@!lr:integer; {quantities used in calculations for leaders}
 
 @ @<Set init...@>=
 total_pages:=0; max_v:=0; max_h:=0; max_push:=0; last_bop:=-1;
-doing_leaders:=false; dead_cycles:=0; cur_s:=-1;
+doing_leaders:=false; dead_cycles:=0; cur_s:=-1; dir_used:=false;
 
 @ The \.{DVI} bytes are output to a buffer instead of being written directly
 to the output file. This makes it possible to reduce the overhead of
@@ -14729,9 +14876,9 @@ changes; the subtype of an an |hlist_node| inside R-text is changed to
 
 @d reversed=1 {subtype for an |hlist_node| whose hlist has been reversed}
 @d dlist=2 {subtype for an |hlist_node| from display math mode}
-@d box_lr(#) == (qo(subtype(#))) {direction mode of a box}
-@d set_box_lr(#) ==  subtype(#):=set_box_lr_end
-@d set_box_lr_end(#) == qi(#)
+@d box_lr(#) == ((qo(subtype(#)))div 16) {direction mode of a box}
+@d set_box_lr(#) == subtype(#):=box_dir(#)+dir_max+set_box_lr_end
+@d set_box_lr_end(#) == qi(16*(#))
 @#
 @d left_to_right=0
 @d right_to_left=1
@@ -14752,6 +14899,7 @@ changes; the subtype of an an |hlist_node| inside R-text is changed to
 
 @ @<Initialize variables as |ship_out| begins@>=
 dvi_h:=0; dvi_v:=0; cur_h:=h_offset; dvi_f:=null_font;
+dvi_dir:=dir_yoko; cur_dir_hv:=dvi_dir;
 @<Calculate page dimensions and margins@>;
 ensure_dvi_open;
 if total_pages=0 then
@@ -14798,6 +14946,10 @@ that a \.{DVI}-reading program will push onto its coordinate stack.
 procedure hlist_out; {output an |hlist_node| box}
 label reswitch, move_past, fin_rule, next_p;
 var base_line: scaled; {the baseline coordinate for this box}
+@!disp: scaled; {displacement}
+@!save_dir:eight_bits; {what |dvi_dir| should pop to}
+@!jc:UTF16_code; {temporary register for KANJI codes}
+@!ksp_ptr:pointer; {position of |auto_spacing_glue| in the hlist}
 @!left_edge: scaled; {the left coordinate for this box}
 @!save_h,@!save_v: scaled; {what |dvi_h| and |dvi_v| should pop to}
 @!this_box: pointer; {pointer to containing box}
@@ -14824,19 +14976,23 @@ if XeTeX_interword_space_shaping_state > 1 then begin
   @<Merge sequences of words using native fonts and inter-word spaces into single nodes@>;
 end;
 p:=list_ptr(this_box);
+ksp_ptr:=space_ptr(this_box);
 incr(cur_s);
 if cur_s>0 then dvi_out(push);
 if cur_s>max_push then max_push:=cur_s;
-save_loc:=dvi_offset+dvi_ptr; base_line:=cur_v;
+save_loc:=dvi_offset+dvi_ptr; synch_dir;
+base_line:=cur_v; disp:=0; revdisp:=0;
 prev_p:=this_box+list_offset;
 @<Initialize |hlist_out| for mixed direction typesetting@>;
 left_edge:=cur_h;
+print("hlo b>>>"); print_int(this_box);
 while p<>null do @<Output node |p| for |hlist_out| and move to the next node,
   maintaining the condition |cur_v=base_line|@>;
 @<Finish |hlist_out| for mixed direction typesetting@>;
 prune_movements(save_loc);
 if cur_s>0 then dvi_pop(save_loc);
 decr(cur_s);
+print("hlo end");
 end;
 
 @ Extra stuff for justifiable AAT text; need to merge runs of words and normal spaces.
@@ -15014,12 +15170,15 @@ dvi_f:=f;
 end
 
 @ @<Output the non-|char_node| |p| for |hlist_out|...@>=
-begin case type(p) of
-hlist_node,vlist_node:@<Output a box in an hlist@>;
+begin 
+print("dh> ");print_int(p); print(" "); print_int(type(p));
+case type(p) of
+hlist_node,vlist_node,dir_node:@<Output a box in an hlist@>;
 rule_node: begin rule_ht:=height(p); rule_dp:=depth(p); rule_wd:=width(p);
   goto fin_rule;
   end;
 whatsit_node: @<Output the whatsit node |p| in an hlist@>;
+disp_node: begin disp:=disp_dimen(p); revdisp:=disp; cur_v:=base_line+disp; end;
 glue_node: @<Move right or output leaders@>;
 margin_kern_node: begin
   cur_h:=cur_h+width(p);
@@ -15038,18 +15197,22 @@ end
 
 @ @<Output a box in an hlist@>=
 if list_ptr(p)=null then cur_h:=cur_h+width(p)
-else  begin save_h:=dvi_h; save_v:=dvi_v;
-  cur_v:=base_line+shift_amount(p); {shift the box down}
+else  begin save_h:=dvi_h; save_v:=dvi_v; save_dir:=dvi_dir;
+  cur_v:=base_line+disp+shift_amount(p); {shift the box down}
   temp_ptr:=p; edge:=cur_h+width(p);
   if cur_dir=right_to_left then cur_h:=edge;
-  if type(p)=vlist_node then vlist_out@+else hlist_out;
-  dvi_h:=save_h; dvi_v:=save_v;
-  cur_h:=edge; cur_v:=base_line;
+  case type(p) of
+    hlist_node:hlist_out;
+    vlist_node:vlist_out;
+    dir_node:dir_out;
+  endcases;
+  dvi_h:=save_h; dvi_v:=save_v; dvi_dir:=save_dir;
+  cur_h:=edge; cur_v:=base_line+disp; cur_dir_hv:=save_dir;
   end
 
 @ @<Output a rule in an hlist@>=
-if is_running(rule_ht) then rule_ht:=height(this_box);
-if is_running(rule_dp) then rule_dp:=depth(this_box);
+if is_running(rule_ht) then rule_ht:=height(this_box)+disp;
+if is_running(rule_dp) then rule_dp:=depth(this_box)-disp;
 rule_ht:=rule_ht+rule_dp; {this is the rule thickness}
 if (rule_ht>0)and(rule_wd>0) then {we don't output empty rules}
   begin synch_h; cur_v:=base_line+rule_dp; synch_v;
@@ -15147,14 +15310,18 @@ else  begin lq:=rule_wd div leader_wd; {the number of box copies}
 bytes needed to specify horizontal and vertical motion in the \.{DVI} output.
 
 @<Output a leader box at |cur_h|, ...@>=
-begin cur_v:=base_line+shift_amount(leader_box); synch_v; save_v:=dvi_v;@/
-synch_h; save_h:=dvi_h; temp_ptr:=leader_box;
+begin cur_v:=base_line+disp+shift_amount(leader_box); synch_v; save_v:=dvi_v;@/
+synch_h; save_h:=dvi_h; save_dir:=dvi_dir; temp_ptr:=leader_box;
 if cur_dir=right_to_left then cur_h:=cur_h+leader_wd;
 outer_doing_leaders:=doing_leaders; doing_leaders:=true;
-if type(leader_box)=vlist_node then vlist_out@+else hlist_out;
+case type(leader_box) of
+  hlist_node:hlist_out;
+  vlist_node:vlist_out;
+  dir_node:dir_out;
+endcases;
 doing_leaders:=outer_doing_leaders;
-dvi_v:=save_v; dvi_h:=save_h; cur_v:=base_line;
-cur_h:=save_h+leader_wd+lx;
+dvi_v:=save_v; dvi_h:=save_h; dvi_dir:=save_dir;
+cur_v:=base_line; cur_h:=save_h+leader_wd+lx; cur_dir_hv:=save_dir;
 end
 
 @ The |vlist_out| routine is similar to |hlist_out|, but a bit simpler.
@@ -15178,21 +15345,25 @@ var left_edge: scaled; {the left coordinate for this box}
 @!cur_glue:real; {glue seen so far}
 @!cur_g:scaled; {rounded equivalent of |cur_glue| times the glue ratio}
 @!upwards:boolean; {whether we're stacking upwards}
+@!save_dir:integer; {what |dvi_dir| should pop to}
 begin cur_g:=0; cur_glue:=float_constant(0);
 this_box:=temp_ptr; g_order:=glue_order(this_box);
 g_sign:=glue_sign(this_box); p:=list_ptr(this_box);
-upwards:=(subtype(this_box)=min_quarterword+1);
 incr(cur_s);
 if cur_s>0 then dvi_out(push);
 if cur_s>max_push then max_push:=cur_s;
-save_loc:=dvi_offset+dvi_ptr; left_edge:=cur_h;
+save_loc:=dvi_offset+dvi_ptr;
+synch_dir;
+left_edge:=cur_h;
 if upwards then cur_v:=cur_v+depth(this_box) else cur_v:=cur_v-height(this_box);
 top_edge:=cur_v;
+print("vlo b>>>"); print_int(this_box);
 while p<>null do @<Output node |p| for |vlist_out| and move to the next node,
   maintaining the condition |cur_h=left_edge|@>;
 prune_movements(save_loc);
 if cur_s>0 then dvi_pop(save_loc);
 decr(cur_s);
+print("vlo end");
 end;
 
 @ @<Output node |p| for |vlist_out|...@>=
@@ -15204,7 +15375,7 @@ end
 
 @ @<Output the non-|char_node| |p| for |vlist_out|@>=
 begin case type(p) of
-hlist_node,vlist_node:@<Output a box in a vlist@>;
+hlist_node,vlist_node,dir_node:@<Output a box in a vlist@>;
 rule_node: begin rule_ht:=height(p); rule_dp:=depth(p); rule_wd:=width(p);
   goto fin_rule;
   end;
@@ -15225,13 +15396,17 @@ usually be constant.
 @<Output a box in a vlist@>=
 if list_ptr(p)=null then cur_v:=cur_v+height(p)+depth(p)
 else  begin if upwards then cur_v:=cur_v-depth(p) else cur_v:=cur_v+height(p); synch_v;
-  save_h:=dvi_h; save_v:=dvi_v;
+  save_h:=dvi_h; save_v:=dvi_v; save_dir:=dvi_dir;
   if cur_dir=right_to_left then cur_h:=left_edge-shift_amount(p)
   else cur_h:=left_edge+shift_amount(p); {shift the box right}
   temp_ptr:=p;
-  if type(p)=vlist_node then vlist_out@+else hlist_out;
-  dvi_h:=save_h; dvi_v:=save_v;
-  if upwards then cur_v:=save_v-height(p) else cur_v:=save_v+depth(p); cur_h:=left_edge;
+  case type(p) of
+    hlist_node:hlist_out;
+    vlist_node:vlist_out;
+    dir_node:dir_out;
+  endcases;
+  dvi_h:=save_h; dvi_v:=save_v; dvi_dir:=save_dir;
+  if upwards then cur_v:=save_v-height(p) else cur_v:=save_v+depth(p); cur_h:=left_edge; cur_dir_hv:=save_dir;
   end
 
 @ @<Output a rule in a vlist...@>=
@@ -20152,6 +20327,7 @@ stretchability and set |final_pass=true|.
 
 @<Glob...@>=
 @!cur_p:pointer; {the current breakpoint under consideration}
+@!chain:boolean; {chain current line and next line?}
 @!second_pass:boolean; {is this our second attempt to break this paragraph?}
 @!final_pass:boolean; {is this our final attempt to break this paragraph?}
 @!threshold:integer; {maximum badness on feasible lines}
@@ -20481,7 +20657,8 @@ while s<>null do
   glue_node:@<Subtract glue from |break_width|@>;
   penalty_node: do_nothing;
   math_node: break_width[1]:=break_width[1]-width(s);
-  kern_node: if subtype(s)<>explicit then goto done
+  kern_node: if (subtype(s)<>explicit)and(subtype(s)<>ita_kern) then
+    goto done
     else break_width[1]:=break_width[1]-width(s);
   othercases goto done
   endcases;@/
@@ -21064,14 +21241,15 @@ begin if is_char_node(cur_p) then
   @<Advance \(c)|cur_p| to the node following the present
     string of characters@>;
 case type(cur_p) of
-hlist_node,vlist_node,rule_node: act_width:=act_width+width(cur_p);
+hlist_node,vlist_node,dir_node,rule_node: act_width:=act_width+width(cur_p);
 whatsit_node: @<Advance \(p)past a whatsit node in the \(l)|line_break| loop@>;
 glue_node: begin @<If node |cur_p| is a legal breakpoint, call |try_break|;
   then update the active widths by including the glue in |glue_ptr(cur_p)|@>;
   if second_pass and auto_breaking then
     @<Try to hyphenate the following word@>;
   end;
-kern_node: if subtype(cur_p)=explicit then kern_break
+kern_node: if (subtype(cur_p)=explicit)or(subtype(cur_p)=ita_kern) then
+  kern_break
   else act_width:=act_width+width(cur_p);
 ligature_node: begin f:=font(lig_char(cur_p));
   xtx_ligature_present:=true;
@@ -21082,7 +21260,7 @@ math_node: begin if subtype(cur_p)<L_code then auto_breaking:=odd(subtype(cur_p)
   kern_break;
   end;
 penalty_node: try_break(penalty(cur_p),unhyphenated);
-mark_node,ins_node,adjust_node: do_nothing;
+disp_node,mark_node,ins_node,adjust_node: do_nothing;
 othercases confusion("paragraph")
 @:this can't happen paragraph}{\quad paragraph@>
 endcases;@/
@@ -21111,8 +21289,9 @@ a breakpoint is legal at |cur_p|, as explained above.
 if auto_breaking then
   begin if is_char_node(prev_p) then try_break(0,unhyphenated)
   else if precedes_break(prev_p) then try_break(0,unhyphenated)
-  else if (type(prev_p)=kern_node)and(subtype(prev_p)<>explicit) then
-    try_break(0,unhyphenated);
+  else if (type(prev_p)=kern_node)then
+    if (subtype(prev_p)<>explicit)and(subtype(prev_p)<>ita_kern) then
+      try_break(0,unhyphenated);
   end;
 check_shrinkage(glue_ptr(cur_p)); q:=glue_ptr(cur_p);
 act_width:=act_width+width(q);@|
@@ -21285,6 +21464,7 @@ var q,@!r,@!s:pointer; {temporary registers for list manipulation}
 @!t:quarterword; {used for replacement counts in discretionary nodes}
 @!pen:integer; {use when calculating penalties between lines}
 @!cur_line: halfword; {the current line number being justified}
+@!revdisp:scaled; {temporary value of displacement}
 @!LR_ptr:pointer; {stack of LR codes}
 begin LR_ptr:=LR_save;
 @<Reverse the links of the relevant passive nodes, setting |cur_p| to the
@@ -21330,7 +21510,9 @@ loop@+  begin q:=link(r);
   {now |q| cannot be |null|}
   if is_char_node(q) then goto done1;
   if non_discardable(q) then goto done1;
-  if type(q)=kern_node then if (subtype(q)<>explicit) and (subtype(q)<>space_adjustment) then goto done1;
+  if type(q)=kern_node then 
+    if (subtype(q)<>explicit)and(subtype(q)<>ita_kern)and(subtype(q)<>space_adjustment) then 
+      goto done1;
   r:=q; {now |type(q)=glue_node|, |kern_node|, |math_node|, or |penalty_node|}
   if type(q)=math_node then if TeXXeT_en then
     @<Adjust \(t)the LR stack for the |post_line_break| routine@>;
@@ -24364,6 +24546,9 @@ consideration of the other cases until later.
 @d main_loop_lookahead=100 {go here to bring in another character, if any}
 @d main_lig_loop=110 {go here to check for ligatures or kerning}
 @d append_normal_space=120 {go here to append a normal space between words}
+@d main_loop_j=130 {like |main_loop|, but |cur_chr| holds a KANJI code}
+@d skip_loop=141
+@d again_2=150
 @#
 @d pdfbox_crop=1 {|pdf_box_type| passed to |find_pic_file|}
 @d pdfbox_media=2
@@ -24376,18 +24561,34 @@ consideration of the other cases until later.
 @t\4@>@<Declare the procedure called |handle_right_brace|@>@;
 procedure main_control; {governs \TeX's activities}
 label big_switch,reswitch,main_loop,main_loop_wrapup,
+  main_loop_j,main_loop_j+1,main_loop_j+3,skip_loop,again_2,
   main_loop_move,main_loop_move+1,main_loop_move+2,main_loop_move_lig,
   main_loop_lookahead,main_loop_lookahead+1,
   main_lig_loop,main_lig_loop+1,main_lig_loop+2,
   collect_native,collected,
   append_normal_space,exit;
 var@!t:integer; {general-purpose temporary variable}
+@!cx:UTF16_code; {kanji character}
+@!kp:pointer; {kinsoku penalty register}
+@!gp,gq:pointer; {temporary registers for list manipulation}
+@!disp:scaled; {displacement register}
+@!ins_kp:boolean; {whether insert kinsoku penalty}
 begin if every_job<>null then begin_token_list(every_job,every_job_text);
 big_switch: get_x_token;@/
 reswitch: @<Give diagnostic information, if requested@>;
+ins_kp:=false;
 case abs(mode)+cur_cmd of
-hmode+letter,hmode+other_char,hmode+char_given: goto main_loop;
-hmode+char_num: begin scan_usv_num; cur_chr:=cur_val; goto main_loop;@+end;
+hmode+letter,hmode+other_char,hmode+char_given: 
+  if is_cjkx_jachar(cur_chr) then goto main_loop_j else goto main_loop;
+hmode+char_num: begin t:=cur_chr; scan_usv_num; cur_chr:=cur_val; 
+  case t of
+  0: if is_cjkx_jachar(cur_chr) then goto main_loop_j else goto main_loop;
+  1: goto main_loop;
+  2: goto main_loop_j;
+  endcases;
+  end;
+hmode+achar_given: goto main_loop;
+hmode+kchar_given: goto main_loop_j;
 hmode+no_boundary: begin get_x_token;
   if (cur_cmd=letter)or(cur_cmd=other_char)or(cur_cmd=char_given)or
    (cur_cmd=char_num) then cancel_boundary:=true;
@@ -24404,7 +24605,11 @@ othercases begin
   end
 endcases; {of the big |case| statement}
 goto big_switch;
-main_loop:@<Append character |cur_chr| and the following characters (if~any)
+main_loop_j:@<Append KANJI-character |cur_chr|
+  to the current hlist in the current font; |goto reswitch| when
+  a non-character has been fetched@>;
+main_loop:inhibit_glue_flag:=false;
+@<Append character |cur_chr| and the following characters (if~any)
   to the current hlist in the current font; |goto reswitch| when
   a non-character has been fetched@>;
 append_normal_space:check_for_post_char_toks(big_switch);
@@ -24561,13 +24766,16 @@ collect_native:
 
   {try to collect as many chars as possible in the same font}
   get_next;
-  if (cur_cmd=letter) or (cur_cmd=other_char) or (cur_cmd=char_given) then goto collect_native;
+  if (cur_cmd=letter) or (cur_cmd=other_char) or (cur_cmd=char_given) then 
+    begin if not is_cjkx_jachar(cur_chr) then goto collect_native end
+  else if cur_cmd=achar_given then goto collect_native;
   x_token;
-  if (cur_cmd=letter) or (cur_cmd=other_char) or (cur_cmd=char_given) then goto collect_native;
-  if cur_cmd=char_num then begin
-    scan_usv_num;
-    cur_chr:=cur_val;
-    goto collect_native;
+  if (cur_cmd=letter) or (cur_cmd=other_char) or (cur_cmd=char_given) then 
+    begin if not is_cjkx_jachar(cur_chr) then goto collect_native end
+  else if cur_cmd=achar_given then goto collect_native
+  else if cur_cmd=char_num then begin
+    t:=cur_chr; scan_usv_num; cur_chr:=cur_val;
+    if (t=1)or((t=0)and not is_cjkx_jachar(cur_chr)) then goto collect_native;
   end;
 
   check_for_post_char_toks(collected);
@@ -24806,6 +25014,8 @@ end;
 { End of added code for native fonts }
 
 adjust_space_factor;@/
+if direction=dir_tate then disp:=t_baseline_shift else disp:=y_baseline_shift;
+@<Append |disp_node| at begin of displace area@>;
 check_for_inter_char_toks(big_switch);
 main_f:=cur_font;
 bchar:=font_bchar[main_f]; false_bchar:=font_false_bchar[main_f];
@@ -24868,7 +25078,10 @@ wrapup(rt_hit)
 
 @ @<If the cursor is immediately followed by the right boundary...@>=
 @^inner loop@>
-if lig_stack=null then goto reswitch;
+if lig_stack=null then
+  begin @<Append |disp_node| at end of displace area@>;
+  goto reswitch;
+  end;
 cur_q:=tail; cur_l:=character(lig_stack);
 main_loop_move+1:if not is_char_node(lig_stack) then goto main_loop_move_lig;
 main_loop_move+2:if(cur_chr<font_bc[main_f])or(cur_chr>font_ec[main_f]) then
@@ -24900,23 +25113,49 @@ look ahead for it.
 
 @<Look ahead for another character...@>=
 get_next; {set only |cur_cmd| and |cur_chr|, for speed}
-if cur_cmd=letter then goto main_loop_lookahead+1;
-if cur_cmd=other_char then goto main_loop_lookahead+1;
-if cur_cmd=char_given then goto main_loop_lookahead+1;
+if (cur_cmd=letter)or(cur_cmd=other_char)or(cur_cmd=char_given) then 
+  begin if is_cjkx_jachar(cur_chr) then @<goto |main_lig_loop|@> 
+  else goto main_loop_lookahead+1; end
+else if cur_cmd=achar_given then goto main_loop_lookahead+1
+else if cur_cmd=kchar_given then @<goto |main_lig_loop|@>;
 x_token; {now expand and set |cur_cmd|, |cur_chr|, |cur_tok|}
-if cur_cmd=letter then goto main_loop_lookahead+1;
-if cur_cmd=other_char then goto main_loop_lookahead+1;
-if cur_cmd=char_given then goto main_loop_lookahead+1;
+if (cur_cmd=letter)or(cur_cmd=other_char)or(cur_cmd=char_given) then 
+  begin if is_cjkx_jachar(cur_chr) then @<goto |main_lig_loop|@> 
+  else goto main_loop_lookahead+1; end
+else if cur_cmd=achar_given then goto main_loop_lookahead+1
+else if cur_cmd=kchar_given then @<goto |main_lig_loop|@>;
 if cur_cmd=char_num then
-  begin scan_char_num; cur_chr:=cur_val; goto main_loop_lookahead+1;
+  begin t:=cur_chr; scan_usv_num; cur_chr:=cur_val; 
+  case t of
+  0: if is_cjkx_jachar(cur_chr) then @<goto |main_lig_loop|@> 
+    else goto main_loop_lookahead+1;
+  1: goto main_loop_lookahead+1;
+  2: @<goto |main_lig_loop|@>;
+  endcases;
+end
+else if cur_cmd=inhibit_glue then
+  begin inhibit_glue_flag:=true; goto main_loop_lookahead;
   end;
 if cur_cmd=no_boundary then bchar:=non_char;
 cur_r:=bchar; lig_stack:=null; goto main_lig_loop;
 main_loop_lookahead+1: adjust_space_factor;
+inhibit_glue_flag:=false;
 check_for_inter_char_toks(big_switch);
 fast_get_avail(lig_stack); font(lig_stack):=main_f;
 cur_r:=qi(cur_chr); character(lig_stack):=cur_r;
 if cur_r=false_bchar then cur_r:=non_char {this prevents spurious ligatures}
+
+@ @<goto |main_lig_loop|@>=
+begin bchar:=non_char; cur_r:=bchar; lig_stack:=null;
+if ligature_present then pack_lig(rt_hit);
+if ins_kp=true then
+  begin cx:=cur_l; @<Insert kinsoku penalty@>;
+  end;
+ins_kp:=false;
+goto main_loop_j;
+end
+@z
+
 
 @ Even though comparatively few characters have a lig/kern program, several
 of the instructions here count as part of \TeX's inner loop, since a
@@ -25194,6 +25433,185 @@ begin if privileged then
   end;
 its_all_over:=false;
 exit:end;
+
+@ @<Append KANJI-character |cur_chr| ...@>=
+if is_char_node(tail) then
+  begin if not( (last_jchr<>null) and (link(last_jchr)=tail) ) then
+    begin cx:=qo(character(tail)); @<Insert |post_break_penalty|@>;
+    end;
+  end
+else if type(tail)=ligature_node then
+  begin cx:=qo(character(lig_char(tail))); @<Insert |post_break_penalty|@>;
+  end;
+if direction=dir_tate then
+  begin if font_dir[main_f]=dir_tate then disp:=0
+  else if font_dir[main_f]=dir_yoko then disp:=t_baseline_shift-y_baseline_shift
+  else disp:=t_baseline_shift;
+  main_f:=cur_tfont;
+  end
+else
+  begin if font_dir[main_f]=dir_yoko then disp:=0
+  else if font_dir[main_f]=dir_tate then disp:=y_baseline_shift-t_baseline_shift
+  else disp:=y_baseline_shift;
+  main_f:=cur_jfont;
+  end;
+@<Append |disp_node| at end of displace area@>;
+ins_kp:=false; ligature_present:=false;
+cur_l:=qi(get_jfm_pos(KANJI(cur_chr),main_f));
+main_i:=orig_char_info(main_f)(qi(0));
+goto main_loop_j+3;
+@#
+main_loop_j+1: space_factor:=1000;
+  if main_f<>null_font then
+    begin if not disp_called then
+      begin prev_node:=tail; tail_append(get_node(small_node_size));
+      type(tail):=disp_node; disp_dimen(tail):=0; disp_called:=true
+      end;
+    fast_get_avail(main_p); font(main_p):=main_f; character(main_p):=cur_l;
+    link(tail):=main_p; tail:=main_p; last_jchr:=tail;
+    fast_get_avail(main_p);
+    info(main_p):=KANJI(cur_chr)+cjkx_code(cur_chr)*max_char_val;
+    link(tail):=main_p; tail:=main_p;
+    cx:=cur_chr; @<Insert kinsoku penalty@>;
+  end;
+  ins_kp:=false;
+again_2:
+  get_next;
+  main_i:=orig_char_info(main_f)(cur_l);
+  case cur_cmd of
+    letter,other_char,char_given: begin
+      if is_cjkx_jachar(cur_chr) then begin
+        cur_l:=qi(get_jfm_pos(KANJI(cur_chr),main_f)); goto main_loop_j+3; end
+      else begin 
+        ins_kp:=true; cur_l:=qi(0); goto main_loop_j+3; end;
+      end;
+    achar_given: begin ins_kp:=true; cur_l:=qi(0); goto main_loop_j+3; end;
+    kchar_given: begin cur_l:=qi(get_jfm_pos(KANJI(cur_chr),main_f)); goto main_loop_j+3; end;
+  endcases;
+  x_token;
+  case cur_cmd of
+    letter,other_char: begin
+      if is_cjkx_jachar(cur_chr) then begin cur_l:=qi(get_jfm_pos(KANJI(cur_chr),main_f)); end
+      else begin ins_kp:=true; cur_l:=qi(0); end;
+      end;
+    char_given: begin
+      if is_cjkx_jachar(cur_chr) then begin cur_l:=qi(get_jfm_pos(KANJI(cur_chr),main_f)); end
+      else begin ins_kp:=true; cur_l:=qi(0); end;
+      cur_cmd:=cat_code(cur_chr);
+      end;
+    achar_given: begin ins_kp:=true; cur_l:=qi(0); cur_cmd:=cat_code(cur_chr); end;
+    kchar_given: begin cur_l:=qi(get_jfm_pos(KANJI(cur_chr),main_f)); cur_cmd:=cat_code(cur_chr); end;
+    char_num: begin t:=cur_chr; scan_char_num; cur_chr:=cur_val;
+      if (t=1)or((t=0)and not is_cjkx_jachar(cur_chr)) then begin 
+        ins_kp:=true; cur_l:=qi(0); goto main_loop_j+3; 
+        end
+      else begin cur_l:=qi(get_jfm_pos(KANJI(cur_chr),main_f)); end
+      end;
+    inhibit_glue: begin inhibit_glue_flag:=(cur_chr=0); goto again_2; end;
+    othercases begin ins_kp:=max_halfword;
+      cur_l:=qi(-1); cur_r:=non_char; lig_stack:=null;
+      end;
+  endcases;
+@#
+main_loop_j+3:
+  if ins_kp=true then @<Insert |pre_break_penalty| of |cur_chr|@>;
+  if main_f<>null_font then
+    begin @<Look ahead for glue or kerning@>;
+    end
+  else inhibit_glue_flag:=false;
+  if ins_kp=false then begin { Kanji -> Kanji }
+    goto main_loop_j+1;
+  end else if ins_kp=true then begin { Kanji -> Ascii }
+    {@@<Append |disp_node| at begin of displace area@@>;}
+    ins_kp:=false; goto main_loop;
+  end else begin { Kanji -> cs }
+    {@@<Append |disp_node| at begin of displace area@@>;}
+    goto reswitch;
+  end;
+
+@ @<Append |disp_node| at begin ...@>=
+begin if not is_char_node(tail)and(type(tail)=disp_node) then
+  begin if prev_disp=disp then
+    begin free_node(tail,small_node_size); tail:=prev_node; link(tail):=null;
+    end
+  else disp_dimen(tail):=disp;
+  end
+else
+  if disp<>0 or not disp_called then
+    begin prev_node:=tail; tail_append(get_node(small_node_size));
+    type(tail):=disp_node; disp_dimen(tail):=disp; prev_disp:=disp;
+    disp_called:=true
+    end;
+end;
+
+@ @<Append |disp_node| at end ...@>=
+if disp<>0 then
+begin if not is_char_node(tail)and(type(tail)=disp_node) then
+  begin disp_dimen(tail):=0;
+  end
+else
+  begin prev_node:=tail; tail_append(get_node(small_node_size));
+  type(tail):=disp_node; disp_dimen(tail):=0; prev_disp:=disp;
+  disp_called:=true
+  end;
+end;
+
+@ @<Look ahead for glue or kerning@>=
+cur_q:=tail;
+if inhibit_glue_flag<>true then
+  begin
+  if cur_l<qi(0) then cur_l:=qi(0) else inhibit_glue_flag:=false;
+  if (tail=link(head))and(not is_char_node(tail))and(type(tail)=disp_node) then
+    goto skip_loop
+  else begin if char_tag(main_i)=gk_tag then
+    begin main_k:=glue_kern_start(main_f)(main_i);
+    main_j:=font_info[main_k].qqqq;
+    if skip_byte(main_j)>stop_flag then {huge glue/kern table rearranged}
+      begin main_k:=glue_kern_restart(main_f)(main_j);
+        main_j:=font_info[main_k].qqqq;
+        end;
+    loop@+begin if next_char(main_j)=cur_l then if skip_byte(main_j)<=stop_flag then
+      begin if op_byte(main_j)<kern_flag then
+        begin gp:=font_glue[main_f]; cur_r:=rem_byte(main_j);
+        if gp<>null then
+          begin while((type(gp)<>cur_r)and(link(gp)<>null)) do gp:=link(gp);
+          gq:=glue_ptr(gp);
+          end
+        else
+          begin gp:=get_node(small_node_size); font_glue[main_f]:=gp;
+          gq:=null;
+          end;
+        if gq=null then
+          begin type(gp):=cur_r; gq:=new_spec(zero_glue);
+          glue_ptr(gp):=gq;
+          main_k:=exten_base[main_f]+qi((qo(cur_r))*3);
+          width(gq):=font_info[main_k].sc;
+          stretch(gq):=font_info[main_k+1].sc;
+          shrink(gq):=font_info[main_k+2].sc;
+          add_glue_ref(gq); link(gp):=get_node(small_node_size);
+          gp:=link(gp); glue_ptr(gp):=null; link(gp):=null;
+          end;
+        tail_append(new_glue(gq)); subtype(tail):=jfm_skip+1;
+        goto skip_loop;
+        end
+      else  begin
+        tail_append(new_kern(char_kern(main_f)(main_j)));
+        goto skip_loop;
+        end;
+    end;
+    if skip_byte(main_j)>=stop_flag then goto skip_loop;
+    main_k:=main_k+qo(skip_byte(main_j))+1; {SKIP property}
+    main_j:=font_info[main_k].qqqq;
+    end;
+  end;
+  end;
+end
+else
+  begin
+  if cur_l<qi(0) then cur_l:=qi(0) else inhibit_glue_flag:=false;
+  end;
+skip_loop: do_nothing;
+
 
 @* \[47] Building boxes and lists.
 The most important parts of |main_control| are concerned with \TeX's
@@ -25653,10 +26071,15 @@ procedure begin_box(@!box_context:integer);
 label exit, done;
 var @!p,@!q:pointer; {run through the current list}
 @!r:pointer; {running behind |p|}
-@!fm:boolean; {a final \.{\\beginM} \.{\\endM} node pair?}
+@!s:pointer; {running behind |r|}
+@!t:pointer;
+@!fm:integer; {1: if |r|, 2: if |p| is a \.{\\beginM} node}
+@!gm:integer; {1: if |link(q)|, 2: if |q| is an  \.{\\endM} node}
+@!fd,@!gd:integer; {same for |disp_node|}
+@!disp,@!pdisp:scaled; {displacement}
+@!a_dir:eight_bits; {adjust direction}
 @!tx:pointer; {effective tail node}
 @!m:quarterword; {the length of a replacement list}
-@!k:halfword; {0 or |vmode| or |hmode|}
 @!n:halfword; {a box number}
 begin case cur_chr of
 box_code: begin scan_register_num; fetch_box(cur_box);
@@ -26078,6 +26501,7 @@ label done, exit;
 var p:pointer; {the box}
     r: pointer; {to remove marginal kern nodes}
 @!c:box_code..copy_code; {should we copy?}
+@!disp:scaled; {displacement}
 begin if cur_chr>copy_code then @<Handle saved items and |goto done|@>;
 c:=cur_chr; scan_register_num; fetch_box(p);
 if p=null then return;
@@ -26125,17 +26549,17 @@ begin if tail<>head then
   else if type(tail)=ligature_node then p:=lig_char(tail)
   else if (type(tail)=whatsit_node) then begin
     if is_native_word_subtype(tail) then begin
-      tail_append(new_kern(get_native_italic_correction(tail))); subtype(tail):=explicit;
+      tail_append(new_kern(get_native_italic_correction(tail))); subtype(tail):=ita_kern;
     end
     else if (subtype(tail)=glyph_node) then begin
-      tail_append(new_kern(get_native_glyph_italic_correction(tail))); subtype(tail):=explicit;
+      tail_append(new_kern(get_native_glyph_italic_correction(tail))); subtype(tail):=ita_kern;
     end;
     return;
   end
   else return;
   f:=font(p);
   tail_append(new_kern(char_italic(f)(char_info(f)(character(p)))));
-  subtype(tail):=explicit;
+  subtype(tail):=ita_kern;
   end;
 exit:end;
 
@@ -28025,6 +28449,14 @@ and the font families are declared by |def_family|.
 @<Put each...@>=
 primitive("catcode",def_code,cat_code_base);
 @!@:cat_code_}{\.{\\catcode} primitive@>
+primitive("cjkxcode",def_code,cjkx_code_base);
+@!@:cjkx_code_}{\.{\\cjkxcode} primitive@>
+primitive("prebreakpenalty",def_code,pre_break_penalty_base);
+@!@:pre_break_penalty_}{\.{\\prebreakpenalty} primitive@>
+primitive("postbreakpenalty",def_code,post_break_penalty_base);
+@!@:post_break_penalty_}{\.{\\postbreakpenalty} primitive@>
+primitive("xspcode",def_code,auto_xsp_code_base);
+@!@:auto_xsp_code_}{\.{\\xspcode} primitive@>
 primitive("mathcode",def_code,math_code_base);
 @!@:math_code_}{\.{\\mathcode} primitive@>
 primitive("XeTeXmathcodenum",XeTeX_def_code,math_code_base);
@@ -28058,6 +28490,10 @@ primitive("scriptscriptfont",def_family,math_font_base+script_script_size);
 
 @ @<Cases of |print_cmd_chr|...@>=
 def_code: if chr_code=cat_code_base then print_esc("catcode")
+  else if chr_code=cjkx_code_base then print_esc("cjkxcode")
+  else if chr_code=pre_break_penalty_base then print_esc("prebreakpenalty")
+  else if chr_code=post_break_penalty_base then print_esc("postbreakpenalty")
+  else if chr_code=auto_xsp_code_base then print_esc("xspcode")
   else if chr_code=math_code_base then print_esc("mathcode")
   else if chr_code=lc_code_base then print_esc("lccode")
   else if chr_code=uc_code_base then print_esc("uccode")
@@ -28146,6 +28582,7 @@ def_code: begin @<Let |n| be the largest legal code value, based on |cur_chr|@>;
 
 @ @<Let |n| be the largest...@>=
 if cur_chr=cat_code_base then n:=max_char_code
+else if cur_chr=cjkx_code_base then n:=4
 else if cur_chr=math_code_base then n:=@'100000
 else if cur_chr=sf_code_base then n:=@'77777
 else if cur_chr=del_code_base then n:=@'77777777
@@ -32159,6 +32596,7 @@ and |ship_out|, or might be local to |post_line_break|.
   end
 
 @<Glob...@>=
+@!revdisp:scaled; {temporary value of displacement}
 @!LR_ptr:pointer; {stack of LR codes for |hpack|, |ship_out|, and |init_math|}
 @!LR_problems:integer; {counts missing begins and ends}
 @!cur_dir:small_number; {current text direction}
@@ -32342,7 +32780,8 @@ list and add them to the head of the new one.
 function reverse(@!this_box,@!t:pointer; var cur_g:scaled;
   var cur_glue:real):pointer;
 label reswitch,next_p,done;
-var l:pointer; {the new list}
+var l,la:pointer; {the new list}
+disp,disp2: scaled; { displacement } disped: boolean;
 @!p:pointer; {the current node}
 @!q:pointer; {the next node}
 @!g_order: glue_ord; {applicable order of infinity for glue}
@@ -32350,6 +32789,7 @@ var l:pointer; {the new list}
 @!glue_temp:real; {glue value before rounding}
 @!m,@!n:halfword; {count of unmatched math nodes}
 begin g_order:=glue_order(this_box); g_sign:=glue_sign(this_box);
+disp:=revdisp; disped:=false;
 l:=t; p:=temp_ptr; m:=min_halfword; n:=min_halfword;
 loop@+  begin while p<>null do
     @<Move node |p| to the new list and go to the next node;
@@ -32358,14 +32798,23 @@ loop@+  begin while p<>null do
   p:=new_math(0,info(LR_ptr)); LR_problems:=LR_problems+10000;
     {manufacture one missing math node}
   end;
-done:reverse:=l;
+done: {if the beginning node of the new list isn't |disp_node|,
+       we insert |disp_node| to fix.}
+if (l<>null)and(type(l)<>disp_node) then begin
+  p:=get_node(small_node_size); type(p):=disp_node;
+  disp_dimen(p):=disp; link(p):=l; reverse:=p;
+  end
+else reverse:=l;
 end;
 
 @ @<Move node |p| to the new list...@>=
 reswitch: if is_char_node(p) then
   repeat f:=font(p); c:=character(p);
   cur_h:=cur_h+char_width(f)(char_info(f)(c));
-  q:=link(p); link(p):=l; l:=p; p:=q;
+  if font_dir[f]<>dir_default then begin
+    q:=link(p); la:=l; l:=p; p:=link(q); link(q):=la;
+    end
+  else begin q:=link(p); link(p):=l; l:=p; p:=q; end;
   until not is_char_node(p)
 else @<Move the non-|char_node| |p| to the new list@>
 
@@ -32376,6 +32825,9 @@ hlist_node,vlist_node,rule_node,kern_node: rule_wd:=width(p);
 @t\4@>@<Cases of |reverse| that need special treatment@>@;
 edge_node: confusion("LR2");
 @:this can't happen LR2}{\quad LR2@>
+disp_node: begin
+  disp2:=disp_dimen(p); disp_dimen(p):=disp; disp:=disp2;
+  if not disped then disped:=true; end;
 othercases goto next_p
 endcases;@/
 cur_h:=cur_h+rule_wd;
@@ -32484,7 +32936,8 @@ begin while p<>null do
   begin words:=1; {this setting occurs in more branches than any other}
   if is_char_node(p) then r:=get_avail
   else case type(p) of
-  hlist_node,vlist_node: begin r:=get_node(box_node_size);
+  dir_node,hlist_node,vlist_node: begin r:=get_node(box_node_size);
+    mem[r+7]:=mem[p+7]; 
     mem[r+6]:=mem[p+6]; mem[r+5]:=mem[p+5]; {copy the last two words}
     words:=5; list_ptr(r):=null; {this affects |mem[r+5]|}
     end;
@@ -34647,6 +35100,261 @@ end else begin
   v:=char_height(cur_jfont)(t)+char_depth(cur_jfont)(t);
 end
 
+
+@ \pTeX\ inserts a glue specified by \.{\\kanjiskip} between 2byte-characters,
+automatically, if \.{\\autospacing}.  This glue is suppressed by
+\.{\\noautospacing}.
+\.{\\xkanjiskip}, \.{\\noautoxspacing}, \.{\\autoxspacing}, \.{\\xspcode} is
+used to control between 2byte and 1byte characters.
+
+@d reset_auto_spacing_code=0
+@d set_auto_spacing_code=1
+@d reset_auto_xspacing_code=2
+@d set_auto_xspacing_code=3
+
+@<Put each...@>=
+primitive("autospacing",set_auto_spacing,set_auto_spacing_code);
+@!@:auto_spacing_}{\.{\\autospacing} primitive@>
+primitive("noautospacing",set_auto_spacing,reset_auto_spacing_code);
+@!@:no_auto_spacing_}{\.{\\noautospacing} primitive@>
+primitive("autoxspacing",set_auto_spacing,set_auto_xspacing_code);
+@!@:auto_xspacing_}{\.{\\autoxspacing} primitive@>
+primitive("noautoxspacing",set_auto_spacing,reset_auto_xspacing_code);
+@!@:no_auto_xspacing_}{\.{\\noautoxspacing} primitive@>
+
+@ @<Cases of |print_cmd_chr|...@>=
+set_auto_spacing:begin
+  if (chr_code mod 2)=0 then print_esc("noauto") else print_esc("auto");
+  if chr_code<2 then print("spacing") else print("xspacing");
+end;
+
+@ @<Assignments@>=
+set_auto_spacing:begin
+  if cur_chr<2 then p:=auto_spacing_code
+  else begin p:=auto_xspacing_code; cur_chr:=(cur_chr mod 2); end;
+  define(p,data,cur_chr);
+end;
+
+@ Following codes are used in section 49.
+
+@<Show the current japanese processing mode@>=
+begin
+  @<Adjust |selector| based on |show_stream|@>
+  print_nl("> ");
+if auto_spacing>0 then print("auto spacing mode; ")
+  else print("no auto spacing mode; ");
+print_nl("> ");
+if auto_xspacing>0 then print("auto xspacing mode")
+  else print("no auto xspacing mode");
+goto common_ending;
+end
+
+@ The \.{\\inhibitglue} primitive control to insert a glue specified
+JFM (Japanese Font Metic) file.  The \.{\\inhibitxspcode} is used to control
+inserting a space between 2byte-char and 1byte-char.
+
+@d inhibit_both=0     {disable to insert space before 2byte-char and after it}
+@d inhibit_previous=1 {disable to insert space before 2byte-char}
+@d inhibit_after=2    {disable to insert space after 2byte-char}
+@d inhibit_none=3     {enable to insert space before/after 2byte-char}
+@d inhibit_unused=4   {unused entry}
+@d no_entry=10000
+@d new_pos=0
+@d cur_pos=1
+
+@ @<Cases of |main_control| that don't...@>=
+  any_mode(inhibit_glue): inhibit_glue_flag:=(cur_chr=0);
+
+@ @<Put each...@>=
+primitive("inhibitglue",inhibit_glue,0);
+@!@:inhibit_glue_}{\.{\\inhibitglue} primitive@>
+primitive("disinhibitglue",inhibit_glue,1);
+@!@:dis_inhibit_glue_}{\.{\\disinhibitglue} primitive@>
+primitive("inhibitxspcode",assign_inhibit_xsp_code,inhibit_xsp_code_base);
+@!@:inhibit_xsp_code_}{\.{\\inhibitxspcode} primitive@>
+
+@ @<Cases of |print_cmd_chr|...@>=
+inhibit_glue: if (chr_code>0) then print_esc("disinhibitglue")
+  else print_esc("inhibitglue");
+assign_inhibit_xsp_code: print_esc("inhibitxspcode");
+
+@ @<Declare procedures needed in |scan_something_internal|@>=
+function get_inhibit_pos(c:UTF16_code; n:small_number):pointer;
+label done, done1;
+var p,pp,s:pointer;
+begin s:=calc_pos(c); p:=s; pp:=no_entry;
+if n=new_pos then
+  begin repeat
+  if inhibit_xsp_code(p)=c then goto done;  { found, update there }
+  if inhibit_xsp_code(p)=0 then             { no further scan needed }
+    begin if pp<>no_entry then p:=pp; goto done; end;
+  if inhibit_xsp_type(p)=inhibit_unused then
+    if pp=no_entry then pp:=p; { save the nearest unused hash }
+  incr(p); if p>1023 then p:=0;
+  until s=p;
+  p:=pp;
+  end
+else
+  begin repeat
+  if inhibit_xsp_code(p)=0 then goto done1;
+  if inhibit_xsp_code(p)=c then goto done;
+  incr(p); if p>1023 then p:=0;
+  until s=p;
+done1: p:=no_entry;
+  end;
+done: get_inhibit_pos:=p;
+end;
+
+@ @<Assignments@>=
+assign_inhibit_xsp_code:
+begin p:=cur_chr; scan_int; n:=cur_val; scan_optional_equals; scan_usv_num;
+j:=get_inhibit_pos(tokanji(n),new_pos);
+if (j<>no_entry)and(cur_val>inhibit_after) then
+  begin if global or(cur_level=level_one) then cur_val:=inhibit_unused
+    { remove the entry from inhibit table }
+  else cur_val:=inhibit_none; end
+else if j=no_entry then
+  begin print_err("Inhibit table is full!!");
+  help1("I'm skipping this control sequences.");@/
+  error; return; end;
+define(inhibit_xsp_code_base+j,cur_val,n);
+end;
+
+@ @<Fetch inhibit type from some table@>=
+begin scan_int; q:=get_inhibit_pos(tokanji(cur_val),cur_pos);
+cur_val_level:=int_val; cur_val:=inhibit_none;
+if q<>no_entry then cur_val:=inhibit_xsp_type(q);
+if cur_val>inhibit_none then cur_val:=inhibit_none;
+end
+
+
+@ Following codes are used in |main_control|.
+
+@<Insert kinsoku penalty@>=
+begin if pre_break_penalty(cx)<>0 then
+  begin if not is_char_node(cur_q)and(type(cur_q)=penalty_node) then
+    penalty(cur_q):=penalty(cur_q)+pre_break_penalty(cx)
+  else
+    begin main_p:=link(cur_q); link(cur_q):=new_penalty(pre_break_penalty(cx));
+    subtype(link(cur_q)):=kinsoku_pena; link(link(cur_q)):=main_p;
+    end;
+  end;
+if post_break_penalty(cx)<>0 then
+  begin tail_append(new_penalty(post_break_penalty(cx)));
+  subtype(tail):=kinsoku_pena; end;
+end;
+
+@ @<Insert |pre_break_penalty| of |cur_chr|@>=
+if pre_break_penalty(cur_chr)<>0 then
+  begin if not is_char_node(tail)and(type(tail)=penalty_node) then
+    penalty(tail):=penalty(tail)+pre_break_penalty(cur_chr)
+  else
+    begin tail_append(new_penalty(pre_break_penalty(cur_chr)));
+    subtype(tail):=kinsoku_pena;
+    end;
+  end;
+
+@ @<Insert |post_break_penalty|@>=
+if post_break_penalty(cx)<>0 then
+  begin tail_append(new_penalty(post_break_penalty(cx)));
+  subtype(tail):=kinsoku_pena;
+  end;
+
+@ This is a part of section 32.
+
+The procedure |synch_dir| is used in |hlist_out| and |vlist_out|.
+
+@d dvi_yoko=0
+@d dvi_tate=1
+@d dvi_dtou=3
+
+@<Glob...@>=
+@!dvi_dir:integer; {a \.{DVI} reader program thinks we direct to}
+@!cur_dir_hv:integer; {\TeX\ thinks we direct to}
+@!page_dir:eight_bits;
+
+@ @<Set init...@>=
+page_dir:=dir_yoko;
+
+@ @<Declare procedures needed in |hlist_out|, |vlist_out|@>=
+procedure synch_dir;
+var tmp:scaled; {temporary resister}
+begin
+  case cur_dir_hv of
+  dir_yoko:
+    if dvi_dir<>cur_dir_hv then begin
+      synch_h; synch_v; dvi_out(dirchg); dvi_out(dvi_yoko);
+      dir_used:=true;
+      case dvi_dir of
+        dir_tate: begin tmp:=cur_h; cur_h:=-cur_v; cur_v:=tmp end;
+        dir_dtou: begin tmp:=cur_h; cur_h:=cur_v; cur_v:=-tmp end;
+      endcases;
+      dvi_h:=cur_h; dvi_v:=cur_v; dvi_dir:=cur_dir_hv;
+    end;
+  dir_tate:
+    if dvi_dir<>cur_dir_hv then begin
+      synch_h; synch_v; dvi_out(dirchg); dvi_out(dvi_tate);
+      dir_used:=true;
+      case dvi_dir of
+        dir_yoko: begin tmp:=cur_h; cur_h:=cur_v; cur_v:=-tmp end;
+        dir_dtou: begin cur_v:=-cur_v; cur_h:=-cur_h; end;
+      endcases;
+      dvi_h:=cur_h; dvi_v:=cur_v; dvi_dir:=cur_dir_hv;
+    end;
+  dir_dtou:
+    if dvi_dir<>cur_dir_hv then begin
+      synch_h; synch_v; dvi_out(dirchg); dvi_out(dvi_dtou);
+      dir_used:=true;
+      case dvi_dir of
+        dir_yoko: begin tmp:=cur_h; cur_h:=-cur_v; cur_v:=tmp end;
+        dir_tate: begin cur_v:=-cur_v; cur_h:=-cur_h; end;
+      endcases;
+      dvi_h:=cur_h; dvi_v:=cur_v; dvi_dir:=cur_dir_hv;
+    end;
+  othercases
+    confusion("synch_dir");
+  endcases
+end;
+
+@ @<Declare procedures needed in |hlist_out|, |vlist_out|@>=
+procedure dir_out;
+var @!this_box: pointer; {pointer to containing box}
+begin this_box:=temp_ptr;
+  temp_ptr:=list_ptr(this_box);
+  if (type(temp_ptr)<>hlist_node)and(type(temp_ptr)<>vlist_node) then
+    confusion("dir_out");
+  case abs(box_dir(this_box)) of
+  dir_yoko:
+    case abs(box_dir(temp_ptr)) of
+    dir_tate: {Tate in Yoko}
+      begin cur_v:=cur_v-height(this_box); cur_h:=cur_h+depth(temp_ptr) end;
+    dir_dtou: {DtoU in Yoko}
+      begin cur_v:=cur_v+depth(this_box); cur_h:=cur_h+height(temp_ptr) end;
+    endcases;
+  dir_tate:
+    case abs(box_dir(temp_ptr)) of
+    dir_yoko: {Yoko in Tate}
+      begin cur_v:=cur_v+depth(this_box); cur_h:=cur_h+height(temp_ptr) end;
+    dir_dtou: {DtoU in Tate}
+      begin
+        cur_v:=cur_v+depth(this_box)-height(temp_ptr);
+        cur_h:=cur_h+width(temp_ptr)
+      end;
+    endcases;
+  dir_dtou:
+    case abs(box_dir(temp_ptr)) of
+    dir_yoko: {Yoko in DtoU}
+      begin cur_v:=cur_v-height(this_box); cur_h:=cur_h+depth(temp_ptr) end;
+    dir_tate: {Tate in DtoU}
+      begin
+        cur_v:=cur_v+depth(this_box)-height(temp_ptr);
+        cur_h:=cur_h+width(temp_ptr)
+      end;
+    endcases;
+  endcases;
+  cur_dir_hv:=abs(box_dir(temp_ptr));
+  if type(temp_ptr)=vlist_node then vlist_out@+else hlist_out;
+end;
 
 @* \[54] System-dependent changes.
 This section should be replaced, if necessary, by any special

@@ -817,11 +817,11 @@ maininit (int ac, string *av)
   synctexoption = SYNCTEX_NO_OPTION;
 #endif
 
-#if IS_pTeX
+#if IS_pTeX || defined(npTeX)
   kpse_set_program_name (argv[0], NULL);
   initkanji (); ptenc_ptex_mode(true);
 #endif
-#if (defined(XeTeX) || defined(pdfTeX) || defined(npTeX)) && defined(WIN32)
+#if (defined(XeTeX) || defined(pdfTeX) ) && defined(WIN32)
   kpse_set_program_name (argv[0], NULL);
 #endif
 #if (IS_upTeX || defined(XeTeX) || defined(pdfTeX) || defined(npTeX)) && defined(WIN32)
