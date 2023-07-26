@@ -5985,6 +5985,10 @@ else  begin print_esc("mathcode"); print_int(n-math_code_base);
  bit 2: a linebreak after the character $p$ does NOT emits a space
  bit 3: Japanese character
 
+cjkxcode 6 $\longmapsto$ kcatcode 16 (kanji), 17 (kana)
+cjkxcode 7 $\longmapsto$ kcatcode 18 (other kchar)
+cjkxcode 4 $\longmapsto$ kcatcode 19 (hangul)
+
 @d is_cjkx_jachar(#)==(cjkx_code(#)>=4)
 @d is_cjkx_nolinebreak(#)==((cjkx_code(#) div 2)mod 2==1)
 @d is_cjkx_widowpenalty(#)==(cjkx_code(#) mod 2==1)
@@ -13543,7 +13547,6 @@ if (font_ptr=font_max)or(fmem_ptr+lf>font_mem_size) then
   @<Apologize for not loading the font, |goto done|@>;
 f:=font_ptr+1;
 font_dir[f]:=jfm_flag;
-print("f: "); print_int(jfm_enc);
 font_enc[f]:=jfm_enc; if jfm_flag=dir_default then font_enc[f]:=0;
 font_num_ext[f]:=nt;
 ctype_base[f]:=fmem_ptr;
@@ -15033,6 +15036,7 @@ end;
    (type(#) = ins_node) or
    (type(#) = mark_node) or
    (type(#) = adjust_node) or
+   (type(#) = disp_node) or
    ((type(#) = whatsit_node) and (subtype(#) <= 4)))
      { This checks for |subtype|s in the range open/write/close/special/language,
        but the definitions haven't appeared yet in the .web file so we cheat. }
@@ -24763,7 +24767,8 @@ prev_class:=char_class_boundary; {boundary}
 { added code for native font support }
 if is_native_font(cur_font) then begin
   if mode>0 then if language<>clang then fix_language;
-
+  if direction=dir_tate then disp:=t_baseline_shift else disp:=y_baseline_shift;
+  @<Append |disp_node| at begin of displace area@>;
   main_h:=0;
   main_f:=cur_font;
   native_len:=0;
@@ -25028,7 +25033,7 @@ collected:
       end
     end
   end;
-
+  @<Append |disp_node| at end of displace area@>;
   if cur_ptr<>null then goto big_switch
   else goto reswitch;
 end;
@@ -28601,7 +28606,7 @@ def_code: begin @<Let |n| be the largest legal code value, based on |cur_chr|@>;
 
 @ @<Let |n| be the largest...@>=
 if cur_chr=cat_code_base then n:=max_char_code
-else if cur_chr=cjkx_code_base then n:=4
+else if cur_chr=cjkx_code_base then n:=7
 else if cur_chr=math_code_base then n:=@'100000
 else if cur_chr=sf_code_base then n:=@'77777
 else if cur_chr=del_code_base then n:=@'77777777
