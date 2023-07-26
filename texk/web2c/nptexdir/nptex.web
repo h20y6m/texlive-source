@@ -4525,7 +4525,6 @@ begin if cur_length>depth_threshold then
 n:=0;
 while p>mem_min do
   begin print_ln; print_current_string; {display the nesting history}
-  print_int(p);
   if p>mem_end then {pointer out of range}
     begin print("Bad link, display aborted."); return;
 @.Bad link...@>
@@ -5849,16 +5848,47 @@ for k:="A" to "Z" do
   uc_code(k):=k; uc_code(k+"a"-"A"):=k;@/
   sf_code(k):=999; auto_xsp_code(k):=3; auto_xsp_code(k+"a"-"A"):=3;
   end;
-kansuji_char(0):=12295;
-kansuji_char(1):=19968;
-kansuji_char(2):=20108;
-kansuji_char(3):=19977;
-kansuji_char(4):=22235;
-kansuji_char(5):=20116;
-kansuji_char(6):=20845;
-kansuji_char(7):=19971;
-kansuji_char(8):=20843;
+kansuji_char(0):=12295; kansuji_char(1):=19968; kansuji_char(2):=20108;
+kansuji_char(3):=19977; kansuji_char(4):=22235; kansuji_char(5):=20116;
+kansuji_char(6):=20845; kansuji_char(7):=19971; kansuji_char(8):=20843;
 kansuji_char(9):=20061;
+for k:=@"250 to @"10FF do cjkx_code(k):=7;
+for k:=@"1100 to @"11FF do begin cjkx_code(k):=4; cat_code(k):=letter; end;
+for k:=@"1200 to @"1DFF do cjkx_code(k):=7;
+for k:=@"1F00 to @"2E7F do cjkx_code(k):=7;
+for k:=@"2E80 to @"2FEF do begin cjkx_code(k):=6; cat_code(k):=letter; end;
+for k:=@"2FF0 to @"303F do cjkx_code(k):=7;
+for k:=@"3040 to @"30FF do begin cjkx_code(k):=6; cat_code(k):=letter; end;
+for k:=@"3100 to @"312F do begin cjkx_code(k):=6; cat_code(k):=letter; end;
+for k:=@"3130 to @"318F do begin cjkx_code(k):=4; cat_code(k):=letter; end;
+for k:=@"3190 to @"31EF do begin cjkx_code(k):=6; cat_code(k):=letter; end;
+for k:=@"31F0 to @"31FF do begin cjkx_code(k):=6; cat_code(k):=letter; end;
+for k:=@"3200 to @"33FF do cjkx_code(k):=7;
+for k:=@"3400 to @"4DBF do begin cjkx_code(k):=6; cat_code(k):=letter; end;
+for k:=@"4DC0 to @"4DFF do cjkx_code(k):=7;
+for k:=@"4E00 to @"9FFF do begin cjkx_code(k):=6; cat_code(k):=letter; end;
+for k:=@"A000 to @"A95F do cjkx_code(k):=7;
+for k:=@"A960 to @"A97F do begin cjkx_code(k):=4; cat_code(k):=letter; end;
+for k:=@"A980 to @"ABFF do cjkx_code(k):=7;
+for k:=@"AC00 to @"D7FF do begin cjkx_code(k):=4; cat_code(k):=letter; end;
+for k:=@"D800 to @"F8FF do cjkx_code(k):=7;
+for k:=@"F900 to @"FAFF do begin cjkx_code(k):=6; cat_code(k):=letter; end;
+for k:=@"FB00 to @"FF0F do cjkx_code(k):=7;
+for k:=@"FF10 to @"FF19 do begin cjkx_code(k):=6; cat_code(k):=letter; end;
+for k:=@"FF1A to @"FF20 do cjkx_code(k):=7;
+for k:=@"FF21 to @"FF3A do begin cjkx_code(k):=6; cat_code(k):=letter; end;
+for k:=@"FF3B to @"FF40 do cjkx_code(k):=7;
+for k:=@"FF41 to @"FF5A do begin cjkx_code(k):=6; cat_code(k):=letter; end;
+for k:=@"FF5B to @"FF65 do cjkx_code(k):=7;
+for k:=@"FF66 to @"FF6F do begin cjkx_code(k):=6; cat_code(k):=letter; end;
+for k:=@"FF70 to @"FF73 do cjkx_code(k):=7;
+for k:=@"FF74 to @"FF9D do begin cjkx_code(k):=6; cat_code(k):=letter; end;
+for k:=@"FF9E to @"1AFEF do cjkx_code(k):=7;
+for k:=@"1AFF0 to @"1B16F do begin cjkx_code(k):=6; cat_code(k):=letter; end;
+for k:=@"1B170 to @"1FFFF do cjkx_code(k):=7;
+for k:=@"20000 to @"323AF do begin cjkx_code(k):=6; cat_code(k):=letter; end;
+for k:=@"323B0 to @"10FFFF do cjkx_code(k):=7;
+cjkx_code(@"FF70):=7; cjkx_code(@"FF71):=7; cjkx_code(@"FF72):=7;
 
 @ @<Show equivalent |n|, in region 4@>=
 if (n=par_shape_loc) or ((n>=etex_pen_base) and (n<etex_pens)) then
@@ -13452,7 +13482,6 @@ for example by defining |fget| to be `\ignorespaces|begin get(tfm_file);|
   fget; #:=#*@"100+fbyte;
   fget; #:=#+fbyte*@"10000;
   end
-@z
 @d store_four_quarters(#)==begin fget; a:=fbyte; qw.b0:=qi(a);
   fget; b:=fbyte; qw.b1:=qi(b);
   fget; c:=fbyte; qw.b2:=qi(c);
@@ -13514,6 +13543,7 @@ if (font_ptr=font_max)or(fmem_ptr+lf>font_mem_size) then
   @<Apologize for not loading the font, |goto done|@>;
 f:=font_ptr+1;
 font_dir[f]:=jfm_flag;
+print("f: "); print_int(jfm_enc);
 font_enc[f]:=jfm_enc; if jfm_flag=dir_default then font_enc[f]:=0;
 font_num_ext[f]:=nt;
 ctype_base[f]:=fmem_ptr;
@@ -13541,8 +13571,7 @@ end
 @ Only the first two words of the header are needed by \TeX82.
 
 @<Read the {\.{TFM}} header@>=
-begin print("AA");
-if lh<2 then abort;
+begin if lh<2 then abort;
 store_four_quarters(font_check[f]);
 fget; read_sixteen(z); {this rejects a negative design size}
 fget; z:=z*@'400+fbyte; fget; z:=(z*@'20)+(fbyte div@'20);
@@ -13556,10 +13585,8 @@ if s<>-1000 then
   else z:=xn_over_d(z,-s,1000);
 font_size[f]:=z;
 end;
-print("BB");
 
 @ @<Read character data@>=
-print("CC"); print_int(jfm_flag); print(" ");
 if jfm_flag<>dir_default then
   for k:=ctype_base[f] to ctype_base[f]+nt-1 do
     begin
@@ -13582,7 +13609,6 @@ for k:=char_base[f] to width_base[f]-1 do
   othercases do_nothing {|no_tag|}
   endcases;
   end;
-print("DD");
 
 @ We want to make sure that there is no cycle of characters linked together
 by |list_tag| entries, since such a cycle would get \TeX\ into an endless
@@ -14985,14 +15011,12 @@ base_line:=cur_v; disp:=0; revdisp:=0;
 prev_p:=this_box+list_offset;
 @<Initialize |hlist_out| for mixed direction typesetting@>;
 left_edge:=cur_h;
-print("hlo b>>>"); print_int(this_box);
 while p<>null do @<Output node |p| for |hlist_out| and move to the next node,
   maintaining the condition |cur_v=base_line|@>;
 @<Finish |hlist_out| for mixed direction typesetting@>;
 prune_movements(save_loc);
 if cur_s>0 then dvi_pop(save_loc);
 decr(cur_s);
-print("hlo end");
 end;
 
 @ Extra stuff for justifiable AAT text; need to merge runs of words and normal spaces.
@@ -15171,7 +15195,6 @@ end
 
 @ @<Output the non-|char_node| |p| for |hlist_out|...@>=
 begin 
-print("dh> ");print_int(p); print(" "); print_int(type(p));
 case type(p) of
 hlist_node,vlist_node,dir_node:@<Output a box in an hlist@>;
 rule_node: begin rule_ht:=height(p); rule_dp:=depth(p); rule_wd:=width(p);
@@ -15357,13 +15380,11 @@ synch_dir;
 left_edge:=cur_h;
 if upwards then cur_v:=cur_v+depth(this_box) else cur_v:=cur_v-height(this_box);
 top_edge:=cur_v;
-print("vlo b>>>"); print_int(this_box);
 while p<>null do @<Output node |p| for |vlist_out| and move to the next node,
   maintaining the condition |cur_h=left_edge|@>;
 prune_movements(save_loc);
 if cur_s>0 then dvi_pop(save_loc);
 decr(cur_s);
-print("vlo end");
 end;
 
 @ @<Output node |p| for |vlist_out|...@>=
@@ -25154,8 +25175,6 @@ if ins_kp=true then
 ins_kp:=false;
 goto main_loop_j;
 end
-@z
-
 
 @ Even though comparatively few characters have a lig/kern program, several
 of the instructions here count as part of \TeX's inner loop, since a
@@ -35051,9 +35070,29 @@ label exit;
 var p:pointer; {tail of the backup list}
 @!q:pointer; {new node being added to the token list via |store_new_token|}
 @!k:pool_pointer; {index into |str_pool|}
-begin p:=backup_head; link(p):=null; k:=str_start[s];
-while k<str_start[s+1] do
-  begin get_token; {no expansion}
+@!save_cur_cs:pointer; {to save |cur_cs|}
+begin p:=backup_head; link(p):=null;
+if s<too_big_char then begin
+  while true do
+    begin get_token; {recursion is possible here}
+@^recursion@>
+    if (cur_cs=0)and@|
+       ((cur_chr=s)or(cur_chr=s-"a"+"A")) then
+      begin store_new_token(cur_tok);
+      flush_list(link(backup_head)); scan_keyword_noexpand:=true; return;
+      end
+    else if (cur_cmd<>spacer)or(p<>backup_head) then
+      begin back_input;
+      if p<>backup_head then back_list(link(backup_head));
+      scan_keyword_noexpand:=false; return;
+      end;
+    end;
+  end;
+k:=str_start_macro(s);
+save_cur_cs:=cur_cs;
+while k<str_start_macro(s+1) do
+  begin get_token; {recursion is possible here}
+@^recursion@>
   if (cur_cs=0)and@|
    ((cur_chr=so(str_pool[k]))or(cur_chr=so(str_pool[k])-"a"+"A")) then
     begin store_new_token(cur_tok); incr(k);
@@ -35061,7 +35100,8 @@ while k<str_start[s+1] do
   else if (cur_cmd<>spacer)or(p<>backup_head) then
     begin back_input;
     if p<>backup_head then back_list(link(backup_head));
-    scan_keyword_noexpand:=false; return;
+    cur_cs:=save_cur_cs;
+    scan_keyword:=false; return;
     end;
   end;
 flush_list(link(backup_head)); scan_keyword_noexpand:=true;
