@@ -2733,6 +2733,7 @@ open_dvi_output(FILE** fptr)
 #else
         *fptr = popen(cmd, "w");
 #endif
+        fprintf(stderr, "%s", cmd);
         free(cmd);
         return (*fptr != 0);
     }

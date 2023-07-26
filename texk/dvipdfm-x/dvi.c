@@ -345,13 +345,13 @@ check_id_bytes (void) {
 static void
 need_XeTeX (int c) {
   if (dpx_conf.compat_mode != dpx_mode_xdv_mode)
-    ERROR ("DVI opcode %i only valid for XeTeX", c);
+    ERROR ("DVI opcode %i only valid for XeTeX and npTeX", c);
 }
 
 static void
 need_pTeX (int c) {
   if (!is_ptex)
-    ERROR ("DVI opcode %i only valid for Ascii pTeX", c);
+    ERROR ("DVI opcode %i only valid for Ascii pTeX and npTeX", c);
   has_ptex = 1;
 }
 
@@ -386,19 +386,19 @@ find_post (void)
   post_id_byte = ch;
   if (ch == XDV_ID || ch == XDV_ID_OLD)
     dpx_conf.compat_mode = dpx_mode_xdv_mode;
-  dvi_ptex_with_vert = is_ptex = ch == DVIV_ID;
+  dvi_ptex_with_vert = is_ptex = (ch == DVIV_ID) || (ch == XDV_ID);
 
   /* Make sure post_post is really there */
   current = current - 5;
   xseek_absolute (dvi_file, current, "DVI");
   if ((ch = fgetc(dvi_file)) != POST_POST) {
-    MESG("Found %d where post_post opcode should be\n", ch);
+    MESG("A Found %d where post_post opcode should be\n", ch);
     ERROR(invalid_signature);
   }
   current = get_signed_quad(dvi_file);
   xseek_absolute (dvi_file, current, "DVI");
   if ((ch = fgetc(dvi_file)) != POST) {
-    MESG("Found %d where post_post opcode should be\n", ch);
+    MESG("B Found %d where post_post opcode should be\n", ch);
     ERROR(invalid_signature);
   }
 
@@ -2136,12 +2136,13 @@ check_postamble (void)
   }
   skip_bytes(4, dvi_file);
   post_id_byte = get_unsigned_byte(dvi_file);
-  if (!(post_id_byte == DVI_ID || post_id_byte == DVIV_ID || post_id_byte == XDV_ID || post_id_byte == XDV_ID_OLD)) {
+  if (!(post_id_byte == DVI_ID || post_id_byte == DVIV_ID 
+    || post_id_byte == XDV_ID || post_id_byte == XDV_ID_OLD)) {
     MESG("DVI ID = %d\n", post_id_byte);
     ERROR(invalid_signature);
   }
   check_id_bytes();
-  if (has_ptex && post_id_byte != DVIV_ID)
+  if (has_ptex && post_id_byte != DVIV_ID && post_id_byte != XDV_ID)
     ERROR ("Saw opcode %i in DVI file not for Ascii pTeX", PTEXDIR);
 
   num_pages = 0; /* force loop to terminate */
