@@ -4406,7 +4406,8 @@ font will be printed.
 @ Boxes, rules, inserts, whatsits, marks, and things in general that are
 sort of ``complicated'' are indicated only by printing `\.{[]}'.
 
-@p procedure short_display(@!p:integer); {prints highlights of list |p|}
+@p@t\4@>@<Declare the pTeX-specific |print_font_...| procedures@>@;@/
+procedure short_display(@!p:integer); {prints highlights of list |p|}
 var n:integer; {for replacement counts}
 begin while p>mem_min do
   begin if is_char_node(p) then
@@ -7204,7 +7205,36 @@ Meanwhile, this is a convenient place to catch up on something we were unable
 to do before the hash table was defined:
 
 @<Print the font identifier for |font(p)|@>=
-print_esc(font_id_text(font(p)))
+begin
+  print_esc(font_id_text(font(p)));
+  if ptex_tracing_fonts > 0 then begin
+    print(" (");
+    print_font_name_and_size(font(p));
+  if ptex_tracing_fonts > 1 then begin
+    print_font_dir_and_enc(font(p));
+  end;
+    print(")");
+  end;
+end;
+
+@ @<Declare the pTeX-specific |print_font_...| procedures@>=
+procedure print_font_name_and_size(f:internal_font_number);
+begin
+  print(font_name[f]);
+  if font_size[f]<>font_dsize[f] then begin
+    print("@@");
+    print_scaled(font_size[f]);
+    print("pt");
+  end;
+end;
+@#
+procedure print_font_dir_and_enc(f:internal_font_number);
+begin
+  if font_dir[f]=dir_tate then print("/TATE")
+  else if font_dir[f]=dir_yoko then print("/YOKO");
+  if font_enc[f]=2 then print("+Unicode")
+  else if font_enc[f]=1 then print("+JIS");
+end;
 
 @* \[19] Saving and restoring equivalents.
 The nested structure provided by `$\.{\char'173}\ldots\.{\char'175}$' groups
@@ -10079,7 +10109,8 @@ the internal quantity to be scanned; an error will be signalled if
 @d char_class_ignored == char_class_limit
 @d char_class_boundary == (char_class_ignored - 1)
 
-@p procedure scan_something_internal(@!level:small_number;@!negative:boolean);
+@p @t\4@>@<Declare procedures needed in |scan_something_internal|@>@t@>@/
+procedure scan_something_internal(@!level:small_number;@!negative:boolean);
   {fetch an internal parameter}
 label exit, restart;
 var m:halfword; {|chr_code| part of the operand token}
@@ -10091,7 +10122,7 @@ var m:halfword; {|chr_code| part of the operand token}
 @!p:0..nest_size; {index into |nest|}
 begin restart: m:=cur_chr;
 case cur_cmd of
-{ set_kansuji_char: <Fetch kansuji char code from some table>; }
+set_kansuji_char: @<Fetch kansuji char code from some table@>;
 def_code: @<Fetch a character code from some table@>;
 XeTeX_def_code:
   begin
@@ -11313,10 +11344,19 @@ end;
 
 @d number_code=0 {command code for \.{\\number}}
 @d roman_numeral_code=1 {command code for \.{\\romannumeral}}
-@d string_code=2 {command code for \.{\\string}}
-@d meaning_code=3 {command code for \.{\\meaning}}
-@d font_name_code=4 {command code for \.{\\fontname}}
-@d etex_convert_base=5 {base for \eTeX's command codes}
+@d kansuji_code=2 {command code for \.{\\kansuji}}
+@d string_code=3 {command code for \.{\\string}}
+@d meaning_code=4 {command code for \.{\\meaning}}
+@d font_name_code=5 {command code for \.{\\fontname}}
+@d euc_code=6 {command code for \.{\\euc}}
+@d sjis_code=7 {command code for \.{\\sjis}}
+@d jis_code=8 {command code for \.{\\jis}}
+@d kuten_code=9 {command code for \.{\\kuten}}
+@d ucs_code=10 {command code for \.{\\ucs}}
+@d toucs_code=11 {command code for \.{\\toucs}}
+@d tojis_code=12 {command code for \.{\\tojis}}
+@d ptex_font_name_code=13 {command code for \.{\\ptexfontname}}
+@d etex_convert_base=ptex_font_name_code+1 {base for \eTeX's command codes}
 @d eTeX_revision_code=etex_convert_base {command code for \.{\\eTeXrevision}}
 @d etex_convert_codes=etex_convert_base+1 {end of \eTeX's command codes}
 @d expanded_code=etex_convert_codes {command code for \.{\\expanded}}
@@ -11354,7 +11394,24 @@ primitive("meaning",convert,meaning_code);@/
 @!@:meaning_}{\.{\\meaning} primitive@>
 primitive("fontname",convert,font_name_code);@/
 @!@:font_name_}{\.{\\fontname} primitive@>
-@#
+primitive("kansuji",convert,kansuji_code);
+@!@:kansuji_}{\.{\\kansuji} primitive@>
+primitive("euc",convert,euc_code);
+@!@:euc_}{\.{\\euc} primitive@>
+primitive("sjis",convert,sjis_code);
+@!@:sjis_}{\.{\\sjis} primitive@>
+primitive("jis",convert,jis_code);
+@!@:jis_}{\.{\\jis} primitive@>
+primitive("kuten",convert,kuten_code);
+@!@:kuten_}{\.{\\kuten} primitive@>
+primitive("ucs",convert,ucs_code);
+@!@:ucs_}{\.{\\ucs} primitive@>
+primitive("toucs",convert,toucs_code);
+@!@:toucs_}{\.{\\toucs} primitive@>
+primitive("tojis",convert,tojis_code);
+@!@:tojis_}{\.{\\tojis} primitive@>
+primitive("ptexfontname",convert,ptex_font_name_code);
+@!@:ptexfontname_}{\.{\\ptexfontname} primitive@>
 @#
 primitive("expanded",convert,expanded_code);@/
 @!@:expanded_}{\.{\\expanded} primitive@>
@@ -11396,6 +11453,15 @@ convert: case chr_code of
   string_code: print_esc("string");
   meaning_code: print_esc("meaning");
   font_name_code:  print_esc("fontname");
+  kansuji_code: print_esc("kansuji");
+  euc_code:print_esc("euc");
+  sjis_code:print_esc("sjis");
+  jis_code:print_esc("jis");
+  kuten_code:print_esc("kuten");
+  ucs_code:print_esc("ucs");
+  toucs_code:print_esc("toucs");
+  tojis_code:print_esc("tojis");
+  ptex_font_name_code: print_esc("ptexfontname");
   eTeX_revision_code: print_esc("eTeXrevision");
   expanded_code:        print_esc("expanded");
   left_margin_kern_code:    print_esc("leftmarginkern");
@@ -11425,6 +11491,7 @@ we have to create a temporary string that is destroyed immediately after.
 
 @p procedure conv_toks;
 var old_setting:0..max_selector; {holds |selector| setting}
+@!cx:UnicodeScalar; {temporary register for KANJI}
 @!save_warning_index, @!save_def_ref:pointer;
 @!boolvar: boolean; {temp boolean}
 @!s: str_number;
@@ -11450,8 +11517,12 @@ end;
 @d illegal_Ucharcat_catcode(#)==(#<left_brace)or(#>active_char)or(#=out_param)or(#=ignore)
 
 @<Scan the argument for command |c|@>=
+KANJI(cx):=0;
 case c of
-number_code,roman_numeral_code: scan_int;
+number_code,roman_numeral_code,
+kansuji_code,euc_code,sjis_code,jis_code,kuten_code,
+ucs_code,toucs_code,tojis_code: scan_int;
+ptex_font_name_code: scan_font_ident;
 string_code, meaning_code: begin save_scanner_status:=scanner_status;
   scanner_status:=normal; get_token; scanner_status:=save_scanner_status;
   end;
@@ -11674,6 +11745,23 @@ end {there are no other cases}
 case c of
 number_code: print_int(cur_val);
 roman_numeral_code: print_roman_int(cur_val);
+kansuji_code: print_kansuji(cur_val);
+jis_code:   begin cur_val:=fromJIS(cur_val);
+  if cur_val=0 then print_int(-1) else print_int(cur_val); end;
+euc_code:   begin cur_val:=fromEUC(cur_val);
+  if cur_val=0 then print_int(-1) else print_int(cur_val); end;
+sjis_code:  begin cur_val:=fromSJIS(cur_val);
+  if cur_val=0 then print_int(-1) else print_int(cur_val); end;
+kuten_code: begin cur_val:=fromKUTEN(cur_val);
+  if cur_val=0 then print_int(-1) else print_int(cur_val); end;
+ucs_code:   print_int(fromUCS(cur_val));
+toucs_code: print_int(toUCS(cur_val));
+tojis_code: begin cur_val:=toJIS(cur_val);
+  if cur_val=0 then print_int(-1) else print_int(cur_val); end;
+ptex_font_name_code: begin
+  print_font_name_and_size(cur_val);
+  print_font_dir_and_enc(cur_val);
+  end;
 string_code:if cur_cs<>0 then sprint_cs(cur_cs)
   else print_char(cur_chr);
 meaning_code: print_meaning;
@@ -11989,6 +12077,18 @@ We consider now the way \TeX\ handles various kinds of \.{\\if} commands.
 @d if_false_code=15 { `\.{\\iffalse}' }
 @d if_case_code=16 { `\.{\\ifcase}' }
 @d if_primitive_code=21 { `\.{\\ifprimitive}' }
+@#
+@d if_tdir_code=if_primitive_code+1 { `\.{\\iftdir}' }
+@d if_ydir_code=if_tdir_code+1 { `\.{\\ifydir}' }
+@d if_ddir_code=if_ydir_code+1 { `\.{\\ifddir}' }
+@d if_mdir_code=if_ddir_code+1 { `\.{\\ifmdir}' }
+@d if_tbox_code=if_mdir_code+1 { `\.{\\iftbox}' }
+@d if_ybox_code=if_tbox_code+1 { `\.{\\ifybox}' }
+@d if_dbox_code=if_ybox_code+1 { `\.{\\ifdbox}' }
+@d if_mbox_code=if_dbox_code+1 { `\.{\\ifmbox}' }
+@#
+@d if_jfont_code=if_mbox_code+1  { `\.{\\ifjfont}' }
+@d if_tfont_code=if_jfont_code+1 { `\.{\\iftfont}' }
 
 @<Put each...@>=
 primitive("if",if_test,if_char_code);
@@ -12025,6 +12125,26 @@ primitive("iffalse",if_test,if_false_code);
 @!@:if_false_}{\.{\\iffalse} primitive@>
 primitive("ifcase",if_test,if_case_code);
 @!@:if_case_}{\.{\\ifcase} primitive@>
+primitive("iftdir",if_test,if_tdir_code);
+@!@:if_tdir_}{\.{\\iftdir} primitive@>
+primitive("ifydir",if_test,if_ydir_code);
+@!@:if_ydir_}{\.{\\ifydir} primitive@>
+primitive("ifddir",if_test,if_ddir_code);
+@!@:if_ddir_}{\.{\\ifddir} primitive@>
+primitive("ifmdir",if_test,if_mdir_code);
+@!@:if_mdir_}{\.{\\ifmdir} primitive@>
+primitive("iftbox",if_test,if_tbox_code);
+@!@:if_tbox_}{\.{\\iftbox} primitive@>
+primitive("ifybox",if_test,if_ybox_code);
+@!@:if_ybox_}{\.{\\ifybox} primitive@>
+primitive("ifdbox",if_test,if_dbox_code);
+@!@:if_dbox_}{\.{\\ifdbox} primitive@>
+primitive("ifmbox",if_test,if_mbox_code);
+@!@:if_mbox_}{\.{\\ifmbox} primitive@>
+primitive("ifjfont",if_test,if_jfont_code);
+@!@:if_jfont_}{\.{\\ifjfont} primitive@>
+primitive("iftfont",if_test,if_tfont_code);
+@!@:if_tfont_}{\.{\\iftfont} primitive@>
 primitive("ifprimitive",if_test,if_primitive_code);
 @!@:if_primitive_}{\.{\\ifprimitive} primitive@>
 
@@ -12047,6 +12167,16 @@ case chr_code mod unless_code of
   if_true_code:print_esc("iftrue");
   if_false_code:print_esc("iffalse");
   if_case_code:print_esc("ifcase");
+  if_tdir_code:print_esc("iftdir");
+  if_ydir_code:print_esc("ifydir");
+  if_ddir_code:print_esc("ifddir");
+  if_mdir_code:print_esc("ifmdir");
+  if_tbox_code:print_esc("iftbox");
+  if_ybox_code:print_esc("ifybox");
+  if_dbox_code:print_esc("ifdbox");
+  if_mbox_code:print_esc("ifmbox");
+  if_jfont_code:print_esc("ifjfont");
+  if_tfont_code:print_esc("iftfont");
   if_primitive_code:print_esc("ifprimitive");
   @/@<Cases of |if_test| for |print_cmd_chr|@>@/
   othercases print_esc("if")
@@ -12223,7 +12353,17 @@ if_vmode_code: b:=(abs(mode)=vmode);
 if_hmode_code: b:=(abs(mode)=hmode);
 if_mmode_code: b:=(abs(mode)=mmode);
 if_inner_code: b:=(mode<0);
+if_tdir_code: b:=(abs(direction)=dir_tate);
+if_ydir_code: b:=(abs(direction)=dir_yoko);
+if_ddir_code: b:=(abs(direction)=dir_dtou);
+if_mdir_code: b:=(direction<0);
+if_tbox_code, if_ybox_code, if_dbox_code, if_mbox_code,
 if_void_code, if_hbox_code, if_vbox_code: @<Test box register status@>;
+if_jfont_code, if_tfont_code:
+  begin scan_font_ident;
+  if this_if=if_jfont_code then b:=(font_dir[cur_val]=dir_yoko)
+  else if this_if=if_tfont_code then b:=(font_dir[cur_val]=dir_tate);
+  end;
 ifx_code: @<Test if two tokens match@>;
 if_eof_code: begin scan_four_bit_int; b:=(read_open[cur_val]=closed);
   end;
@@ -12285,8 +12425,15 @@ end
 begin scan_register_num; fetch_box(p);
 if this_if=if_void_code then b:=(p=null)
 else if p=null then b:=false
-else if this_if=if_hbox_code then b:=(type(p)=hlist_node)
-else b:=(type(p)=vlist_node);
+else begin
+  if type(p)=dir_node then p:=list_ptr(p);
+  if this_if=if_hbox_code then b:=(type(p)=hlist_node)
+  else if this_if=if_vbox_code then b:=(type(p)=vlist_node)
+  else if this_if=if_tbox_code then b:=(abs(box_dir(p))=dir_tate)
+  else if this_if=if_ybox_code then b:=(abs(box_dir(p))=dir_yoko)
+  else if this_if=if_dbox_code then b:=(abs(box_dir(p))=dir_dtou)
+  else b:=(box_dir(p)<0);
+  end
 end
 
 @ An active character will be treated as category 13 following
@@ -35662,6 +35809,56 @@ end else begin
   v:=char_height(cur_jfont)(t)+char_depth(cur_jfont)(t);
 end
 
+@ set a kansuji character.
+
+@ @<Put each...@>=
+primitive("kansujichar",set_kansuji_char,0);
+@!@:kansujichar_}{\.{\\kansujichar} primitive@>
+
+@ @<Cases of |print_cmd_chr|...@>=
+set_kansuji_char: print_esc("kansujichar");
+
+@ @<Assignments@>=
+set_kansuji_char:
+begin p:=cur_chr; scan_int; n:=cur_val; scan_optional_equals; scan_usv_num;
+if (n<0)or(n>9) then
+  begin print_err("Invalid KANSUJI number ("); print_int(n); print_char(")");
+@.Invalid KANSUJI number@>
+  help1("I'm skipping this control sequences.");@/
+  error; return;
+  end
+else
+  define(kansuji_base+n,n,tokanji(cur_val));
+end;
+
+@ @<Fetch kansuji char code from some table@>=
+begin scan_int; cur_val_level:=int_val;
+  if (cur_val<0)or(cur_val>9) then
+    begin print_err("Invalid KANSUJI number ("); print_int(cur_val); print_char(")");
+    help1("I'm skipping this control sequences.");@/
+    error; return;
+    end
+  else
+    cur_val:=kansuji_char(cur_val);
+end
+
+@ |print_kansuji| procedure converts a number to KANJI number.
+
+@ @<Declare procedures needed in |scan_something_internal|@>=
+procedure print_kansuji(@!n:integer);
+var @!k:0..23; {index to current digit; we assume that $|n|<10^{23}$}
+@!cx: UnicodeScalar; {temporary register for KANJI}
+begin k:=0;
+  if n<0 then return; {nonpositive input produces no output}
+  repeat dig[k]:=n mod 10; n:=n div 10; incr(k);
+  until n=0;
+  begin while k>0 do
+    begin decr(k);
+    cx:=kansuji_char(dig[k]);
+    print_char(cx);
+    end;
+  end;
+end;
 
 @ \pTeX\ inserts a glue specified by \.{\\kanjiskip} between 2byte-characters,
 automatically, if \.{\\autospacing}.  This glue is suppressed by

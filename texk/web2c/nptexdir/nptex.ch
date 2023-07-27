@@ -776,6 +776,18 @@ dump_things(ctype_base[null_font], font_ptr+1-null_font);
 dump_things(char_base[null_font], font_ptr+1-null_font);
 @z
 
+@x
+  begin print_nl("\font"); print_esc(font_id_text(k)); print_char("=");
+@y
+  begin case font_dir[k] of
+    dir_default: print_nl("\font"); 
+    dir_yoko: print_nl("\jfont"); 
+    dir_tate: print_nl("\tfont"); 
+    end;
+  print_esc(font_id_text(k)); print_char("=");
+@z
+
+
 @x [50.1322] l.24000 - Make dumping/undumping more efficient - tfm
   print_file_name(font_name[k],font_area[k],"");
 @y

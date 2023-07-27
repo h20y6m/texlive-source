@@ -186,7 +186,12 @@ authorization from the copyright holders.
 @define procedure getmd5sum();
 
 @define function fromJIS ();
+@define function fromEUC ();
+@define function fromSJIS ();
+@define function fromKUTEN ();
+@define function fromUCS ();
 @define function toJIS ();
+@define function toUCS ();
 @define function calcpos ();
 @define function kcatcodekey ();
 @define function BYTE1 ();
