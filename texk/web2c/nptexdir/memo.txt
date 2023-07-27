@@ -1,0 +1,16 @@
+changes from pTeX
+
+ * kcatcode -> catcode+cjkx_code
+   TODO: \kcatcode は読み出しのみ可能．
+   cjk_code = zyx_{(2)} トークンには付随しない値．
+     x: \jcharwidowpenalty挿入対象ならば1
+     y: この文字の直後の開業で空白を挿入しないならば1
+        （実際の挙動は\ptexlineendmodeで）
+     z: 和文文字扱い（フォントが\jfont or \tfont）すれば1
+  大雑把に言うと
+    \kcatcode=16, 17 ⇔ \catcode=11 and \cjkxcode=6
+    \kcatcode=18 ⇔ \catcode=12 and \cjkxcode=7
+    \kcatcode=19 ⇔ \catcode=11 and \cjkxcode=4
+  なお，文字列化すると catcode 12 になることは注意．
+ * \prebreakpenalty, \postbreakpenalty, \xspcode, \inhibitxspcode
+   →\catcode などと同じように，Unicode全体分のエントリがある．

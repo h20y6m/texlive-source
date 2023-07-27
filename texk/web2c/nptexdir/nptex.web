@@ -5788,7 +5788,7 @@ registers.
 @d post_break_penalty_base=pre_break_penalty_base+number_usvs
 @d auto_xsp_code_base=post_break_penalty_base+number_usvs {table of |number_usvs| auto spacer flag}
 @d inhibit_xsp_code_base=auto_xsp_code_base+number_usvs {table of |number_usvs| inhibit spacer flag}
-@d kansuji_base=inhibit_xsp_code_base+1024 {table of 10 kansuji mappings}
+@d kansuji_base=inhibit_xsp_code_base+number_usvs {table of 10 kansuji mappings}
 @d lc_code_base=kansuji_base+10 {table of |number_usvs| lowercase mappings}
 @d uc_code_base=lc_code_base+number_usvs {table of |number_usvs| uppercase mappings}
 @d sf_code_base=uc_code_base+number_usvs {table of |number_usvs| spacefactor mappings}
@@ -5897,7 +5897,7 @@ for k:=cat_code_base+1 to int_base-1 do eqtb[k]:=eqtb[cat_code_base];
 for k:=0 to number_usvs-1 do
   begin cat_code(k):=other_char; math_code(k):=hi(k); sf_code(k):=1000;
   cjkx_code(k):=0; pre_break_penalty(k):=0; post_break_penalty(k):=0;
-  auto_xsp_code(k):=0; inhibit_xsp_code(k):=0;
+  auto_xsp_code(k):=0; inhibit_xsp_code(k):=3;
   end;
 cat_code(carriage_return):=car_ret; cat_code(" "):=spacer;
 cat_code("\"):=escape; cat_code("%"):=comment;
@@ -6052,8 +6052,8 @@ cjkxcode 7 $\longmapsto$ kcatcode 18 (other kchar)
 cjkxcode 4 $\longmapsto$ kcatcode 19 (hangul)
 
 @d is_cjkx_jachar(#)==(cjkx_code(#)>=4)
-@d is_cjkx_nolinebreak(#)==((cjkx_code(#) div 2)mod 2==1)
-@d is_cjkx_widowpenalty(#)==(cjkx_code(#) mod 2==1)
+@d is_cjkx_nospc(#)==((cjkx_code(#) div 2)mod 2=1)
+@d is_cjkx_widowpenalty(#)==(cjkx_code(#) mod 2=1)
 
 
 @ Region 5 of |eqtb| contains the integer parameters and registers defined
@@ -7977,8 +7977,10 @@ The |state| variable has one of three values, when we are scanning such
 files:
 $$\baselineskip 15pt\vbox{\halign{#\hfil\cr
 1) |state=mid_line| is the normal state.\cr
-2) |state=skip_blanks| is like |mid_line|, but blanks are ignored.\cr
-3) |state=new_line| is the state at the beginning of a line.\cr}}$$
+2) |state=mid_kanji| is like |mid_line|, and internal KANJI string.\cr
+3) |state=skip_blanks| is like |mid_line|, but blanks are ignored.\cr
+4) |state=skip_blanks_kanji| is like |mid_kanji|, but blanks are ignored.\cr
+5) |state=new_line| is the state at the beginning of a line.\cr}}$$
 These state values are assigned numeric codes so that if we add the state
 code to the next character's command code, we get distinct values. For
 example, `|mid_line+spacer|' stands for the case that a blank
@@ -7986,9 +7988,21 @@ space character occurs in the middle of a line when it is not being
 ignored; after this case is processed, the next value of |state| will
 be |skip_blanks|.
 
+If \.{\\ptexlineendmode} is odd, the |state| become |skip_blanks_kanji|
+after a control word which ends with a character whose the second bit 
+of |cjkx_code| is 1. This state is
+similar to |skip_blanks|, but the |state| will be |mid_kanji| after
+|skip_blanks_kanji+left_brace| and |skip_blanks_kanji+right_brace|,
+instead of |mid_line|.
+
 @d mid_line=1 {|state| code when scanning a line of characters}
 @d skip_blanks=2+max_char_code {|state| code when ignoring blanks}
 @d new_line=3+max_char_code+max_char_code {|state| code at start of line}
+{ @d mid_kanji=2+max_char_code {|state| code when scanning a line of characters} 
+ @d skip_blanks_kanji=4+max_char_code+max_char_code+max_char_code
+   {|state| code when ignoring blanks}
+@d new_line=5+max_char_code+max_char_code+max_char_code+max_char_code
+   {|state| code at start of line} }
 
 @ Additional information about the current line is available via the
 |index| variable, which counts how many lines of characters are present
@@ -8852,7 +8866,14 @@ mid_line+right_brace: decr(align_state);
 skip_blanks+right_brace,new_line+right_brace: begin
   state:=mid_line; decr(align_state);
   end;
-add_delims_to(skip_blanks),add_delims_to(new_line): state:=mid_line;
+add_delims_to(skip_blanks),add_delims_to(new_line):
+  state:=mid_line;
+
+@ @<Global...@>=
+skip_mode:boolean;
+
+@ @<Set init...@>=
+skip_mode:=true;
 
 @ When a character of type |spacer| gets through, its character code is
 changed to $\.{"\ "}=@'40$. This means that the ASCII codes for tab and space,
@@ -8958,8 +8979,11 @@ begin if loc>limit then cur_cs:=null_cs {|state| is irrelevant in this case}
 else  begin start_cs: k:=loc; cur_chr:=buffer[k]; cat:=cat_code(cur_chr);
   incr(k);
   if cat=letter then state:=skip_blanks
+    { begin if is_cjkx_nospc(cur_chr) and (ptex_lineend mod 2)=0 then 
+      state:=skip_blanks_kanji else state:=skip_blanks end }
   else if cat=spacer then state:=skip_blanks
-  else state:=mid_line;
+  else state:=mid_line; {begin if is_cjkx_nospc(cur_chr) and (ptex_lineend mod 2)=0 then 
+      state:=mid_kanji else state:=mid_line end;}
   if (cat=letter)and(k<=limit) then
     @<Scan ahead in the buffer until finding a nonletter;
     if an expanded code is encountered, reduce it
@@ -13422,7 +13446,7 @@ label done,bad_tfm,not_found;
 var k:font_index; {index into |font_info|}
 @!jfm_flag:dir_default..dir_tate; {direction of the \.{JFM}}
 @!nt:halfword; {number of the |char_type| tables}
-@!cx:UTF16_code; {kanji code}
+@!cx:UnicodeScalar; {kanji code}
 @!file_opened:boolean; {was |tfm_file| successfully opened?}
 @!lf,@!lh,@!bc,@!ec,@!nw,@!nh,@!nd,@!ni,@!nl,@!nk,@!ne,@!np:halfword;
   {sizes of subfiles}
@@ -13928,7 +13952,7 @@ end;
 
 @ Another warning for (u)\pTeX.
 
-@p procedure char_warning_jis(@!f:internal_font_number;@!jc:UTF16_code);
+@p procedure char_warning_jis(@!f:internal_font_number;@!jc:UnicodeScalar);
 begin if tracing_lost_chars>0 then
   begin begin_diagnostic;
   print_nl("Character "); print_char(jc); print(" (");
@@ -15049,7 +15073,7 @@ label reswitch, move_past, fin_rule, next_p;
 var base_line: scaled; {the baseline coordinate for this box}
 @!disp: scaled; {displacement}
 @!save_dir:eight_bits; {what |dvi_dir| should pop to}
-@!jc:UTF16_code; {temporary register for KANJI codes}
+@!jc:UnicodeScalar; {temporary register for KANJI codes}
 @!ksp_ptr:pointer; {position of |auto_spacing_glue| in the hlist}
 @!left_edge: scaled; {the left coordinate for this box}
 @!save_h,@!save_v: scaled; {what |dvi_h| and |dvi_v| should pop to}
@@ -18097,10 +18121,10 @@ while q<>null do @<Process node-or-noad |q| as much as possible in preparation
 @<Convert \(a)a final |bin_noad| to an |ord_noad|@>;
 @<Make a second pass over the mlist, removing all noads and inserting the
   proper spacing and penalties@>;
-{ p:=new_null_box; link(p):=link(temp_head); adjust_hlist(p,false); 
+p:=new_null_box; link(p):=link(temp_head); adjust_hlist(p,false); 
 link(temp_head):=link(p);
 delete_glue_ref(space_ptr(p)); delete_glue_ref(xspace_ptr(p));
-free_node(p,box_node_size); }
+free_node(p,box_node_size);
 end;
 
 @ We use the fact that no character nodes appear in an mlist, hence
@@ -19838,9 +19862,9 @@ subtype(tail):=tab_skip_code+1
 @ @<Package an unset...@>=
 begin if mode=-hmode then
   begin adjust_tail:=cur_tail; pre_adjust_tail:=cur_pre_tail;
-{ adjust_hlist(head,false); delete_glue_ref(cur_kanji_skip); delete_glue_ref(cur_xkanji_skip);
+  adjust_hlist(head,false); delete_glue_ref(cur_kanji_skip); delete_glue_ref(cur_xkanji_skip);
   cur_kanji_skip:=space_ptr(head); cur_xkanji_skip:=xspace_ptr(head);
-  add_glue_ref(cur_kanji_skip); add_glue_ref(cur_xkanji_skip); }
+  add_glue_ref(cur_kanji_skip); add_glue_ref(cur_xkanji_skip);
   u:=hpack(link(head),natural); w:=width(u);
   cur_tail:=adjust_tail; adjust_tail:=null;
   cur_pre_tail:=pre_adjust_tail; pre_adjust_tail:=null;
@@ -19898,7 +19922,11 @@ Everything will be set later.
 @p procedure fin_row;
 var p:pointer; {the new unset box}
 begin if mode=-hmode then
-  begin p:=hpack(link(head),natural);
+  begin adjust_hlist(head,false);
+  delete_glue_ref(cur_kanji_skip); delete_glue_ref(cur_xkanji_skip);
+  cur_kanji_skip:=space_ptr(head); cur_xkanji_skip:=xspace_ptr(head);
+  add_glue_ref(cur_kanji_skip); add_glue_ref(cur_xkanji_skip);
+  p:=hpack(link(head),natural);
   pop_nest;
   if cur_pre_head <> cur_pre_tail then
       append_list(cur_pre_head)(cur_pre_tail);
@@ -19908,6 +19936,7 @@ begin if mode=-hmode then
   end
 else  begin p:=vpack(link(head),natural); pop_nest;
   link(tail):=p; tail:=p; space_factor:=1000;
+  inhibit_glue_flag:=false;
   end;
 type(p):=unset_node; glue_stretch(p):=0;
 if every_cr<>null then begin_token_list(every_cr,every_cr_text);
@@ -19922,7 +19951,7 @@ set so that the columns line up, taking due account of spanned columns.
 procedure@?resume_after_display; forward;@t\2@>@/
 procedure@?build_page; forward;@t\2@>@/
 procedure fin_align;
-var @!p,@!q,@!r,@!s,@!u,@!v: pointer; {registers for the list operations}
+var @!p,@!q,@!r,@!s,@!u,@!v,@!z: pointer; {registers for the list operations}
 @!t,@!w:scaled; {width of column}
 @!o:scaled; {shift offset for unset boxes}
 @!n:halfword; {matching span amount}
@@ -20025,7 +20054,14 @@ save_ptr:=save_ptr-2; pack_begin_line:=-mode_line;
 if mode=-vmode then
   begin rule_save:=overfull_rule;
   overfull_rule:=0; {prevent rule from being packaged}
+  z:=new_null_box; link(z):=preamble;
+  adjust_hlist(z,false);
+  delete_glue_ref(cur_kanji_skip); delete_glue_ref(cur_xkanji_skip);
+  cur_kanji_skip:=space_ptr(z); cur_xkanji_skip:=xspace_ptr(z);
+  add_glue_ref(cur_kanji_skip); add_glue_ref(cur_xkanji_skip);
   p:=hpack(preamble,saved(1),saved(0)); overfull_rule:=rule_save;
+  delete_glue_ref(space_ptr(z)); delete_glue_ref(xspace_ptr(z));
+  free_node(z,box_node_size);
   end
 else  begin q:=link(preamble);
   repeat height(q):=width(q); width(q):=0; q:=link(link(q));
@@ -24890,7 +24926,7 @@ label big_switch,reswitch,main_loop,main_loop_wrapup,
   collect_native,collected,
   append_normal_space,exit;
 var@!t:integer; {general-purpose temporary variable}
-@!cx:UTF16_code; {kanji character}
+@!cx:UnicodeScalar; {kanji character}
 @!kp:pointer; {kinsoku penalty register}
 @!gp,gq:pointer; {temporary registers for list manipulation}
 @!disp:scaled; {displacement register}
@@ -26598,9 +26634,10 @@ end;
 also have to finish a paragraph that hasn't ended.
 
 @<Cases of |handle...@>=
-hbox_group: package(0);
-adjusted_hbox_group: begin adjust_tail:=adjust_head;
-    pre_adjust_tail:=pre_adjust_head; package(0);
+hbox_group: begin adjust_hlist(head,false); package(0);
+  end;
+adjusted_hbox_group: begin adjust_hlist(head,false);
+    adjust_tail:=adjust_head; pre_adjust_tail:=pre_adjust_head; package(0);
   end;
 vbox_group: begin end_graf; package(0);
   end;
@@ -26739,8 +26776,12 @@ end;
 @ @<Declare act...@>=
 procedure end_graf;
 begin if mode=hmode then
-  begin if head=tail then pop_nest {null paragraphs are ignored}
-  else line_break(false);
+  begin 
+if (link(head)=tail)and(not is_char_node(tail)and(type(tail)=disp_node)) then
+    begin free_node(tail,small_node_size); tail:=head; link(head):=null; end;
+    { |disp_node|-only paragraphs are ignored }
+  if head=tail then pop_nest {null paragraphs are ignored}
+  else begin adjust_hlist(head,true); line_break(false) end;
   if LR_save<>null then
     begin flush_list(LR_save); LR_save:=null;
     end;
@@ -27149,7 +27190,7 @@ absent from the font, we will simply use the other, without shifting.
 procedure make_accent;
 var s,@!t: real; {amount of slant}
 @!disp:scaled; {displacement}
-@!cx:UTF16_code; {temporary register for KANJI}
+@!cx:UnicodeScalar; {temporary register for KANJI}
 @!p,@!q,@!r:pointer; {character, box, and kern nodes}
 @!f:internal_font_number; {relevant font}
 @!a,@!h,@!x,@!w,@!delta,@!lsb,@!rsb:scaled; {heights and widths, as explained above}
@@ -27435,7 +27476,12 @@ display. Then we can set the proper values of |display_width| and
 begin j:=null; w:=-max_dimen;
 if head=tail then {`\.{\\noindent\$\$}' or `\.{\$\${ }\$\$}'}
   @<Prepare for display after an empty paragraph@>
-else  begin line_break(true);@/
+else if (link(head)=tail)and(not is_char_node(tail)and(type(tail)=disp_node)) then
+  begin free_node(tail,small_node_size); tail:=head; link(head):=null;
+  @<Prepare for display after an empty paragraph@>
+  end
+  { |disp_node|-only paragraphs are ignored }
+else begin adjust_hlist(head,true); line_break(true);@/
   @<Calculate the natural width, |w|, by which the characters of the
     final line extend to the right of the reference point,
     plus two ems; or set |w:=max_dimen| if the non-blank information
@@ -28508,6 +28554,8 @@ a sequence of prefixes until coming to a non-prefix, then it carries out
 the command.
 
 @<Cases of |main_control| that don't...@>=
+any_mode(set_auto_spacing),
+any_mode(set_kansuji_char),
 any_mode(toks_register),
 any_mode(assign_toks),
 any_mode(assign_int),
@@ -29059,7 +29107,7 @@ def_code: begin @<Let |n| be the largest legal code value, based on |cur_chr|@>;
 
 @ @<Let |n| be the largest...@>=
 if cur_chr=cat_code_base then n:=max_char_code
-else if cur_chr=cjkx_code_base then n:=7
+else if cur_chr=cjkx_code_base then n:=@'17777777777
 else if cur_chr=auto_xsp_code_base then n:=3
 else if cur_chr=inhibit_xsp_code_base then n:=3
 else if cur_chr=math_code_base then n:=@'100000
@@ -35501,8 +35549,8 @@ end
 
 @* \[54] System-dependent changes for Japanese typesetting, based on \pTeX.
 @<Declare procedures that scan font-related stuff@>=
-function get_jfm_pos(@!kcode:UTF16_code;@!f:internal_font_number):eight_bits;
-var @!jc:UTF16_code; {temporary register for KANJI}
+function get_jfm_pos(@!kcode:UnicodeScalar;@!f:internal_font_number):eight_bits;
+var @!jc:UnicodeScalar; {temporary register for KANJI}
 @!sp,@!mp,@!ep:pointer;
 begin@/
 if f=null_font then
@@ -35671,10 +35719,6 @@ inserting a space between 2byte-char and 1byte-char.
 @d inhibit_previous=1 {disable to insert space before 2byte-char}
 @d inhibit_after=2    {disable to insert space after 2byte-char}
 @d inhibit_none=3     {enable to insert space before/after 2byte-char}
-@d inhibit_unused=4   {unused entry}
-@d no_entry=10000
-@d new_pos=0
-@d cur_pos=1
 
 @ @<Cases of |main_control| that don't...@>=
   any_mode(inhibit_glue): inhibit_glue_flag:=(cur_chr=0);
@@ -35878,6 +35922,378 @@ else begin
   ("marks and whatsits."); error;
   end;
 end;
+
+@ This function is called from |adjust_hlist| to check, whether
+a list which pointed |box_p| contains a printing character.
+If the list contains such a character, then return `true', otherwise `false'.
+If the first matter is a character, |first_char| is stored it.
+|last_char| is stored a last character.  If no printing characters exist
+in the list, |first_char| and |last_char| is null.
+@^recursion@>
+
+Note that |first_char| and |last_char| may be |math_node|.
+
+@<Glob...@>=
+@!first_char:pointer; {first printable character}
+@!last_char:pointer; {last printable character}
+@!find_first_char:boolean; {find for a first printable character?}
+
+@ @<Declare procedures needed in |hlist_out|, |vlist_out|@>=
+function check_box(box_p:pointer):boolean;
+label done;
+var @!p:pointer; {run through the current box}
+@!flag:boolean; {found any printable character?}
+begin flag:=false; p:=box_p;
+while p<>null do
+  begin if is_char_node(p) then
+    repeat
+    if find_first_char then
+      begin first_char:=p; find_first_char:=false
+      end;
+    last_char:=p; flag:=true;
+    if font_dir[font(p)]<>dir_default then p:=link(p);
+    p:=link(p);
+    if p=null then goto done;
+    until not is_char_node(p);
+  case type(p) of
+  hlist_node:
+    begin flag:=true;
+      if shift_amount(p)=0 then
+        begin if check_box(list_ptr(p)) then flag:=true;
+        end
+      else if find_first_char then find_first_char:=false
+        else last_char:=null;
+    end;
+  ligature_node: if check_box(lig_ptr(p)) then flag:=true;
+  ins_node,disp_node,mark_node,adjust_node,whatsit_node,penalty_node:
+    do_nothing;
+  math_node:
+    if (subtype(p)=before)or(subtype(p)=after) then
+      begin if find_first_char then
+        begin find_first_char:=false; first_char:=p;
+        end;
+        last_char:=p; flag:=true;
+      end
+    else do_nothing; {\.{\\beginR} etc.}
+  kern_node:
+    if subtype(p)=acc_kern then
+      begin p:=link(p);
+        if is_char_node(p) then
+          if font_dir[font(p)]<>dir_default then p:=link(p);
+        p:=link(link(p));
+        if find_first_char then
+          begin find_first_char:=false; first_char:=p;
+          end;
+        last_char:=p; flag:=true;
+        if font_dir[font(p)]<>dir_default then p:=link(p);
+        end
+    else
+      begin flag:=true;
+        if find_first_char then find_first_char:=false
+        else last_char:=null;
+        end;
+  othercases begin flag:=true;
+    if find_first_char then find_first_char:=false
+    else last_char:=null;
+    end;
+  endcases;
+  p:=link(p);
+  end;
+done: check_box:=flag;
+end;
+
+@ Following procedure |adjust_hlist| inserts \.{\\xkanjiskip} between
+2byte-char and 1byte-char in hlist which pointed |p|.
+Note that the skip is inserted into a place where too difficult to decide
+whether inserting or not (i.e, before penalty, after penalty).
+
+If |pf| is true then insert |jchr_widow_penalty| that is penalty for
+creating a widow KANJI character line.
+
+@d no_skip=0
+@d after_schar=1 {denote after single byte character}
+@d after_wchar=2 {denote after double bytes character}
+
+@<Declare procedures needed in |hlist_out|, |vlist_out|@>=
+procedure adjust_hlist(p:pointer;pf:boolean);
+label exit;
+var q,s,t,u,v,x,z:pointer;
+  i,k:halfword;
+  a: pointer; { temporary pointer for accent }
+  insert_skip:no_skip..after_wchar;
+  cx:UnicodeScalar; {temporary register for KANJI character}
+  ax:ASCII_code; {temporary register for ASCII character}
+  do_ins:boolean; {for inserting |xkanji_skip| into previous (or after) KANJI}
+begin if link(p)=null then goto exit;
+if auto_spacing>0 then
+  begin delete_glue_ref(space_ptr(p)); space_ptr(p):=kanji_skip;
+  add_glue_ref(kanji_skip);
+  end;
+if auto_xspacing>0 then
+  begin delete_glue_ref(xspace_ptr(p)); xspace_ptr(p):=xkanji_skip;
+  add_glue_ref(xkanji_skip);
+  end;
+u:=space_ptr(p); add_glue_ref(u);
+s:=xspace_ptr(p); add_glue_ref(s);
+if not is_char_node(link(p)) then
+  if (type(link(p))=glue_node)and(subtype(link(p))=jfm_skip+1) then
+  begin v:=link(p); link(p):=link(v);
+  fast_delete_glue_ref(glue_ptr(v)); free_node(v,small_node_size);
+  end
+  else if (type(link(p))=penalty_node)and(subtype(link(p))=kinsoku_pena) then
+    begin v:=link(link(p));
+    if (not is_char_node(v)) and (type(v)=glue_node)and(subtype(v)=jfm_skip+1) then
+      begin link(link(p)):=link(v);
+      fast_delete_glue_ref(glue_ptr(v)); free_node(v,small_node_size);
+      end
+    end;
+
+i:=0; insert_skip:=no_skip; p:=link(p); v:=p; q:=p;
+while p<>null do
+  begin if is_char_node(p) then
+    begin repeat @<Insert a space around the character |p|@>;
+      q:=p; p:=link(p); incr(i);
+      if (i>5)and pf then
+        begin if is_char_node(v) then
+        if font_dir[font(v)]<>dir_default then v:=link(v);
+        v:=link(v);
+        end;
+    until not is_char_node(p);
+    end
+  else
+    begin case type(p) of
+    hlist_node: @<Insert hbox surround spacing@>;
+    ligature_node: @<Insert ligature surround spacing@>;
+    penalty_node,disp_node: @<Insert penalty or displace surround spacing@>;
+    kern_node: if subtype(p)=explicit then insert_skip:=no_skip
+      else if subtype(p)=acc_kern then begin
+        { When we insert \.{\\xkanjiskip}, we first ignore accent (and kerns) and
+          insert \.{\\xkanjiskip}, then we recover the accent. }
+        if q=p then begin t:=link(p);
+          { if p is beginning on the list, we have only to ignore nodes. }
+          if is_char_node(t) then
+            if font_dir[font(t)]<>dir_default then t:=link(t);
+          p:=link(link(t));
+          if font_dir[font(p)]<>dir_default then
+            begin p:=link(p); insert_skip:=after_wchar; end
+          else  insert_skip:=after_schar;
+          end
+        else begin
+          a:=p; t:=link(p);
+          if is_char_node(t) then
+            if font_dir[font(t)]<>dir_default then t:=link(t);
+          t:=link(link(t)); link(q):=t; p:=t;
+          @<Insert a space around the character |p|@>; incr(i);
+          if (i>5)and pf then
+            begin if is_char_node(v) then
+            if font_dir[font(v)]<>dir_default then v:=link(v);
+            v:=link(v);
+            end;
+          if link(q)<>t then link(link(q)):=a else link(q):=a;
+          end;
+        end;
+    math_node: @<Insert math surround spacing@>;
+    mark_node,adjust_node,ins_node,whatsit_node:
+      {These nodes are vanished when typeset is done}
+      do_nothing;
+    othercases insert_skip:=no_skip;
+    endcases;
+    q:=p; p:=link(p);
+    end;
+  end;
+if not is_char_node(q)and(type(q)=glue_node)and(subtype(q)=jfm_skip+1) then
+  begin fast_delete_glue_ref(glue_ptr(q));
+  glue_ptr(q):=zero_glue; add_glue_ref(zero_glue);
+  end;
+delete_glue_ref(u); delete_glue_ref(s);
+if (v<>null)and pf and(i>5) then @<Make |jchr_widow_penalty| node@>;
+exit:
+end;
+
+@ @<Insert a space around the character |p|@>=
+if font_dir[font(p)]<>dir_default then
+  begin KANJI(cx):=info(link(p)) mod max_char_val;
+  if insert_skip=after_schar then @<Insert ASCII-KANJI spacing@>;
+  p:=link(p); insert_skip:=after_wchar;
+  end
+else
+  begin ax:=qo(character(p));
+  if insert_skip=after_wchar then @<Insert KANJI-ASCII spacing@>;
+  if auto_xsp_code(ax)>=2 then
+    insert_skip:=after_schar else insert_skip:=no_skip;
+  end
+
+@ @<Insert hbox surround spacing@>=
+begin find_first_char:=true; first_char:=null; last_char:=null;
+if shift_amount(p)=0 then
+  begin if check_box(list_ptr(p)) then
+    begin if first_char<>null then @<Insert a space before the |first_char|@>;
+    if last_char<>null then
+      begin @<Insert a space after the |last_char|@>;
+      end else insert_skip:=no_skip;
+    end else insert_skip:=no_skip;
+  end else insert_skip:=no_skip;
+end
+
+@ @<Insert a space before the |first_char|@>=
+if type(first_char)=math_node then
+  begin ax:=qo("0");
+  if insert_skip=after_wchar then @<Insert KANJI-ASCII spacing@>;
+  end
+else if font_dir[font(first_char)]<>dir_default then
+  begin KANJI(cx):=info(link(first_char)) mod max_char_val;
+  if insert_skip=after_schar then @<Insert ASCII-KANJI spacing@>
+  else if insert_skip=after_wchar then @<Insert KANJI-KANJI spacing@>;
+  end
+else
+  begin ax:=qo(character(first_char));
+  if insert_skip=after_wchar then @<Insert KANJI-ASCII spacing@>;
+  end;
+
+@ @<Insert a space after the |last_char|@>=
+if type(last_char)=math_node then
+  begin ax:=qo("0");
+  if auto_xsp_code(ax)>=2 then
+    insert_skip:=after_schar else insert_skip:=no_skip;
+  end
+else if font_dir[font(last_char)]<>dir_default then
+  begin insert_skip:=after_wchar;
+  KANJI(cx):=info(link(last_char)) mod max_char_val;
+  if is_char_node(link(p))and(font_dir[font(link(p))]<>dir_default) then
+    begin @<Append KANJI-KANJI spacing@>; p:=link(p);
+    end;
+  end
+else
+  begin ax:=qo(character(last_char));
+  if auto_xsp_code(ax)>=2 then
+    insert_skip:=after_schar else insert_skip:=no_skip;
+  end;
+
+@ @<Insert math surround spacing@>=
+begin if (subtype(p)=before)and(insert_skip=after_wchar) then
+  begin ax:=qo("0"); @<Insert KANJI-ASCII spacing@>;
+  insert_skip:=no_skip;
+  end
+else if subtype(p)=after then
+  begin ax:=qo("0");
+  if auto_xsp_code(ax)>=2 then
+    insert_skip:=after_schar else insert_skip:=no_skip;
+  end
+else insert_skip:=no_skip;
+end
+
+@ @<Insert ligature surround spacing@>=
+begin t:=lig_ptr(p);
+if is_char_node(t) then
+  begin ax:=qo(character(t));
+  if insert_skip=after_wchar then @<Insert KANJI-ASCII spacing@>;
+  while link(t)<>null do t:=link(t);
+  if is_char_node(t) then
+    begin ax:=qo(character(t));
+    if auto_xsp_code(ax)>=2 then
+      insert_skip:=after_schar else insert_skip:=no_skip;
+    end;
+  end;
+end
+
+@ @<Insert penalty or displace surround spacing@>=
+begin if is_char_node(link(p)) then
+  begin q:=p; p:=link(p);
+  if font_dir[font(p)]<>dir_default then
+    begin KANJI(cx):=info(link(p)) mod max_char_val;
+    if insert_skip=after_schar then @<Insert ASCII-KANJI spacing@>
+    else if insert_skip=after_wchar then @<Insert KANJI-KANJI spacing@>;
+    p:=link(p); insert_skip:=after_wchar;
+    end
+  else
+    begin ax:=qo(character(p));
+    if insert_skip=after_wchar then @<Insert KANJI-ASCII spacing@>;
+    if auto_xsp_code(ax)>=2 then
+      insert_skip:=after_schar else insert_skip:=no_skip;
+    end;
+  end
+end
+
+@ @<Insert ASCII-KANJI spacing@>=
+begin if (inhibit_xsp_code(cx)=inhibit_both)or
+       (inhibit_xsp_code(cx)=inhibit_previous) then
+      do_ins:=false else do_ins:=true;
+if do_ins then
+  begin z:=new_glue(s); subtype(z):=xkanji_skip_code+1;
+  link(z):=link(q); link(q):=z; q:=z;
+  end;
+end
+
+@ @<Insert KANJI-ASCII spacing@>=
+begin if odd(auto_xsp_code(ax)) then
+  begin if (inhibit_xsp_code(cx)=inhibit_both)or
+       (inhibit_xsp_code(cx)=inhibit_after) then
+      do_ins:=false else do_ins:=true;
+  end
+else do_ins:=false;
+if do_ins then
+  begin z:=new_glue(s); subtype(z):=xkanji_skip_code+1;
+  link(z):=link(q); link(q):=z; q:=z;
+  end;
+end
+
+@ @<Insert KANJI-KANJI spacing@>=
+begin z:=new_glue(u); subtype(z):=kanji_skip_code+1;
+link(z):=link(q); link(q):=z; q:=z;
+end
+
+@ @<Append KANJI-KANJI spacing@>=
+begin z:=new_glue(u); subtype(z):=kanji_skip_code+1;
+link(z):=link(p); link(p):=z; p:=link(z); q:=z;
+end
+
+@ @<Make |jchr_widow_penalty| node@>=
+begin q:=v; p:=link(v);
+if is_char_node(v)and(font_dir[font(v)]<>dir_default) then
+  begin q:=p; p:=link(p);
+  end;
+t:=q; s:=null;
+@<Seek list and make |t| pointing widow penalty position@>;
+if s<>null then
+  begin s:=link(t);
+    if not is_char_node(s)and(type(s)=penalty_node) then
+      penalty(s):=penalty(s)+jchr_widow_penalty
+    else if jchr_widow_penalty<>0 then
+      begin s:=new_penalty(jchr_widow_penalty); subtype(s):=widow_pena;
+      link(s):=link(t); link(t):=s; t:=link(s);
+      while(not is_char_node(t)) do
+        begin if (type(t)=glue_node)or(type(t)=kern_node) then goto exit;
+        t:=link(t);
+        end;
+      z:=new_glue(u); subtype(z):=kanji_skip_code+1;
+      link(z):=link(s); link(s):=z;
+      end;
+  end;
+end;
+
+@ @<Seek list and make |t| pointing widow penalty position@>=
+k:=0;
+while(p<>null) do
+begin if is_char_node(p) then
+  begin if font_dir[font(p)]<>dir_default then
+    begin KANJI(cx):=info(link(p)) mod max_char_val;
+    i:=info(link(p)) div max_char_val; k:=0;
+    if not odd(i) then begin t:=q; s:=p; end;
+    p:=link(p); q:=p;
+    end
+  else begin k:=k+1;
+    if k>1 then begin q:=p; s:=null; end;
+    end;
+  end
+else begin case type(p) of
+  penalty_node,mark_node,adjust_node,whatsit_node,
+  glue_node,kern_node,math_node,disp_node:
+    do_nothing;
+  othercases begin q:=p; s:=null; end;
+  endcases;
+  end;
+p:=link(p);
+end
 
 
 @* \[54] System-dependent changes.
