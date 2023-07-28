@@ -8026,13 +8026,12 @@ similar to |skip_blanks|, but the |state| will be |mid_kanji| after
 instead of |mid_line|.
 
 @d mid_line=1 {|state| code when scanning a line of characters}
-@d skip_blanks=2+max_char_code {|state| code when ignoring blanks}
-@d new_line=3+max_char_code+max_char_code {|state| code at start of line}
-{ @d mid_kanji=2+max_char_code {|state| code when scanning a line of characters} 
- @d skip_blanks_kanji=4+max_char_code+max_char_code+max_char_code
+@d mid_kanji=2+max_char_code {|state| code when scanning a line of characters}
+@d skip_blanks=3+max_char_code+max_char_code {|state| code when ignoring blanks}
+@d skip_blanks_kanji=4+max_char_code+max_char_code+max_char_code
    {|state| code when ignoring blanks}
 @d new_line=5+max_char_code+max_char_code+max_char_code+max_char_code
-   {|state| code at start of line} }
+   {|state| code at start of line}
 
 @ Additional information about the current line is available via the
 |index| variable, which counts how many lines of characters are present
@@ -8293,6 +8292,7 @@ at most |error_line|. Non-current input levels whose |token_type| is
 @p procedure show_context; {prints where the scanner is}
 label done;
 var old_setting:0..max_selector; {saved |selector| setting}
+@!s: pointer; {temporary pointer}
 @!nn:integer; {number of contexts shown so far, less one}
 @!bottom_line:boolean; {have we reached the final context to be shown?}
 @<Local variables for formatting calculations@>@/
@@ -8845,7 +8845,8 @@ values for |mid_line|, |skip_blanks|, and |new_line| are spaced
 apart from each other by |max_char_code+1|, so we can add a character's
 command code to the state to get a single number that characterizes both.
 
-@d any_state_plus(#) == mid_line+#,skip_blanks+#,new_line+#
+@d any_state_plus(#) == 
+  mid_line+#,skip_blanks+#,new_line+#,skip_blanks_kanji+#,mid_kanji+#
 
 @<Change state if necessary...@>=
 case state+cur_cmd of
@@ -8864,7 +8865,7 @@ othercases do_nothing
 endcases
 
 @ @<Cases where character is ignored@>=
-any_state_plus(ignore),skip_blanks+spacer,new_line+spacer
+any_state_plus(ignore),skip_blanks+spacer,skip_blanks_kanji+spacer,new_line+spacer
 
 @ We go to |restart| instead of to |switch|, because |state| might equal
 |token_list| after the error has been dealt with
@@ -8879,25 +8880,41 @@ deletions_allowed:=false; error; deletions_allowed:=true;
 goto restart;
 end
 
-@ @d add_delims_to(#)==#+math_shift,#+tab_mark,#+mac_param,
-  #+sub_mark,#+letter,#+other_char
+@ @d add_delims_to(#)==#+math_shift,#+tab_mark,#+mac_param,#+sub_mark
 
 @<Handle situations involving spaces, braces, changes of state@>=
-mid_line+spacer:@<Enter |skip_blanks| state, emit a space@>;
-mid_line+car_ret:@<Finish line, emit a space@>;
-skip_blanks+car_ret,any_state_plus(comment):
+mid_kanji+spacer,mid_line+spacer:@<Enter |skip_blanks| state, emit a space@>;
+mid_line+car_ret:
+  if is_cjkx_nospc(cur_chr)and skip_mode then @<Finish line, |goto switch|@> 
+  else @<Finish line, emit a space@>;
+skip_blanks+car_ret,skip_blanks_kanji+car_ret,any_state_plus(comment):
   @<Finish line, |goto switch|@>;
 new_line+car_ret:@<Finish line, emit a \.{\\par}@>;
 mid_line+left_brace: incr(align_state);
+mid_kanji+left_brace: begin incr(align_state);
+  if ((ptex_lineend div 4) mod 2)=1 then state:=mid_line;
+  end;
 skip_blanks+left_brace,new_line+left_brace: begin
   state:=mid_line; incr(align_state);
   end;
+skip_blanks_kanji+left_brace: begin
+  state:=mid_kanji; incr(align_state);
+  end;
 mid_line+right_brace: decr(align_state);
+mid_kanji+right_brace: begin decr(align_state);
+  if ((ptex_lineend div 4) mod 2)=1 then state:=mid_line;
+  end;
 skip_blanks+right_brace,new_line+right_brace: begin
   state:=mid_line; decr(align_state);
   end;
-add_delims_to(skip_blanks),add_delims_to(new_line):
+skip_blanks_kanji+right_brace: begin
+  state:=mid_kanji; decr(align_state);
+  end;
+add_delims_to(skip_blanks),add_delims_to(skip_blanks_kanji),
+add_delims_to(new_line),add_delims_to(mid_kanji):
   state:=mid_line;
+any_state_plus(letter),any_state_plus(other_char):
+  if is_cjkx_nospc(cur_chr) then state:=mid_kanji else state:=mid_line;
 
 @ @<Global...@>=
 skip_mode:boolean;
@@ -8985,7 +9002,8 @@ end
 
 @ @<Process an active-character...@>=
 begin cur_cs:=cur_chr+active_base;
-cur_cmd:=eq_type(cur_cs); cur_chr:=equiv(cur_cs); state:=mid_line;
+cur_cmd:=eq_type(cur_cs); cur_chr:=equiv(cur_cs);
+if is_cjkx_nospc(cur_chr) then state:=mid_kanji else state:=mid_line;
 if cur_cmd>=outer_call then check_outer_validity;
 end
 
@@ -9008,12 +9026,13 @@ buffer and the process is repeated, slowly but surely.
 begin if loc>limit then cur_cs:=null_cs {|state| is irrelevant in this case}
 else  begin start_cs: k:=loc; cur_chr:=buffer[k]; cat:=cat_code(cur_chr);
   incr(k);
-  if cat=letter then state:=skip_blanks
-    { begin if is_cjkx_nospc(cur_chr) and (ptex_lineend mod 2)=0 then 
-      state:=skip_blanks_kanji else state:=skip_blanks end }
+  if cat=letter then
+    begin if is_cjkx_nospc(cur_chr) and (ptex_lineend mod 2)=0 then 
+      state:=skip_blanks_kanji else state:=skip_blanks end
   else if cat=spacer then state:=skip_blanks
-  else state:=mid_line; {begin if is_cjkx_nospc(cur_chr) and (ptex_lineend mod 2)=0 then 
-      state:=mid_kanji else state:=mid_line end;}
+  else if is_cjkx_nospc(cur_chr) and (ptex_lineend mod 2)=0 then 
+    state:=mid_kanji 
+  else state:=mid_line;
   if (cat=letter)and(k<=limit) then
     @<Scan ahead in the buffer until finding a nonletter;
     if an expanded code is encountered, reduce it
@@ -9083,8 +9102,12 @@ begin if (cat=sup_mark) and (buffer[k]=cur_chr) and (k<limit) then
 end
 
 @ @<Scan ahead in the buffer...@>=
-begin repeat cur_chr:=buffer[k]; cat:=cat_code(cur_chr); incr(k);
-until (cat<>letter)or(k>limit);
+begin cur_chr:=buffer[k]; cat:=cat_code(cur_chr); incr(k);
+while (cat=letter)and(k<=limit) do begin
+  if is_cjkx_nospc(cur_chr) and (ptex_lineend mod 2)=0 then 
+    state:=skip_blanks_kanji else state:=skip_blanks;
+  cur_chr:=buffer[k]; cat:=cat_code(cur_chr); incr(k);
+end;
 @<If an expanded...@>;
 if cat<>letter then decr(k);
   {now |k| points to first nonletter}
