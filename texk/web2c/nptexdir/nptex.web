@@ -5116,6 +5116,7 @@ that might be expanded by `\.{\\the}'.
   {user-defined font integer ( \.{\\hyphenchar}, \.{\\skewchar} )}
 @d set_kansuji_char=assign_font_int+1
   {user-defined kansuji character ( \.{\\kansujichar} )}
+  {and getting |\kcatcode| (only for compatibility with \pTeX)}
 @d set_aux=set_kansuji_char+1
   {specify state info ( \.{\\spacefactor}, \.{\\prevdepth} )}
 @d set_prev_graf=set_aux+1 {specify state info ( \.{\\prevgraf} )}
@@ -8885,8 +8886,7 @@ end
 @<Handle situations involving spaces, braces, changes of state@>=
 mid_kanji+spacer,mid_line+spacer:@<Enter |skip_blanks| state, emit a space@>;
 mid_line+car_ret: @<Finish line, emit a space@>;
-mid_kanji+car_ret:
-  if is_cjkx_nospc(cur_chr)and skip_mode then @<Finish line, |goto switch|@> 
+mid_kanji+car_ret: if skip_mode then @<Finish line, |goto switch|@> 
   else @<Finish line, emit a space@>;
 skip_blanks+car_ret,skip_blanks_kanji+car_ret,any_state_plus(comment):
   @<Finish line, |goto switch|@>;
@@ -10285,9 +10285,8 @@ the codes for its extensions: |eTeX_version_code|, \dots\ .
 @d last_node_font_code=glue_val+4 {code for \.{\\lastnodefont}}
 @d input_line_no_code=glue_val+5 {code for \.{\\inputlineno}}
 @d badness_code=input_line_no_code+1 {code for \.{\\badness}}
-@d kcat_code=badness_code+1 {code for \.{\\kcatcode}}
 @#
-@d pdftex_first_rint_code = kcat_code + 1 {base for \pdfTeX's command codes}
+@d pdftex_first_rint_code = badness_code + 1 {base for \pdfTeX's command codes}
 @d pdf_last_x_pos_code    = pdftex_first_rint_code + 6 {code for \.{\\pdflastxpos}}
 @d pdf_last_y_pos_code    = pdftex_first_rint_code + 7 {code for \.{\\pdflastypos}}
 @d elapsed_time_code      = pdftex_first_rint_code + 10 {code for \.{\\elapsedtime}}
@@ -10362,8 +10361,6 @@ primitive("inputlineno",last_item,input_line_no_code);
 @!@:input_line_no_}{\.{\\inputlineno} primitive@>
 primitive("badness",last_item,badness_code);
 @!@:badness_}{\.{\\badness} primitive@>
-primitive("kcatcode",last_item,kcat_code);
-@!@:kcatcode_}{\.{\\kcatcode} primitive@>
 primitive("pdflastxpos",last_item,pdf_last_x_pos_code);@/
 @!@:pdf_last_x_pos_}{\.{\\pdflastxpos} primitive@>
 primitive("pdflastypos",last_item,pdf_last_y_pos_code);@/
@@ -10550,16 +10547,6 @@ if m>=input_line_no_code then
  else begin case m of
   input_line_no_code: cur_val:=line;
   badness_code: cur_val:=last_badness;
-  kcat_code: begin scan_usv_num; 
-    if is_cjkx_jachar(cur_val) then begin
-      if cat_code(cur_val)=other_char then cur_val:=18 { |other_char| }
-      else if cat_code(cur_val)=letter then 
-        begin if is_cjkx_nospc(cur_val) then cur_val:=19 { |hangul| }
-        else cur_val:=16 { |kanji| } end
-      else cur_val:=15; { |not_cjk| }
-      end
-    else cur_val:=15; { |not_cjk| }
-    end;
   elapsed_time_code: cur_val := get_microinterval;
   random_seed_code:  cur_val := random_seed;
   pdf_shell_escape_code:
@@ -32421,7 +32408,6 @@ last_node_type_code: print_esc("lastnodetype");
 last_node_subtype_code: print_esc("lastnodesubtype");
 last_node_char_code: print_esc("lastnodechar");
 last_node_font_code: print_esc("lastnodefont");
-kcat_code: print_esc("kcatcode");
 eTeX_version_code: print_esc("eTeXversion");
 XeTeX_version_code: print_esc("XeTeXversion");
 
@@ -36076,30 +36062,51 @@ end else begin
   v:=char_height(cur_jfont)(t)+char_depth(cur_jfont)(t);
 end
 
-@ set a kansuji character.
+@ set a kansuji character, and get |kcat_code|.
 
 @ @<Put each...@>=
 primitive("kansujichar",set_kansuji_char,0);
 @!@:kansujichar_}{\.{\\kansujichar} primitive@>
+primitive("kcatcode",set_kansuji_char,1);
+@!@:kcatcode_}{\.{\\kcatcode} primitive@>
 
 @ @<Cases of |print_cmd_chr|...@>=
-set_kansuji_char: print_esc("kansujichar");
+set_kansuji_char: if chr_code>0 then print_esc("kcatcode") 
+  else print_esc("kansujichar");
 
 @ @<Assignments@>=
-set_kansuji_char:
-begin p:=cur_chr; scan_int; n:=cur_val; scan_optional_equals; scan_usv_num;
-if (n<0)or(n>9) then
-  begin print_err("Invalid KANSUJI number ("); print_int(n); print_char(")");
-@.Invalid KANSUJI number@>
-  help1("I'm skipping this control sequences.");@/
+set_kansuji_char: if cur_chr>0 then
+  begin scan_usv_num; scan_optional_equals; scan_int;
+  print_err("\kcatcode is read-only integer in npTeX");
+@.kcat_code is read_only@>
+  help2("You cannot assign \kcatcode in npTeX, so I'm skipping this control sequence.")@/
+    ("Use combination of \catcode and \cjkx code instead.");@/
   error; return;
   end
-else
-  define(kansuji_base+n,n,tokanji(cur_val));
-end;
+else begin 
+  scan_int; n:=cur_val; scan_optional_equals; scan_usv_num;
+  if (n<0)or(n>9) then
+    begin print_err("Invalid KANSUJI number ("); print_int(n); print_char(")");
+@.Invalid KANSUJI number@>
+    help1("I'm skipping this control sequences.");@/
+    error; return;
+    end
+  else
+    define(kansuji_base+n,n,tokanji(cur_val));
+  end;
 
 @ @<Fetch kansuji char code from some table@>=
-begin scan_int; cur_val_level:=int_val;
+if m>0 then begin scan_usv_num; cur_val_level:=int_val;
+    if is_cjkx_jachar(cur_val) then begin
+      if cat_code(cur_val)=other_char then cur_val:=18 { |other_char| }
+      else if cat_code(cur_val)=letter then 
+        begin if is_cjkx_nospc(cur_val) then cur_val:=16 { |kanjil| }
+        else cur_val:=19 { |hangul| } end
+      else cur_val:=15; { |not_cjk| }
+      end
+    else cur_val:=15; { |not_cjk| }
+    end
+else begin scan_int; cur_val_level:=int_val;
   if (cur_val<0)or(cur_val>9) then
     begin print_err("Invalid KANSUJI number ("); print_int(cur_val); print_char(")");
     help1("I'm skipping this control sequences.");@/
@@ -36107,7 +36114,7 @@ begin scan_int; cur_val_level:=int_val;
     end
   else
     cur_val:=kansuji_char(cur_val);
-end
+  end
 
 @ |print_kansuji| procedure converts a number to KANJI number.
 
