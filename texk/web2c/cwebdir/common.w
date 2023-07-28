@@ -394,7 +394,7 @@ boolean get_line(void) /* inputs the next line */
 stop reading it and start reading from the named include file.  The
 \.{@@i} line should give a complete file name with or without
 double quotes.
-If the environment variable \.{CWEBINPUTS} is set, or if the compiler flag
+If the environment variable |CWEBINPUTS| is set, or if the compiler flag
 of the same name was defined at compile time,
 \.{CWEB} will look for include files in the directory thus named, if
 it cannot find them in the current directory.
@@ -424,7 +424,6 @@ The remainder of the \.{@@i} line after the file name is ignored.
     goto restart; /* success */
   }
   if ((kk=getenv("CWEBINPUTS"))!=NULL) {
-@qCWEBINPUTS@>
     if ((l=strlen(kk))>max_file_name_length-2) too_long();
     strcpy(temp_file_name,kk);
   }
@@ -670,15 +669,16 @@ if (p==NULL) {
 }
 
 @ The information associated with a new identifier must be initialized
-in a slightly different way in \.{CWEAVE} than in \.{CTANGLE}; hence the
-|init_p| procedure.
+in a slightly different way in \.{CWEAVE} than in \.{CTANGLE}.
 
 @<Enter a new name...@>= {
   if (byte_ptr+l>byte_mem_end) overflow("byte memory");
   if (name_ptr>=name_dir_end) overflow("name");
   strncpy(byte_ptr,first,l);
   (++name_ptr)->byte_start=byte_ptr+=l;
-  init_p(p,t);
+  if (program==cweave) {
+    p->ilk=t; init_node(p);
+  }
 }
 
 @ If |p| is a |name_pointer| variable, as we have seen,

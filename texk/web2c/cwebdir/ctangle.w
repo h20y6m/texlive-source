@@ -162,10 +162,8 @@ eight_bits t) /* not used by \.{CTANGLE} */
   return length(p)==l && strncmp(first,p->byte_start,l)==0;
 }
 
-@ The common lookup routine |id_lookup| refers to separate routines |init_node|
-and |init_p| when the data structure grows. Actually |init_p| is called only by
-\.{CWEAVE}, but we need to declare a dummy version so that
-the loader won't complain of its absence.
+@ The common lookup routine |id_lookup| refers to a separate routine
+|init_node| when the data structure grows.
 
 @c
 void
@@ -174,8 +172,6 @@ name_pointer node)
 {
     node->equiv=(void *)text_info;
 }
-void
-init_p(name_pointer p,eight_bits t) {@+(void)p;@+(void)t;@+}
 
 @* Tokens.
 Replacement texts, which represent \CEE/ code in a compressed format,
@@ -587,10 +583,10 @@ static boolean output_defs_seen=false;
 static void output_defs(void);@/
 static void out_char(eight_bits);
 
-@ @d C_printf(c,a) fprintf(C_file,c,a)
-@d C_putc(c) putc((int)(c),C_file) /* isn't \CEE/ wonderfully consistent? */
+@ @d macro_end (cur_text+1)->tok_start /* end of |macro| replacement text */
 @#
-@d macro_end (cur_text+1)->tok_start /* end of |macro| replacement text */
+@d C_printf(c,a) fprintf(C_file,c,a)
+@d C_putc(c) putc((int)(c),C_file) /* isn't \CEE/ wonderfully consistent? */
 
 @c
 static void
