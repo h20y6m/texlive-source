@@ -8884,7 +8884,8 @@ end
 
 @<Handle situations involving spaces, braces, changes of state@>=
 mid_kanji+spacer,mid_line+spacer:@<Enter |skip_blanks| state, emit a space@>;
-mid_line+car_ret:
+mid_line+car_ret: @<Finish line, emit a space@>;
+mid_kanji+car_ret:
   if is_cjkx_nospc(cur_chr)and skip_mode then @<Finish line, |goto switch|@> 
   else @<Finish line, emit a space@>;
 skip_blanks+car_ret,skip_blanks_kanji+car_ret,any_state_plus(comment):
@@ -9002,8 +9003,8 @@ end
 
 @ @<Process an active-character...@>=
 begin cur_cs:=cur_chr+active_base;
-cur_cmd:=eq_type(cur_cs); cur_chr:=equiv(cur_cs);
 if is_cjkx_nospc(cur_chr) then state:=mid_kanji else state:=mid_line;
+cur_cmd:=eq_type(cur_cs); cur_chr:=equiv(cur_cs);
 if cur_cmd>=outer_call then check_outer_validity;
 end
 
@@ -9031,7 +9032,7 @@ else  begin start_cs: k:=loc; cur_chr:=buffer[k]; cat:=cat_code(cur_chr);
       state:=skip_blanks_kanji else state:=skip_blanks end
   else if cat=spacer then state:=skip_blanks
   else if is_cjkx_nospc(cur_chr) and (ptex_lineend mod 2)=0 then 
-    state:=mid_kanji 
+    state:=mid_kanji
   else state:=mid_line;
   if (cat=letter)and(k<=limit) then
     @<Scan ahead in the buffer until finding a nonletter;
@@ -10279,10 +10280,14 @@ And the |last_item| command is modified by either |int_val|, |dimen_val|,
 the codes for its extensions: |eTeX_version_code|, \dots\ .
 
 @d last_node_type_code=glue_val+1 {code for \.{\\lastnodetype}}
-@d input_line_no_code=glue_val+2 {code for \.{\\inputlineno}}
+@d last_node_subtype_code=glue_val+2 {code for \.{\\lastnodesubtype}}
+@d last_node_char_code=glue_val+3 {code for \.{\\lastnodechar}}
+@d last_node_font_code=glue_val+4 {code for \.{\\lastnodefont}}
+@d input_line_no_code=glue_val+5 {code for \.{\\inputlineno}}
 @d badness_code=input_line_no_code+1 {code for \.{\\badness}}
+@d kcat_code=badness_code+1 {code for \.{\\kcatcode}}
 @#
-@d pdftex_first_rint_code = badness_code + 1 {base for \pdfTeX's command codes}
+@d pdftex_first_rint_code = kcat_code + 1 {base for \pdfTeX's command codes}
 @d pdf_last_x_pos_code    = pdftex_first_rint_code + 6 {code for \.{\\pdflastxpos}}
 @d pdf_last_y_pos_code    = pdftex_first_rint_code + 7 {code for \.{\\pdflastypos}}
 @d elapsed_time_code      = pdftex_first_rint_code + 10 {code for \.{\\elapsedtime}}
@@ -10357,6 +10362,8 @@ primitive("inputlineno",last_item,input_line_no_code);
 @!@:input_line_no_}{\.{\\inputlineno} primitive@>
 primitive("badness",last_item,badness_code);
 @!@:badness_}{\.{\\badness} primitive@>
+primitive("kcatcode",last_item,kcat_code);
+@!@:kcatcode_}{\.{\\kcatcode} primitive@>
 primitive("pdflastxpos",last_item,pdf_last_x_pos_code);@/
 @!@:pdf_last_x_pos_}{\.{\\pdflastxpos} primitive@>
 primitive("pdflastypos",last_item,pdf_last_y_pos_code);@/
@@ -10478,7 +10485,58 @@ if not is_char_node(tx) then
     tx:=q;
     end
 @#
-@d find_effective_tail==find_effective_tail_eTeX
+@d find_effective_tail_pTeX==
+tx:=tail;
+if not is_char_node(tx) then
+  if type(tx)=disp_node then
+    begin tx:=prev_node;
+    if not is_char_node(tx) then
+      if type(tx)=disp_node then {|disp_node| from a discretionary}
+        begin tx:=head; q:=link(head);
+        while q<>prev_node do
+          begin if is_char_node(q) then tx:=q
+          else if type(q)<>disp_node then tx:=q;
+          end;
+        q:=link(q);
+        end;
+    end
+@#
+@d find_effective_tail_epTeX==
+tx:=tail;
+if not is_char_node(tx) then if type(tx)=disp_node then tx:=prev_node;
+if not is_char_node(tx) then
+  if (type(tx)=disp_node) {|disp_node| from a discretionary}
+    or((type(tx)=math_node)and(subtype(tx)=end_M_code)) then
+    begin r:=head; q:=link(head);
+    while q<>tx do
+      begin if is_char_node(q) then r:=q
+      else if (type(q)<>disp_node)and
+        ((type(q)<>math_node)or(subtype(q)<>end_M_code)) then r:=q;
+      q:=link(q);
+      end;
+    tx:=r;
+    end
+@#
+@d find_effective_tail==find_effective_tail_epTeX
+@#
+@d find_last_char==
+if font_dir[font(tx)]<>dir_default then cur_val:=KANJI(info(link(tx))) mod max_char_val
+else cur_val:=qo(character(tx))
+
+@d ignore_font_kerning==
+begin if ((type(tx)=glue_node) and (subtype(tx)=jfm_skip+1))
+  or ((type(tx)=penalty_node) and (subtype(tx)=kinsoku_pena)) then
+  tx:=last_jchr
+else if (type(tx)=kern_node) and (subtype(tx)=normal) then
+  begin r:=head; q:=link(head);
+  while q<>tx do
+    begin r:=q;
+    if is_char_node(q) then if font_dir[font(q)]<>dir_default then q:=link(q);
+    q:=link(q);
+    end;
+  if ((type(r)=penalty_node) and (subtype(r)=kinsoku_pena)) then tx:=last_jchr else tx:=r;
+  end;
+end
 
 @<Fetch an item in the current node...@>=
 if m>=input_line_no_code then
@@ -10492,6 +10550,16 @@ if m>=input_line_no_code then
  else begin case m of
   input_line_no_code: cur_val:=line;
   badness_code: cur_val:=last_badness;
+  kcat_code: begin scan_usv_num; 
+    if is_cjkx_jachar(cur_val) then begin
+      if cat_code(cur_val)=other_char then cur_val:=18 { |other_char| }
+      else if cat_code(cur_val)=letter then 
+        begin if is_cjkx_nospc(cur_val) then cur_val:=19 { |hangul| }
+        else cur_val:=16 { |kanji| } end
+      else cur_val:=15; { |not_cjk| }
+      end
+    else cur_val:=15; { |not_cjk| }
+    end;
   elapsed_time_code: cur_val := get_microinterval;
   random_seed_code:  cur_val := random_seed;
   pdf_shell_escape_code:
@@ -10508,11 +10576,26 @@ if m>=input_line_no_code then
   end
 else begin if cur_chr=glue_val then cur_val:=zero_glue@+else cur_val:=0;
   find_effective_tail;
-  if cur_chr=last_node_type_code then
+  if (cur_chr=last_node_type_code)or(cur_chr=last_node_subtype_code) then
     begin cur_val_level:=int_val;
     if (tx=head)or(mode=0) then cur_val:=-1;
     end
+  else if cur_chr=last_node_char_code then
+    begin cur_val_level:=int_val; cur_val:=-1;
+    end
+  else if cur_chr=last_node_font_code then
+    begin cur_val_level:=ident_val; cur_val:=null_font+font_id_base;
+    end
   else cur_val_level:=cur_chr;
+  if (cur_chr=last_node_char_code)or(cur_chr=last_node_font_code) then
+    if is_char_node(tx)and(tx<>head) then begin
+      { |tx| might be ``second node'' of a KANJI character; so we need to look the node before |tx| }
+      r:=head; q:=head;
+      while q<>tx do begin r:=q; q:=link(q); end; { |r| is the node just before |tx| }
+      if (r<>head)and is_char_node(r) then if font_dir[font(r)]<>dir_default then tx:=r;
+      if cur_chr=last_node_char_code then find_last_char
+      else cur_val:=font(tx)+font_id_base;
+      end;
   if not is_char_node(tx)and(mode<>0) then
     case cur_chr of
     int_val: if type(tx)=penalty_node then cur_val:=penalty(tx);
@@ -10521,8 +10604,42 @@ else begin if cur_chr=glue_val then cur_val:=zero_glue@+else cur_val:=0;
       begin cur_val:=glue_ptr(tx);
       if subtype(tx)=mu_glue then cur_val_level:=mu_val;
       end;
-    last_node_type_code: if type(tx)<=unset_node then cur_val:=type(tx)+1
-      else cur_val:=unset_node+2;
+    last_node_type_code: if type(tx)<=unset_node then
+        begin if type(tx)=dir_node then tx:=list_ptr(tx);
+        cur_val:=type(tx);
+        if cur_val<dir_node then cur_val:=cur_val+1
+        else if cur_val>disp_node then cur_val:=cur_val-1;
+        end
+      else cur_val:=unset_node; {\epTeX's |unset_node| is \eTeX's |unset_node+2|}
+    last_node_subtype_code: if type(tx)<=unset_node then cur_val:=subtype(tx)
+        { non-math nodes }
+      else begin
+        cur_val:=type(tx);
+        if cur_val<unset_node+4 then cur_val:=cur_val-unset_node-1
+          { |style_noad|, |choice_noad|, |ord_noad| }
+        else if cur_val=unset_node+4 then cur_val:=cur_val-unset_node-1+subtype(tx)
+        else cur_val:=cur_val-unset_node+1;
+      end;
+    last_node_char_code: begin
+      ignore_font_kerning;
+      if is_char_node(tx) then
+        find_last_char
+      else if type(tx)=ligature_node then
+        {decompose a ligature to original characters}
+        begin r:=lig_ptr(tx);
+        while link(r)<>null do r:=link(r);
+        cur_val:=qo(character(r));
+        end
+      {else: already -1}
+      end;
+    last_node_font_code: begin
+      ignore_font_kerning;
+      if is_char_node(tx) then
+        cur_val:=font(tx)+font_id_base
+      else if type(tx)=ligature_node then
+        cur_val:=font(lig_char(tx))+font_id_base
+      {else: already nullfont}
+      end;
     end {there are no other cases}
   else if (mode=vmode)and(tx=head) then
     case cur_chr of
@@ -10530,6 +10647,9 @@ else begin if cur_chr=glue_val then cur_val:=zero_glue@+else cur_val:=0;
     dimen_val: cur_val:=last_kern;
     glue_val: if last_glue<>max_halfword then cur_val:=last_glue;
     last_node_type_code: cur_val:=last_node_type;
+    last_node_subtype_code: cur_val:=last_node_subtype;
+    last_node_char_code: cur_val:=-1;
+    last_node_font_code: cur_val:=-1;
     end; {there are no other cases}
   end
 
@@ -24226,6 +24346,7 @@ all split and floating insertions.
 @!last_penalty:integer; {used to implement \.{\\lastpenalty}}
 @!last_kern:scaled; {used to implement \.{\\lastkern}}
 @!last_node_type:integer; {used to implement \.{\\lastnodetype}}
+@!last_node_subtype:integer; {used to implement \.{\\lastnodesubtype}}
 @!insert_penalties:integer; {sum of the penalties for insertions
   that were held over}
 
@@ -24366,7 +24487,7 @@ elsewhere.)
 @<Start a new current page@>=
 page_contents:=empty; page_tail:=page_head; link(page_head):=null;@/
 last_glue:=max_halfword; last_penalty:=0; last_kern:=0;
-last_node_type:=-1;
+last_node_type:=-1; last_node_subtype:=-1;
 page_depth:=0; page_max_depth:=0
 
 @ At certain times box 255 is supposed to be void (i.e., |null|),
@@ -24434,7 +24555,11 @@ else contrib_tail:=contrib_head {other modes}
 @ @<Update the values of |last_glue|...@>=
 if last_glue<>max_halfword then delete_glue_ref(last_glue);
 last_penalty:=0; last_kern:=0;
-last_node_type:=type(p)+1;
+if type(p)<dir_node then last_node_type:=type(p)+1
+else if type(p)=dir_node then last_node_type:=type(list_ptr(p))+1
+else if type(p)<disp_node then last_node_type:=type(p)
+else last_node_type:=type(p)-1; {no |disp_node| in a vertical list}
+last_node_subtype:=subtype(p);
 if type(p)=glue_node then
   begin last_glue:=glue_ptr(p); add_glue_ref(last_glue);
   end
@@ -26708,8 +26833,112 @@ if q=null then if fm then confusion("tail1")
 else if fm then {|r|$\to$|p=begin_M|$\to$|q=end_M|}
   begin tail:=r; link(r):=null; flush_node_list(p);@+end
 @#
-@d check_effective_tail(#)==find_effective_tail_eTeX
-@d fetch_effective_tail==fetch_effective_tail_eTeX
+@d check_effective_tail_pTeX(#)==
+tx:=tail;
+if not is_char_node(tx) then
+  if type(tx)=disp_node then
+    begin tx:=prev_node;
+    if not is_char_node(tx) then
+      if type(tx)=disp_node then #; {|disp_node| from a discretionary}
+    end
+@#
+@d fetch_effective_tail_pTeX(#)== {extract |tx|, merge |disp_node| pair}
+q:=head; p:=null; disp:=0; pdisp:=0;
+repeat r:=p; p:=q; fd:=false;
+if not is_char_node(q) then
+  if type(q)=disc_node then
+    begin for m:=1 to replace_count(q) do p:=link(p);
+    if p=tx then #;
+    end
+  else if type(q)=disp_node then
+    begin pdisp:=disp; disp:=disp_dimen(q); fd:=true;@+end;
+q:=link(p);
+until q=tx; {found |r|$\to$|p|$\to$|q=tx|}
+q:=link(tx); link(p):=q; link(tx):=null;
+if q=null then tail:=p
+else if fd then {|r|$\to$|p=disp_node|$\to$|q=disp_node|}
+  begin prev_node:=r; prev_disp:=pdisp; link(p):=null; tail:=p;
+  disp_dimen(p):=disp_dimen(q); free_node(q,small_node_size);
+  end
+else prev_node:=p
+@#
+@d fetch_effective_tail_epTeX(#)== {extract |tx|,
+  drop \.{\\beginM} \.{\\endM} pair and\slash or merge |disp_node| pair}
+q:=head; p:=null; r:=null; fm:=0; fd:=0; disp:=0; pdisp:=0;
+repeat s:=r; r:=p; p:=q; fm:=fm div 2; fd:=fd div 2;
+if not is_char_node(q) then
+  if type(q)=disc_node then
+    begin for m:=1 to replace_count(q) do
+      begin p:=link(p); if p=tx then #; end
+      { |tx| might be a part of discretionary; in this case, nothing will be removed}
+    end
+  else if (type(q)=math_node)and(subtype(q)=begin_M_code) then fm:=2
+  else if type(q)=disp_node then
+    begin pdisp:=disp; disp:=disp_dimen(q); fd:=2;@+end;
+q:=link(p);
+until q=tx; {found |s|$\to$|r|$\to$|p|$\to$|q=tx|}
+q:=link(tx); link(p):=q; link(tx):=null;
+if q=null then  begin tail:=p; gm:=0; gd:=0;@+end
+else  begin if type(q)=math_node then
+    begin gm:=2;
+    if link(q)=null then gd:=0
+    else if type(link(q))=disp_node then gd:=1
+    else confusion("tail3");
+@:this can't happen tail3}{\quad tail3@>
+    end
+  else if type(q)=disp_node then
+    begin prev_node:=p; gd:=2;
+    if link(q)=null then gm:=0
+    else if type(link(q))=math_node then gm:=1
+    else confusion("tail4");
+@:this can't happen tail4}{\quad tail4@>
+    end
+  else confusion("tail5");
+@:this can't happen tail5}{\quad tail5@>
+  end;
+if gm=0 then if fm=2 then confusion("tail1")
+@:this can't happen tail1}{\quad tail1@>
+  else if fm=1 then confusion("tail2");
+@:this can't happen tail2}{\quad tail2@>
+if (fm+fd)=1 then begin fm:=0; fd:=0;@+end;
+if gm=0 then fm:=0;
+if gd=0 then fd:=0;
+@#
+if fd>0 then {merge a |disp_node| pair}
+  begin if gm=0 then {|p|$\to$|q=disp_node|$to$|null|}
+    begin t:=q; q:=null; link(p):=q; tail:=p;@+end
+  else if gm=1 then {|p|$\to$|q=disp_node|$to$|end_M|$to$|null|}
+    begin t:=q; q:=link(q); link(p):=q; gm:=2;@+end
+  else {|p|$\to$|q=end_M|$\to$|disp_node|$to$|null|}
+    begin t:=link(q); link(q):=null; tail:=q;@+end;
+@#
+  if fd=1 then {|s|$\to$|r=disp_node|}
+    begin prev_node:=s; disp_dimen(r):=disp_dimen(t);@+end
+  else {|r|$\to$|p=disp_node|}
+    begin prev_node:=r; disp_dimen(p):=disp_dimen(t);@+end;
+  prev_disp:=pdisp; free_node(t,small_node_size); gd:=0;
+  end;
+@#
+if fm>0 then {drop \.{\\beginM} \.{\\endM} pair}
+  begin if gd=0 then {|p|$\to$|q=end_M|$to$|null|}
+    begin t:=q; q:=null; link(p):=q; tail:=p;@+end
+  else if gd=1 then {|p|$\to$|q=end_M|$to$|disp_node|$to$|null|}
+    begin t:=q; q:=link(q); link(p):=q; prev_node:=p; link(t):=null
+    end
+  else {|p|$\to$|q=disp_node|$\to$|end_M|$to$|null|}
+    begin t:=link(q); link(q):=null; tail:=q;@+end;
+@#
+  if fm=1 then {|s|$\to$|r=begin_M|$\to$|p=disp_node|}
+    begin link(s):=p; link(r):=t; t:=r; prev_node:=s;@+end
+  else {|r|$\to$|p=begin_M|$\to$|q|}
+    begin link(r):=q; link(p):=t; t:=p;
+    if q=null then tail:=r@+else prev_node:=r;
+    end;
+  flush_node_list(t);
+  end
+@#
+@d check_effective_tail(#)==find_effective_tail_epTeX
+@d fetch_effective_tail==fetch_effective_tail_epTeX
 
 @<If the current list ends with a box node, delete it...@>=
 begin cur_box:=null;
@@ -27072,7 +27301,12 @@ procedure delete_last;
 label exit;
 var @!p,@!q:pointer; {run through the current list}
 @!r:pointer; {running behind |p|}
-@!fm:boolean; {a final \.{\\beginM} \.{\\endM} node pair?}
+@!s:pointer; {running behind |r|}
+@!t:pointer;
+@!fm:integer; {1: if |r|, 2: if |p| is a \.{\\beginM} node}
+@!gm:integer; {1: if |link(q)|, 2: if |q| is an  \.{\\endM} node}
+@!fd,@!gd:integer; {same for |disp_node|}
+@!disp,@!pdisp:scaled; {displacement}
 @!tx:pointer; {effective tail node}
 @!m:quarterword; {the length of a replacement list}
 begin if (mode=vmode)and(tail=head) then
@@ -32124,6 +32358,12 @@ that integer.
 @<Generate all \eTeX...@>=
 primitive("lastnodetype",last_item,last_node_type_code);
 @!@:last_node_type_}{\.{\\lastnodetype} primitive@>
+primitive("lastnodesubtype",last_item,last_node_subtype_code);
+@!@:last_node_subtype_}{\.{\\lastnodesubtype} primitive@>
+primitive("lastnodechar",last_item,last_node_char_code);
+@!@:last_node_char_}{\.{\\lastnodechar} primitive@>
+primitive("lastnodefont",last_item,last_node_font_code);
+@!@:last_node_font_}{\.{\\lastnodefont} primitive@>
 primitive("eTeXversion",last_item,eTeX_version_code);
 @!@:eTeX_version_}{\.{\\eTeXversion} primitive@>
 primitive("eTeXrevision",convert,eTeX_revision_code);@/
@@ -32178,6 +32418,10 @@ primitive("XeTeXpdfpagecount",last_item,XeTeX_pdf_page_count_code);
 
 @ @<Cases of |last_item| for |print_cmd_chr|@>=
 last_node_type_code: print_esc("lastnodetype");
+last_node_subtype_code: print_esc("lastnodesubtype");
+last_node_char_code: print_esc("lastnodechar");
+last_node_font_code: print_esc("lastnodefont");
+kcat_code: print_esc("kcatcode");
 eTeX_version_code: print_esc("eTeXversion");
 XeTeX_version_code: print_esc("XeTeXversion");
 
