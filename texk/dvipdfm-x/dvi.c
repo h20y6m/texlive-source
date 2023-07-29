@@ -378,15 +378,15 @@ find_post (void)
   /* file_position now points to last non padding character or
    * beginning of file */
   if (dvi_file_size - current < 4 || current == 0 ||
-      !(ch == DVI_ID || ch == DVIV_ID || ch == XDV_ID || ch == XDV_ID_OLD)) {
+      !(ch == DVI_ID || ch == DVIV_ID || ch == XDV_ID || ch == XDV_ID_OLD || ch == XDV_NP_ID)) {
     MESG("DVI ID = %d\n", ch);
     ERROR(invalid_signature);
   } 
 
   post_id_byte = ch;
-  if (ch == XDV_ID || ch == XDV_ID_OLD)
+  if (ch == XDV_ID || ch == XDV_ID_OLD || ch == XDV_NP_ID)
     dpx_conf.compat_mode = dpx_mode_xdv_mode;
-  dvi_ptex_with_vert = is_ptex = (ch == DVIV_ID) || (ch == XDV_ID);
+  dvi_ptex_with_vert = is_ptex = (ch == DVIV_ID) || (ch == XDV_NP_ID);
 
   /* Make sure post_post is really there */
   current = current - 5;
@@ -410,7 +410,7 @@ find_post (void)
     ERROR(invalid_signature);
   }
   ch = get_unsigned_byte(dvi_file);
-  if (!(ch == DVI_ID || ch == XDV_ID || ch == XDV_ID_OLD)) {
+  if (!(ch == DVI_ID || ch == XDV_ID || ch == XDV_ID_OLD || ch == XDV_NP_ID)) {
     MESG("DVI ID = %d\n", ch);
     ERROR(invalid_signature);
   }
@@ -506,15 +506,15 @@ get_preamble_dvi_info (void)
   
   /* An Ascii pTeX DVI file has id_byte DVI_ID in the preamble but DVIV_ID in the postamble. */
   ch = get_unsigned_byte(dvi_file);
-  if (!(ch == DVI_ID || ch == XDV_ID || ch == XDV_ID_OLD)) {
+  if (!(ch == DVI_ID || ch == XDV_ID || ch == XDV_ID_OLD || ch == XDV_NP_ID)) {
     MESG("DVI ID = %d\n", ch);
     ERROR(invalid_signature);
   }
 
   pre_id_byte = ch;
-  if (ch == XDV_ID || ch == XDV_ID_OLD)
+  if (ch == XDV_ID || ch == XDV_ID_OLD || ch == XDV_NP_ID)
     dpx_conf.compat_mode = dpx_mode_xdv_mode;
-  is_ptex = ch == DVI_ID; /* maybe */
+  is_ptex = ch == (ch == DVI_ID) || (ch == XDV_NP_ID);; /* maybe */
   
   dvi_info.unit_num = get_positive_quad(dvi_file, "DVI", "unit_num");
   dvi_info.unit_den = get_positive_quad(dvi_file, "DVI", "unit_den");
@@ -2137,12 +2137,12 @@ check_postamble (void)
   skip_bytes(4, dvi_file);
   post_id_byte = get_unsigned_byte(dvi_file);
   if (!(post_id_byte == DVI_ID || post_id_byte == DVIV_ID 
-    || post_id_byte == XDV_ID || post_id_byte == XDV_ID_OLD)) {
+    || post_id_byte == XDV_ID || post_id_byte == XDV_NP_ID || post_id_byte == XDV_ID_OLD)) {
     MESG("DVI ID = %d\n", post_id_byte);
     ERROR(invalid_signature);
   }
   check_id_bytes();
-  if (has_ptex && post_id_byte != DVIV_ID && post_id_byte != XDV_ID)
+  if (has_ptex && post_id_byte != DVIV_ID && post_id_byte != XDV_NP_ID)
     ERROR ("Saw opcode %i in DVI file not for Ascii pTeX", PTEXDIR);
 
   num_pages = 0; /* force loop to terminate */

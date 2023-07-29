@@ -102,6 +102,7 @@
 #define DVIV_ID    3    /* with Ascii pTeX VW mode extension */
 #define XDV_ID_OLD 6    /* older XeTeX ".xdv" output that does not have XDV_TEXT_AND_GLYPHS */
 #define XDV_ID     7    /* XeTeX ".xdv" output that uses XDV opcodes below */
+#define XDV_NP_ID  8    /* npTeX ".xdv" output that uses XDV opcodes below and PTEXDIR */
 #define POST       248  /* Postamble- -- similar to preamble
                               four byte pointer to final bop
                               four byte numerator

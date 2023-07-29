@@ -4577,7 +4577,6 @@ begin if cur_length>depth_threshold then
 n:=0;
 while p>mem_min do
   begin print_ln; print_current_string; {display the nesting history}
-  print_int(p); 
   if p>mem_end then {pointer out of range}
     begin print("Bad link, display aborted."); return;
 @.Bad link...@>
@@ -14653,7 +14652,7 @@ users to override the |mag|~setting when a \.{DVI} file is being printed.)
 Finally, |k| and |x| allow the \.{DVI} writer to include a comment, which is not
 interpreted further. The length of comment |x| is |k|, where |0<=k<256|.
 
-@d id_byte=7 {identifies the kind of \.{DVI} files described here}
+@d id_byte=8 {identifies the kind of \.{DVI} files described here}
 
 @ Font definitions for a given font number |k| contain further parameters
 $$\hbox{|c[4]| |s[4]| |d[4]| |a[1]| |l[1]| |n[a+l]|.}$$
