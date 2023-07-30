@@ -31249,6 +31249,7 @@ any_mode(extension):do_extension;
 procedure do_extension;
 var i,@!j,@!k:integer; {all-purpose integers}
 @!p,@!q,@!r:pointer; {all-purpose pointers}
+@!disp:scaled; {displacement register}
 begin case cur_chr of
   open_node:@<Implement \.{\\openout}@>;
   write_node:@<Implement \.{\\write}@>;
@@ -32055,6 +32056,8 @@ begin
   if is_native_font(cur_font) then begin
    new_whatsit(glyph_node,glyph_node_size);
    scan_int;
+   if direction=dir_tate then disp:=t_baseline_shift else disp:=y_baseline_shift;
+   { @<Append |disp_node| at begin of displace area@>; }
    if (cur_val<0)or(cur_val>65535) then
      begin print_err("Bad glyph number");
      help2("A glyph number must be between 0 and 65535.")@/
@@ -32064,6 +32067,7 @@ begin
    native_glyph(tail):=cur_val;
    set_native_glyph_metrics(tail, XeTeX_use_glyph_metrics);
   end else not_native_font_error(extension, glyph_code, cur_font);
+  { @<Append |disp_node| at end of displace area@>; }
  end
 end
 
@@ -36435,8 +36439,15 @@ while p<>null do
         else last_char:=null;
     end;
   ligature_node: if check_box(lig_ptr(p)) then flag:=true;
-  ins_node,disp_node,mark_node,adjust_node,whatsit_node,penalty_node:
+  ins_node,disp_node,mark_node,adjust_node,penalty_node:
     do_nothing;
+  whatsit_node: 
+    if (subtype(p)=native_word_node)or(subtype(p)=native_word_node_AT) then
+      begin if find_first_char then
+        begin find_first_char:=false; first_char:=p;
+        end;
+        last_char:=p; flag:=true;
+      end;
   math_node:
     if (subtype(p)=before)or(subtype(p)=after) then
       begin if find_first_char then
@@ -36492,7 +36503,7 @@ var q,s,t,u,v,x,z:pointer;
   a: pointer; { temporary pointer for accent }
   insert_skip:no_skip..after_wchar;
   cx:UnicodeScalar; {temporary register for KANJI character}
-  ax:ASCII_code; {temporary register for ASCII character}
+  ax,ay:UnicodeScalar; {temporary register for ASCII character}
   do_ins:boolean; {for inserting |xkanji_skip| into previous (or after) KANJI}
 begin if link(p)=null then goto exit;
 if auto_spacing>0 then
@@ -36562,8 +36573,10 @@ while p<>null do
           if link(q)<>t then link(link(q)):=a else link(q):=a;
           end;
         end;
+    whatsit_node: if (subtype(p)=native_word_node)or(subtype(p)=native_word_node_AT) then
+      @<Insert native word node surround spacing@>;
     math_node: @<Insert math surround spacing@>;
-    mark_node,adjust_node,ins_node,whatsit_node:
+    mark_node,adjust_node,ins_node:
       {These nodes are vanished when typeset is done}
       do_nothing;
     othercases insert_skip:=no_skip;
@@ -36593,6 +36606,21 @@ else
     insert_skip:=after_schar else insert_skip:=no_skip;
   end
 
+@ @<Insert native word node surround spacing@>=
+begin k:=native_length(p)-1; ax:=get_native_char(p,0);
+if (k>0) and (ax>=@"D800) and (ax<=@"DBFF) then begin
+  ay:=get_native_char(p, 1);
+  if (ay>=@"DC00) and (ay<=@"DFFF) then ax:=@"10000+(ax-@"D800)*@"400+(ay-@"DC00);
+  end;
+if insert_skip=after_wchar then @<Insert KANJI-ASCII spacing@>;
+ax:=get_native_char(p,k);
+if (k>0) and (ax>=@"DC00) and (ax<=@"DFFF) then begin
+  ay:=get_native_char(p, k-1);
+  if (ay>=@"D800) and (ay<=@"DBFF) then ax:=@"10000+(ay-@"D800)*@"400+(ax-@"DC00);
+  end;
+if auto_xsp_code(ax)>=2 then insert_skip:=after_schar else insert_skip:=no_skip;
+end
+
 @ @<Insert hbox surround spacing@>=
 begin find_first_char:=true; first_char:=null; last_char:=null;
 if shift_amount(p)=0 then
@@ -36606,7 +36634,16 @@ if shift_amount(p)=0 then
 end
 
 @ @<Insert a space before the |first_char|@>=
-if type(first_char)=math_node then
+if type(first_char)=whatsit_node then { |native_word|, |native_word_AT| }
+  begin k:=native_length(first_char)-1; ax:=get_native_char(first_char,0);
+  if (k>0) and (ax>=@"D800) and (ax<=@"DBFF) then begin
+    ay:=get_native_char(first_char, 1);
+    if (ay>=@"DC00) and (ay<=@"DFFF) then ax:=@"10000+(ax-@"D800)*@"400+(ay-@"DC00);
+    end;
+  print("BN "); print_int(ax); 
+  if insert_skip=after_wchar then @<Insert KANJI-ASCII spacing@>;
+  end
+else if type(first_char)=math_node then
   begin ax:=qo("0");
   if insert_skip=after_wchar then @<Insert KANJI-ASCII spacing@>;
   end
@@ -36621,7 +36658,16 @@ else
   end;
 
 @ @<Insert a space after the |last_char|@>=
-if type(last_char)=math_node then
+if type(last_char)=whatsit_node then { |native_word|, |native_word_AT| }
+  begin k:=native_length(last_char)-1; ax:=get_native_char(last_char,k);
+  if (k>0) and (ax>=@"DC00) and (ax<=@"DFFF) then begin
+    ay:=get_native_char(last_char, k-1);
+    if (ay>=@"D800) and (ay<=@"DBFF) then ax:=@"10000+(ay-@"D800)*@"400+(ax-@"DC00);
+    end;
+  print("AN ");  print_int(ax);
+  if auto_xsp_code(ax)>=2 then insert_skip:=after_schar else insert_skip:=no_skip;
+  end
+else if type(last_char)=math_node then
   begin ax:=qo("0");
   if auto_xsp_code(ax)>=2 then
     insert_skip:=after_schar else insert_skip:=no_skip;

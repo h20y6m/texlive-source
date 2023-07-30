@@ -839,6 +839,13 @@ clear_state (void)
   current_font    = -1;
 }
 
+static void print_dvi_state(void){
+  fprintf(stderr, "(%10f,%10f,%10f,%10f,%10f,%10f,%d)",
+    (double)dvi_state.h/65536,(double)dvi_state.v/65536,(double)dvi_state.w/65536,
+    (double)dvi_state.x/65536,(double)dvi_state.y/65536,(double)dvi_state.z/65536,
+    dvi_state.d);
+}
+
 /* Migrated from pdfdev.c:
  * The following codes are originally put into pdfdev.c.
  * But they are moved to here to make PDF output independent
@@ -2042,11 +2049,23 @@ do_glyphs (int do_actual_text)
   slen = (unsigned int) get_buffered_unsigned_pair();
   xloc = NEW(slen, spt_t);
   yloc = NEW(slen, spt_t);
-  for (i = 0; i < slen; i++) {
-    xloc[i] = get_buffered_signed_quad();
-    yloc[i] = get_buffered_signed_quad();
-  }
-
+  switch(dvi_state.d) {
+    case 1: /* \tate */
+    for (i = 0; i < slen; i++) {
+      yloc[i] = get_buffered_signed_quad();
+      xloc[i] = get_buffered_signed_quad();
+    }; break;
+    case 3: /* \dtou */
+    for (i = 0; i < slen; i++) {
+      yloc[i] = -get_buffered_signed_quad();
+      xloc[i] = -get_buffered_signed_quad();
+    }; break;
+    default:
+    for (i = 0; i < slen; i++) {
+      xloc[i] = get_buffered_signed_quad();
+      yloc[i] = get_buffered_signed_quad();
+    }; break;
+  };
   if (font->rgba_used == 1) {
     pdf_color color;
     pdf_color_rgbcolor(&color,

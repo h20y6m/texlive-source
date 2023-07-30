@@ -1,14 +1,25 @@
 \ptextracingfonts=1000
-\font\lm="[LibertinusSerif-Regular.otf]"\lm
-\jfont\a=upjisr-h \a
+\font\lm="[LibertinusSerif-Regular.otf]:+dlig"\lm
+\jfont\a=upjisr-h at 12pt \a
 \jfont in jis\g=goth10
 \jfont\v=upjisr-v at 12pt\v
 \special{dvipdfmx:config z 0}
 \ybaselineshift 3pt
+\tbaselineshift=\dimexpr.5\fontcharht\font `\M
 \def\zw{zw}
-\message{AAA}\autospacing\autoxspacing
+\autospacing\autoxspacing
 \kanjiskip=1pt plus 0.05\zw minus 0.01\zw
 \xkanjiskip=0.25\zw plus 0.25\zw minus 0.125\zw
+\def\folio{}
+\setbox0=\hbox{\vrule\hbox{\vrule 漢字rffiThz漢\XeTeXglyph 94\XeTeXglyph 76\char453%
+  字\tenrm erffiThz\vrule}\vrule}\quad
+\setbox0=\hbox{漢字\hbox{()}漢字a\hbox{日}b}
+
+\tracingonline1\showboxbreadth10000\showboxdepth10000
+\showbox0
+\leavevmode\box0
+\end
+
 DVIあい（）うえお漢字αβδx this%
 \cjkxcode`\α=0 αβsπ
 
@@ -21,7 +32,9 @@ DVIあい（）うえお漢字αβδx this%
 
 \g ちょっと「チェック」しちゃった．
 
-\hbox{\tate xyzちょっとチェックABC}
-\tracingall
+\kanjiskip=0pt plus 0.05\zw minus 0.01\zw
+\leavevmode
+\hbox{\vrule\hbox{\tate \vrule xyzちょっとチェックABC\vrule}\vrule}\quad
+\hbox{\vrule\hbox{\dtou \vrule ffiThtzckちょっとチェックABC\vrule}\vrule}%
 \end
 
