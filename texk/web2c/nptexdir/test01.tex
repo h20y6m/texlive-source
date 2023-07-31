@@ -1,5 +1,5 @@
 \ptextracingfonts=1000
-\font\lm="[LibertinusSerif-Regular.otf]:+dlig"\lm
+\font\lm="Unifont:+dlig"\lm
 \jfont\a=upjisr-h at 12pt \a
 \jfont in jis\g=goth10
 \jfont\v=upjisr-v at 12pt\v
@@ -11,25 +11,26 @@
 \kanjiskip=1pt plus 0.05\zw minus 0.01\zw
 \xkanjiskip=0.25\zw plus 0.25\zw minus 0.125\zw
 \def\folio{}
-\setbox0=\hbox{\vrule\hbox{\vrule 漢字rffiThz漢\XeTeXglyph 94\XeTeXglyph 76\char453%
+\leavevmode
+\hbox{\vrule\hbox{\vrule 漢字rffiThty漢\XeTeXglyph 94\XeTeXglyph 76\char453%
   字\tenrm erffiThz\vrule}\vrule}\quad
-\setbox0=\hbox{漢字\hbox{()}漢字\accent168Th\hbox{日\accent`ほ漢\XeTeXglyph354sあ}b}
-
-\tracingonline1\showboxbreadth10000\showboxdepth10000
-\showbox0
-\leavevmode\box0
+\hbox{漢字\hbox{()}漢字\accent168Th\hbox{日\accent`ほ漢\XeTeXglyph354sあ}b}
 
 \chardef\cdn=`\β
 \achardef\cda=`\β
 \kchardef\cdk=`\β
-\achardef\x=95424
+\achardef\cdaa=`𠮷
+\kchardef\cdka=`𠮷
+\catcode`𠂤=13
+\def𠂤{[fuga]}
+\def\𠮷{[hoge]}
+𠂤.\string 𠮷.\the\numexpr`𠂤.\the\numexpr`\𠂤.
+\𠮷.\csname 𠮷\endcsname
 
-\tracingall\tracingcommands=3
-\x\catcode`\γ=12
+\cdaa\cdka\catcode`\γ=12
 {\cjkxcode`\β=6 \cjkxcode`\γ=7 [1\cdn 2\cda3\cdk 4\char`\γ\achar`\γ\kchar`\γ]}
 {\cjkxcode`\β=0 \cjkxcode`\γ=0 [1\cdn 2\cda3\cdk 4\char`\γ\achar`\γ\kchar`\γ]}
 
-\tracingnone
 \end
 
 DVIあい（）うえお漢字αβδx this%

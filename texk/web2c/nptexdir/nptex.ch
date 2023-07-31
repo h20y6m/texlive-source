@@ -77,6 +77,12 @@ if translate_filename then read_tcx_file;
 @!bound_default:integer; {temporary for setup}
 @z
 
+@x [5.54] l.1422 - error_line
+@!trick_buf:array[0..ssup_error_line] of ASCII_code; {circular buffer for
+@y
+@!trick_buf:array[0..ssup_error_line] of UnicodeScalar; {circular buffer for
+@z
+
 @x [5.61] l.1556 - Print rest of banner, eliminate misleading `(no format preloaded)'.
 if translate_filename then begin
   wterm(' (');
