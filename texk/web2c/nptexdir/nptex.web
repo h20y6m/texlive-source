@@ -160,11 +160,11 @@
   \phantom{#1}%
   \rlap{\special{pdf:btrans xscale -1}#1\special{pdf:etrans}}%
 }
-\def\XeTeX{X\kern-.125em\lower.5ex\hbox{\mirror{E}}\kern-.1667em\TeX}
-\def\npTeX{np\TeX}
-\def\pTeX{p\TeX}
+\protected\def\XeTeX{X\kern-.125em\lower.5ex\hbox{\mirror{E}}\kern-.1667em\TeX}
+\protected\def\npTeX{np\TeX}
+\protected\def\pTeX{p\TeX}
 
-\def\eTeX{$\varepsilon$-\TeX}
+\protected\def\eTeX{$\varepsilon$-\TeX}
 \font\revrm=xbmc10 % for right-to-left text
 % to generate xbmc10 (i.e., reflected cmbx10) use a file
 % xbmc10.mf containing:
@@ -2610,7 +2610,7 @@ routines cited there must be modified to allow negative glue ratios.)
 
 \font\tenlogo=logo10 % font used for the METAFONT logo
 \def\MP{{\tenlogo META}\-{\tenlogo POST}}
-\def\pdfTeX{pdf\TeX}
+\protected\def\pdfTeX{pdf\TeX}
 
 This section is (almost) straight from MetaPost. I had to change
 the types (use |integer| instead of |fraction|), but that should
@@ -3568,7 +3568,7 @@ case abs(box_dir(b)) of
   dir_yoko: @<Yoko to other direction@>;
   dir_tate: @<Tate to other direction@>;
   dir_dtou: @<DtoU to other direction@>;
-  othercases begin 
+  othercases begin
     print_int(b); print(": "); print_int(box_dir(b)); print("->"); print_int(dir);
     confusion("new_dir_node:illegal dir");
   end;
@@ -4419,7 +4419,7 @@ begin while p>mem_min do
         else @<Print the font identifier for |font(p)|@>;
         print_char(" "); font_in_short_display:=font(p);
         end;
-      if font_dir[font(p)]<>dir_default then 
+      if font_dir[font(p)]<>dir_default then
         begin p:=link(p); print_char(info(p) mod max_char_val);
         end
       else print_ASCII(qo(character(p)));
@@ -4471,7 +4471,7 @@ begin if p>mem_end then print_esc("CLOBBERED.")
 else  begin if (font(p)<font_base)or(font(p)>font_max) then print_char("*")
 @.*\relax@>
   else @<Print the font identifier for |font(p)|@>;
-  print_char(" "); 
+  print_char(" ");
   if font_dir[font(p)]<>dir_default then
     begin p:=link(p); print_char(info(p) mod max_char_val); end
   else print_ASCII(qo(character(p)));
@@ -4592,7 +4592,7 @@ exit:
 end;
 
 @ @<Display node |p|@>=
-if is_char_node(p) then 
+if is_char_node(p) then
   begin print_font_and_char(p);
   if font_dir[font(p)]<>dir_default then p:=link(p)
   end
@@ -7138,7 +7138,11 @@ after_group: print_esc("aftergroup");
 assign_font_dimen: print_esc("fontdimen");
 begin_group: print_esc("begingroup");
 break_penalty: print_esc("penalty");
-char_num: print_esc("char");
+char_num: case chr_code of
+  0: print_esc("char");
+  1: print_esc("achar");
+  2: print_esc("kchar");
+  end;
 cs_name: print_esc("csname");
 def_font: print_esc("font");
 def_jfont: print_esc("jfont");
@@ -8019,7 +8023,7 @@ ignored; after this case is processed, the next value of |state| will
 be |skip_blanks|.
 
 If \.{\\ptexlineendmode} is odd, the |state| become |skip_blanks_kanji|
-after a control word which ends with a character whose the second bit 
+after a control word which ends with a character whose the second bit
 of |cjkx_code| is 1. This state is
 similar to |skip_blanks|, but the |state| will be |mid_kanji| after
 |skip_blanks_kanji+left_brace| and |skip_blanks_kanji+right_brace|,
@@ -8845,7 +8849,7 @@ values for |mid_line|, |skip_blanks|, and |new_line| are spaced
 apart from each other by |max_char_code+1|, so we can add a character's
 command code to the state to get a single number that characterizes both.
 
-@d any_state_plus(#) == 
+@d any_state_plus(#) ==
   mid_line+#,skip_blanks+#,new_line+#,skip_blanks_kanji+#,mid_kanji+#
 
 @<Change state if necessary...@>=
@@ -8885,7 +8889,7 @@ end
 @<Handle situations involving spaces, braces, changes of state@>=
 mid_kanji+spacer,mid_line+spacer:@<Enter |skip_blanks| state, emit a space@>;
 mid_line+car_ret: @<Finish line, emit a space@>;
-mid_kanji+car_ret: if skip_mode then @<Finish line, |goto switch|@> 
+mid_kanji+car_ret: if skip_mode then @<Finish line, |goto switch|@>
   else @<Finish line, emit a space@>;
 skip_blanks+car_ret,skip_blanks_kanji+car_ret,any_state_plus(comment):
   @<Finish line, |goto switch|@>;
@@ -9027,10 +9031,10 @@ begin if loc>limit then cur_cs:=null_cs {|state| is irrelevant in this case}
 else  begin start_cs: k:=loc; cur_chr:=buffer[k]; cat:=cat_code(cur_chr);
   incr(k);
   if cat=letter then
-    begin if is_cjkx_nospc(cur_chr) and (ptex_lineend mod 2)=0 then 
+    begin if is_cjkx_nospc(cur_chr) and (ptex_lineend mod 2)=0 then
       state:=skip_blanks_kanji else state:=skip_blanks end
   else if cat=spacer then state:=skip_blanks
-  else if is_cjkx_nospc(cur_chr) and (ptex_lineend mod 2)=0 then 
+  else if is_cjkx_nospc(cur_chr) and (ptex_lineend mod 2)=0 then
     state:=mid_kanji
   else state:=mid_line;
   if (cat=letter)and(k<=limit) then
@@ -9104,7 +9108,7 @@ end
 @ @<Scan ahead in the buffer...@>=
 begin cur_chr:=buffer[k]; cat:=cat_code(cur_chr); incr(k);
 while (cat=letter)and(k<=limit) do begin
-  if is_cjkx_nospc(cur_chr) and (ptex_lineend mod 2)=0 then 
+  if is_cjkx_nospc(cur_chr) and (ptex_lineend mod 2)=0 then
     state:=skip_blanks_kanji else state:=skip_blanks;
   cur_chr:=buffer[k]; cat:=cat_code(cur_chr); incr(k);
 end;
@@ -10937,7 +10941,7 @@ such constants behave like numeric ones.
 @<Scan an alphabetic character code into |cur_val|@>=
 begin get_token; {suppress macro expansion}
 if cur_tok<cs_token_flag then
-  begin cur_val:=cur_chr;
+  begin skip_mode:=false; cur_val:=cur_chr;
   if cur_cmd<=right_brace then
     if cur_cmd=right_brace then incr(align_state)
     else decr(align_state);
@@ -10953,6 +10957,7 @@ if cur_val>biggest_usv then
   cur_val:="0"; back_error;
   end
 else @<Scan an optional space@>;
+skip_mode:=true;
 end
 
 @ @<Scan an optional space@>=
@@ -12964,6 +12969,7 @@ file name in the input by calling |get_x_token| for the information.
 label done;
 begin name_in_progress:=true; begin_name;
 @<Get the next non-blank non-call...@>;
+skip_mode:=false;
 loop@+begin if (cur_cmd>other_char)or(cur_chr>biggest_char) then
     {not a character}
     begin back_input; goto done;
@@ -15570,7 +15576,7 @@ dvi_f:=f;
 end
 
 @ @<Output the non-|char_node| |p| for |hlist_out|...@>=
-begin 
+begin
 case type(p) of
 hlist_node,vlist_node,dir_node:@<Output a box in an hlist@>;
 rule_node: begin rule_ht:=height(p); rule_dp:=depth(p); rule_wd:=width(p);
@@ -15804,7 +15810,7 @@ else  begin if upwards then cur_v:=cur_v-depth(p) else cur_v:=cur_v+height(p); s
     dir_node:dir_out;
   endcases;
   dvi_h:=save_h; dvi_v:=save_v; dvi_dir:=save_dir;
-  if upwards then cur_v:=save_v-height(p) else cur_v:=save_v+depth(p); 
+  if upwards then cur_v:=save_v-height(p) else cur_v:=save_v+depth(p);
   cur_h:=left_edge; cur_dir_hv:=save_dir;
   end
 
@@ -16060,7 +16066,7 @@ else  begin dvi_out(post); {beginning of the postamble}
   dvi_out(max_push div 256); dvi_out(max_push mod 256);@/
   dvi_out((total_pages div 256) mod 256); dvi_out(total_pages mod 256);@/
   @<Output the font definitions for all fonts that were used@>;
-  dvi_out(post_post); dvi_four(last_bop); dvi_out(id_byte); 
+  dvi_out(post_post); dvi_four(last_bop); dvi_out(id_byte);
   k:=4+((dvi_buf_size-dvi_ptr) mod 4); {the number of 223's}
   while k>0 do
     begin dvi_out(223); decr(k);
@@ -18397,7 +18403,7 @@ while q<>null do @<Process node-or-noad |q| as much as possible in preparation
 @<Convert \(a)a final |bin_noad| to an |ord_noad|@>;
 @<Make a second pass over the mlist, removing all noads and inserting the
   proper spacing and penalties@>;
-p:=new_null_box; link(p):=link(temp_head); adjust_hlist(p,false); 
+p:=new_null_box; link(p):=link(temp_head); adjust_hlist(p,false);
 link(temp_head):=link(p);
 delete_glue_ref(space_ptr(p)); delete_glue_ref(xspace_ptr(p));
 free_node(p,box_node_size);
@@ -22098,8 +22104,8 @@ loop@+  begin q:=link(r);
   {now |q| cannot be |null|}
   if is_char_node(q) then goto done1;
   if non_discardable(q) then goto done1;
-  if type(q)=kern_node then 
-    if (subtype(q)<>explicit)and(subtype(q)<>ita_kern)and(subtype(q)<>space_adjustment) then 
+  if type(q)=kern_node then
+    if (subtype(q)<>explicit)and(subtype(q)<>ita_kern)and(subtype(q)<>space_adjustment) then
       goto done1;
   r:=q; {now |type(q)=glue_node|, |kern_node|, |math_node|, or |penalty_node|}
   if type(q)=math_node then if TeXXeT_en then
@@ -25217,12 +25223,11 @@ big_switch: get_x_token;@/
 reswitch: @<Give diagnostic information, if requested@>;
 ins_kp:=false;
 case abs(mode)+cur_cmd of
-hmode+letter,hmode+other_char,hmode+char_given: 
+hmode+letter,hmode+other_char,hmode+char_given:
   if is_cjkx_jachar(cur_chr) then goto main_loop_j else goto main_loop;
-hmode+char_num: begin t:=cur_chr; 
-  if t<>1 then scan_usv_num else scan_char_num; cur_chr:=cur_val; 
+hmode+char_num: begin t:=cur_chr; scan_usv_num; cur_chr:=cur_val;
   case t of
-  0: if (cur_chr>=@"10000)or is_cjkx_jachar(cur_chr) then goto main_loop_j else goto main_loop;
+  0: if is_cjkx_jachar(cur_chr) then goto main_loop_j else goto main_loop;
   1: goto main_loop;
   2: goto main_loop_j;
   endcases;
@@ -25407,16 +25412,17 @@ collect_native:
 
   {try to collect as many chars as possible in the same font}
   get_next;
-  if (cur_cmd=letter) or (cur_cmd=other_char) or (cur_cmd=char_given) then 
+  if (cur_cmd=letter) or (cur_cmd=other_char) or (cur_cmd=char_given) then
     begin if not is_cjkx_jachar(cur_chr) then goto collect_native end
   else if cur_cmd=achar_given then goto collect_native;
   x_token;
-  if (cur_cmd=letter) or (cur_cmd=other_char) or (cur_cmd=char_given) then 
+  if (cur_cmd=letter) or (cur_cmd=other_char) or (cur_cmd=char_given) then
     begin if not is_cjkx_jachar(cur_chr) then goto collect_native end
   else if cur_cmd=achar_given then goto collect_native
   else if cur_cmd=char_num then begin t:=cur_chr;
-    if t<>1 then scan_usv_num else scan_char_num; cur_chr:=cur_val;
-    if (t=1)or((t=0)and not ((t>=@"10000)or is_cjkx_jachar(cur_chr))) then goto collect_native;
+    scan_usv_num; cur_chr:=cur_val;
+    if (t=1)or((t=0)and not is_cjkx_jachar(cur_chr)) then goto collect_native
+    else cur_cmd:=kchar_given;
   end;
 
   check_for_post_char_toks(collected);
@@ -25754,22 +25760,21 @@ look ahead for it.
 
 @<Look ahead for another character...@>=
 get_next; {set only |cur_cmd| and |cur_chr|, for speed}
-if (cur_cmd=letter)or(cur_cmd=other_char)or(cur_cmd=char_given) then 
-  begin if is_cjkx_jachar(cur_chr) then @<goto |main_lig_loop|@> 
+if (cur_cmd=letter)or(cur_cmd=other_char)or(cur_cmd=char_given) then
+  begin if is_cjkx_jachar(cur_chr) then @<goto |main_lig_loop|@>
   else goto main_loop_lookahead+1; end
 else if cur_cmd=achar_given then goto main_loop_lookahead+1
 else if cur_cmd=kchar_given then @<goto |main_lig_loop|@>;
 x_token; {now expand and set |cur_cmd|, |cur_chr|, |cur_tok|}
-if (cur_cmd=letter)or(cur_cmd=other_char)or(cur_cmd=char_given) then 
-  begin if is_cjkx_jachar(cur_chr) then @<goto |main_lig_loop|@> 
+if (cur_cmd=letter)or(cur_cmd=other_char)or(cur_cmd=char_given) then
+  begin if is_cjkx_jachar(cur_chr) then @<goto |main_lig_loop|@>
   else goto main_loop_lookahead+1; end
 else if cur_cmd=achar_given then goto main_loop_lookahead+1
 else if cur_cmd=kchar_given then @<goto |main_lig_loop|@>;
 if cur_cmd=char_num then
-  begin t:=cur_chr;
-  if t<>1 then scan_usv_num else scan_char_num; cur_chr:=cur_val; cur_chr:=cur_val; 
+  begin t:=cur_chr; scan_usv_num; cur_chr:=cur_val;
   case t of
-  0: if cur_chr<=@"10000 or is_cjkx_jachar(cur_chr) then @<goto |main_lig_loop|@> 
+  0: if is_cjkx_jachar(cur_chr) then @<goto |main_lig_loop|@>
     else goto main_loop_lookahead+1;
   1: goto main_loop_lookahead+1;
   2: @<goto |main_lig_loop|@>;
@@ -26119,10 +26124,10 @@ again_2:
   get_next;
   main_i:=orig_char_info(main_f)(cur_l);
   case cur_cmd of
-    letter,other_char,char_given: begin
+    letter,other_char: begin
       if is_cjkx_jachar(cur_chr) then begin
         cur_l:=qi(get_jfm_pos(KANJI(cur_chr),main_f)); goto main_loop_j+3; end
-      else begin 
+      else begin
         ins_kp:=true; cur_l:=qi(0); goto main_loop_j+3; end;
       end;
     achar_given: begin ins_kp:=true; cur_l:=qi(0); goto main_loop_j+3; end;
@@ -26135,16 +26140,16 @@ again_2:
       else begin ins_kp:=true; cur_l:=qi(0); end;
       end;
     char_given: begin
-      if is_cjkx_jachar(cur_chr) then begin cur_l:=qi(get_jfm_pos(KANJI(cur_chr),main_f)); end
+      if is_cjkx_jachar(cur_chr) then
+        begin cur_l:=qi(get_jfm_pos(KANJI(cur_chr),main_f)); end
       else begin ins_kp:=true; cur_l:=qi(0); end;
       cur_cmd:=cat_code(cur_chr);
       end;
     achar_given: begin ins_kp:=true; cur_l:=qi(0); cur_cmd:=cat_code(cur_chr); end;
     kchar_given: begin cur_l:=qi(get_jfm_pos(KANJI(cur_chr),main_f)); cur_cmd:=cat_code(cur_chr); end;
-    char_num: begin t:=cur_chr; 
-      if t<>1 then scan_usv_num else scan_char_num; cur_chr:=cur_val;
-      if (t=1)or((t=0)and not ((t>=@"10000)or is_cjkx_jachar(cur_chr))) then begin 
-        ins_kp:=true; cur_l:=qi(0); goto main_loop_j+3; 
+    char_num: begin t:=cur_chr; scan_usv_num; cur_chr:=cur_val;
+      if (t=1)or((t=0)and not is_cjkx_jachar(cur_chr)) then begin
+        ins_kp:=true; cur_l:=qi(0); goto main_loop_j+3;
         end
       else begin cur_l:=qi(get_jfm_pos(KANJI(cur_chr),main_f)); end
       end;
@@ -27038,7 +27043,7 @@ var h:scaled; {height of box}
 @!p:pointer; {first node in a box}
 @!d:scaled; {max depth}
 @!u,v:integer; {saved values for upwards mode flag}
-begin d:=box_max_depth; 
+begin d:=box_max_depth;
 delete_glue_ref(cur_kanji_skip); delete_glue_ref(cur_xkanji_skip);
 if auto_spacing>0 then cur_kanji_skip:=kanji_skip
 else cur_kanji_skip:=zero_glue;
@@ -27085,7 +27090,8 @@ start_par: if chr_code=0 then print_esc("noindent")@+ else print_esc("indent");
 
 @ @<Cases of |main_control| that build...@>=
 vmode+start_par: new_graf(cur_chr>0);
-vmode+letter,vmode+other_char,vmode+char_num,vmode+char_given,
+vmode+letter,vmode+other_char,vmode+char_num,
+   vmode+char_given,vmode+achar_given,vmode+kchar_given,
    vmode+math_shift,vmode+un_hbox,vmode+vrule,
    vmode+accent,vmode+discretionary,vmode+hskip,vmode+valign,
    vmode+ex_space,vmode+no_boundary:@t@>@;@/
@@ -27164,7 +27170,7 @@ end;
 @ @<Declare act...@>=
 procedure end_graf;
 begin if mode=hmode then
-  begin 
+  begin
 if (link(head)=tail)and(not is_char_node(tail)and(type(tail)=disp_node)) then
     begin free_node(tail,small_node_size); tail:=head; link(head):=null; end;
     { |disp_node|-only paragraphs are ignored }
@@ -27534,7 +27540,7 @@ else  begin print_err("Discretionary list is too long");
   error;
   end;
 if n>0 then tail:=q;
-decr(save_ptr); 
+decr(save_ptr);
 prev_node:=tail; tail_append(get_node(small_node_size));
 type(tail):=disp_node; disp_dimen(tail):=0; prev_disp:=0;
 return;
@@ -27589,7 +27595,7 @@ var s,@!t: real; {amount of slant}
 @!a,@!h,@!x,@!w,@!delta,@!lsb,@!rsb:scaled; {heights and widths, as explained above}
 @!i:four_quarters; {character information}
 begin scan_usv_num;
-if cur_val>=@"10000 or is_cjkx_jachar(cur_val) then
+if is_cjkx_jachar(cur_val) then
   begin KANJI(cx):=cur_val;
   if direction=dir_tate then f:=cur_tfont else f:=cur_jfont;
   p:=new_character(f,get_jfm_pos(KANJI(cx),f));
@@ -27624,17 +27630,16 @@ end;
 @ @<Create a character node |q| for the next...@>=
 q:=null; f:=cur_font;  KANJI(cx):=empty;
 case cur_cmd of
-  letter,other_char,char_given: if is_cjkx_jachar(cur_chr) then 
+  letter,other_char,char_given: if is_cjkx_jachar(cur_chr) then
       begin if direction=dir_tate then f:=cur_tfont else f:=cur_jfont;
       cx:=cur_chr; end
     else begin q:=new_character(f,cur_chr); cur_val:=cur_chr end;
   achar_given: begin q:=new_character(f,cur_chr); cur_val:=cur_chr end;
-  kchar_given: 
+  kchar_given:
     begin if direction=dir_tate then f:=cur_tfont else f:=cur_jfont;
     cx:=cur_chr; end;
-  char_num: begin cx:=cur_chr; 
-    if cx<>1 then scan_usv_num else scan_char_num; cur_chr:=cur_val;
-    if (cx=1)or((cx=0)and not ((cur_chr>=@"10000)or is_cjkx_jachar(cur_chr))) then
+  char_num: begin cx:=cur_chr; scan_usv_num; cur_chr:=cur_val;
+    if (cx=1)or((cx=0)and not is_cjkx_jachar(cur_chr)) then
       begin if direction=dir_tate then f:=cur_tfont else f:=cur_jfont;
       cx:=cur_chr; end
     else  begin q:=new_character(f,cur_chr); cur_val:=cur_chr; KANJI(cx):=empty; end;
@@ -28052,7 +28057,8 @@ label restart,reswitch,exit;
 var c:integer; {math character code}
 begin restart:@<Get the next non-blank non-relax...@>;
 reswitch:case cur_cmd of
-letter,other_char,char_given: begin c:=ho(math_code(cur_chr));
+letter,other_char,char_given,achar_given,kchar_given:
+  begin c:=ho(math_code(cur_chr));
     if is_active_math_char(c) then
       begin @<Treat |cur_chr| as an active character@>;
       goto restart;
@@ -28124,7 +28130,7 @@ was first properly typeset by \TeX. The code in this section was used.
 @^Knuth, Donald Ervin@>
 
 @<Cases of |main_control| that build...@>=
-mmode+letter,mmode+other_char,mmode+char_given:
+mmode+letter,mmode+other_char,mmode+char_given,mmode+achar_given,mmode+kchar_given:
   set_math_char(ho(math_code(cur_chr)));
 mmode+char_num: begin scan_char_num; cur_chr:=cur_val;
   set_math_char(ho(math_code(cur_chr)));
@@ -29214,10 +29220,16 @@ corresponding |chr| is the |eqtb| location of the internal register in question.
 @d toks_def_code=6 {|shorthand_def| for \.{\\toksdef}}
 @d XeTeX_math_char_num_def_code=8
 @d XeTeX_math_char_def_code=9
+@d achar_def_code=10
+@d kchar_def_code=11
 
 @<Put each...@>=
 primitive("chardef",shorthand_def,char_def_code);@/
 @!@:char_def_}{\.{\\chardef} primitive@>
+primitive("achardef",shorthand_def,achar_def_code);@/
+@!@:achar_def_}{\.{\\achardef} primitive@>
+primitive("kchardef",shorthand_def,kchar_def_code);@/
+@!@:kchar_def_}{\.{\\kchardef} primitive@>
 primitive("mathchardef",shorthand_def,math_char_def_code);@/
 @!@:math_char_def_}{\.{\\mathchardef} primitive@>
 primitive("XeTeXmathcharnumdef",shorthand_def,XeTeX_math_char_num_def_code);@/
@@ -29240,6 +29252,8 @@ primitive("toksdef",shorthand_def,toks_def_code);@/
 @ @<Cases of |print_cmd_chr|...@>=
 shorthand_def: case chr_code of
   char_def_code: print_esc("chardef");
+  achar_def_code: print_esc("achardef");
+  kchar_def_code: print_esc("kchardef");
   math_char_def_code: print_esc("mathchardef");
   XeTeX_math_char_def_code: print_esc("Umathchardef");
   XeTeX_math_char_num_def_code: print_esc("Umathcharnumdef");
@@ -29250,6 +29264,10 @@ shorthand_def: case chr_code of
   othercases print_esc("toksdef")
   endcases;
 char_given: begin print_esc("char"); print_hex(chr_code);
+  end;
+achar_given: begin print_esc("achar"); print_hex(chr_code);
+  end;
+kchar_given: begin print_esc("kchar"); print_hex(chr_code);
   end;
 math_given: begin print_esc("mathchar"); print_hex(chr_code);
   end;
@@ -29269,6 +29287,10 @@ shorthand_def: begin n:=cur_chr; get_r_token; p:=cur_cs; define(p,relax,256);
   scan_optional_equals;
   case n of
   char_def_code: begin scan_usv_num; define(p,char_given,cur_val);
+    end;
+  achar_def_code: begin scan_usv_num; define(p,achar_given,cur_val);
+    end;
+  kchar_def_code: begin scan_usv_num; define(p,kchar_given,cur_val);
     end;
   math_char_def_code: begin scan_fifteen_bit_int; define(p,math_given,cur_val);
     end;
@@ -32106,10 +32128,10 @@ begin
  end else if abs(mode)=mmode then report_illegal_case
  else begin
   if is_native_font(cur_font) then begin
+   if direction=dir_tate then disp:=t_baseline_shift else disp:=y_baseline_shift;
+   @<Append |disp_node| at begin of displace area@>;
    new_whatsit(glyph_node,glyph_node_size);
    scan_int;
-   if direction=dir_tate then disp:=t_baseline_shift else disp:=y_baseline_shift;
-   { @<Append |disp_node| at begin of displace area@>; }
    if (cur_val<0)or(cur_val>65535) then
      begin print_err("Bad glyph number");
      help2("A glyph number must be between 0 and 65535.")@/
@@ -32118,8 +32140,8 @@ begin
    native_font(tail):=cur_font;
    native_glyph(tail):=cur_val;
    set_native_glyph_metrics(tail, XeTeX_use_glyph_metrics);
+    @<Append |disp_node| at end of displace area@>; inhibit_glue_flag:=false;
   end else not_native_font_error(extension, glyph_code, cur_font);
-  { @<Append |disp_node| at end of displace area@>; }
  end
 end
 
@@ -33932,7 +33954,7 @@ begin while p<>null do
   if is_char_node(p) then r:=get_avail
   else case type(p) of
   dir_node,hlist_node,vlist_node: begin r:=get_node(box_node_size);
-    mem[r+7]:=mem[p+7]; 
+    mem[r+7]:=mem[p+7];
     mem[r+6]:=mem[p+6]; mem[r+5]:=mem[p+5]; {copy the last two words}
     add_glue_ref(space_ptr(r)); add_glue_ref(xspace_ptr(r));
     words:=5; list_ptr(r):=null; {this affects |mem[r+5]|}
@@ -36126,7 +36148,7 @@ primitive("kcatcode",set_kansuji_char,1);
 @!@:kcatcode_}{\.{\\kcatcode} primitive@>
 
 @ @<Cases of |print_cmd_chr|...@>=
-set_kansuji_char: if chr_code>0 then print_esc("kcatcode") 
+set_kansuji_char: if chr_code>0 then print_esc("kcatcode")
   else print_esc("kansujichar");
 
 @ @<Assignments@>=
@@ -36138,7 +36160,7 @@ set_kansuji_char: if cur_chr>0 then
     ("Use combination of \catcode and \cjkx code instead.");@/
   error; return;
   end
-else begin 
+else begin
   scan_int; n:=cur_val; scan_optional_equals; scan_usv_num;
   if (n<0)or(n>9) then
     begin print_err("Invalid KANSUJI number ("); print_int(n); print_char(")");
@@ -36154,7 +36176,7 @@ else begin
 if m>0 then begin scan_usv_num; cur_val_level:=int_val;
     if is_cjkx_jachar(cur_val) then begin
       if cat_code(cur_val)=other_char then cur_val:=18 { |other_char| }
-      else if cat_code(cur_val)=letter then 
+      else if cat_code(cur_val)=letter then
         begin if is_cjkx_nospc(cur_val) then cur_val:=16 { |kanjil| }
         else cur_val:=19 { |hangul| } end
       else cur_val:=15; { |not_cjk| }
@@ -36493,7 +36515,7 @@ while p<>null do
   ligature_node: if check_box(lig_ptr(p)) then flag:=true;
   ins_node,disp_node,mark_node,adjust_node,penalty_node:
     do_nothing;
-  whatsit_node: 
+  whatsit_node:
     if (subtype(p)=native_word_node)or(subtype(p)=native_word_node_AT) then
       begin if find_first_char then
         begin find_first_char:=false; first_char:=p;
@@ -36692,7 +36714,6 @@ if type(first_char)=whatsit_node then { |native_word|, |native_word_AT| }
     ay:=get_native_char(first_char, 1);
     if (ay>=@"DC00) and (ay<=@"DFFF) then ax:=@"10000+(ax-@"D800)*@"400+(ay-@"DC00);
     end;
-  print("BN "); print_int(ax); 
   if insert_skip=after_wchar then @<Insert KANJI-ASCII spacing@>;
   end
 else if type(first_char)=math_node then
@@ -36716,7 +36737,6 @@ if type(last_char)=whatsit_node then { |native_word|, |native_word_AT| }
     ay:=get_native_char(last_char, k-1);
     if (ay>=@"D800) and (ay<=@"DBFF) then ax:=@"10000+(ay-@"D800)*@"400+(ax-@"DC00);
     end;
-  print("AN ");  print_int(ax);
   if auto_xsp_code(ax)>=2 then insert_skip:=after_schar else insert_skip:=no_skip;
   end
 else if type(last_char)=math_node then

@@ -388,6 +388,16 @@ for j:=1 to n do append_to_name(TEX_format_default[j]);
 @y
 @z
 
+@x [29.526]
+done: end_name; name_in_progress:=false;
+warning_index := save_warning_index; {restore |warning_index|}
+end;
+@y
+done: end_name; name_in_progress:=false; skip_mode:=true;
+warning_index := save_warning_index; {restore |warning_index|}
+end;
+@z
+
 @x [29.536] l.10331
   wlog(' (');
   fputs(translate_filename, log_file);
