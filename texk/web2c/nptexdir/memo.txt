@@ -14,3 +14,6 @@ changes from pTeX
   なお，文字列化すると catcode 12 になることは注意．
  * \prebreakpenalty, \postbreakpenalty, \xspcode, \inhibitxspcode
    →\catcode などと同じように，Unicode全体分のエントリがある．
+ * jchr_widow_penalty_code -> jchar_widow_penalty_code
+ * 文字トークン段階では欧文・和文の区別がない．
+   → "kanji character ..." とはならない

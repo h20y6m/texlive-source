@@ -3498,7 +3498,10 @@ the proportionality constant for glue setting; |glue_sign(p)| is
 glue should stretch or shrink or remain rigid; and |glue_order(p)|
 specifies the order of infinity to which glue setting applies (|normal|,
 |fil|, |fill|, or |filll|). The |subtype| field is not used in \TeX.
+In \pTeX\ the |subtype| field records the box direction |box_dir|.
+
 In \eTeX\ the |subtype| field records the box direction mode |box_lr|.
+In \epTeX~and~\npTeX, the |subtype| field is |qi(16*box_lr+box_dir)|.
 
 @d hlist_node=0 {|type| of hlist nodes}
 @d box_node_size=8 {number of words to allocate for a box node}
@@ -4432,7 +4435,7 @@ end;
 
 @ @<Print a short indication of the contents of node |p|@>=
 case type(p) of
-hlist_node,vlist_node,ins_node,mark_node,adjust_node,
+hlist_node,vlist_node,dir_node,ins_node,mark_node,adjust_node,
   unset_node: print("[]");
 whatsit_node:
   case subtype(p) of
@@ -4624,9 +4627,12 @@ else  case type(p) of
   endcases
 
 @ @<Display box |p|@>=
-begin if type(p)=hlist_node then print_esc("h")
-else if type(p)=vlist_node then print_esc("v")
-else print_esc("unset");
+begin case type(p) of
+  hlist_node: print_esc("h");
+  vlist_node: print_esc("v");
+  dir_node: print_esc("dir");
+  othercases print_esc("unset")
+  endcases@/;
 print("box("); print_scaled(height(p)); print_char("+");
 print_scaled(depth(p)); print(")x"); print_scaled(width(p));
 if type(p)=unset_node then
@@ -4688,6 +4694,7 @@ end
 
 @ @<Display insertion |p|@>=
 begin print_esc("insert"); print_int(qo(subtype(p)));
+print_dir(abs(ins_dir(p)));
 print(", natural size "); print_scaled(height(p));
 print("; split("); print_spec(split_top_ptr(p),0);
 print_char(","); print_scaled(depth(p));
@@ -4761,6 +4768,8 @@ end
 
 @ @<Display penalty |p|@>=
 begin print_esc("penalty "); print_int(penalty(p));
+if subtype(p)=widow_pena then print("(for \jcharwidowpenalty)")
+else if subtype(p)=kinsoku_pena then print("(for kinsoku)");
 end
 
 @ The |post_break| list of a discretionary node is indicated by a prefixed
@@ -4853,7 +4862,8 @@ begin while p<>null do
   begin q:=link(p);
   if is_char_node(p) then free_avail(p)
   else  begin case type(p) of
-    hlist_node,vlist_node,dir_node,unset_node: begin flush_node_list(list_ptr(p));
+    hlist_node,vlist_node,dir_node,unset_node:
+      begin flush_node_list(list_ptr(p));
       fast_delete_glue_ref(space_ptr(p));
       fast_delete_glue_ref(xspace_ptr(p));
       free_node(p,box_node_size); goto done;
@@ -4942,21 +4952,24 @@ case type(p) of
 dir_node,hlist_node,vlist_node,unset_node: begin r:=get_node(box_node_size);
   mem[r+7]:=mem[p+7];
   mem[r+6]:=mem[p+6]; mem[r+5]:=mem[p+5]; {copy the last two words}
+  add_glue_ref(space_ptr(r)); add_glue_ref(xspace_ptr(r));
   list_ptr(r):=copy_node_list(list_ptr(p)); {this affects |mem[r+5]|}
   words:=5;
   end;
 rule_node: begin r:=get_node(rule_node_size); words:=rule_node_size;
   end;
-ins_node: begin r:=get_node(ins_node_size); mem[r+4]:=mem[p+4];
+ins_node: begin r:=get_node(ins_node_size);
+  mem[r+5]:=mem[p+5]; mem[r+4]:=mem[p+4];
   add_glue_ref(split_top_ptr(p));
   ins_ptr(r):=copy_node_list(ins_ptr(p)); {this affects |mem[r+4]|}
-  words:=ins_node_size-1;
+  words:=ins_node_size-2;
   end;
 whatsit_node:@<Make a partial copy of the whatsit node |p| and make |r|
   point to it; set |words| to the number of initial words not yet copied@>;
 glue_node: begin r:=get_node(small_node_size); add_glue_ref(glue_ptr(p));
   glue_ptr(r):=glue_ptr(p); leader_ptr(r):=copy_node_list(leader_ptr(p));
   end;
+disp_node,
 kern_node,math_node,penalty_node: begin r:=get_node(small_node_size);
   words:=small_node_size;
   end;
@@ -5380,7 +5393,8 @@ called at the lowest semantic level, nor will it be called unless |head|
 is a node that should be returned to free memory.
 
 @p procedure pop_nest; {leave a semantic level, re-enter the old}
-begin fast_delete_glue_ref(space_ptr(head)); fast_delete_glue_ref(xspace_ptr(head));
+begin 
+fast_delete_glue_ref(space_ptr(head)); fast_delete_glue_ref(xspace_ptr(head));
 free_node(head,box_node_size); decr(nest_ptr); cur_list:=nest[nest_ptr];
 end;
 
@@ -5811,23 +5825,23 @@ registers.
 @d toks(#)==equiv(toks_base+#)
 @d box(#)==equiv(box_base+#)
 @d cur_font==equiv(cur_font_loc)
-@d cur_jfont==equiv(cur_jfont_loc)
-@d cur_tfont==equiv(cur_tfont_loc)
+@d cur_jfont==equiv(cur_jfont_loc) { \pTeX }
+@d cur_tfont==equiv(cur_tfont_loc) { \pTeX }
 @d fam_fnt(#)==equiv(math_font_base+#)
 @d cat_code(#)==equiv(cat_code_base+#)
-@d cjkx_code(#)==equiv(cjkx_code_base+#)
-@d pre_break_penalty(#)==equiv(pre_break_penalty_base+#)
-@d post_break_penalty(#)==equiv(post_break_penalty_base+#)
+@d cjkx_code(#)==equiv(cjkx_code_base+#) { \npTeX }
+@d pre_break_penalty(#)==equiv(pre_break_penalty_base+#) { \npTeX }
+@d post_break_penalty(#)==equiv(post_break_penalty_base+#) { \npTeX }
 @d lc_code(#)==equiv(lc_code_base+#)
 @d uc_code(#)==equiv(uc_code_base+#)
 @d sf_code(#)==equiv(sf_code_base+#)
 @d math_code(#)==equiv(math_code_base+#)
   {Note: |math_code(c)| is the true math code plus |min_halfword|}
-@d auto_spacing==equiv(auto_spacing_code)
-@d auto_xspacing==equiv(auto_xspacing_code)
-@d auto_xsp_code(#)==equiv(auto_xsp_code_base+#)
-@d inhibit_xsp_code(#)==equiv(inhibit_xsp_code_base+#)
-@d kansuji_char(#)==equiv(kansuji_base+#)
+@d auto_spacing==equiv(auto_spacing_code) { \pTeX }
+@d auto_xspacing==equiv(auto_xspacing_code) { \pTeX }
+@d auto_xsp_code(#)==equiv(auto_xsp_code_base+#) { \pTeX }
+@d inhibit_xsp_code(#)==equiv(inhibit_xsp_code_base+#) { \pTeX }
+@d kansuji_char(#)==equiv(kansuji_base+#) { \pTeX }
 
 @<Put each...@>=
 primitive("output",assign_toks,output_routine_loc);
@@ -5893,9 +5907,15 @@ box(0):=null; eq_type(box_base):=box_ref; eq_level(box_base):=level_one;
 for k:=box_base+1 to box_base+number_regs-1 do eqtb[k]:=eqtb[box_base];
 cur_font:=null_font; eq_type(cur_font_loc):=data;
 eq_level(cur_font_loc):=level_one;@/
+cur_jfont:=null_font; eq_type(cur_jfont_loc):=data;
+eq_level(cur_jfont_loc):=level_one;@/
+cur_tfont:=null_font; eq_type(cur_tfont_loc):=data;
+eq_level(cur_tfont_loc):=level_one;@/
 for k:=math_font_base to math_font_base+number_math_fonts-1 do eqtb[k]:=eqtb[cur_font_loc];
 equiv(cat_code_base):=0; eq_type(cat_code_base):=data;
 eq_level(cat_code_base):=level_one;@/
+eqtb[auto_spacing_code]:=eqtb[cat_code_base];
+eqtb[auto_xspacing_code]:=eqtb[cat_code_base];
 for k:=cat_code_base+1 to int_base-1 do eqtb[k]:=eqtb[cat_code_base];
 for k:=0 to number_usvs-1 do
   begin cat_code(k):=other_char; math_code(k):=hi(k); sf_code(k):=1000;
@@ -6026,6 +6046,7 @@ if n<math_code_base then
         0: print("both");   { |inhibit_both| }
         1: print("before"); { |inhibit_previous| }
         2: print("after");  { |inhibit_after| }
+        3: print("none");   { |inhibit_none| }
       end; {there are no other cases}
     end
   else if n<lc_code_base then
@@ -6125,7 +6146,7 @@ that will be defined later.
 @d right_hyphen_min_code=53 {minimum right hyphenation fragment size}
 @d holding_inserts_code=54 {do not remove insertion nodes from \.{\\box255}}
 @d error_context_lines_code=55 {maximum intermediate line pairs shown}
-@d jchr_widow_penalty_code=56
+@d jchar_widow_penalty_code=56
             {penalty for creating a widow KANJI character line}
 @d text_baseline_shift_factor_code=57
 @d script_baseline_shift_factor_code=58
@@ -6215,7 +6236,7 @@ that will be defined later.
 @d right_hyphen_min==int_par(right_hyphen_min_code)
 @d holding_inserts==int_par(holding_inserts_code)
 @d error_context_lines==int_par(error_context_lines_code)
-@d jchr_widow_penalty==int_par(jchr_widow_penalty_code)
+@d jchar_widow_penalty==int_par(jchar_widow_penalty_code)
 @d text_baseline_shift_factor==int_par(text_baseline_shift_factor_code)
 @d script_baseline_shift_factor==int_par(script_baseline_shift_factor_code)
 @d scriptscript_baseline_shift_factor==int_par(scriptscript_baseline_shift_factor_code)
@@ -6300,7 +6321,7 @@ left_hyphen_min_code:print_esc("lefthyphenmin");
 right_hyphen_min_code:print_esc("righthyphenmin");
 holding_inserts_code:print_esc("holdinginserts");
 error_context_lines_code:print_esc("errorcontextlines");
-jchr_widow_penalty_code:print_esc("jcharwidowpenalty");
+jchar_widow_penalty_code:print_esc("jcharwidowpenalty");
 text_baseline_shift_factor_code:print_esc("textbaselineshiftfactor");
 script_baseline_shift_factor_code:print_esc("scriptbaselineshiftfactor");
 scriptscript_baseline_shift_factor_code:print_esc("scriptscriptbaselineshiftfactor");
@@ -6431,8 +6452,8 @@ primitive("holdinginserts",assign_int,int_base+holding_inserts_code);@/
 @!@:holding_inserts_}{\.{\\holdinginserts} primitive@>
 primitive("errorcontextlines",assign_int,int_base+error_context_lines_code);@/
 @!@:error_context_lines_}{\.{\\errorcontextlines} primitive@>
-primitive("jcharwidowpenalty",assign_int,int_base+jchr_widow_penalty_code);@/
-@!@:jchr_widow_penalty}{\.{\\jcharwidowpenalty} primitive@>
+primitive("jcharwidowpenalty",assign_int,int_base+jchar_widow_penalty_code);@/
+@!@:jchar_widow_penalty}{\.{\\jcharwidowpenalty} primitive@>
 primitive("textbaselineshiftfactor",assign_int,int_base+text_baseline_shift_factor_code);@/
 @!@:text_baseline_shift_factor}{\.{\\textbaselineshiftfactor} primitive@>
 primitive("scriptbaselineshiftfactor",assign_int,int_base+script_baseline_shift_factor_code);@/
@@ -36576,7 +36597,7 @@ end;
 Note that the skip is inserted into a place where too difficult to decide
 whether inserting or not (i.e, before penalty, after penalty).
 
-If |pf| is true then insert |jchr_widow_penalty| that is penalty for
+If |pf| is true then insert |jchar_widow_penalty| that is penalty for
 creating a widow KANJI character line.
 
 @d no_skip=0
@@ -36677,7 +36698,7 @@ if not is_char_node(q)and(type(q)=glue_node)and(subtype(q)=jfm_skip+1) then
   glue_ptr(q):=zero_glue; add_glue_ref(zero_glue);
   end;
 delete_glue_ref(u); delete_glue_ref(s);
-if (v<>null)and pf and(i>5) then @<Make |jchr_widow_penalty| node@>;
+if (v<>null)and pf and(i>5) then @<Make |jchar_widow_penalty| node@>;
 exit:
 end;
 
@@ -36849,7 +36870,7 @@ begin z:=new_glue(u); subtype(z):=kanji_skip_code+1;
 link(z):=link(p); link(p):=z; p:=link(z); q:=z;
 end
 
-@ @<Make |jchr_widow_penalty| node@>=
+@ @<Make |jchar_widow_penalty| node@>=
 begin q:=v; p:=link(v);
 if is_char_node(v)and(font_dir[font(v)]<>dir_default) then
   begin q:=p; p:=link(p);
@@ -36859,9 +36880,9 @@ t:=q; s:=null;
 if s<>null then
   begin s:=link(t);
     if not is_char_node(s)and(type(s)=penalty_node) then
-      penalty(s):=penalty(s)+jchr_widow_penalty
-    else if jchr_widow_penalty<>0 then
-      begin s:=new_penalty(jchr_widow_penalty); subtype(s):=widow_pena;
+      penalty(s):=penalty(s)+jchar_widow_penalty
+    else if jchar_widow_penalty<>0 then
+      begin s:=new_penalty(jchar_widow_penalty); subtype(s):=widow_pena;
       link(s):=link(t); link(t):=s; t:=link(s);
       while(not is_char_node(t)) do
         begin if (type(t)=glue_node)or(type(t)=kern_node) then goto exit;

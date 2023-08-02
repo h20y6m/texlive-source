@@ -132,17 +132,30 @@ has been detected. It has five possible values: |spotless|, |warning_issued|,
 @d max_halfword==@"3FFFFFFF {largest allowable value in a |halfword|}
 @z
 
+@x [8.111] l.2436 - pTeX: check hi/ho
+  (mem_top+sup_main_memory>=max_halfword) then bad:=14;
+@y
+  (mem_top+sup_main_memory>=max_halfword)or@|
+  (hi(0)<>0) then bad:=14;
+@z
+
+@x [8.112] l.2450 - pTeX: hi/ho
+sufficiently large.
+@y
+sufficiently large and this is required for \pTeX.
+@z
+
 @x [15.209] l.4165
 @d shorthand_def=95 {code definition ( \.{\\chardef}, \.{\\countdef}, etc.~)}
 @y
 @d shorthand_def=let+1 {code definition ( \.{\\chardef}, \.{\\countdef}, etc.~)}
 @z
 
-@x [16.215] - e-TeX last_node_type
+@x [16.215] - e-pTeX last_node_subtype
 last_glue:=max_halfword; last_penalty:=0; last_kern:=0;
 @y
 last_glue:=max_halfword; last_penalty:=0; last_kern:=0;
-last_node_type:=-1;
+last_node_type:=-1; last_node_subtype:=-1;
 @z
 
 @x [17.222] l.4523 - frozen_special, for source specials.
