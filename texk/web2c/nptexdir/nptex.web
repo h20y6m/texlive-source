@@ -36608,7 +36608,7 @@ creating a widow KANJI character line.
 procedure adjust_hlist(p:pointer;pf:boolean);
 label exit;
 var q,s,t,u,v,x,z:pointer;
-  i,k:halfword;
+  i,k:integer;
   a: pointer; { temporary pointer for accent }
   insert_skip:no_skip..after_wchar;
   cx:UnicodeScalar; {temporary register for KANJI character}
@@ -36682,8 +36682,10 @@ while p<>null do
           if link(q)<>t then link(link(q)):=a else link(q):=a;
           end;
         end;
-    whatsit_node: if (subtype(p)=native_word_node)or(subtype(p)=native_word_node_AT) then
-      @<Insert native word node surround spacing@>;
+    whatsit_node: if subtype(p)=glyph_node then
+        @<Insert native glyph node surround spacing@>
+      else if is_native_word_subtype(p) then
+        @<Insert native word node surround spacing@>;
     math_node: @<Insert math surround spacing@>;
     mark_node,adjust_node,ins_node:
       {These nodes are vanished when typeset is done}
@@ -36728,6 +36730,15 @@ if (k>0) and (ax>=@"DC00) and (ax<=@"DFFF) then begin
   if (ay>=@"D800) and (ay<=@"DBFF) then ax:=@"10000+(ay-@"D800)*@"400+(ax-@"DC00);
   end;
 if auto_xsp_code(ax)>=2 then insert_skip:=after_schar else insert_skip:=no_skip;
+end
+
+@ @<Insert native glyph node surround spacing@>=
+begin ay:=native_glyph(p); i:=native_font(p);
+  ax:=get_font_char_range(i,false); k:=get_font_char_range(i,true);
+  repeat incr(k) until (map_char_to_glyph(i,k)=ay)or(k>ax);
+  if k>ax then ax:=qo("0") else ax:=k;
+  if insert_skip=after_wchar then @<Insert KANJI-ASCII spacing@>;
+  if auto_xsp_code(ax)>=2 then insert_skip:=after_schar else insert_skip:=no_skip;
 end
 
 @ @<Insert hbox surround spacing@>=

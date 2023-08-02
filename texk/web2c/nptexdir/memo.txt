@@ -1,7 +1,6 @@
 changes from pTeX
 
- * kcatcode -> catcode+cjkx_code
-   TODO: \kcatcode は読み出しのみ可能．
+ * \kcatcode の役割は \catcode+\cjkx_code に．
    cjk_code = zyx_{(2)} トークンには付随しない値．
      x: \jcharwidowpenalty挿入対象ならば1
      y: この文字の直後の開業で空白を挿入しないならば1
@@ -12,8 +11,16 @@ changes from pTeX
     \kcatcode=18 ⇔ \catcode=12 and \cjkxcode=7
     \kcatcode=19 ⇔ \catcode=11 and \cjkxcode=4
   なお，文字列化すると catcode 12 になることは注意．
+ * \kcatcode は読み出しのみ可能．
+   \catcode=12 and \cjkxcode>=4 --> \kcatcode の返り値は 18 (other_kchar)
+   \catcode=11 and \cjkxcode=6, 7 --> 返り値 16 (kanji)
+   \catcode=11 and \cjkxocde=4, 5 --> 返り値 19 (hangul)
+   他 --> 返り値 15 (non_cjk)
  * \prebreakpenalty, \postbreakpenalty, \xspcode, \inhibitxspcode
    →\catcode などと同じように，Unicode全体分のエントリがある．
  * jchr_widow_penalty_code -> jchar_widow_penalty_code
  * 文字トークン段階では欧文・和文の区別がない．
    → "kanji character ..." とはならない
+ * \XeTeXglyph 由来ノード (font: f, glyph: p) 周りの \xkanjiskip
+   \XeTeXcharglyph f c == p となる最初の c を文字コードとみなす
+   （そういう c がなければ，`\0 = 48 とする）
