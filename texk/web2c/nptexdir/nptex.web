@@ -14712,7 +14712,11 @@ the following commands are used in \.{XDV} files.
 
 \yskip\hang|set_text_and_glyphs| 254 |l[2]| |t[2l]| |w[4]| |k[2]| |xy[8k]| |g[2k]|.
 
-\yskip\noindent Commands 250 and 255 are undefined in normal \.{XDV} files.
+\yskip\noindent Commands 250 and 255 are undefined in normal \.{XDV} files,
+but the command 255 may be used in \.{XDV} files which are produced by \npTeX.
+
+\yskip\hang|dir| 255 |d[1]|.
+Change the current direction to ``yoko''(0), ``tate''~(1) and ``DtoU''~(3).
 
 @ @d set_char_0=0 {typeset character 0 and move right}
 @d set1=128 {typeset a character and move right}
