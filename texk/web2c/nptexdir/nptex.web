@@ -333,7 +333,7 @@ known as `\eTeX'.
 @#
 @d banner=='This is TeX, Version 3.141592653' {printed when \TeX\ starts}
 @#
-@d TEX==NPTEX {change program name into |XETEX|}
+@d TEX==NPTEX {change program name into |NPTEX|}
 @#
 @d TeXXeT_code=0 {the \TeXXeT\ feature is optional}
 @#
@@ -362,6 +362,18 @@ known as `\eTeX'.
 @d XeTeX_generate_actual_text_code=10 { controls output of /ActualText for native-word nodes }
 @d XeTeX_hyphenatable_length_code=11 { sets maximum hyphenatable word length }
 @d eTeX_states=12 {number of \eTeX\ state variables in |eqtb|}
+
+@ dummy
+
+@d pTeX_version=5
+@d pTeX_minor_version=0
+@d pTeX_revision==".0"
+@#
+@d upTeX_version=2
+@d upTeX_revision==".00"
+@#
+@d epTeX_version_number==900000
+
 
 @ Different \PASCAL s have slightly different conventions, and the present
 @!@:PASCAL H}{\ph@>
@@ -10317,8 +10329,13 @@ the codes for its extensions: |eTeX_version_code|, \dots\ .
 @d last_node_font_code=glue_val+4 {code for \.{\\lastnodefont}}
 @d input_line_no_code=glue_val+5 {code for \.{\\inputlineno}}
 @d badness_code=input_line_no_code+1 {code for \.{\\badness}}
+@d ptex_version_code=badness_code+1 {code for \.{\\ptexversion}}
+@d uptex_version_code=ptex_version_code+1 {code for \.{\\uptexversion}}
+@d eptex_version_code=uptex_version_code+1 {code for \.{\\epTeXversion}}
+@d ptex_minor_version_code=eptex_version_code+1 {code for \.{\\ptexminorversion}}
+@d nptex_version_code=ptex_minor_version_code+1 {code for \.{\\npTeXversion}}
 @#
-@d pdftex_first_rint_code = badness_code + 1 {base for \pdfTeX's command codes}
+@d pdftex_first_rint_code = nptex_version_code + 1 {base for \pdfTeX's command codes}
 @d pdf_last_x_pos_code    = pdftex_first_rint_code + 6 {code for \.{\\pdflastxpos}}
 @d pdf_last_y_pos_code    = pdftex_first_rint_code + 7 {code for \.{\\pdflastypos}}
 @d elapsed_time_code      = pdftex_first_rint_code + 10 {code for \.{\\elapsedtime}}
@@ -10393,6 +10410,16 @@ primitive("inputlineno",last_item,input_line_no_code);
 @!@:input_line_no_}{\.{\\inputlineno} primitive@>
 primitive("badness",last_item,badness_code);
 @!@:badness_}{\.{\\badness} primitive@>
+primitive("ptexversion",last_item,ptex_version_code);
+@!@:ptexversion_}{\.{\\ptexversion} primitive@>
+primitive("uptexversion",last_item,uptex_version_code);
+@!@:uptexversion_}{\.{\\uptexversion} primitive@>
+primitive("epTeXversion",last_item,eptex_version_code);
+@!@:epTeXversion_}{\.{\\epTeXversion} primitive@>
+primitive("ptexminorversion",last_item,ptex_minor_version_code);
+@!@:ptexminorversion_}{\.{\\ptexminorversion} primitive@>
+primitive("npTeXversion",last_item,nptex_version_code);
+@!@:npTeXversion_}{\.{\\npTeXversion} primitive@>
 primitive("pdflastxpos",last_item,pdf_last_x_pos_code);@/
 @!@:pdf_last_x_pos_}{\.{\\pdflastxpos} primitive@>
 primitive("pdflastypos",last_item,pdf_last_y_pos_code);@/
@@ -10419,6 +10446,11 @@ last_item: case chr_code of
   dimen_val: print_esc("lastkern");
   glue_val: print_esc("lastskip");
   input_line_no_code: print_esc("inputlineno");
+  ptex_version_code: print_esc("ptexversion");
+  uptex_version_code: print_esc("uptexversion");
+  eptex_version_code: print_esc("epTeXversion");
+  ptex_minor_version_code: print_esc("ptexminorversion");
+  nptex_version_code: print_esc("npTeXversion");
   @/@<Cases of |last_item| for |print_cmd_chr|@>@/
   pdf_last_x_pos_code:  print_esc("pdflastxpos");
   pdf_last_y_pos_code:  print_esc("pdflastypos");
@@ -10582,6 +10614,11 @@ if m>=input_line_no_code then
   end
  else begin case m of
   input_line_no_code: cur_val:=line;
+  ptex_version_code: cur_val:=pTeX_version;
+  uptex_version_code: cur_val:=upTeX_version;
+  eptex_version_code: cur_val:=epTeX_version_number;
+  ptex_minor_version_code: cur_val:=pTeX_minor_version;
+  nptex_version_code: cur_val:=npTeX_version;
   badness_code: cur_val:=last_badness;
   elapsed_time_code: cur_val := get_microinterval;
   random_seed_code:  cur_val := random_seed;
@@ -10619,7 +10656,7 @@ else begin if cur_chr=glue_val then cur_val:=zero_glue@+else cur_val:=0;
       if cur_chr=last_node_char_code then find_last_char
       else cur_val:=font(tx)+font_id_base;
       end;
-  if not is_char_node(tx)and(mode<>0) then
+  if not is_char_node(tx)and(tx<>head)and(mode<>0) then
     case cur_chr of
     int_val: if type(tx)=penalty_node then cur_val:=penalty(tx);
     dimen_val: if type(tx)=kern_node then cur_val:=width(tx);
@@ -10653,6 +10690,22 @@ else begin if cur_chr=glue_val then cur_val:=zero_glue@+else cur_val:=0;
         while link(r)<>null do r:=link(r);
         cur_val:=qo(character(r));
         end
+      else if type(tx)=whatsit_node then
+        begin if is_native_word_subtype(tx) then
+          begin k:=native_length(tx)-1; cur_val:=get_native_char(tx,k);
+            if (k>0) and (cur_val>=@"DC00) and (cur_val<=@"DFFF) then begin
+              n:=get_native_char(tx, k-1);
+              if (n>=@"D800) and (n<=@"DBFF) then 
+                cur_val:=@"10000+(n-@"D800)*@"400+(cur_val-@"DC00);
+              end
+            end
+          else if subtype(tx)=glyph_node then
+            begin n:=native_glyph(tx); kk:=native_font(tx);
+              cur_val:=get_font_char_range(kk,false); k:=get_font_char_range(kk,true);
+              repeat incr(k); until (map_char_to_glyph(kk,k)=n)or(k>cur_val);
+              if k>cur_val then cur_val:=-1 else cur_val:=k;
+              end
+          end
       {else: already -1}
       end;
     last_node_font_code: begin
@@ -10661,7 +10714,11 @@ else begin if cur_chr=glue_val then cur_val:=zero_glue@+else cur_val:=0;
         cur_val:=font(tx)+font_id_base
       else if type(tx)=ligature_node then
         cur_val:=font(lig_char(tx))+font_id_base
-      {else: already nullfont}
+      else if type(tx)=whatsit_node then
+        begin if is_native_word_subtype(tx) or (subtype(tx)=glyph_node) then
+          cur_val:=native_font(tx)+font_id_base;
+        end
+     {else: already nullfont}
       end;
     end {there are no other cases}
   else if (mode=vmode)and(tx=head) then
@@ -11322,7 +11379,7 @@ done2:
 @ @<Complain about unknown unit...@>=
 begin print_err("Illegal unit of measure ("); print("pt inserted)");
 @.Illegal unit of measure@>
-help6("Dimensions can be in units of em, ex, in, pt, pc,")@/
+help6("Dimensions can be in units of em, ex, zw, zh, in, pt, pc,")@/
   ("cm, mm, dd, cc, bp, H, Q, or sp; but yours is a new one!")@/
   ("I'll assume that you meant to say pt, for printer's points.")@/
   ("To recover gracefully from this error, it's best to")@/
@@ -11535,7 +11592,11 @@ end;
 @d toucs_code=11 {command code for \.{\\toucs}}
 @d tojis_code=12 {command code for \.{\\tojis}}
 @d ptex_font_name_code=13 {command code for \.{\\ptexfontname}}
-@d etex_convert_base=ptex_font_name_code+1 {base for \eTeX's command codes}
+@d ptex_revision_code=14 {command code for \.{\\ptexrevision}}
+@d uptex_revision_code=15 {command code for \.{\\uptexrevision}}
+@d nptex_revision_code=16 {command code for \.{\\npTeXrevision}}
+@d ptex_convert_codes=17 {end of \pTeX's command codes}
+@d etex_convert_base=ptex_convert_codes {base for \eTeX's command codes}
 @d eTeX_revision_code=etex_convert_base {command code for \.{\\eTeXrevision}}
 @d etex_convert_codes=etex_convert_base+1 {end of \eTeX's command codes}
 @d expanded_code=etex_convert_codes {command code for \.{\\expanded}}
@@ -11591,6 +11652,12 @@ primitive("tojis",convert,tojis_code);
 @!@:tojis_}{\.{\\tojis} primitive@>
 primitive("ptexfontname",convert,ptex_font_name_code);
 @!@:ptexfontname_}{\.{\\ptexfontname} primitive@>
+primitive("ptexrevision",convert,ptex_revision_code);
+@!@:ptexrevision_}{\.{\\ptexrevision} primitive@>
+primitive("uptexrevision",convert,uptex_revision_code);
+@!@:uptexrevision_}{\.{\\uptexrevision} primitive@>
+primitive("npTeXrevision",convert,nptex_revision_code);
+@!@:npTeXrevision_}{\.{\\npTeXrevision} primitive@>
 @#
 primitive("expanded",convert,expanded_code);@/
 @!@:expanded_}{\.{\\expanded} primitive@>
@@ -11641,6 +11708,9 @@ convert: case chr_code of
   toucs_code:print_esc("toucs");
   tojis_code:print_esc("tojis");
   ptex_font_name_code: print_esc("ptexfontname");
+  ptex_revision_code:print_esc("ptexrevision");
+  uptex_revision_code:print_esc("uptexrevision");
+  nptex_revision_code:print_esc("npTeXrevision");
   eTeX_revision_code: print_esc("eTeXrevision");
   expanded_code:        print_esc("expanded");
   left_margin_kern_code:    print_esc("leftmarginkern");
@@ -11670,7 +11740,6 @@ we have to create a temporary string that is destroyed immediately after.
 
 @p procedure conv_toks;
 var old_setting:0..max_selector; {holds |selector| setting}
-@!cx:UnicodeScalar; {temporary register for KANJI}
 @!save_warning_index, @!save_def_ref:pointer;
 @!boolvar: boolean; {temp boolean}
 @!s: str_number;
@@ -11696,12 +11765,12 @@ end;
 @d illegal_Ucharcat_catcode(#)==(#<left_brace)or(#>active_char)or(#=out_param)or(#=ignore)
 
 @<Scan the argument for command |c|@>=
-KANJI(cx):=0;
 case c of
 number_code,roman_numeral_code,
 kansuji_code,euc_code,sjis_code,jis_code,kuten_code,
 ucs_code,toucs_code,tojis_code: scan_int;
 ptex_font_name_code: scan_font_ident;
+ptex_revision_code, uptex_revision_code, nptex_revision_code: do_nothing;
 string_code, meaning_code: begin save_scanner_status:=scanner_status;
   scanner_status:=normal; get_token; scanner_status:=save_scanner_status;
   end;
@@ -11941,6 +12010,9 @@ ptex_font_name_code: begin
   print_font_name_and_size(cur_val);
   print_font_dir_and_enc(cur_val);
   end;
+ptex_revision_code: print(pTeX_revision);
+uptex_revision_code: print(upTeX_revision);
+nptex_revision_code: print(npTeX_revision);
 string_code:if cur_cs<>0 then sprint_cs(cur_cs)
   else print_char(cur_chr);
 meaning_code: print_meaning;
