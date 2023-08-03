@@ -1,3 +1,1498 @@
+commit 1d665c2b521512cdd56964138fc601debd1f1177
+Author: Khaled Hosny <khaled@aliftype.com>
+Date:   Wed Aug 2 23:44:56 2023 +0300
+
+    8.1.1
+
+ NEWS             | 8 ++++++++
+ configure.ac     | 2 +-
+ meson.build      | 2 +-
+ src/hb-version.h | 4 ++--
+ 4 files changed, 12 insertions(+), 4 deletions(-)
+
+commit 91c449a64a6924afd2aee4d3eb0b80c8c7d9ad07
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Wed Aug 2 14:40:55 2023 -0600
+
+    [graph] Make space_for non-recursive
+    
+    It was tail-recursive so perhaps the compiler did the same.
+    Anyway, make it explicit now.
+
+ src/graph/graph.hh | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+commit dcd3afcabfeb447a075b189f20cd523e177a0a9d
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Tue Aug 1 20:09:34 2023 -0600
+
+    [skippy-iter] Remove unused num_items
+
+ src/OT/Layout/GPOS/CursivePosFormat1.hh  |  2 +-
+ src/OT/Layout/GPOS/MarkMarkPosFormat1.hh |  2 +-
+ src/OT/Layout/GPOS/PairPosFormat1.hh     |  2 +-
+ src/OT/Layout/GPOS/PairPosFormat2.hh     |  2 +-
+ src/OT/Layout/GSUB/LigatureSet.hh        |  2 +-
+ src/hb-kern.hh                           |  2 +-
+ src/hb-ot-layout-gsubgpos.hh             | 24 +++++++-----------------
+ 7 files changed, 13 insertions(+), 23 deletions(-)
+
+commit 5b337130e28eeaef3b5cfe884b514059417e3384
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Tue Aug 1 20:02:21 2023 -0600
+
+    Add test for previous commit
+
+ .../fonts/bef923f4ccb474f961c43b63a9c74b7d9b7a023f.ttf   | Bin 0 -> 2180 bytes
+ test/shape/data/in-house/tests/context-matching.tests    |   1 +
+ 2 files changed, 1 insertion(+)
+
+commit 39048099cb421095e24cdcc027b9cdc2a7fcf93e
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Tue Aug 1 19:41:12 2023 -0600
+
+    [skippy-iter] Remove early stop
+    
+    The optimization in (Chain)RuleSet matching relies on
+    matching one, even if num_items is out of range.
+    
+    Fixes https://github.com/harfbuzz/harfbuzz/issues/4358
+
+ src/hb-ot-layout-gsubgpos.hh | 12 ++----------
+ 1 file changed, 2 insertions(+), 10 deletions(-)
+
+commit 70b3fbed2850f310658b65a68a058232b78ebeee
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Tue Aug 1 15:16:16 2023 -0600
+
+    [graph] Fix invalid read when map gets resized
+    
+    I don't fully understand how the old code was wrong, since
+    *v should be evaluated before the set() method call.
+    Yet this seems to fix a bug that could be reproduced
+    with HB_DEBUG_SUBSET_REPACK enabled and the following:
+    
+    $ hb-repacker-fuzzer test/fuzzing/graphs/clusterfuzz-testcase-minimized-hb-repacker-fuzzer-6419865171525632
+
+ src/graph/graph.hh | 11 ++++++++---
+ 1 file changed, 8 insertions(+), 3 deletions(-)
+
+commit 94d4283b12037d66ceb3b195f47d3bca96eb6627
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Tue Aug 1 15:05:17 2023 -0600
+
+    [graph] Handle a malloc fail
+    
+    Fixes https://oss-fuzz.com/testcase-detail/4579249263345664
+
+ src/graph/graph.hh                                   |  19 ++++++++++++-------
+ ...ase-minimized-hb-repacker-fuzzer-4579249263345664 | Bin 0 -> 173466 bytes
+ 2 files changed, 12 insertions(+), 7 deletions(-)
+
+commit 603920e911dc0fde79dc0ddde2be393f5c123d30
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Tue Aug 1 14:58:33 2023 -0600
+
+    [graph] Minor asserts
+
+ src/graph/graph.hh | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+commit 8d00476fbf99f770608644e424712cf95d3950b8
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Tue Aug 1 14:27:37 2023 -0600
+
+    [graph] Minor restructure a condition
+
+ src/graph/graph.hh | 11 +++++------
+ 1 file changed, 5 insertions(+), 6 deletions(-)
+
+commit 7946984b9624338b8d15fa53ac21664a734e93d3
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Tue Aug 1 14:18:03 2023 -0600
+
+    [graph] More assert
+
+ src/graph/graph.hh | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+commit 3b386c3773f24e30ec26bbbf86422ac67a6fb7b9
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Tue Aug 1 14:12:43 2023 -0600
+
+    [graph] Minor assert
+
+ src/graph/graph.hh | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+commit 07e7033076d9acfeeaa7a91ea878fa130a022824
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Tue Aug 1 12:25:45 2023 -0600
+
+    [graph] Error check
+
+ src/graph/graph.hh | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+commit 7a9aac1ae3f7b836ddb314636d6f50d8ad7ec5d2
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Tue Aug 1 12:05:22 2023 -0600
+
+    [graph] Fixes to parent handling
+
+ src/graph/graph.hh | 19 ++++++++++++++-----
+ 1 file changed, 14 insertions(+), 5 deletions(-)
+
+commit 2feac50b40f1dff06655c8efcadcc55088b34dad
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Mon Jul 31 19:53:06 2023 -0600
+
+    Revert "[gsubgpos] Keep another digest in the applicable_t"
+    
+    This reverts commit fd79c7cecdf68fe4626943f29bd5edf1e603d2b2.
+
+ src/hb-ot-layout-gsubgpos.hh | 32 ++++++++++----------------------
+ 1 file changed, 10 insertions(+), 22 deletions(-)
+
+commit fd79c7cecdf68fe4626943f29bd5edf1e603d2b2
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Mon Jul 31 19:52:15 2023 -0600
+
+    [gsubgpos] Keep another digest in the applicable_t
+    
+    The digest for all the remaining subtables combined.
+    The idea is to get out of the subtable look as soon as
+    no more can be applied.
+    
+    Doesn't seem to speed up anything I tested. Going to revert.
+
+ src/hb-ot-layout-gsubgpos.hh | 32 ++++++++++++++++++++++----------
+ 1 file changed, 22 insertions(+), 10 deletions(-)
+
+commit e3fd69c88958fead68a62cecef7454990f7757fd
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Mon Jul 31 19:07:42 2023 -0600
+
+    [layout] Inline another function
+    
+    Code is smaller too.
+
+ src/hb-ot-layout-gsubgpos.hh | 3 +++
+ 1 file changed, 3 insertions(+)
+
+commit 9cdc043c16d319268677a9098c83dc572d279c99
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Mon Jul 31 18:53:29 2023 -0600
+
+    [Cursive] Only sanitize what we use
+
+ src/OT/Layout/GPOS/CursivePosFormat1.hh | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit 25e9defa516d63b12a659282a13dc9e1fe522cc8
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Mon Jul 31 17:12:07 2023 -0600
+
+    [sanitize] Inline check_struct
+    
+    Though seems like the compiler was always inlining it anyway.
+
+ src/hb-sanitize.hh | 3 +++
+ 1 file changed, 3 insertions(+)
+
+commit 44026aa8a992b7105a615f1fbaaf0e342b634efa
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Mon Jul 31 16:47:06 2023 -0600
+
+    [Cursive] Minor, adjust unsafe-to-concat if prev didn't sanitize
+
+ src/OT/Layout/GPOS/CursivePosFormat1.hh | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+commit b382e616cc807fe16da0fe7baca6dc2335fab987
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Mon Jul 31 16:29:28 2023 -0600
+
+    [GPOS] Sanitize Cursive positioning anchors lazily
+    
+    Speeds up Duployan-Regular.otf load time by 30%.
+    Doesn't seem to slow down shaping in a measurable way.
+
+ src/OT/Layout/GPOS/CursivePosFormat1.hh | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+commit fcb9e5915f5d20b20576612efd4ee15d9da04c8a
+Author: Khaled Hosny <khaled@aliftype.com>
+Date:   Tue Aug 1 00:57:06 2023 +0300
+
+    8.1.0
+
+ NEWS                   | 21 +++++++++++++++++++--
+ configure.ac           |  2 +-
+ docs/harfbuzz-docs.xml |  1 +
+ meson.build            |  2 +-
+ src/hb-ot-layout.cc    |  2 +-
+ src/hb-version.h       |  6 +++---
+ 6 files changed, 26 insertions(+), 8 deletions(-)
+
+commit 847e4a7607b6ddd97bd9d59c047d18736a566428
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Jul 31 15:21:51 2023 -0600
+
+    Bump github/codeql-action from 2.21.0 to 2.21.2 (#4352)
+    
+    Bumps [github/codeql-action](https://github.com/github/codeql-action) from 2.21.0 to 2.21.2.
+    - [Release notes](https://github.com/github/codeql-action/releases)
+    - [Changelog](https://github.com/github/codeql-action/blob/main/CHANGELOG.md)
+    - [Commits](https://github.com/github/codeql-action/compare/1813ca74c3faaa3a2da2070b9b8a0b3e7373a0d8...0ba4244466797eb048eb91a6cd43d5c03ca8bd05)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: github/codeql-action
+      dependency-type: direct:production
+      update-type: version-update:semver-patch
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+    Co-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+
+ .github/workflows/scorecard.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit db608229d1633f9cbea3b5223d6548e803fb08c7
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Mon Jul 31 15:16:43 2023 -0600
+
+    [README] Update
+
+ README.md | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+commit 59f5f2651525c9d41d3394f9ef021f624b097346
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Mon Jul 31 15:09:11 2023 -0600
+
+    [ci/msys] Don't install freetype (#4354)
+    
+    * [ci/msys] Try deleting system harfbuzz DLL
+
+ .github/workflows/msys2-ci.yml | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
+
+commit bd84458a951e2e8e7390ec45d3c0b0bfc30eca19
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Mon Jul 31 13:27:15 2023 -0600
+
+    [ci] Try uploading msys artefacts (#4353)
+    
+    * [ci] Try uploading msys artefacts
+    
+    * [ci] Always upload DLLs from msys2
+    
+    * [ci] Rename artifacts
+    
+    * Another try
+
+ .github/workflows/msys2-ci.yml | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+commit d9c4d3edf0e2dcc8e1653cffad114110a59f691d
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Mon Jul 31 12:43:12 2023 -0600
+
+    [uniscribe] Fix warnings
+
+ src/hb-uniscribe.cc | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+commit 29ad9304e2b0cd84fbf125dfa907cd20d141fc70
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sun Jul 30 17:06:25 2023 -0600
+
+    [layout] Minor add prealloc
+
+ src/hb-ot-layout.cc | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit a41368bd7a0bf14c54b311a4455f7fdc5aa2df4b
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sun Jul 30 17:04:02 2023 -0600
+
+    [buffer] Minor micro-optimize
+
+ src/hb-buffer.cc | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+commit dc35a0fbcb960f57df6c09a548651028c19e9790
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sun Jul 30 16:32:11 2023 -0600
+
+    [ot-map] Speed up feature finding
+    
+    New API:
+    - hb_ot_layout_collect_feature_map()
+
+ docs/harfbuzz-sections.txt |  1 +
+ src/hb-ot-layout.cc        | 39 ++++++++++++++++++++++++++++++++++++++-
+ src/hb-ot-layout.h         |  7 +++++++
+ src/hb-ot-map.cc           | 22 +++++++++++++++-------
+ 4 files changed, 61 insertions(+), 8 deletions(-)
+
+commit ebdfa9838bd0170ee2f3bc766dbdad659a0e870c
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sun Jul 30 12:22:55 2023 -0600
+
+    [perf] Measure freetype face loading as well
+
+ perf/benchmark-font.cc | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+commit 202888ec3ed27f1ac575a13d93688776545a62bf
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sun Jul 30 11:49:08 2023 -0600
+
+    Fix mac bot
+    
+    I think the new unsafe-to-concat is correct...
+
+ src/hb-ot-shaper-use-machine.hh            | 1893 ++++++++++++++--------------
+ test/shape/data/in-house/tests/macos.tests |    2 +-
+ 2 files changed, 971 insertions(+), 924 deletions(-)
+
+commit 35a026c89ab4f55a962f0e837a7b7650eb3e7c31
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sun Jul 30 11:28:59 2023 -0600
+
+    [shape] Unsafe-to-concat around fraction slash
+
+ src/hb-ot-shape.cc | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+commit f19ca24a8ed92373342adb0c69ac5975b44f50e1
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sun Jul 30 11:26:11 2023 -0600
+
+    Revert "Revert "Require numerator and denominator in auto fraction""
+    
+    This reverts commit 8fe506e153c530affd529e7175e813c3a878faed.
+
+ src/hb-ot-shape.cc                                       | 2 ++
+ test/shape/data/in-house/tests/automatic-fractions.tests | 4 ++++
+ 2 files changed, 6 insertions(+)
+
+commit b2a73166d4d7874565ac61dcfca74f651f922e5c
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sun Jul 30 11:23:19 2023 -0600
+
+    [buffer] Fix unsafe_to_concat()
+    
+    Ouch!
+
+ src/hb-buffer.hh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 8fe506e153c530affd529e7175e813c3a878faed
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sun Jul 30 10:43:28 2023 -0600
+
+    Revert "Require numerator and denominator in auto fraction"
+    
+    This reverts commit f3e86937df345d7709de879af1d1a1502e84e1e9.
+
+ src/hb-ot-shape.cc                                       | 2 --
+ test/shape/data/in-house/tests/automatic-fractions.tests | 4 ----
+ 2 files changed, 6 deletions(-)
+
+commit f3e86937df345d7709de879af1d1a1502e84e1e9
+Author: David Corbett <corbett.dav@northeastern.edu>
+Date:   Sun Jul 30 08:28:23 2023 -0400
+
+    Require numerator and denominator in auto fraction
+
+ src/hb-ot-shape.cc                                       | 2 ++
+ test/shape/data/in-house/tests/automatic-fractions.tests | 4 ++++
+ 2 files changed, 6 insertions(+)
+
+commit 23838e5a2e7f5627d77fb85c50a0bfd9e004d6a8
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sat Jul 29 13:20:14 2023 -0600
+
+    [graph] Error handling
+
+ src/graph/graph.hh | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+commit 04f4909257b2da56d76c24872075f6f655ae4438
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Fri Jul 28 14:37:52 2023 -0600
+
+    [graph] Use a move instead of swap
+
+ src/graph/graph.hh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 3bedb0eeed62aaab3c6be849480a54214a59715b
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Thu Jul 27 16:04:01 2023 -0600
+
+    [graph] Minor rename
+
+ src/graph/graph.hh | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit bb1f53c2540a1e45c18eb8fbe4935b9c4e4fefa8
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Thu Jul 27 13:29:56 2023 -0600
+
+    [graph] Try fixing infinite loop found by CIFuzz under malloc fail
+
+ src/graph/graph.hh | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit db3314c1f860ee5cf68c81ccce5771b9b0366bca
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Thu Jul 27 13:20:32 2023 -0600
+
+    [graph] Minor space type change
+
+ src/graph/graph.hh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 6a218eaeea3de3455825be63a099e6028c56508d
+Merge: 45a0d65c6 6bb61708e
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Thu Jul 27 13:14:52 2023 -0600
+
+    Merge pull request #4343 from harfbuzz/graph-parents-map
+    
+    [graph] Use a hb_map_t to keep parents, instead of hb_vector_t
+
+commit 6bb61708ed2059abdbbb6eb7e8a9b721de64dd73
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Thu Jul 27 13:02:55 2023 -0600
+
+    [graph] Try fixing bots
+
+ src/graph/graph.hh | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit 1b5abb178197876d73584a4f51325323563b50dc
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Thu Jul 27 12:41:43 2023 -0600
+
+    [graph] Speed-up vertices having only one parent
+
+ src/graph/graph.hh | 55 +++++++++++++++++++++++++++++++++++++++++-------------
+ 1 file changed, 42 insertions(+), 13 deletions(-)
+
+commit f3d0b11d570eb790bb1ef5114f48fb59fbb260b6
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Thu Jul 27 12:20:39 2023 -0600
+
+    [graph] Make parents private
+
+ src/graph/graph.hh | 31 +++++++++++++++++++++----------
+ 1 file changed, 21 insertions(+), 10 deletions(-)
+
+commit d3b997ee70e87d4e6b3e22ce99a21372c94d5a14
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Wed Jul 26 15:39:14 2023 -0600
+
+    [graph] Use a hb_map_t to keep parents, instead of hb_vector_t
+    
+    In some fonts, for example Noto Duployan-Regular, nodes can
+    have over a thousand parents... Speeds up 10% subsetting.
+
+ src/graph/classdef-graph.hh |  2 +-
+ src/graph/coverage-graph.hh |  2 +-
+ src/graph/graph.hh          | 94 +++++++++++++++++++++++++++++----------------
+ src/graph/gsubgpos-graph.hh |  6 +--
+ src/graph/pairpos-graph.hh  |  2 +-
+ 5 files changed, 66 insertions(+), 40 deletions(-)
+
+commit 45a0d65c6219c755245ea1df24b2e8d644420971
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Thu Jul 27 09:06:02 2023 -0700
+
+    [instancer] cosmetic change
+
+ src/hb-ot-var-common.hh | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
+
+commit cb320d22228d366c06dd97d43bf06f7ad7afd5f2
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Thu Jul 27 10:43:07 2023 -0600
+
+    Revert "[cff] Use float instead of double"
+    
+    This reverts commit c8f67ac28eb18e65adda75818e2c472ad3936874.
+    
+    Tests failing.
+
+ src/hb-cff-interp-common.hh      | 14 +++++++-------
+ src/hb-cff-interp-dict-common.hh |  4 ++--
+ src/hb-cff2-interp-cs.hh         |  8 ++++----
+ src/hb-subset-cff2.cc            |  6 +++---
+ 4 files changed, 16 insertions(+), 16 deletions(-)
+
+commit c8f67ac28eb18e65adda75818e2c472ad3936874
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Thu Jul 27 10:34:45 2023 -0600
+
+    [cff] Use float instead of double
+    
+    Reduces memory usage slightly.
+
+ src/hb-cff-interp-common.hh      | 14 +++++++-------
+ src/hb-cff-interp-dict-common.hh |  4 ++--
+ src/hb-cff2-interp-cs.hh         |  8 ++++----
+ src/hb-subset-cff2.cc            |  6 +++---
+ 4 files changed, 16 insertions(+), 16 deletions(-)
+
+commit b36b100ef1c94012456c807167b2ac07443380ce
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Wed Jul 26 14:42:46 2023 -0600
+
+    [var] Remove byte_data_t; use hb_bytes_t
+    
+    Now that we have hopefully fixed the bug preventing hb_bytes_t
+    use, remove the hack.
+    
+    Ref.
+    5690840ceb190341f9960d2b975c4366566ae86b
+    https://github.com/harfbuzz/harfbuzz/issues/4138
+
+ src/hb-ot-var-common.hh | 55 ++++++++++++++++---------------------------------
+ 1 file changed, 18 insertions(+), 37 deletions(-)
+
+commit c25b8c06129d5abca2124a69a170b54dff215c41
+Merge: 5690840ce 5cab0709a
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Wed Jul 26 12:47:15 2023 -0600
+
+    Merge pull request #4335 from googlefonts/bug_fixes
+    
+    [instancer] support avar table, fix issues in STAT/fvar tables
+
+commit 5cab0709a4f7267a01eb6f254c02d8bbcb4832e6
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Wed Jul 26 09:56:07 2023 -0700
+
+    [instancer] fix for missing to update tuple indices flag in operator +=
+
+ src/hb-ot-var-common.hh | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit 515f85d545debf3c769b6aa7aa8c90908ce2f7f6
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Mon Jul 24 11:10:17 2023 -0700
+
+    [instancer] fix incorrect encoded_len
+
+ src/hb-ot-var-common.hh | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit bccdcf5b18861fbdb599189ab1dcb45e339b02b2
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Fri Jul 21 10:17:43 2023 -0700
+
+    [instancer] fix a bug in compiling deltas_y for gvar
+
+ src/hb-ot-var-common.hh | 2 ++
+ 1 file changed, 2 insertions(+)
+
+commit 5690840ceb190341f9960d2b975c4366566ae86b
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Wed Jul 26 09:53:32 2023 -0600
+
+    [map] Another try at fixing archaic clang
+    
+    Fixes (?) https://github.com/harfbuzz/harfbuzz/issues/4138
+
+ src/hb-map.hh | 14 ++++++++------
+ 1 file changed, 8 insertions(+), 6 deletions(-)
+
+commit a3b18062b7b19345f8c2818669d3d08f678d0bce
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Tue Jul 25 11:11:07 2023 -0600
+
+    [trak] Fix a couple return values
+
+ src/hb-aat-layout-trak-table.hh | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit 62e6f7835c1e2520108bba2e3b6ded43f93339bc
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Tue Jul 25 08:32:21 2023 -0600
+
+    [Cursive] round
+
+ src/OT/Layout/GPOS/CursivePosFormat1.hh | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit 60db142784bb145426e4a02635bbad4f2f260d16
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Mon Jul 24 20:49:32 2023 -0600
+
+    [layout] Remove unused "max-size" cruft
+
+ src/OT/Layout/GPOS/PairValueRecord.hh |  1 -
+ src/OT/Layout/GSUB/Ligature.hh        |  1 -
+ src/hb-machinery.hh                   |  5 -----
+ src/hb-null.hh                        |  9 ---------
+ src/hb-open-type.hh                   | 30 ------------------------------
+ src/hb-ot-layout-gsubgpos.hh          |  2 --
+ 6 files changed, 48 deletions(-)
+
+commit 8eb7889fd4cd03f84c78eb84514e05927fb6bd2c
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Mon Jul 24 20:31:12 2023 -0600
+
+    Add max-size to static-size objects
+
+ src/hb-machinery.hh | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit e322949b9b94b3d28d952d0b7f337abb4b05c1fb
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Mon Jul 24 20:28:37 2023 -0600
+
+    [ArrayOf] Remove fast-path for offset to max-sized objects
+    
+    Fixes timeout https://oss-fuzz.com/testcase-detail/6153196517851136
+
+ src/hb-open-type.hh | 10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
+
+commit 9ffea6328e71fbaea159116e609d3b0c005564a8
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Jul 24 10:37:25 2023 +0000
+
+    Bump github/codeql-action from 2.20.4 to 2.21.0
+    
+    Bumps [github/codeql-action](https://github.com/github/codeql-action) from 2.20.4 to 2.21.0.
+    - [Release notes](https://github.com/github/codeql-action/releases)
+    - [Changelog](https://github.com/github/codeql-action/blob/main/CHANGELOG.md)
+    - [Commits](https://github.com/github/codeql-action/compare/489225d82a57396c6f426a40e66d461b16b3461d...1813ca74c3faaa3a2da2070b9b8a0b3e7373a0d8)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: github/codeql-action
+      dependency-type: direct:production
+      update-type: version-update:semver-minor
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .github/workflows/scorecard.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 1a267f22ff3a608e5a8370224557268b0504f857
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Jul 24 11:01:01 2023 +0000
+
+    Bump fonttools from 4.41.0 to 4.41.1 in /.ci
+    
+    Bumps [fonttools](https://github.com/fonttools/fonttools) from 4.41.0 to 4.41.1.
+    - [Release notes](https://github.com/fonttools/fonttools/releases)
+    - [Changelog](https://github.com/fonttools/fonttools/blob/main/NEWS.rst)
+    - [Commits](https://github.com/fonttools/fonttools/compare/4.41.0...4.41.1)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: fonttools
+      dependency-type: direct:production
+      update-type: version-update:semver-patch
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .ci/requirements-fonttools.txt | 70 +++++++++++++++++++++---------------------
+ .ci/requirements.txt           | 70 +++++++++++++++++++++---------------------
+ 2 files changed, 70 insertions(+), 70 deletions(-)
+
+commit ca7e7e925b920ee54a0d0ad256f4a7daa0763684
+Author: Nikolaus Waxweiler <madigens@gmail.com>
+Date:   Sun Jul 23 22:20:09 2023 +0100
+
+    Fix wasm-micro-runtime build instructions
+
+ docs/wasm-shaper.md | 11 ++++-------
+ 1 file changed, 4 insertions(+), 7 deletions(-)
+
+commit a32278acd89a5e29774c7a03b0d11b669cfbb3fc
+Author: Nikolaus Waxweiler <madigens@gmail.com>
+Date:   Sun Jul 23 22:19:51 2023 +0100
+
+    Fix example code
+
+ docs/wasm-shaper.md | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit 55f41e287f8ff846584269cb0dbbc730402cab75
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Fri Jul 21 12:10:46 2023 -0600
+
+    [perf] Add duployan.txt
+    
+    From https://kaltashwawa.ca/2022/01/20/lovecraft-in-chinook-puspus-kopa-ulthar-tawn/
+
+ perf/texts/duployan.txt | 27 +++++++++++++++++++++++++++
+ 1 file changed, 27 insertions(+)
+
+commit c91899be14c82ae3d27c4cba2a1b920b6989a4f7
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Fri Jul 21 11:43:47 2023 -0600
+
+    [gdef] Use set-digest for mark-filterint-sets
+    
+    Speeds up Noto Duployan-Regular.otf by 45% percent!
+
+ src/OT/Layout/GDEF/GDEF.hh   | 33 +++++++++++++++++++++++++++++++++
+ src/hb-null.hh               |  2 +-
+ src/hb-ot-layout-gsubgpos.hh |  2 +-
+ 3 files changed, 35 insertions(+), 2 deletions(-)
+
+commit e8948a4e86902202005193f5859980e6602ff2b4
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Thu Jul 20 22:12:53 2023 -0600
+
+    [gsubgpos] Fix optimization
+    
+    Fixes https://github.com/harfbuzz/harfbuzz/issues/4336
+
+ src/hb-ot-layout-gsubgpos.hh | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+commit 36c7ec443b9e5881502f2056331abb6c8508db28
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Thu Jul 20 18:56:46 2023 -0600
+
+    [sanitize] Simplify a return
+
+ src/hb-sanitize.hh | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+commit 13f05ab9b39202aed98923b8ed0488b344e88a6f
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Thu Jul 20 09:57:02 2023 -0700
+
+    [instancer] support avar table partial instancing
+
+ src/hb-ot-var-avar-table.hh | 164 ++++++++++++++++++++++++++++++++++++++++++++
+ src/hb-subset-input.cc      |   1 -
+ src/hb-subset.cc            |   4 ++
+ 3 files changed, 168 insertions(+), 1 deletion(-)
+
+commit 837885f0fabdd99f7c804adbb449d1eab67401a8
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Thu Jul 20 12:58:16 2023 -0600
+
+    Revert "[sanitize/Coverage] Keep a map of sane coverages"
+    
+    This reverts commit a689114898cc3e8f1c6ba7cc49cd6c3639d91250.
+
+ src/OT/Layout/Common/Coverage.hh | 22 +++++-----------------
+ src/hb-sanitize.hh               |  3 ---
+ 2 files changed, 5 insertions(+), 20 deletions(-)
+
+commit 0ab906715e51859f5c88bae2a9e7611e3c251bec
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Thu Jul 20 12:57:16 2023 -0600
+
+    [sanitize/Coverage] Keep a map of sane coverages
+    
+    Fonts like Gulzar reuse the same coverage over a thousand times
+    sometimes.
+    
+    However, this doesn't speed up sanitize unfortunately. Looks
+    like calling Coverage::sanitize() is already very fast. We're
+    just doing A LOT of it.
+    
+    The map slowed it down in fact. A set was even slower.
+    
+    Going to revert.
+
+ src/OT/Layout/Common/Coverage.hh | 22 +++++++++++++++++-----
+ src/hb-sanitize.hh               |  3 +++
+ 2 files changed, 20 insertions(+), 5 deletions(-)
+
+commit 7de2f515a0792048556078a0860c940a1ee32739
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Thu Jul 20 12:46:54 2023 -0600
+
+    [set] Remove dependency on hb-machinery.hh
+
+ src/hb-bit-set.hh | 11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
+
+commit e8de5cb08f209ce3901c53e86eade2238e0fb894
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Thu Jul 20 11:31:13 2023 -0600
+
+    [gsubgpos] Use a couple variables
+
+ src/hb-ot-layout-gsubgpos.hh | 30 ++++++++++++++++++------------
+ 1 file changed, 18 insertions(+), 12 deletions(-)
+
+commit 0ccd61a3b2ff0d94a9c72fe3ce965221ef6a7d5b
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Wed Jul 19 16:42:30 2023 -0600
+
+    [gsubgpos] Micro-optimize
+
+ src/hb-ot-layout-gsubgpos.hh | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+
+commit b01c165034ebd26cc6d76301a6a272a813d42526
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Wed Jul 19 16:35:10 2023 -0600
+
+    [gsubgpos] Minor error handling
+
+ src/hb-ot-layout-gsubgpos.hh | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit ee5f200bf1a61f43538e36716ba96cd229ebb1ba
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Wed Jul 19 12:26:50 2023 -0600
+
+    [gsubgpos] Remove un unnecessary variable
+
+ src/hb-ot-layout-gsubgpos.hh | 20 ++++----------------
+ 1 file changed, 4 insertions(+), 16 deletions(-)
+
+commit a0bb2d3a9b107d45d1f5f4e2ce27a0cbd46710ed
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Wed Jul 19 11:21:01 2023 -0700
+
+    [instancer] support STAT table for all instancing operations
+
+ src/hb-subset.cc | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+commit 42c6a3a18a7d9106e0daf063371a1ba00543f73b
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Wed Jul 19 12:07:19 2023 -0600
+
+    [gsubgpos] Remove unnecessary condition
+    
+    Second is always set in this branch.
+
+ src/hb-ot-layout-gsubgpos.hh | 14 ++++----------
+ 1 file changed, 4 insertions(+), 10 deletions(-)
+
+commit b5de54e1d49701073c1a9356c5e689e135cd8aec
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Wed Jul 19 11:19:06 2023 -0600
+
+    [gsubgpos] Also match second component in (Chain)RuleSet::apply()
+    
+    Another 40% speedup in shaping Gulzar-Regular.
+
+ src/hb-ot-layout-gsubgpos.hh | 98 +++++++++++++++++++++++++++++++++-----------
+ 1 file changed, 75 insertions(+), 23 deletions(-)
+
+commit 73d94dbde35f5e01014f7858730e7d60b369aefd
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Wed Jul 19 10:33:57 2023 -0700
+
+    [instancer] bug fixes in fvar: add missing instanceCount, update axis limit
+
+ src/hb-ot-var-fvar-table.hh | 35 ++++++++++++++++++++++++++++-------
+ 1 file changed, 28 insertions(+), 7 deletions(-)
+
+commit 02b00d774368bb82b97348436b0620b9ffe1bf0f
+Author: Richard Dodd (dodj) <richard.o.dodd@gmail.com>
+Date:   Wed Jul 19 11:22:07 2023 +0100
+
+    Update wasm-shaper.md (just a small typo)
+
+ docs/wasm-shaper.md | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 730f579f68c9062b0f493d400f445946f2ee032d
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Tue Jul 18 15:09:36 2023 -0700
+
+    [instancer] store float value rather than F2DOT14 int value in axes_location map
+
+ src/hb-ot-layout-common.hh | 19 +++++++++++--------
+ src/hb-subset-plan.cc      |  6 +++---
+ 2 files changed, 14 insertions(+), 11 deletions(-)
+
+commit efbd257a325fedcf9000a9cccbf2d97d38769b98
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Tue Jul 18 14:50:32 2023 -0700
+
+    [instancer] memory leak fix in cvar
+
+ src/hb-ot-var-cvar-table.hh | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit a9e9279bee736d45eb58931ff7a363932e548090
+Merge: aa381ae96 5ee015ecf
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Tue Jul 18 12:24:17 2023 -0600
+
+    Merge pull request #4329 from googlefonts/instancer_solver_fix
+    
+    port instancer solver normalizeValue fixes from fonttools
+
+commit aa381ae963fedadc227afcc154e3cf95d9aa84c1
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Tue Jul 18 10:42:13 2023 -0600
+
+    [ReverseChain] Remove SIZE_MAX
+    
+    Oops. Can't set it since the struct has offsets.
+
+ src/OT/Layout/GSUB/ReverseChainSingleSubstFormat1.hh | 1 -
+ 1 file changed, 1 deletion(-)
+
+commit e583c9e904d3825b6f6e7a2996d555d16c67753b
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Tue Jul 18 10:34:26 2023 -0600
+
+    [ReverseChain] Add max-size
+
+ src/OT/Layout/GSUB/ReverseChainSingleSubstFormat1.hh | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit 7a2f9dcfb9cd892191f295c8fd9ca39d6675d9ed
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Tue Jul 18 04:36:15 2023 -0600
+
+    [matcher] Move initializers inline
+
+ src/hb-ot-layout-gsubgpos.hh | 26 ++++++++------------------
+ 1 file changed, 8 insertions(+), 18 deletions(-)
+
+commit 5ee015ecf60aac27ea3cd6309b1b1fb3c3566196
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Mon Jul 17 13:54:34 2023 -0700
+
+    [instancer-solver] remove unused normalizeValue() code
+
+ src/hb-subset-instancer-solver.cc | 30 ------------------------------
+ 1 file changed, 30 deletions(-)
+
+commit 6c25c752f608dfaa0b153b4c62bd96225c670080
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Mon Jul 17 13:47:38 2023 -0700
+
+    [instancer] use renormalized values when instantiating Condition table
+
+ src/hb-ot-layout-common.hh | 22 +++++++++++++++++++++-
+ 1 file changed, 21 insertions(+), 1 deletion(-)
+
+commit 73ce3015bbaa04ce5a2a9da358e3695c7db10c44
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Mon Jul 17 13:46:57 2023 -0700
+
+    [instancer-solver] port optimization and more tests from fonttools
+
+ src/hb-subset-instancer-solver.cc   |  5 ++---
+ src/test-subset-instancer-solver.cc | 19 +++++++++++++++++++
+ 2 files changed, 21 insertions(+), 3 deletions(-)
+
+commit 350423df8d7bc3c87b030c6304c9611136e60e68
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Mon Jul 17 11:10:19 2023 -0700
+
+    [instancer-solver] fix tests
+
+ src/test-subset-instancer-solver.cc | 59 +++++++++++++++++++------------------
+ src/test-tuple-varstore.cc          |  5 +++-
+ 2 files changed, 34 insertions(+), 30 deletions(-)
+
+commit 12be4cb184c6600f26285f8a56b9b27b80931f22
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Mon Jul 17 11:08:54 2023 -0700
+
+    [instancer-solver] fix APIs calling rebase_tent() with TripleDistances
+
+ src/hb-ot-var-common.hh     | 21 ++++++++++++++-------
+ src/hb-ot-var-cvar-table.hh |  2 +-
+ 2 files changed, 15 insertions(+), 8 deletions(-)
+
+commit 165f3e60ace3a086a3d5741146da83d2c82a409b
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Mon Jul 17 09:46:03 2023 -0700
+
+    [instancer-solver] add renormalizeValue() and store axis->distances map
+
+ src/hb-ot-var-fvar-table.hh       |  7 +++++++
+ src/hb-subset-instancer-solver.cc | 43 +++++++++++++++++++++++++++++++++++++--
+ src/hb-subset-instancer-solver.hh | 24 +++++++++++++++++++++-
+ src/hb-subset-plan-member-list.hh |  2 ++
+ src/hb-subset-plan.cc             | 12 ++++++-----
+ 5 files changed, 80 insertions(+), 8 deletions(-)
+
+commit d92a7a58d83952782d2cf54391e129a09c4b306d
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Mon Jul 17 11:27:38 2023 -0600
+
+    [gsubgpos] Inline a couple functions
+    
+    Produces smaller code.
+
+ src/hb-ot-layout-gsubgpos.hh | 34 ++++++++++++++++++----------------
+ 1 file changed, 18 insertions(+), 16 deletions(-)
+
+commit 4ea3737d04c575cd9b6ffda1e4e0f2c9d2b60d9c
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Mon Jul 17 09:50:28 2023 -0600
+
+    [gsubgpos] Add fast-path for end-of-string in (Chain)RuleSet::apply()
+
+ src/hb-ot-layout-gsubgpos.hh | 26 ++++++++++++++++++++++++--
+ 1 file changed, 24 insertions(+), 2 deletions(-)
+
+commit e7ce633946e40e3f753880e8cfd4b86a51a878be
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Mon Jul 17 08:52:12 2023 -0600
+
+    [algs] Fix -Wcomma errors
+    
+    Fixes https://github.com/harfbuzz/harfbuzz/issues/4328
+
+ src/hb-algs.hh | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit af095d90e3ecd602feefad529ceaf6ee126103ac
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Jul 17 10:22:42 2023 +0000
+
+    Bump github/codeql-action from 2.20.3 to 2.20.4
+    
+    Bumps [github/codeql-action](https://github.com/github/codeql-action) from 2.20.3 to 2.20.4.
+    - [Release notes](https://github.com/github/codeql-action/releases)
+    - [Changelog](https://github.com/github/codeql-action/blob/main/CHANGELOG.md)
+    - [Commits](https://github.com/github/codeql-action/compare/46ed16ded91731b2df79a2893d3aea8e9f03b5c4...489225d82a57396c6f426a40e66d461b16b3461d)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: github/codeql-action
+      dependency-type: direct:production
+      update-type: version-update:semver-patch
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .github/workflows/scorecard.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit b031bbde94c962b287528402985e2c8a8f4b83b5
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Jul 17 10:22:45 2023 +0000
+
+    Bump actions/setup-python from 4.6.1 to 4.7.0
+    
+    Bumps [actions/setup-python](https://github.com/actions/setup-python) from 4.6.1 to 4.7.0.
+    - [Release notes](https://github.com/actions/setup-python/releases)
+    - [Commits](https://github.com/actions/setup-python/compare/bd6b4b6205c4dbad673328db7b31b7fab9e241c0...61a6322f88396a6271a6ee3565807d608ecaddd1)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: actions/setup-python
+      dependency-type: direct:production
+      update-type: version-update:semver-minor
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .github/workflows/msvc-ci.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit ae8fea081a09d478986427d4861c74eb0b9582d0
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Jul 17 10:28:35 2023 +0000
+
+    Bump fonttools from 4.40.0 to 4.41.0 in /.ci
+    
+    Bumps [fonttools](https://github.com/fonttools/fonttools) from 4.40.0 to 4.41.0.
+    - [Release notes](https://github.com/fonttools/fonttools/releases)
+    - [Changelog](https://github.com/fonttools/fonttools/blob/main/NEWS.rst)
+    - [Commits](https://github.com/fonttools/fonttools/compare/4.40.0...4.41.0)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: fonttools
+      dependency-type: direct:production
+      update-type: version-update:semver-minor
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .ci/requirements-fonttools.txt | 72 +++++++++++++++++++++---------------------
+ .ci/requirements.txt           | 70 ++++++++++++++++++++--------------------
+ 2 files changed, 71 insertions(+), 71 deletions(-)
+
+commit da84a078ee89d3d9cbd2a030722d01ee85f1bcde
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Jul 17 10:28:55 2023 +0000
+
+    Bump meson from 1.1.1 to 1.2.0 in /.ci
+    
+    Bumps [meson](https://github.com/mesonbuild/meson) from 1.1.1 to 1.2.0.
+    - [Release notes](https://github.com/mesonbuild/meson/releases)
+    - [Commits](https://github.com/mesonbuild/meson/compare/1.1.1...1.2.0)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: meson
+      dependency-type: direct:production
+      update-type: version-update:semver-minor
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .ci/requirements.in  | 2 +-
+ .ci/requirements.txt | 6 +++---
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+commit 49730531097cb0b29b6435fa62d10e5060852388
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sun Jul 16 13:09:49 2023 -0600
+
+    Config
+
+ src/OT/Layout/GSUB/LigatureSet.hh | 4 ++--
+ src/hb-config.hh                  | 2 +-
+ src/hb-ot-layout-gsubgpos.hh      | 8 ++++++--
+ 3 files changed, 9 insertions(+), 5 deletions(-)
+
+commit 645fabd1013e94693f6da2d4263b0edd3b0b014d
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sun Jul 16 11:36:59 2023 -0600
+
+    [gsubgpos] Vastly speed up ChainRuleSet / RuleSet matching
+    
+    Match the first component in a fast loop.
+    
+    Idea replicated from LigatureSet.
+    
+    Speeds up Gulzar shaping by 22%!
+    37% in NotoNastaliqUrdu!
+
+ src/OT/Layout/GSUB/LigatureSet.hh |  4 +-
+ src/hb-ot-layout-gsubgpos.hh      | 82 +++++++++++++++++++++++++++++++++++----
+ 2 files changed, 77 insertions(+), 9 deletions(-)
+
+commit 77080f86f85744600a052e4f10bea50f331c44b0
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sun Jul 16 11:26:32 2023 -0600
+
+    .
+
+ src/OT/Layout/GSUB/LigatureSet.hh |  7 +---
+ src/hb-ot-layout-gsubgpos.hh      | 84 +++++++++++++++++++++++++++++++++++----
+ 2 files changed, 79 insertions(+), 12 deletions(-)
+
+commit 5c8f3b7fec330897d66bf72559aa2ac26862ae99
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sun Jul 16 09:39:18 2023 -0600
+
+    [gsubgpos] Conditionally cache backtrack again
+
+ src/hb-ot-layout-gsubgpos.hh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 52237eb1fe6a53de649917ec64382adac89f8e54
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sun Jul 16 09:07:25 2023 -0600
+
+    [ChainContext] More caching
+
+ src/hb-ot-layout-gsubgpos.hh | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+commit 62e10c9fa0fce0b4798ccc13640f9fe85206f227
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sun Jul 16 08:43:18 2023 -0600
+
+    Revert "[gsubgpos] Allocate iterators further up"
+    
+    This reverts commit b9f364b8fcacf8ab32d0272190d8509f214e55f2.
+
+ src/OT/Layout/GSUB/Ligature.hh                     |   5 +-
+ .../Layout/GSUB/ReverseChainSingleSubstFormat1.hh  |   8 +-
+ src/hb-ot-layout-gsubgpos.hh                       | 117 +++++++++------------
+ 3 files changed, 55 insertions(+), 75 deletions(-)
+
+commit b9f364b8fcacf8ab32d0272190d8509f214e55f2
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sun Jul 16 08:42:36 2023 -0600
+
+    [gsubgpos] Allocate iterators further up
+    
+    To avoid calling set_match_func repeatedly.
+    
+    Doesn't show speedup. Going to revert.
+
+ src/OT/Layout/GSUB/Ligature.hh                     |   5 +-
+ .../Layout/GSUB/ReverseChainSingleSubstFormat1.hh  |   8 +-
+ src/hb-ot-layout-gsubgpos.hh                       | 117 ++++++++++++---------
+ 3 files changed, 75 insertions(+), 55 deletions(-)
+
+commit c2f454c7e2e8f05636cfbf76f5e6b3dc3919378d
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sun Jul 16 08:23:59 2023 -0600
+
+    [gsubgpos] Fix residual from 5af80f349c4e040bfa853ee3f561ac16538b5988
+
+ src/hb-ot-layout-gsubgpos.hh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 4e641103d40b5ada7f77dba3b6f0891de60388bb
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sun Jul 16 07:40:20 2023 -0600
+
+    [buffer] Inline a method
+
+ src/hb-buffer.hh | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+commit 5af80f349c4e040bfa853ee3f561ac16538b5988
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sun Jul 16 07:27:28 2023 -0600
+
+    [ChainContext] Cache two class values
+    
+    7% speedup shaping Gulzar.
+
+ src/hb-ot-layout-gsubgpos.hh | 38 ++++++++++++++++++++++++++------------
+ 1 file changed, 26 insertions(+), 12 deletions(-)
+
+commit 8cde4fa9a0e8cb6e42770a2ff7da158f2914cdb2
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sun Jul 16 06:01:06 2023 -0600
+
+    [gsubgpos] Inline a couple methods
+
+ src/hb-ot-layout-gsubgpos.hh | 2 ++
+ 1 file changed, 2 insertions(+)
+
+commit f94508edd60e26a015586c37c29104d6bdc26462
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sat Jul 15 15:28:19 2023 -0600
+
+    [Ligature] Micro-optimize
+
+ src/OT/Layout/GSUB/LigatureSet.hh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 76de3451e68168912bfd4b1a500ddbc45200b706
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sat Jul 15 15:00:23 2023 -0600
+
+    [ot-shape] Short-circuit spaces as well
+
+ src/hb-ot-shape.cc | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+commit 765da4db1949b88eff921eb1b909dc4054e55f37
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sat Jul 15 14:55:36 2023 -0600
+
+    [ot-shape] Minor short-circuit
+
+ src/hb-ot-shape.cc | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
+
+commit 7b8e0bbb9f41561c2ee29a2868de9d7d155c9194
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sat Jul 15 14:53:15 2023 -0600
+
+    [ot-shape] Minor short-circuit
+
+ src/hb-ot-shape.cc | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+commit b2d648e41b5f963fdfe37536467c03c02cd99d2f
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sat Jul 15 14:26:06 2023 -0600
+
+    [perf/benchmark-subset] Rename subset_codepoints to subset_unicodes
+
+ perf/benchmark-subset.cc | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+commit a56288488c70036832414145c64ce9e42d7464a6
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sat Jul 15 13:59:10 2023 -0600
+
+    [subset] Speed up a couple of set iteration loops
+    
+    Need to speed up set::next_range() for the second one to have
+    any effect.
+
+ src/hb-ot-layout-common.hh | 11 ++++++++++-
+ src/hb-subset-plan.cc      |  9 ++++++---
+ 2 files changed, 16 insertions(+), 4 deletions(-)
+
+commit 326d319f93fe6173344602929fdbb5ba27412388
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sat Jul 15 13:14:34 2023 -0600
+
+    [graph] Micro-optimize
+
+ src/graph/graph.hh | 8 ++------
+ 1 file changed, 2 insertions(+), 6 deletions(-)
+
+commit 548230e45e0bc9fa985d80714ede4c39a347d508
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sat Jul 15 13:13:16 2023 -0600
+
+    [graph] Early return from a function
+
+ src/graph/graph.hh | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+commit 09706b04fce2afe42cade4cbf1b36db23edde94c
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sat Jul 15 13:11:04 2023 -0600
+
+    [graph] Add a pre-alloc to map
+
+ src/graph/graph.hh | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit d1ddfc4d10e169c7fdd6187b38dd7a14f59e1def
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Fri Jul 14 14:52:43 2023 -0600
+
+    [graph] Use move instead of swap
+
+ src/graph/graph.hh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 07cb6bf87af604dcc1a025257aea43c9e991c065
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Fri Jul 14 13:38:33 2023 -0600
+
+    [graph] Minor, type
+
+ src/graph/graph.hh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 867640af31e8f88d65cd72a2c7f86f4632b98539
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Fri Jul 14 13:09:16 2023 -0600
+
+    Revert "[set] Add test_and_add / test_and_del"
+    
+    This reverts commit de1237fbf2660b5952dde4db171a62d9b1a77c92.
+    
+    This seems to be a net loss.
+
+ src/graph/graph.hh           | 17 ++++++++++++-----
+ src/hb-bit-page.hh           | 25 -------------------------
+ src/hb-bit-set-invertible.hh |  2 --
+ src/hb-bit-set.hh            | 16 ----------------
+ src/hb-set.hh                |  2 --
+ 5 files changed, 12 insertions(+), 50 deletions(-)
+
+commit 10b776b0c3afeefa19ec47c40196cf205a112c8b
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Fri Jul 14 13:08:19 2023 -0600
+
+    [graph] Micro-optimize
+
+ src/graph/graph.hh | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit de1237fbf2660b5952dde4db171a62d9b1a77c92
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Fri Jul 14 12:38:56 2023 -0600
+
+    [set] Add test_and_add / test_and_del
+    
+    Use in graph.
+
+ src/graph/graph.hh           | 17 +++++------------
+ src/hb-bit-page.hh           | 25 +++++++++++++++++++++++++
+ src/hb-bit-set-invertible.hh |  2 ++
+ src/hb-bit-set.hh            | 16 ++++++++++++++++
+ src/hb-set.hh                |  2 ++
+ 5 files changed, 50 insertions(+), 12 deletions(-)
+
+commit 7f1ff9c8819edc9cdb2e48cfc4042e38a05777a9
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Fri Jul 14 12:22:24 2023 -0600
+
+    [graph] Micro-optimize array access
+
+ src/graph/graph.hh | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+commit d9cf9b5f071c77b385d92d4740d5fd053cf6f8c7
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Fri Jul 14 12:19:10 2023 -0600
+
+    [priority-queue] Inline insert()
+
+ src/hb-priority-queue.hh | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+commit d00b88737e0a704d2af3b6539592dd9bb33a4722
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Fri Jul 14 11:26:51 2023 -0600
+
+    Revert "[subset/closure] Batch recursions in scheduled stages"
+    
+    This reverts commit f2aaeeb3016e10bf91c251296391a381d5fc6385.
+
+ src/hb-ot-layout-gsub-table.hh |  9 ++-------
+ src/hb-ot-layout-gsubgpos.hh   | 15 ---------------
+ 2 files changed, 2 insertions(+), 22 deletions(-)
+
+commit 5e42f7bb6d025f14955e60c94ea08aca472e08dd
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Fri Jul 14 11:26:38 2023 -0600
+
+    Revert "Revert "[priority-queue] Inline a couple more""
+    
+    This reverts commit 915410e5267cba5bfc6154548c8856ae077bfefe.
+    
+    Mistake.
+
+ src/hb-priority-queue.hh | 3 +++
+ 1 file changed, 3 insertions(+)
+
+commit 915410e5267cba5bfc6154548c8856ae077bfefe
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Fri Jul 14 11:18:09 2023 -0600
+
+    Revert "[priority-queue] Inline a couple more"
+    
+    This reverts commit 8704d73213da2294281687ecd7a40d408e9bf26a.
+
+ src/hb-priority-queue.hh | 3 ---
+ 1 file changed, 3 deletions(-)
+
+commit f2aaeeb3016e10bf91c251296391a381d5fc6385
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Fri Jul 14 11:17:37 2023 -0600
+
+    [subset/closure] Batch recursions in scheduled stages
+    
+    Going to revert. Doesn't pass tests and savings are minor.
+
+ src/hb-ot-layout-gsub-table.hh |  9 +++++++--
+ src/hb-ot-layout-gsubgpos.hh   | 15 +++++++++++++++
+ 2 files changed, 22 insertions(+), 2 deletions(-)
+
+commit 5a65ede5d43711098982995c4d2d6cd7f8eecad1
+Author: Khaled Hosny <khaled@aliftype.com>
+Date:   Wed Jul 12 10:18:31 2023 +0300
+
+    Minor
+
+ NEWS | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
 commit d160d9389cb4c5b15ebea9b41eb74018c4358924
 Author: Khaled Hosny <khaled@aliftype.com>
 Date:   Wed Jul 12 08:27:25 2023 +0300
