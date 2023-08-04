@@ -27492,7 +27492,11 @@ else  begin scan_register_num; c:=cur_val;
 p:=scan_toks(false,true); p:=get_node(small_node_size);
 mark_class(p):=c;
 type(p):=mark_node; subtype(p):=0; {the |subtype| is not used}
-mark_ptr(p):=def_ref; link(tail):=p; tail:=p;
+inhibit_glue_flag:=false;
+mark_ptr(p):=def_ref;
+if not is_char_node(tail)and(type(tail)=disp_node) then
+  prev_append(p)
+else tail_append(p);
 end;
 
 @ Penalty nodes get into a list via the |break_penalty| command.
@@ -27503,8 +27507,12 @@ any_mode(break_penalty): append_penalty;
 
 @ @<Declare action...@>=
 procedure append_penalty;
-begin scan_int; tail_append(new_penalty(cur_val));
-if mode=vmode then build_page;
+begin scan_int;
+  inhibit_glue_flag:=false;
+  if not is_char_node(tail)and(type(tail)=disp_node) then
+    prev_append(new_penalty(cur_val))
+  else tail_append(new_penalty(cur_val));
+  if mode=vmode then build_page;
 end;
 
 @ The |remove_item| command removes a penalty, kern, or glue node if it
@@ -27592,7 +27600,6 @@ vmode+un_vbox,hmode+un_hbox,mmode+un_hbox: unpackage;
 procedure unpackage;
 label done, exit;
 var p:pointer; {the box}
-    r: pointer; {to remove marginal kern nodes}
 @!c:box_code..copy_code; {should we copy?}
 @!disp:scaled; {displacement}
 begin if cur_chr>copy_code then @<Handle saved items and |goto done|@>;
@@ -27632,14 +27639,42 @@ else
   free_node(p,box_node_size);
   end;
 done:
-while link(tail) <> null do begin
-    r:=link(tail);
-    if not is_char_node(r) and (type(r) = margin_kern_node) then begin
-        link(tail):=link(r);
-        free_node(r, margin_kern_node_size);
-    end;
-    tail:=link(tail);
-end;
+while link(tail)<>null do
+  {reset |inhibit_glue_flag| when a node other than |disp_node| is found;
+   |disp_node| is always inserted according to tex-jp-build issue 40}
+  begin p:=tail; tail:=link(tail);
+  if is_char_node(tail) then begin
+    inhibit_glue_flag:=false;
+    if font_dir[font(tail)]<>dir_default then last_jchr:=link(tail);
+    end
+  else
+    case type(tail) of
+    glue_node : begin
+      inhibit_glue_flag:=false;
+      if (subtype(tail)=kanji_skip_code+1)
+             or(subtype(tail)=xkanji_skip_code+1) then
+        begin link(p):=link(tail);
+        delete_glue_ref(glue_ptr(tail));
+        free_node(tail,small_node_size); tail:=p;
+        end;
+      end;
+    penalty_node : begin
+      inhibit_glue_flag:=false;
+      if subtype(tail)=widow_pena then
+        begin link(p):=link(tail); free_node(tail,small_node_size);
+        tail:=p;
+        end;
+      end;
+    disp_node :
+      begin prev_disp:=disp; disp:=disp_dimen(tail); prev_node:=p;
+      end;
+    margin_kern_node: begin
+      link(p):=link(tail); free_node(tail, margin_kern_node_size);
+      tail:=link(p);
+      end;
+    othercases inhibit_glue_flag:=false;
+    endcases;
+  end;
 exit:end;
 
 @ @<Forbidden...@>=vmode+ital_corr,
@@ -27657,8 +27692,16 @@ procedure append_italic_correction;
 label exit;
 var p:pointer; {|char_node| at the tail of the current list}
 @!f:internal_font_number; {the font in the |char_node|}
+@!d:pointer; {|disp_node|}
 begin if tail<>head then
-  begin if is_char_node(tail) then p:=tail
+  begin 
+  if not is_char_node(tail)and(type(tail)=disp_node) then
+    begin d:=tail; tail:=prev_node;
+    end
+  else d:=null;
+  if (last_jchr<>null)and(link(last_jchr)=tail)and(is_char_node(tail)) then
+    p:=last_jchr
+  else if is_char_node(tail) then p:=tail
   else if type(tail)=ligature_node then p:=lig_char(tail)
   else if (type(tail)=whatsit_node) then begin
     if is_native_word_subtype(tail) then begin
@@ -27673,6 +27716,9 @@ begin if tail<>head then
   f:=font(p);
   tail_append(new_kern(char_italic(f)(char_info(f)(character(p)))));
   subtype(tail):=ita_kern;
+  if d<>null then
+    begin prev_node:=tail; tail_append(d);
+    end;
   end;
 exit:end;
 
@@ -27698,7 +27744,7 @@ but it starts out as 1000 in the subsidiary lists.
 @<Declare act...@>=
 procedure append_discretionary;
 var c:integer; {hyphen character}
-begin tail_append(new_disc);
+begin tail_append(new_disc); inhibit_glue_flag:=false;
 if cur_chr=1 then
   begin c:=hyphen_char[cur_font];
   if c>=0 then if c<=biggest_char then pre_break(tail):=new_character(cur_font,c);
@@ -27760,6 +27806,11 @@ else if (n>0)and(abs(direction)<>d) then
   help2("\discretionary's argument and outer hlist must have same direction.")@/
   ("I delete your third part."); flush_node_list(p); n:=0; error;
   end
+else if (n>0)and(abs(direction)<>d) then
+  begin print_err("Direction Incompatible");
+  help2("\discretionary's argument and outer hlist must have same direction.")@/
+  ("I delete your third part."); flush_node_list(p); n:=0; error;
+  end
 else link(tail):=p;
 if n<=max_quarterword then replace_count(tail):=n
 else  begin print_err("Discretionary list is too long");
@@ -27783,8 +27834,12 @@ while p<>null do
   begin if not is_char_node(p) then if type(p)>rule_node then
     if type(p)<>kern_node then if type(p)<>ligature_node then if type(p)<>disp_node then
     if (type(p)<>whatsit_node)
-        or (not is_native_word_subtype(p) and (subtype(p)<>glyph_node)) then
+        or (not is_native_word_subtype(p) and (subtype(p)<>glyph_node)) then 
+    begin
     if (type(p)=penalty_node)and(subtype(p)<>normal) then
+        begin link(q):=link(p); free_node(p,small_node_size); p:=q;
+        end
+    else
       begin print_err("Improper discretionary list");
 @.Improper discretionary list@>
       help1("Discretionary lists must contain only boxes and kerns.");@/
@@ -27796,6 +27851,7 @@ while p<>null do
       end_diagnostic(true);
       flush_node_list(p); link(q):=null; goto done;
       end;
+    end;
   q:=p; p:=link(q); incr(n);
   end;
 done:
@@ -28106,6 +28162,7 @@ begin get_token; {|get_x_token| would fail on \.{\\ifmmode}\thinspace!}
 if (cur_cmd=math_shift)and(mode>0) then @<Go into display math mode@>
 else  begin back_input; @<Go into ordinary math mode@>;
   end;
+direction:=-abs(direction);
 end;
 
 @ @<Go into ordinary math mode@>=
@@ -28196,11 +28253,12 @@ done:
 
 @ @<Let |d| be the natural width of node |p|...@>=
 reswitch: if is_char_node(p) then
-  begin f:=font(p); d:=char_width(f)(char_info(f)(character(p)));
+  begin f:=font(p); d:=char_width(f)(orig_char_info(f)(character(p)));
+  if font_dir[f]<>dir_default then p:=link(p);
   goto found;
   end;
 case type(p) of
-hlist_node,vlist_node,rule_node: begin d:=width(p); goto found;
+hlist_node,vlist_node,dir_node,rule_node: begin d:=width(p); goto found;
   end;
 ligature_node:@<Make node |p| look like a |char_node|...@>;
 kern_node: d:=width(p);
