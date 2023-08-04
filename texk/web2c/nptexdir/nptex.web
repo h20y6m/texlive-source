@@ -24238,6 +24238,7 @@ not_found: if prev_dp>d then
 
 @ @<Use node |p| to update the current height and depth measurements...@>=
 case type(p) of
+dir_node,
 hlist_node,vlist_node,rule_node: begin@t@>@;@/
   cur_height:=cur_height+prev_dp+height(p); prev_dp:=depth(p);
   goto not_found;
@@ -24324,6 +24325,7 @@ function vsplit(@!n:halfword; @!h:scaled):pointer;
   {extracts a page of height |h| from box |n|}
 label exit,done;
 var v:pointer; {the box to be split}
+w:pointer; {|dir_node|}
 p:pointer; {runs through the vlist}
 q:pointer; {points to where the break occurs}
 begin cur_val:=n; fetch_box(v);
@@ -24355,6 +24357,12 @@ exit: end;
 if v=null then
   begin vsplit:=null; return;
   end;
+if type(v)=dir_node then begin
+  w:=v; v:=list_ptr(v);
+  delete_glue_ref(space_ptr(w));
+  delete_glue_ref(xspace_ptr(w));
+  free_node(w,box_node_size);
+end;
 if type(v)<>vlist_node then
   begin print_err(""); print_esc("vsplit"); print(" needs a ");
   print_esc("vbox");
@@ -24362,7 +24370,8 @@ if type(v)<>vlist_node then
   help2("The box you are trying to split is an \hbox.")@/
   ("I can't split such a box, so I'll leave it alone.");
   error; vsplit:=null; return;
-  end
+  end;
+flush_node_list(link(v)); link(v):=null
 
 @ It's possible that the box begins with a penalty node that is the
 ``best'' break, so we must be careful to handle this special case correctly.
@@ -24685,7 +24694,14 @@ does not contain an \.{\\hbox}.
 @p procedure ensure_vbox(@!n:eight_bits);
 var p:pointer; {the box register contents}
 begin p:=box(n);
-if p<>null then if type(p)=hlist_node then
+if p<>null then if type(p)=dir_node then
+  begin p:=list_ptr(p);
+  delete_glue_ref(space_ptr(box(n)));
+  delete_glue_ref(xspace_ptr(box(n)));
+  free_node(box(n),box_node_size);
+  box(n):=p
+end;
+if p<>null then if type(p)<>vlist_node then
   begin print_err("Insertions can only be added to a vbox");
 @.Insertions can only...@>
   help3("Tut tut: You're trying to \insert into a")@/
@@ -25220,14 +25236,19 @@ begin if type(r)=split_up then
     if ins_ptr(p)<>null then
       begin temp_ptr:=vpack(ins_ptr(p),natural);
       height(p):=height(temp_ptr)+depth(temp_ptr);
+      delete_glue_ref(space_ptr(temp_ptr));
+      delete_glue_ref(xspace_ptr(temp_ptr));
       free_node(temp_ptr,box_node_size); wait:=true;
       end;
     end;
 best_ins_ptr(r):=null;
 n:=qo(subtype(r));
 temp_ptr:=list_ptr(box(n));
+delete_glue_ref(space_ptr(box(n)));
+delete_glue_ref(xspace_ptr(box(n)));
+flush_node_list(link(box(n)));
 free_node(box(n),box_node_size);
-box(n):=vpack(temp_ptr,natural);
+box(n):=vpack(temp_ptr,natural); set_box_dir(box(n))(abs(ins_dir(p)));
 end
 
 @ @<Either append the insertion node |p|...@>=
@@ -25420,6 +25441,7 @@ hmode+achar_given: goto main_loop;
 hmode+kchar_given: goto main_loop_j;
 hmode+no_boundary: begin get_x_token;
   if (cur_cmd=letter)or(cur_cmd=other_char)or(cur_cmd=char_given)or
+   (cur_cmd=achar_given)or(cur_cmd=kchar_given)or
    (cur_cmd=char_num) then cancel_boundary:=true;
   goto reswitch;
   end;
@@ -26081,7 +26103,11 @@ if space_skip=zero_glue then
   temp_ptr:=new_glue(main_p);
   end
 else temp_ptr:=new_param_glue(space_skip_code);
-link(tail):=temp_ptr; tail:=temp_ptr;
+if not is_char_node(tail)and(type(tail)=disp_node) then
+  begin link(prev_node):=temp_ptr; link(temp_ptr):=tail; prev_node:=temp_ptr;
+  end
+else begin link(tail):=temp_ptr; tail:=temp_ptr;
+  end;
 goto big_switch
 
 @ Having |font_glue| allocated for each text font saves both time and memory.
@@ -26111,7 +26137,11 @@ else  begin if space_skip<>zero_glue then main_p:=space_skip
   @<Modify the glue specification in |main_p| according to the space factor@>;
   q:=new_glue(main_p); glue_ref_count(main_p):=null;
   end;
-link(tail):=q; tail:=q;
+if not is_char_node(tail)and(type(tail)=disp_node) then
+  begin link(prev_node):=q; link(q):=tail; prev_node:=q;
+  end
+else begin link(tail):=q; tail:=q;
+  end
 end;
 
 @ @<Modify the glue specification in |main_p| according to the space factor@>=
@@ -26461,6 +26491,7 @@ mode, by setting |prev_depth:=ignore_depth|.
 
 @<Cases of |main_control| that build...@>=
 vmode+hrule,hmode+vrule,mmode+vrule: begin tail_append(scan_rule_spec);
+  inhibit_glue_flag := false;
   if abs(mode)=vmode then prev_depth:=ignore_depth
   else if abs(mode)=hmode then space_factor:=1000;
   end;
@@ -26549,6 +26580,7 @@ skip_code: scan_glue(glue_val);
 mskip_code: scan_glue(mu_val);
 end; {now |cur_val| points to the glue specification}
 tail_append(new_glue(cur_val));
+inhibit_glue_flag:=false;
 if s>=skip_code then
   begin decr(glue_ref_count(cur_val));
   if s>skip_code then subtype(tail):=mu_glue;
@@ -26559,7 +26591,13 @@ end;
 procedure append_kern;
 var s:quarterword; {|subtype| of the kern node}
 begin s:=cur_chr; scan_dimen(s=mu_glue,false,false);
-tail_append(new_kern(cur_val)); subtype(tail):=s;
+inhibit_glue_flag := false;
+if not is_char_node(tail)and(type(tail)=disp_node) then
+  begin prev_append(new_kern(cur_val)); subtype(prev_node):=s;
+  end
+else
+  begin tail_append(new_kern(cur_val)); subtype(tail):=s;
+  end;
 end;
 
 @ Many of the actions related to box-making are triggered by the appearance
@@ -26799,6 +26837,12 @@ make_box: case chr_code of
   vtop_code+vmode: print_esc("vbox");
   othercases print_esc("hbox")
   endcases;
+chg_dir:
+  case chr_code of
+    dir_yoko: print_esc("yoko");
+    dir_tate: print_esc("tate");
+    dir_dtou: print_esc("dtou");
+  endcases;
 leader_ship: if chr_code=a_leaders then print_esc("leaders")
   else if chr_code=c_leaders then print_esc("cleaders")
   else if chr_code=x_leaders then print_esc("xleaders")
@@ -26903,9 +26947,10 @@ begin if cur_box<>null then
       end;
     if mode>0 then build_page;
     end
-  else  begin if abs(mode)=hmode then space_factor:=1000
+  else  begin if abs(mode)=hmode then
+    begin space_factor:=1000; inhibit_glue_flag:=false; end
     else  begin p:=new_noad;
-      math_type(nucleus(p)):=sub_box;
+      math_type(nucleus(p)):=sub_exp_box;
       info(nucleus(p)):=cur_box; cur_box:=p;
       end;
     link(tail):=cur_box; tail:=cur_box;
@@ -26989,8 +27034,8 @@ endcases;@/
 box_end(box_context); {in simple cases, we use the box immediately}
 exit:end;
 
-@ Note that the condition |not is_char_node(tail)| implies that |head<>tail|,
-since |head| is a one-word node.
+@ Note that in \TeX\ the condition |not is_char_node(tail)| implies that
+|head<>tail|, since |head| is a one-word node; this is not so for \npTeX.
 
 @d fetch_effective_tail_eTeX(#)== {extract |tx|,
   drop \.{\\beginM} \.{\\endM} pair}
@@ -27130,7 +27175,8 @@ else if (mode=vmode)and(head=tail) then
   end
 else  begin check_effective_tail(goto done);
   if not is_char_node(tx) then
-    if (type(tx)=hlist_node)or(type(tx)=vlist_node) then
+    if (type(tx)=hlist_node)or(type(tx)=vlist_node)
+       or(type(tx)=dir_node) then
       @<Remove the last box, unless it's part of a discretionary@>;
   done:end;
 end
@@ -27183,7 +27229,7 @@ if k=vmode then
   begin prev_depth:=ignore_depth;
   if every_vbox<>null then begin_token_list(every_vbox,every_vbox_text);
   end
-else  begin space_factor:=1000;
+else  begin space_factor:=1000; inhibit_glue_flag:=false;
   if every_hbox<>null then begin_token_list(every_hbox,every_hbox_text);
   end;
 return;
@@ -27354,8 +27400,7 @@ end;
 @ @<Declare act...@>=
 procedure end_graf;
 begin if mode=hmode then
-  begin
-if (link(head)=tail)and(not is_char_node(tail)and(type(tail)=disp_node)) then
+  begin if (link(head)=tail)and(not is_char_node(tail)and(type(tail)=disp_node)) then
     begin free_node(tail,small_node_size); tail:=head; link(head):=null; end;
     { |disp_node|-only paragraphs are ignored }
   if head=tail then pop_nest {null paragraphs are ignored}
