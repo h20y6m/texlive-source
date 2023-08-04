@@ -21458,17 +21458,18 @@ else  case type(v) of
 @ @<Add the width of node |s| to |b...@>=
 if is_char_node(s) then
   begin f:=font(s);
-  break_width[1]:=@|break_width[1]+char_width(f)(char_info(f)(character(s)));
+  break_width[1]:=@|break_width[1]+char_width(f)(orig_char_info(f)(character(s)));
   if font_dir[f]<>dir_default then s:=link(s);
   end
 else  case type(s) of
   ligature_node: begin f:=font(lig_char(s));
     xtx_ligature_present:=true;
     break_width[1]:=break_width[1]+
-      char_width(f)(char_info(f)(character(lig_char(s))));
+      char_width(f)(orig_char_info(f)(character(lig_char(s))));
     end;
   hlist_node,vlist_node,dir_node,rule_node,kern_node:
     break_width[1]:=break_width[1]+width(s);
+  disp_node: do_nothing;
   whatsit_node:
     if (is_native_word_subtype(s))
     or (subtype(s)=glyph_node)
@@ -22095,14 +22096,14 @@ end
 @ @<Add the width of node |s| to |disc_width|@>=
 if is_char_node(s) then
   begin f:=font(s);
-  disc_width:=disc_width+char_width(f)(char_info(f)(character(s)));
+  disc_width:=disc_width+char_width(f)(orig_char_info(f)(character(s)));
   if font_dir[f]<>dir_default then s:=link(s)
   end
 else  case type(s) of
   ligature_node: begin f:=font(lig_char(s));
     xtx_ligature_present:=true;
     disc_width:=disc_width+
-      char_width(f)(char_info(f)(character(lig_char(s))));
+      char_width(f)(orig_char_info(f)(character(lig_char(s))));
     end;
   hlist_node,vlist_node,dir_node,rule_node,kern_node:
     disc_width:=disc_width+width(s);
@@ -22120,14 +22121,14 @@ else  case type(s) of
 @ @<Add the width of node |s| to |act_width|@>=
 if is_char_node(s) then
   begin f:=font(s);
-  act_width:=act_width+char_width(f)(char_info(f)(character(s)));
+  act_width:=act_width+char_width(f)(orig_char_info(f)(character(s)));
   if font_dir[f]<>dir_default then s:=link(s)
   end
 else  case type(s) of
   ligature_node: begin f:=font(lig_char(s));
     xtx_ligature_present:=true;
     act_width:=act_width+
-      char_width(f)(char_info(f)(character(lig_char(s))));
+      char_width(f)(orig_char_info(f)(character(lig_char(s))));
     end;
   hlist_node,vlist_node,dir_node,rule_node,kern_node:
     act_width:=act_width+width(s);
@@ -22342,7 +22343,7 @@ if q<>null then {|q| may be a |char_node|}
       begin width(q):=0;
       if TeXXeT_en then @<Adjust \(t)the LR stack for the |p...@>;
       end;
-      end
+    end
   end
 else  begin q:=temp_head;
   while link(q)<>null do q:=link(q);
@@ -22817,7 +22818,8 @@ loop@+  begin if not(is_char_node(s)) then
   case type(s) of
     ligature_node: do_nothing;
     kern_node: if subtype(s)<>normal then goto done4;
-    disp_node,whatsit_node,glue_node,penalty_node,ins_node,adjust_node,mark_node:
+    disp_node: do_nothing;
+    whatsit_node,glue_node,penalty_node,ins_node,adjust_node,mark_node:
       goto done4;
     math_node: if subtype(s)>=L_code then goto done4@+else goto done1;
     othercases goto done1
@@ -23521,7 +23523,7 @@ exit:end;
 n:=0; p:=null;
 loop@+  begin get_x_token;
   reswitch: case cur_cmd of
-  letter,other_char,char_given:@<Append a new letter or hyphen@>;
+  letter,other_char,char_given,achar_given,kchar_given:@<Append a new letter or hyphen@>;
   char_num: begin scan_char_num; cur_chr:=cur_val; cur_cmd:=char_given;
     goto reswitch;
     end;
@@ -24131,6 +24133,7 @@ var prev_p:pointer; {lags one step behind |p|}
 begin prev_p:=temp_head; link(temp_head):=p;
 while p<>null do
   case type(p) of
+  dir_node,
   hlist_node,vlist_node,rule_node:@<Insert glue for |split_top_skip|
     and set~|p:=null|@>;
   whatsit_node,mark_node,ins_node: begin prev_p:=p; p:=link(prev_p);
