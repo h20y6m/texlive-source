@@ -16015,13 +16015,7 @@ begin if cur_dir=right_to_left then
   cur_h:=left_edge-shift_amount(leader_box)
   else cur_h:=left_edge+shift_amount(leader_box);
 synch_h; save_h:=dvi_h;@/
-cur_v:=cur_v+height(leader_box); synch_v; save_v:=dvi_v;
-temp_ptr:=leader_box;
-outer_doing_leaders:=doing_leaders; doing_leaders:=true;
-if type(leader_box)=vlist_node then vlist_out@+else hlist_out;
-doing_leaders:=outer_doing_leaders;
-dvi_v:=save_v; dvi_h:=save_h; cur_h:=left_edge;
-cur_v:=save_v-height(leader_box)+leader_ht+lx;
+cur_v:=cur_v+height(leader_box); synch_v; save_v:=dvi_v; save_dir:=dvi_dir;
 temp_ptr:=leader_box;
 outer_doing_leaders:=doing_leaders; doing_leaders:=true;
 case type(leader_box) of
@@ -16692,7 +16686,7 @@ var r:pointer; {the box node that will be returned}
 @!o:glue_ord; {order of infinity}
 begin last_badness:=0; r:=get_node(box_node_size); type(r):=vlist_node;
 if XeTeX_upwards then subtype(r):=min_quarterword+1 else subtype(r):=min_quarterword;
-shift_amount(r):=0;
+shift_amount(r):=0; set_box_dir(r)(dir_default);
 space_ptr(r):=zero_glue; xspace_ptr(r):=zero_glue;
 add_glue_ref(zero_glue); add_glue_ref(zero_glue);
 list_ptr(r):=p;@/
@@ -16952,8 +16946,14 @@ programming.
 @d fam(#) == (plane_and_fam_field(#) mod @"100)
 @d math_char=1 {|math_type| when the attribute is simple}
 @d sub_box=2 {|math_type| when the attribute is a box}
-@d sub_mlist=3 {|math_type| when the attribute is a formula}
-@d math_text_char=4 {|math_type| when italic correction is dubious}
+@d sub_exp_box=3 {|math_type| when the attribute is an explicit created box}
+@d sub_mlist=4 {|math_type| when the attribute is a formula}
+@d math_text_char=5 {|math_type| when italic correction is dubious}
+
+@<Initialize table entries...@>=
+text_baseline_shift_factor:=1000;
+script_baseline_shift_factor:=700;
+scriptscript_baseline_shift_factor:=500;
 
 @ Each portion of a formula is classified as Ord, Op, Bin, Rel, Open,
 Close, Punct, or Inner, for purposes of spacing and line breaking. An
@@ -17198,7 +17198,7 @@ else  begin append_char(c); {include |c| in the recursion history}
   case math_type(p) of
   math_char: begin print_ln; print_current_string; print_fam_and_char(p);
     end;
-  sub_box: show_info; {recursive call}
+  sub_box, sub_exp_box: show_info; {recursive call}
   sub_mlist: if info(p)=null then
       begin print_ln; print_current_string; print("{}");
       end
@@ -18401,8 +18401,8 @@ var q:pointer; {beginning of a list to be boxed}
 begin case math_type(p) of
 math_char: begin cur_mlist:=new_noad; mem[nucleus(cur_mlist)]:=mem[p];
   end;
-sub_box: begin q:=info(p); goto found;
-  end;
+sub_box: begin q:=info(p); goto found; end;
+sub_exp_box: begin q:=shift_sub_exp_box(p); goto found; end;
 sub_mlist: cur_mlist:=info(p);
 othercases begin q:=new_null_box; goto found;
   end
@@ -18412,7 +18412,7 @@ mlist_to_hlist; q:=link(temp_head); {recursive call}
 cur_style:=save_style; {restore the style}
 @<Set up the values of |cur_size| and |cur_mu|, based on |cur_style|@>;
 found: if is_char_node(q)or(q=null) then x:=hpack(q,natural)
-  else if (link(q)=null)and(type(q)<=vlist_node)and(shift_amount(q)=0) then
+  else if (link(q)=null)and(type(q)<=dir_node)and(shift_amount(q)=0) then
     x:=q {it's already clean}
   else x:=hpack(q,natural);
 @<Simplify a trivial box@>;
@@ -18424,7 +18424,8 @@ end;
 @<Simplify a trivial box@>=
 q:=list_ptr(x);
 if is_char_node(q) then
-  begin r:=link(q);
+  begin if font_dir[font(q)]<>dir_default then q:=link(q);
+  r:=link(q);
   if r<>null then if link(r)=null then if not is_char_node(r) then
    if type(r)=kern_node then {unneeded italic correction}
     begin free_node(r,small_node_size); link(q):=null;
@@ -18438,6 +18439,9 @@ a given noad field. It also takes care of issuing error messages for
 nonexistent characters; in such cases, |char_exists(cur_i)| will be |false|
 after |fetch| has acted, and the field will also have been reset to |empty|.
 
+If |cur_f| is a Japanese font, |cur_c| denotes the character class (in
+JFM) of the character.
+
 @p procedure fetch(@!a:pointer); {unpack the |math_char| field |a|}
 begin cur_c:=cast_to_ushort(character(a)); cur_f:=fam_fnt(fam(a)+cur_size);
 cur_c:=cur_c + (plane_and_fam_field(a) div @"100) * @"10000;
@@ -18445,7 +18449,9 @@ if cur_f=null_font then
   @<Complain about an undefined family and set |cur_i| null@>
 else if is_native_font(cur_f) then begin
   cur_i:=null_character;
-end else begin if (qo(cur_c)>=font_bc[cur_f])and(qo(cur_c)<=font_ec[cur_f]) then
+end else begin if font_dir[cur_f]<>dir_default then
+    cur_c:=qi(get_jfm_pos(cur_c,cur_f));
+  if (qo(cur_c)>=font_bc[cur_f])and(qo(cur_c)<=font_ec[cur_f]) then
     cur_i:=char_info(cur_f)(cur_c)
   else cur_i:=null_character;
   if not(char_exists(cur_i)) then
@@ -18507,6 +18513,7 @@ label reswitch, check_dimensions, done_with_noad, done_with_node, delete_q,
 var mlist:pointer; {beginning of the given list}
 @!penalties:boolean; {should penalty nodes be inserted?}
 @!style:small_number; {the given style}
+@!u:pointer; {temporary register}
 @!save_style:small_number; {holds |cur_style| during recursion}
 @!q:pointer; {runs through the mlist}
 @!r:pointer; {the most recent noad preceding |q|}
@@ -18598,6 +18605,7 @@ glue_node: begin @<Convert \(m)math glue to ordinary glue@>;
   end;
 kern_node: begin math_kern(q,cur_mu); goto done_with_node;
   end;
+disp_node: goto done_with_node;
 
 @ @d choose_mlist(#)==begin p:=#(q); #(q):=null;@+end
 
@@ -18689,7 +18697,11 @@ procedure make_vcenter(@!q:pointer);
 var v:pointer; {the box that should be centered vertically}
 @!delta:scaled; {its height plus depth}
 begin v:=info(nucleus(q));
-if type(v)<>vlist_node then confusion("vcenter");
+if type(v)=dir_node then
+  begin if type(list_ptr(v))<>vlist_node then confusion("dircenter")
+  end
+else  begin if type(v)<>vlist_node then confusion("vcenter")
+  end;
 @:this can't happen vcenter}{\quad vcenter@>
 delta:=height(v)+depth(v);
 height(v):=axis_height(cur_size)+half(delta);
@@ -19168,14 +19180,16 @@ No boundary characters enter into these ligatures.
 procedure make_ord(@!q:pointer);
 label restart,exit;
 var a:integer; {address of lig/kern instruction}
-@!p,@!r:pointer; {temporary registers for list manipulation}
+@!gp,@!gq,@!p,@!r:pointer; {temporary registers for list manipulation}
+@!rr:halfword;
 begin restart:@t@>@;@/
-if math_type(subscr(q))=empty then if math_type(supscr(q))=empty then
- if math_type(nucleus(q))=math_char then
+if (math_type(subscr(q))=empty)and(math_type(supscr(q))=empty)
+  and(math_type(nucleus(q))=math_char) then
   begin p:=link(q);
   if p<>null then if (type(p)>=ord_noad)and(type(p)<=punct_noad) then
-    if math_type(nucleus(p))=math_char then
-    if fam(nucleus(p))=fam(nucleus(q)) then
+  if fam(nucleus(p))=fam(nucleus(q)) then
+  if math_type(nucleus(p))=math_char then
+    if font_dir[cur_f]=dir_default then
       begin math_type(nucleus(q)):=math_text_char;
       fetch(nucleus(q));
       if char_tag(cur_i)=lig_tag then
@@ -19194,6 +19208,46 @@ if math_type(subscr(q))=empty then if math_type(supscr(q))=empty then
           a:=a+qo(skip_byte(cur_i))+1;
           cur_i:=font_info[a].qqqq;
           end;
+        end;
+      end
+    else begin math_type(nucleus(q)):=math_text_char;
+      fetch(nucleus(p)); a:=cur_c; fetch(nucleus(q));
+      if char_tag(cur_i)=gk_tag then
+        begin cur_c:=a; a:=glue_kern_start(cur_f)(cur_i);
+         cur_i:=font_info[a].qqqq;
+         if skip_byte(cur_i)>stop_flag then {huge glue/kern table rearranged}
+           begin a:=glue_kern_restart(cur_f)(cur_i);
+           cur_i:=font_info[a].qqqq;
+           end;
+       loop@+ begin
+         if next_char(cur_i)=cur_c then if skip_byte(cur_i)<=stop_flag then
+         if op_byte(cur_i)<kern_flag then
+           begin gp:=font_glue[cur_f]; rr:=rem_byte(cur_i);
+           if gp<>null then begin
+             while((type(gp)<>rr)and(link(gp)<>null)) do begin gp:=link(gp);
+               end;
+             gq:=glue_ptr(gp);
+             end
+           else begin gp:=get_node(small_node_size);
+             font_glue[cur_f]:=gp; gq:=null;
+             end;
+           if gq=null then
+             begin type(gp):=rr; gq:=new_spec(zero_glue); glue_ptr(gp):=gq;
+             a:=exten_base[cur_f]+qi((qo(rr))*3); width(gq):=font_info[a].sc;
+             stretch(gq):=font_info[a+1].sc; shrink(gq):=font_info[a+2].sc;
+             add_glue_ref(gq); link(gp):=get_node(small_node_size);
+             gp:=link(gp); glue_ptr(gp):=null; link(gp):=null;
+             end;
+           p:=new_glue(gq); subtype(p):=jfm_skip+1;
+           link(p):=link(q); link(q):=p; return;
+           end
+         else begin p:=new_kern(char_kern(cur_f)(cur_i));
+           link(p):=link(q); link(q):=p; return;
+           end;
+         if skip_byte(cur_i)>=stop_flag then return;
+         a:=a+qo(skip_byte(cur_i))+1; {SKIP property}
+         cur_i:=font_info[a].qqqq;
+         end;
         end;
       end;
   end;
@@ -19254,6 +19308,7 @@ math_char, math_text_char:
   italic correction if a subscript is present@>;
 empty: p:=null;
 sub_box: p:=info(nucleus(q));
+sub_exp_box: p:=shift_sub_exp_box(nucleus(q));
 sub_mlist: begin cur_mlist:=info(nucleus(q)); save_style:=cur_style;
   mlist_penalties:=false; mlist_to_hlist; {recursive call}
 @^recursion@>
@@ -19285,6 +19340,11 @@ if is_native_font(cur_f) then begin
     end;
 end else if char_exists(cur_i) then
   begin delta:=char_italic(cur_f)(cur_i); p:=new_character(cur_f,qo(cur_c));
+  u:=p;
+  if font_dir[cur_f]<>dir_default then begin
+    link(u):=get_avail; u:=link(u);
+    info(u):=character(nucleus(q))+ (plane_and_fam_field(nucleus(q)) div @"100) * @"10000;
+  end;
   if (math_type(nucleus(q))=math_text_char)and(space(cur_f)<>0) then
     delta:=0; {no italic correction in mid-word of text font}
   if (math_type(subscr(q))=empty)and(delta<>0) then
@@ -19594,6 +19654,8 @@ style_node: @<Change the current style and |goto delete_q|@>;
 whatsit_node,penalty_node,rule_node,disc_node,adjust_node,ins_node,mark_node,
  glue_node,kern_node:@t@>@;@/
   begin link(p):=q; p:=q; q:=link(q); link(p):=null; goto done;
+  end;
+disp_node: begin link(p):=q; p:=q; q:=link(q); link(p):=null; goto done;
   end;
 othercases confusion("mlist3")
 @:this can't happen mlist3}{\quad mlist3@>
@@ -20148,6 +20210,7 @@ begin push_nest;
 if mode=-hmode then space_factor:=1000
 else  begin prev_depth:=ignore_depth; normal_paragraph;
   end;
+inhibit_glue_flag:=false;
 cur_span:=p;
 end;
 
@@ -20602,6 +20665,7 @@ else  begin glue_order(r):=glue_sign(r); glue_sign(r):=shrinking;
   else glue_set(r):=unfloat((height(r)-t)/glue_shrink(r));
   end;
 height(r):=w; type(r):=vlist_node;
+set_box_dir(r)(direction);
 end
 
 @ We now have a completed alignment, in the list that starts at |head|
@@ -20707,13 +20771,6 @@ same number of |mem|~words.
 @^data structure assumptions@>
 
 @<Get ready to start...@>=
-first_use:=true; chain:=false;
-delete_glue_ref(cur_kanji_skip); delete_glue_ref(cur_xkanji_skip);
-cur_kanji_skip:=space_ptr(head); cur_xkanji_skip:=xspace_ptr(head);
-add_glue_ref(cur_kanji_skip); add_glue_ref(cur_xkanji_skip);
-if not is_char_node(tail)and(type(tail)=disp_node) then
-  begin free_node(tail,small_node_size); tail:=prev_node; link(tail):=null
-  end;
 first_use:=true; chain:=false;
 delete_glue_ref(cur_kanji_skip); delete_glue_ref(cur_xkanji_skip);
 cur_kanji_skip:=space_ptr(head); cur_xkanji_skip:=xspace_ptr(head);
@@ -21376,14 +21433,14 @@ only character nodes, kern nodes, ligature nodes, and box or rule nodes.
 @<Subtract the width of node |v|...@>=
 if is_char_node(v) then
   begin f:=font(v);
-  break_width[1]:=break_width[1]-char_width(f)(char_info(f)(character(v)));
+  break_width[1]:=break_width[1]-char_width(f)(orig_char_info(f)(character(v)));
   if font_dir[f]<>dir_default then v:=link(v);
   end
 else  case type(v) of
   ligature_node: begin f:=font(lig_char(v));@/
     xtx_ligature_present:=true;
     break_width[1]:=@|break_width[1]-
-      char_width(f)(char_info(f)(character(lig_char(v))));
+      char_width(f)(orig_char_info(f)(character(lig_char(v))));
     end;
   hlist_node,vlist_node,dir_node,rule_node,kern_node:
     break_width[1]:=break_width[1]-width(v);
