@@ -6082,13 +6082,15 @@ else  begin print_esc("mathcode"); print_int(n-math_code_base);
  bit 1: \.{jchrwidowpenalty}
  bit 2: a linebreak after the character $p$ does NOT emits a space
  bit 3: Japanese character
+ bit 4: Japanese character even in math (does not effect is bit 3 is 0)
 
-cjkxcode 6 $\longmapsto$ kcatcode 16 (kanji), 17 (kana)
-cjkxcode 7 $\longmapsto$ kcatcode 18 (other kchar)
-cjkxcode 4 $\longmapsto$ kcatcode 19 (hangul)
+cjkxcode 6, 14 $\longmapsto$ kcatcode 16 (kanji), 17 (kana)
+cjkxcode 7, 15 $\longmapsto$ kcatcode 18 (other kchar)
+cjkxcode 4, 12 $\longmapsto$ kcatcode 19 (hangul)
 
-@d is_cjkx_jachar(#)==(cjkx_code(#)>=4)
-@d is_cjkx_nospc(#)==((cjkx_code(#) div 2)mod 2=1)
+@d is_cjkx_ja_math(#)==(cjkx_code(#)>=12)
+@d is_cjkx_jachar(#)==((cjkx_code(#)div 4)mod 2=1)
+@d is_cjkx_nospc(#)==((cjkx_code(#)div 2)mod 2=1)
 @d is_cjkx_widowpenalty(#)==(cjkx_code(#) mod 2=1)
 
 
@@ -28342,10 +28344,26 @@ into a given word of |mem|.
 procedure scan_math(@!p:pointer);
 label restart,reswitch,exit;
 var c:integer; {math character code}
+jx:boolean; {Japanese character}
 begin restart:@<Get the next non-blank non-relax...@>;
 reswitch:case cur_cmd of
-letter,other_char,char_given,achar_given,kchar_given:
+letter,other_char,char_given:
   begin c:=ho(math_code(cur_chr));
+    if is_active_math_char(c) then
+      begin @<Treat |cur_chr| as an active character@>;
+      goto restart;
+      end
+    else jx:=is_cjkx_ja_math(c);
+    end;
+achar_given:
+  begin c:=ho(math_code(cur_chr)); jx:=false;
+    if is_active_math_char(c) then
+      begin @<Treat |cur_chr| as an active character@>;
+      goto restart;
+      end;
+    end;
+kchar_given:
+  begin c:=ho(math_code(cur_chr)); jx:=true;
     if is_active_math_char(c) then
       begin @<Treat |cur_chr| as an active character@>;
       goto restart;
@@ -28355,6 +28373,7 @@ char_num: begin scan_char_num; cur_chr:=cur_val; cur_cmd:=char_given;
   goto reswitch;
   end;
 math_char_num:
+  begin jx:=false;
   if cur_chr = 2 then begin {\.{\\Umathchar}}
     scan_math_class_int; c:=set_class_field(cur_val);
     scan_math_fam_int;   c:=c + set_family_field(cur_val);
@@ -28366,13 +28385,14 @@ math_char_num:
            set_family_field((cur_val mod @"1000) div @"100) +
            (cur_val mod @"100);
   end;
-math_given: begin
+  end;
+math_given: begin jx:=false;
   c:=set_class_field(cur_chr div @"1000) +
        set_family_field((cur_chr mod @"1000) div @"100) +
        (cur_chr mod @"100);
   end;
-XeTeX_math_given: c:=cur_chr;
-delim_num: begin
+XeTeX_math_given: begin c:=cur_chr; jx:=false; end;
+delim_num: begin jx:=false;
   if cur_chr=1 then begin {\.{\\Udelimiter <class> <fam> <usv>}}
     scan_math_class_int; c:=set_class_field(cur_val);
     scan_math_fam_int;   c:=c + set_family_field(cur_val);
@@ -28387,9 +28407,20 @@ delim_num: begin
   end;
 othercases @<Scan a subformula enclosed in braces and |return|@>
 endcases;@/
+if jx then
+  begin if font_dir[fam_fnt(cur_jfam+cur_size)]=dir_default then
+    begin print_err("Not a Japanese font family."); help1("IGNORE.");@/
+    error; end
+  else plane_and_fam_field(p):=cur_jfam;
+  end
+else begin 
+  if (is_var_family(c)) and fam_in_range then plane_and_fam_field(p):=cur_fam
+  else plane_and_fam_field(p):=(math_fam_field(c));
+  if font_dir[fam_fnt(fam(p)+cur_size)]<>dir_default then
+    begin print_err("A Japanese font family."); help1("IGNORE.");@/
+    error; end;
+  end;
 math_type(p):=math_char; character(p):=qi(c mod @"10000);
-if (is_var_family(c)) and fam_in_range then plane_and_fam_field(p):=cur_fam
-else plane_and_fam_field(p):=(math_fam_field(c));
 plane_and_fam_field(p):=plane_and_fam_field(p) + (math_char_field(c) div @"10000) * @"100;
 exit:end;
 
@@ -28417,10 +28448,15 @@ was first properly typeset by \TeX. The code in this section was used.
 @^Knuth, Donald Ervin@>
 
 @<Cases of |main_control| that build...@>=
-mmode+letter,mmode+other_char,mmode+char_given,mmode+achar_given,mmode+kchar_given:
-  set_math_char(ho(math_code(cur_chr)));
-mmode+char_num: begin scan_char_num; cur_chr:=cur_val;
-  set_math_char(ho(math_code(cur_chr)));
+mmode+letter,mmode+other_char,mmode+char_given:
+  if is_cjkx_ja_math(cur_chr) then set_math_kchar(cur_chr)
+  else set_math_char(ho(math_code(cur_chr)));
+mmode+achar_given: set_math_char(ho(math_code(cur_chr)));
+mmode+kchar_given: set_math_kchar(ho(cur_chr));
+mmode+char_num: begin t:=cur_chr; scan_usv_num; cur_chr:=cur_val;
+  if (t=1)or((t=0)and not is_cjkx_jachar(cur_chr)) then
+    set_math_char(ho(math_code(cur_chr)))
+  else set_math_kchar(cur_chr);
   end;
 mmode+math_char_num: if cur_chr = 2 then begin {\.{\\Umathchar}}
     scan_math_class_int; t:=set_class_field(cur_val);
@@ -28474,10 +28510,30 @@ else  begin p:=new_noad; math_type(nucleus(p)):=math_char;
     begin if fam_in_range then plane_and_fam_field(nucleus(p)):=cur_fam;
     type(p):=ord_noad;
     end
-  else  type(p):=ord_noad+math_class_field(c);
+  else type(p):=ord_noad+math_class_field(c);
   plane_and_fam_field(nucleus(p)):=plane_and_fam_field(nucleus(p)) + (ch div @"10000) * @"100;
   link(tail):=p; tail:=p;
+  if font_dir[fam_fnt(fam(p)+cur_size)]<>dir_default then
+    begin print_err("A Japanese font family."); help1("IGNORE.");@/
+    error; end;
   end;
+end;
+
+@ The |set_math_kchar| procedure is silimar to |set_math_char|, but
+the argument is a Japanese character code. This simplifies the code.
+@<Declare act...@>=
+procedure set_math_kchar(@!c:integer);
+var p:pointer; {the new noad}
+begin if is_active_math_char(math_code(c)) then
+  @<Treat |cur_chr|...@>
+else  begin p:=new_noad; math_type(nucleus(p)):=math_char;
+  character(nucleus(p)):=qi(c mod @"10000);
+  plane_and_fam_field(nucleus(p)):=cur_jfam; type(p):=ord_noad;
+  plane_and_fam_field(nucleus(p)):=plane_and_fam_field(nucleus(p)) + (c div @"10000) * @"100;
+  link(tail):=p; tail:=p;
+  if font_dir[fam_fnt(cur_jfam+cur_size)]=dir_default then
+    begin print_err("Not a Japanese font family."); help1("IGNORE.");@/
+    error; end  end;
 end;
 
 @ Primitive math operators like \.{\\mathop} and \.{\\underline} are given
@@ -28676,7 +28732,9 @@ mmode+vcenter: begin scan_spec(vcenter_group,false); normal_paragraph;
 
 @ @<Cases of |handle...@>=
 vcenter_group: begin end_graf; unsave; save_ptr:=save_ptr-2;
-  p:=vpack(link(head),saved(1),saved(0)); pop_nest;
+  p:=vpack(link(head),saved(1),saved(0)); 
+  set_box_dir(p)(direction); pop_nest;
+  if abs(box_dir(p))<>abs(direction) then p:=new_dir_node(p,abs(direction));
   tail_append(new_noad); type(tail):=vcenter_noad;
   math_type(nucleus(tail)):=sub_box; info(nucleus(tail)):=p;
   end;
@@ -28981,6 +29039,7 @@ mmode+math_shift: if cur_group=math_shift_group then after_math
 @t\4@>@<Declare subprocedures for |after_math|@>@;
 procedure after_math;
 var l:boolean; {`\.{\\leqno}' instead of `\.{\\eqno}'}
+@!disp:scaled; {displacement}
 @!danger:boolean; {not enough symbol fonts are present}
 @!m:integer; {|mmode| or |-mmode|}
 @!p:pointer; {the formula}
@@ -29051,12 +29110,16 @@ particular \.\$'s. This is consistent with the conventions of
 space above that display.
 
 @<Finish math in text@>=
-begin tail_append(new_math(math_surround,before));
+begin if direction=dir_tate then disp:=t_baseline_shift
+      else disp:=y_baseline_shift;
+@<Append |disp_node| at begin of displace area@>;
+tail_append(new_math(math_surround,before));
 cur_mlist:=p; cur_style:=text_style; mlist_penalties:=(mode>0); mlist_to_hlist;
 link(tail):=link(temp_head);
 while link(tail)<>null do tail:=link(tail);
 tail_append(new_math(math_surround,after));
-space_factor:=1000; unsave;
+@<Append |disp_node| at end of displace area@>;
+space_factor:=1000; inhibit_glue_flag:=false; unsave;
 end
 
 @ \TeX\ gets to the following part of the program when the first `\.\$' ending
@@ -29125,7 +29188,8 @@ procedure resume_after_display;
 begin if cur_group<>math_shift_group then confusion("display");
 @:this can't happen display}{\quad display@>
 unsave; prev_graf:=prev_graf+3;
-push_nest; mode:=hmode; space_factor:=1000; set_cur_lang; clang:=cur_lang;
+push_nest; adjust_dir:=direction; inhibit_glue_flag:=false;
+mode:=hmode; space_factor:=1000; set_cur_lang; clang:=cur_lang;
 prev_graf:=(norm_min(left_hyphen_min)*@'100+norm_min(right_hyphen_min))
              *@'200000+cur_lang;
 @<Scan an optional space@>;
@@ -29139,12 +29203,14 @@ by causing its width to be zero.
 begin if (e<>0)and((w-total_shrink[normal]+q<=z)or@|
    (total_shrink[fil]<>0)or(total_shrink[fill]<>0)or
    (total_shrink[filll]<>0)) then
-  begin free_node(b,box_node_size);
+  begin delete_glue_ref(space_ptr(b)); delete_glue_ref(xspace_ptr(b));
+  free_node(b,box_node_size);
   b:=hpack(p,z-q,exactly);
   end
 else  begin e:=0;
   if w>z then
-    begin free_node(b,box_node_size);
+    begin delete_glue_ref(space_ptr(b)); delete_glue_ref(xspace_ptr(b));
+    free_node(b,box_node_size);
     b:=hpack(p,z,exactly);
     end;
   end;
