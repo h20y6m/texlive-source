@@ -163,6 +163,8 @@
 \protected\def\XeTeX{X\kern-.125em\lower.5ex\hbox{\mirror{E}}\kern-.1667em\TeX}
 \protected\def\npTeX{np\TeX}
 \protected\def\pTeX{p\TeX}
+\protected\def\epTeX{$\varepsilon$-p\TeX}
+\protected\def\upTeX{up\TeX}
 
 \protected\def\eTeX{$\varepsilon$-\TeX}
 \font\revrm=xbmc10 % for right-to-left text
@@ -3624,7 +3626,6 @@ end;
       end;
   othercases confusion("new_dir_node:d->?");
   endcases
-@z
 
 @ A |rule_node| stands for a solid black rectangle; it has |width|,
 |depth|, and |height| fields just as in an |hlist_node|. However, if
@@ -5140,7 +5141,7 @@ that might be expanded by `\.{\\the}'.
   {user-defined font integer ( \.{\\hyphenchar}, \.{\\skewchar} )}
 @d set_kansuji_char=assign_font_int+1
   {user-defined kansuji character ( \.{\\kansujichar} )}
-  {and getting |\kcatcode| (only for compatibility with \pTeX)}
+  {and getting \.{\\kcatcode} (only for compatibility with \pTeX)}
 @d set_aux=set_kansuji_char+1
   {specify state info ( \.{\\spacefactor}, \.{\\prevdepth} )}
 @d set_prev_graf=set_aux+1 {specify state info ( \.{\\prevgraf} )}
@@ -26331,7 +26332,7 @@ main_loop_j+1: space_factor:=1000;
     fast_get_avail(main_p); font(main_p):=main_f; character(main_p):=cur_l;
     link(tail):=main_p; tail:=main_p; last_jchr:=tail;
     fast_get_avail(main_p);
-    info(main_p):=KANJI(cur_chr)+cjkx_code(cur_chr)*max_char_val;
+    info(main_p):=KANJI(cur_chr)+(cjkx_code(cur_chr) mod 2)*max_char_val;
     link(tail):=main_p; tail:=main_p;
     cx:=cur_chr; @<Insert kinsoku penalty@>;
   end;
@@ -27889,7 +27890,7 @@ if is_cjkx_jachar(cur_val) then
   if p<>null then
      begin
         link(p):=get_avail;
-        info(link(p)):=KANJI(cx) + cjkx_code(cx)*max_char_val;
+        info(link(p)):=KANJI(cx) + (cjkx_code(cx) mod 2)*max_char_val;
      end;
   end
 else begin f:=cur_font; p:=new_character(f,cur_val);
@@ -27946,10 +27947,9 @@ else  begin if font_dir[f]=dir_yoko then disp:=0
 if KANJI(cx)<>empty then
   begin q:=new_character(f,get_jfm_pos(KANJI(cx),f));
   link(q):=get_avail;
-  info(link(q)):=KANJI(cx) + cjkx_code(cx)*max_char_val;
+  info(link(q)):=KANJI(cx) + (cjkx_code(cx) mod 2)*max_char_val;
   last_jchr:=q;
   end;
-@z
 
 @ The kern nodes appended here must be distinguished from other kerns, lest
 they be wiped away by the hyphenation algorithm or by a previous line break.
@@ -29404,7 +29404,7 @@ var a:small_number; {accumulated prefix codes so far}
 @!j:halfword; {index into a \.{\\parshape} specification}
 @!k:font_index; {index into |font_info|}
 @!p,@!q:pointer; {for temporary short-term use}
-@!n:integer; {ditto}
+@!m,@!n:integer; {ditto}
 @!e:boolean; {should a definition be expanded? or was \.{\\let} not done?}
 begin a:=0;
 while cur_cmd=prefix do
@@ -29760,7 +29760,12 @@ if (cur_cmd=toks_register)or(cur_cmd=assign_toks) then
 
 @<Assignments@>=
 assign_int: begin p:=cur_chr; scan_optional_equals; scan_int;
-  word_define(p,cur_val);
+  if p=int_base+cur_fam_code then
+    begin if font_dir[fam_fnt(cur_val)]<>dir_default then
+      word_define(int_base+cur_jfam_code,cur_val)
+    else word_define(p,cur_val);
+    end
+  else word_define(p,cur_val);
   end;
 assign_dimen: begin p:=cur_chr; scan_optional_equals;
   scan_normal_dimen; word_define(p,cur_val);
@@ -29831,16 +29836,19 @@ primitive("scriptscriptfont",def_family,math_font_base+script_script_size);
 @!@:script_script_font_}{\.{\\scriptscriptfont} primitive@>
 
 @ @<Cases of |print_cmd_chr|...@>=
-def_code: if chr_code=cat_code_base then print_esc("catcode")
-  else if chr_code=cjkx_code_base then print_esc("cjkxcode")
-  else if chr_code=pre_break_penalty_base then print_esc("prebreakpenalty")
-  else if chr_code=post_break_penalty_base then print_esc("postbreakpenalty")
-  else if chr_code=auto_xsp_code_base then print_esc("xspcode")
-  else if chr_code=math_code_base then print_esc("mathcode")
-  else if chr_code=lc_code_base then print_esc("lccode")
-  else if chr_code=uc_code_base then print_esc("uccode")
-  else if chr_code=sf_code_base then print_esc("sfcode")
-  else print_esc("delcode");
+def_code: begin case chr_code of
+  cat_code_base: print_esc("catcode");
+  cjkx_code_base: print_esc("cjkxcode");
+  pre_break_penalty_base: print_esc("prebreakpenalty");
+  post_break_penalty_base: print_esc("postbreakpenalty");
+  auto_xsp_code_base: print_esc("xspcode");
+  inhibit_xsp_code_base: print_esc("inhibitxspcode");
+  math_code_base: print_esc("mathcode");
+  lc_code_base: print_esc("lccode");
+  uc_code_base: print_esc("uccode");
+  sf_code_base: print_esc("sfcode");
+  othercases print_esc("delcode");
+  endcases; end;
 XeTeX_def_code:
   if chr_code=sf_code_base then print_esc("XeTeXcharclass")
   else if chr_code=math_code_base then print_esc("Umathcodenum")
@@ -30589,6 +30597,7 @@ any_mode(xray): show_whatever;
 @d show_box_code=1 { \.{\\showbox} }
 @d show_the_code=2 { \.{\\showthe} }
 @d show_lists_code=3 { \.{\\showlists} }
+@d show_mode=7 { \.{\\showmode} }
 
 @<Put each...@>=
 primitive("show",xray,show_code);
@@ -30599,12 +30608,15 @@ primitive("showthe",xray,show_the_code);
 @!@:show_the_}{\.{\\showthe} primitive@>
 primitive("showlists",xray,show_lists_code);
 @!@:show_lists_code_}{\.{\\showlists} primitive@>
+primitive("showmode",xray,show_mode);
+@!@:show_mode_}{\.{\\showmode} primitive@>
 
 @ @<Cases of |print_cmd_chr|...@>=
 xray: case chr_code of
   show_box_code:print_esc("showbox");
   show_the_code:print_esc("showthe");
   show_lists_code:print_esc("showlists");
+  show_mode:print_esc("showmode");
   @<Cases of |xray| for |print_cmd_chr|@>@;@/
   othercases print_esc("show")
   endcases;
@@ -30622,6 +30634,7 @@ show_lists_code: begin begin_diagnostic; show_activities;
   end;
 show_box_code: @<Show the current contents of a box@>;
 show_code: @<Show the current meaning of a token, then |goto common_ending|@>;
+show_mode: @<Show the current japanese processing mode@>;
 @<Cases for |show_whatever|@>@;@/
 othercases @<Show the current value of some parameter or register,
   then |goto common_ending|@>
@@ -31721,6 +31734,7 @@ else  begin scan_int;
   else if cur_val>15 then cur_val:=16;
   end;
 write_stream(tail):=cur_val;
+inhibit_glue_flag:=false;
 end;
 
 @ @<Implement \.{\\openout}@>=
@@ -31753,6 +31767,7 @@ p:=scan_toks(false,false); write_tokens(tail):=def_ref;
 end else
 begin new_whatsit(special_node,write_node_size); write_stream(tail):=null;
 p:=scan_toks(false,true); write_tokens(tail):=def_ref;
+inhibit_glue_flag:=false;
 end; end
 
 @ @d call_func(#) == begin if # <> 0 then do_nothing end
@@ -32424,9 +32439,11 @@ is followed by `\.{\\openout}', `\.{\\write}', or `\.{\\closeout}'.
 @<Implement \.{\\immediate}@>=
 begin get_x_token;
 if (cur_cmd=extension)and(cur_chr<=close_node) then
-  begin p:=tail; do_extension; {append a whatsit node}
+  begin k:=inhibit_glue_flag;
+  p:=tail; do_extension; {append a whatsit node}
   out_what(tail); {do the action immediately}
   flush_node_list(tail); tail:=p; link(p):=null;
+  inhibit_glue_flag:=k;
   end
 else back_input;
 end
@@ -32442,7 +32459,8 @@ begin if language<=0 then l:=0
 else if language>255 then l:=0
 else l:=language;
 if l<>clang then
-  begin new_whatsit(language_node,small_node_size);
+  begin inhibit_glue_flag:=false;
+  new_whatsit(language_node,small_node_size);
   what_lang(tail):=l; clang:=l;@/
   what_lhm(tail):=norm_min(left_hyphen_min);
   what_rhm(tail):=norm_min(right_hyphen_min);
@@ -32451,7 +32469,8 @@ end;
 
 @ @<Implement \.{\\setlanguage}@>=
 if abs(mode)<>hmode then report_illegal_case
-else begin new_whatsit(language_node,small_node_size);
+else begin inhibit_glue_flag:=false;
+  new_whatsit(language_node,small_node_size);
   scan_int;
   if cur_val<=0 then clang:=0
   else if cur_val>255 then clang:=0
@@ -32467,11 +32486,11 @@ for k:=0 to 15 do if write_open[k] then a_close(write_file[k])
 
 @ @<Implement \.{\\XeTeXpicfile}@>=
 if abs(mode)=mmode then report_illegal_case
-else load_picture(false)
+else begin inhibit_glue_flag:=false; load_picture(false) end
 
 @ @<Implement \.{\\XeTeXpdffile}@>=
 if abs(mode)=mmode then report_illegal_case
-else load_picture(true)
+else begin inhibit_glue_flag:=false; load_picture(true) end
 
 @ @<Implement \.{\\XeTeXglyph}@>=
 begin
@@ -32479,7 +32498,7 @@ begin
   back_input;
   new_graf(true);
  end else if abs(mode)=mmode then report_illegal_case
- else begin
+ else begin inhibit_glue_flag:=false;
   if is_native_font(cur_font) then begin
    if direction=dir_tate then disp:=t_baseline_shift else disp:=y_baseline_shift;
    @<Append |disp_node| at begin of displace area@>;
@@ -33437,14 +33456,18 @@ font_char_ic_code: begin scan_font_ident; q:=cur_val; scan_usv_num;
     font_char_ic_code: cur_val:=getnativecharic(q, cur_val);
     end; {there are no other cases}
   end else begin
-    if (font_bc[q]<=cur_val)and(font_ec[q]>=cur_val) then
-      begin i:=char_info(q)(qi(cur_val));
+    if font_dir[q]<>dir_default then { Japanese font }
+      cur_val:=get_jfm_pos(KANJI(cur_val),q)
+    else if (font_bc[q]<=cur_val)and(font_ec[q]>=cur_val) then
+    else cur_val:=-1;
+    if cur_val<>-1 then
+      begin i:=orig_char_info(q)(qi(cur_val));
       case m of
       font_char_wd_code: cur_val:=char_width(q)(i);
       font_char_ht_code: cur_val:=char_height(q)(height_depth(i));
       font_char_dp_code: cur_val:=char_depth(q)(height_depth(i));
       font_char_ic_code: cur_val:=char_italic(q)(i);
-      end; {there are no other cases}
+      endcases {there are no other cases}
       end
     else cur_val:=0;
     end
@@ -34191,7 +34214,7 @@ else @<Move the non-|char_node| |p| to the new list@>
 @ @<Move the non-|char_node| |p| to the new list@>=
 begin q:=link(p);
 case type(p) of
-hlist_node,vlist_node,rule_node,kern_node: rule_wd:=width(p);
+dir_node,hlist_node,vlist_node,rule_node,kern_node: rule_wd:=width(p);
 @t\4@>@<Cases of |reverse| that need special treatment@>@;
 edge_node: confusion("LR2");
 @:this can't happen LR2}{\quad LR2@>
@@ -34308,7 +34331,7 @@ begin while p<>null do
   else case type(p) of
   dir_node,hlist_node,vlist_node: begin r:=get_node(box_node_size);
     mem[r+7]:=mem[p+7];
-    mem[r+6]:=mem[p+6]; mem[r+5]:=mem[p+5]; {copy the last two words}
+    mem[r+6]:=mem[p+6]; mem[r+5]:=mem[p+5]; {copy the last three words}
     add_glue_ref(space_ptr(r)); add_glue_ref(xspace_ptr(r));
     words:=5; list_ptr(r):=null; {this affects |mem[r+5]|}
     end;
@@ -34393,7 +34416,8 @@ else  begin push_LR(p);
 @ @<Declare subprocedures for |init_math|@>=
 procedure just_reverse(@!p:pointer);
 label found,done;
-var l:pointer; {the new list}
+var l,la:pointer; {the new list}
+disp,disp2:scaled; { displacement } disped:boolean;
 @!t:pointer; {tail of reversed segment}
 @!q:pointer; {the next node}
 @!m,@!n:halfword; {count of unmatched math nodes}
@@ -34804,11 +34828,12 @@ a font.
 @<Cases for |conditional|@>=
 if_in_csname_code: b:=is_in_csname;
 if_font_char_code:begin scan_font_ident; n:=cur_val; scan_usv_num;
-  if is_native_font(n) then
+  if font_dir[n]<>dir_default then b:=true
+  else if is_native_font(n) then
     b:=(map_char_to_glyph(n, cur_val) > 0)
   else begin
     if (font_bc[n]<=cur_val)and(font_ec[n]>=cur_val) then
-      b:=char_exists(char_info(n)(qi(cur_val)))
+      b:=char_exists(orig_char_info(n)(qi(cur_val)))
     else b:=false;
     end;
   end;
@@ -37228,9 +37253,9 @@ k:=0;
 while(p<>null) do
 begin if is_char_node(p) then
   begin if font_dir[font(p)]<>dir_default then
-    begin KANJI(cx):=info(link(p)) mod max_char_val;
-    i:=info(link(p)) div max_char_val; k:=0;
-    if not odd(i) then begin t:=q; s:=p; end;
+    begin KANJI(cx):=info(link(p)) mod max_char_val; k:=0;
+    if not odd(info(link(p)) div max_char_val) then
+      begin t:=q; s:=p; end;
     p:=link(p); q:=p;
     end
   else begin k:=k+1;
