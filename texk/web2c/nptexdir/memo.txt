@@ -33,3 +33,11 @@ changes from pTeX
    * show_context 中で U+20BB7 -> U+0BB7 と面位置が無視される→解決
    * `\𠮷 （←つちよし）が数値として扱われない→解決
 
+
+* npTeX で未実装の e-upTeX プリミティブ
+  * \epTeXinputencoding
+  * \currentcjktoken, \disablecjktoken, \enablecjktoken, \forcecjktoken
+  * \suppresslongerror, \suppressmathparerror, \suppressoutererror
+  * \synctex
+  * \hfi, \vfi, \pagefistretch, \odelcode, \odelimiter, \omathaccent,
+    \omathchar, \omathchardef, \omathcode, \oradical

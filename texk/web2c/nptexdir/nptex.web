@@ -10348,7 +10348,7 @@ the codes for its extensions: |eTeX_version_code|, \dots\ .
 @#
 @d eTeX_int=pdftex_last_item_codes + 1 {first of \eTeX\ codes for integers}
 @#
-@d XeTeX_int                         = eTeX_int + 8 {base for \XeTeX's command codes}
+@d XeTeX_int                         = eTeX_int + 10 {base for \XeTeX's command codes}
 @d XeTeX_version_code                = XeTeX_int + 0 {code for \.{\\XeTeXversion}}
 @d XeTeX_count_glyphs_code           = XeTeX_int + 1 {code for \.{\\XeTeXcountglyphs}}
 @d XeTeX_count_variations_code       = XeTeX_int + 2 {Deprecated}
@@ -37271,6 +37271,27 @@ else begin case type(p) of
   end;
 p:=link(p);
 end
+
+@ The \.{\\currentspacingmode} and \.{\\currentxspacingmode} commands
+return the current \pTeX's status of \.{\\(no)autospacing} and
+\.{\\(no)autoxspacing} respectively.
+
+@d current_spacing_mode_code=eTeX_int+8 {code for \.{\\currentspacingmode}}
+@d current_xspacing_mode_code=eTeX_int+9 {code for \.{\\currentxspacingmode}}
+
+@<Generate all \eTeX...@>=
+primitive("currentspacingmode",last_item,current_spacing_mode_code);
+@!@:current_spacing_mode_}{\.{\\currentspacingmode} primitive@>
+primitive("currentxspacingmode",last_item,current_xspacing_mode_code);
+@!@:current_xspacing_mode_}{\.{\\currentxspacingmode} primitive@>
+
+@ @<Cases of |last_item| for |print_cmd_chr|@>=
+current_spacing_mode_code: print_esc("currentspacingmode");
+current_xspacing_mode_code: print_esc("currentxspacingmode");
+
+@ @<Cases for fetching an integer value@>=
+current_spacing_mode_code: cur_val:=auto_spacing;
+current_xspacing_mode_code: cur_val:=auto_xspacing;
 
 
 @* \[54] System-dependent changes.

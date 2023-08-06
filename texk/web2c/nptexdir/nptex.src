@@ -363,12 +363,13 @@
 
 \message {Adding new e-TeX definitions:}
 
-\message {\string \eTeX, \string \epTeX, \string \eupTeX, }
+\message {\string \eTeX, \string \epTeX, \string \eupTeX, \string \npTeX, }
 \def \eTeX {$\varepsilon$-\TeX} %%% the simple version, not suitable for maths;
                                 %%% a more sophisticated one may find its way
                                 %%% into "eptexdefs.lib" in due course.
 \def \epTeX {$\varepsilon$-p\TeX}
 \def \eupTeX {$\varepsilon$-up\TeX}
+\def \npTeX {np\TeX}
 
 \message {\string \loggingall,}
 \def \loggingall {\tracingall \tracingonline=\z@}
@@ -772,6 +773,7 @@
         \r@cycle \r@cycle
 
 \fi
+
 
 % And finally re-catcode commercial-at
 
