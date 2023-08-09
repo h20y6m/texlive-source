@@ -774,62 +774,6 @@
 
 \fi
 
-% npTeX specific
-\message{\string\catcode\space and \string\cjkxcode\space for Japanese characters,}
-\begingroup
-  \def\set@cjkx#1#2#3#4{\count@=#1
-    \loop \ifnum\count@<\numexpr#2+1
-      \global\cjkxcode\count@=#3 \global\catcode\count@=#4
-      \advance\count@ by 1
-    \repeat}
-
-  %\set@cjkx{"0080}{"00A9}{7}{12}
-  %\set@cjkx{"00AB}{"00B9}{7}{12}
-  %\set@cjkx{"00BB}{"00BF}{7}{12}
-  %\set@cjkx{"00D7}{"00D7}{7}{12}
-  %\set@cjkx{"00F7}{"00F7}{7}{12}
-  \set@cjkx{"0250}{"10FF}{7}{12}
-  \set@cjkx{"1100}{"11FF}{12}{11}% Hangul Jamo
-  \set@cjkx{"1200}{"1DFF}{7}{12}
-  \set@cjkx{"1F00}{"2E7F}{7}{12}
-  \set@cjkx{"2E80}{"2FEF}{14}{11}% CJK Radicals Supplement
-  \set@cjkx{"2FF0}{"2FFF}{15}{12}% Ideographic Description Characters
-
-  \set@cjkx{"3000}{"303F}{15}{12}
-  \set@cjkx{"3040}{"312F}{14}{11}
-  \set@cjkx{"3130}{"318F}{12}{11}
-  \set@cjkx{"3190}{"31FF}{14}{11}
-  \set@cjkx{"3200}{"33FF}{15}{12}
-  \set@cjkx{"3400}{"4DBF}{14}{11}
-  \set@cjkx{"4DC0}{"4DFF}{15}{12}
-  \set@cjkx{"4E00}{"9FFF}{14}{11}
-  \set@cjkx{"A000}{"A95F}{15}{12}
-  \set@cjkx{"A960}{"A97F}{12}{11}
-  \set@cjkx{"A980}{"ABFF}{15}{12}
-  \set@cjkx{"AC00}{"D7FF}{12}{11}
-  \set@cjkx{"D800}{"F8FF}{15}{12}
-  \set@cjkx{"F900}{"FAFF}{14}{11}
-  \set@cjkx{"FB00}{"FF0F}{15}{12}
-  \set@cjkx{"FF10}{"FF19}{14}{11}
-  \set@cjkx{"FF1A}{"FF20}{15}{12}
-  \set@cjkx{"FF21}{"FF3A}{14}{11}
-  \set@cjkx{"FF3B}{"FF40}{15}{12}
-  \set@cjkx{"FF41}{"FF5A}{14}{11}
-  \set@cjkx{"FF5B}{"FF65}{15}{12}
-  \set@cjkx{"FF66}{"FF6F}{14}{11}
-  \set@cjkx{"FF70}{"FF70}{15}{12}
-  \set@cjkx{"FF71}{"FF9D}{14}{11}
-  \set@cjkx{"FF9E}{"FFFF}{15}{12}
-
-  \set@cjkx{"10000}{"1AFEF}{7}{12}
-  \set@cjkx{"1AFF0}{"1B16F}{14}{11}
-  \set@cjkx{"1B170}{"1FFFF}{7}{12}
-
-  \set@cjkx{"20000}{"3FFFF}{14}{11}
-  \set@cjkx{"40000}{"10FFFF}{15}{12}
-\endgroup
-
-
 % And finally re-catcode commercial-at
 
 \catcode `\@=12

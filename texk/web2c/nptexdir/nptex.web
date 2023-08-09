@@ -15405,7 +15405,7 @@ if total_pages=0 then
   dvi_four(25400000); dvi_four(473628672); {conversion ratio for sp}
   prepare_mag; dvi_four(mag); {magnification factor is frozen}
   old_setting:=selector; selector:=new_string;
-  print(" XeTeX output "); print_int(year); print_char(".");
+  print(" npTeX output "); print_int(year); print_char(".");
   print_two(month); print_char("."); print_two(day);
   print_char(":"); print_two(time div 60);
   print_two(time mod 60);

@@ -1,0 +1,4 @@
+% npTeX
+TEXINPUTS.nptex   = $TEXMFDOTDIR;$TEXMF/tex/{nptex,xetex,uptex,ptex,plain,generic,latex,}//
+TEXINPUTS.nplatex       = $TEXMFDOTDIR;$TEXMF/tex/{nptex,xelatex,uplatex,platex,latex,xetex,generic,}//
+TEXINPUTS.nplatex-dev   = $TEXMFDOTDIR;$TEXMF/tex/{latex-dev,nptex,xelatex,uplatex,platex,latex,xetex,generic,,}//

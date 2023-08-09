@@ -1,0 +1,3 @@
+nptex nptex language.def *nptex.ini
+nplatex-dev nptex language.dat -etex nplatex.ini
+nplatex nptex language.dat -etex nplatex.ini
