@@ -28,6 +28,10 @@ changes from pTeX
  * \XeTeXglyph 由来ノード (font: f, glyph: p) 周りの \xkanjiskip
    \XeTeXcharglyph f c == p となる最初の c を文字コードとみなす
    （そういう c がなければ，`\0 = 48 とする）
+ * \cjkxcode, \prebreakpenalty, \postbreakpenalty  初期値：全部 0
+   \inhibixspcode 初期値：全部 3
+   \xspcode 初期値：0-9A-Za-z は 3，その他は 0
+   →和文文字については nptex.src で設定
 
  * XeTeX で非 BMP の文字がうまく扱えない
    * show_context 中で U+20BB7 -> U+0BB7 と面位置が無視される→解決

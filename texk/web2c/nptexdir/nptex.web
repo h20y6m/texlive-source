@@ -5953,43 +5953,6 @@ kansuji_char(0):=12295; kansuji_char(1):=19968; kansuji_char(2):=20108;
 kansuji_char(3):=19977; kansuji_char(4):=22235; kansuji_char(5):=20116;
 kansuji_char(6):=20845; kansuji_char(7):=19971; kansuji_char(8):=20843;
 kansuji_char(9):=20061;
-for k:=@"250 to @"10FF do cjkx_code(k):=7;
-for k:=@"1100 to @"11FF do begin cjkx_code(k):=4; cat_code(k):=letter; end;
-for k:=@"1200 to @"1DFF do cjkx_code(k):=7;
-for k:=@"1F00 to @"2E7F do cjkx_code(k):=7;
-for k:=@"2E80 to @"2FEF do begin cjkx_code(k):=6; cat_code(k):=letter; end;
-for k:=@"2FF0 to @"303F do cjkx_code(k):=7;
-for k:=@"3040 to @"30FF do begin cjkx_code(k):=6; cat_code(k):=letter; end;
-for k:=@"3100 to @"312F do begin cjkx_code(k):=6; cat_code(k):=letter; end;
-for k:=@"3130 to @"318F do begin cjkx_code(k):=4; cat_code(k):=letter; end;
-for k:=@"3190 to @"31EF do begin cjkx_code(k):=6; cat_code(k):=letter; end;
-for k:=@"31F0 to @"31FF do begin cjkx_code(k):=6; cat_code(k):=letter; end;
-for k:=@"3200 to @"33FF do cjkx_code(k):=7;
-for k:=@"3400 to @"4DBF do begin cjkx_code(k):=6; cat_code(k):=letter; end;
-for k:=@"4DC0 to @"4DFF do cjkx_code(k):=7;
-for k:=@"4E00 to @"9FFF do begin cjkx_code(k):=6; cat_code(k):=letter; end;
-for k:=@"A000 to @"A95F do cjkx_code(k):=7;
-for k:=@"A960 to @"A97F do begin cjkx_code(k):=4; cat_code(k):=letter; end;
-for k:=@"A980 to @"ABFF do cjkx_code(k):=7;
-for k:=@"AC00 to @"D7FF do begin cjkx_code(k):=4; cat_code(k):=letter; end;
-for k:=@"D800 to @"F8FF do cjkx_code(k):=7;
-for k:=@"F900 to @"FAFF do begin cjkx_code(k):=6; cat_code(k):=letter; end;
-for k:=@"FB00 to @"FF0F do cjkx_code(k):=7;
-for k:=@"FF10 to @"FF19 do begin cjkx_code(k):=6; cat_code(k):=letter; end;
-for k:=@"FF1A to @"FF20 do cjkx_code(k):=7;
-for k:=@"FF21 to @"FF3A do begin cjkx_code(k):=6; cat_code(k):=letter; end;
-for k:=@"FF3B to @"FF40 do cjkx_code(k):=7;
-for k:=@"FF41 to @"FF5A do begin cjkx_code(k):=6; cat_code(k):=letter; end;
-for k:=@"FF5B to @"FF65 do cjkx_code(k):=7;
-for k:=@"FF66 to @"FF6F do begin cjkx_code(k):=6; cat_code(k):=letter; end;
-for k:=@"FF70 to @"FF73 do cjkx_code(k):=7;
-for k:=@"FF74 to @"FF9D do begin cjkx_code(k):=6; cat_code(k):=letter; end;
-for k:=@"FF9E to @"1AFEF do cjkx_code(k):=7;
-for k:=@"1AFF0 to @"1B16F do begin cjkx_code(k):=6; cat_code(k):=letter; end;
-for k:=@"1B170 to @"1FFFF do cjkx_code(k):=7;
-for k:=@"20000 to @"323AF do begin cjkx_code(k):=6; cat_code(k):=letter; end;
-for k:=@"323B0 to @"10FFFF do cjkx_code(k):=7;
-cjkx_code(@"FF70):=7; cjkx_code(@"FF71):=7; cjkx_code(@"FF72):=7;
 
 @ @<Show equivalent |n|, in region 4@>=
 if (n=par_shape_loc) or ((n>=etex_pen_base) and (n<etex_pens)) then
@@ -29902,13 +29865,16 @@ XeTeX_def_code: begin
       word_define(p,hi(n));
     end;
   end;
-def_code: begin @<Let |n| be the largest legal code value, based on |cur_chr|@>;
+def_code: begin @<Let |m| be the smallest legal code value, based on |cur_chr|@>;
+  @<Let |n| be the largest legal code value, based on |cur_chr|@>;
   p:=cur_chr; scan_usv_num; p:=p+cur_val; scan_optional_equals;
   scan_int;
-  if ((cur_val<0)and(p<del_code_base))or(cur_val>n) then
+  if ((cur_val<m)and(p<del_code_base))or(cur_val>n) then
     begin print_err("Invalid code ("); print_int(cur_val);
 @.Invalid code@>
-    if p<del_code_base then print("), should be in the range 0..")
+    if p<del_code_base then 
+      begin print("), should be in the range "); print_int(m); print(".."); 
+      end
     else print("), should be at most ");
     print_int(n);
     help1("I'm going to use 0 instead of that illegal code value.");@/
@@ -29930,9 +29896,14 @@ def_code: begin @<Let |n| be the largest legal code value, based on |cur_chr|@>;
   else word_define(p,cur_val);
   end;
 
+@ @<Let |m| be the smallest...@>=
+if (cur_chr=pre_break_penalty_base)or(cur_chr=post_break_penalty_base) then 
+  m:=-@'17777777777
+else m:=0
+
 @ @<Let |n| be the largest...@>=
 if cur_chr=cat_code_base then n:=max_char_code
-else if cur_chr=cjkx_code_base then n:=@'17777777777
+else if cur_chr<auto_xsp_code_base then n:=@'17777777777
 else if cur_chr=auto_xsp_code_base then n:=3
 else if cur_chr=inhibit_xsp_code_base then n:=3
 else if cur_chr=math_code_base then n:=@'100000

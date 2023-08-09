@@ -774,6 +774,61 @@
 
 \fi
 
+% npTeX specific
+\message{\string\catcode\space and \string\cjkxcode\space for Japanese characters,}
+\begingroup
+  \def\set@other@kchar#1#2{\count@=#1
+    \loop \ifnum\count@<\numexpr#2+1
+      \global\cjkxcode\count@=7 \global\catcode\count@=12
+      \advance\count@ by 1
+    \repeat}
+  \def\set@cjkx#1#2#3{\count@=#1
+    \loop \ifnum\count@<\numexpr#2+1
+      \global\cjkxcode\count@=#3 \global\catcode\count@=11
+      \advance\count@ by 1
+    \repeat}
+
+  %\set@other@kchar{"0080}{"00A9}
+  %\set@other@kchar{"00AB}{"00B9}
+  %\set@other@kchar{"00BB}{"00BF}
+  %\set@other@kchar{"00D7}{"00D7}
+  %\set@other@kchar{"00F7}{"00F7}
+  \set@other@kchar{"0250}{"10FF}
+  \set@cjkx{"1100}{"11FF}{4}
+  \set@other@kchar{"1200}{"1DFF}
+  \set@other@kchar{"1F00}{"2E7F}
+  \set@cjkx{"2E80}{"2FEF}{6}
+  \set@other@kchar{"2FF0}{"303F}
+  \set@cjkx{"3040}{"312F}{6}
+  \set@cjkx{"3130}{"318F}{4}
+  \set@cjkx{"3190}{"31FF}{6}
+  \set@other@kchar{"3200}{"33FF}
+  \set@cjkx{"3400}{"4DBF}{6}
+  \set@other@kchar{"4DC0}{"4DFF}
+  \set@cjkx{"4E00}{"9FFF}{6}
+  \set@other@kchar{"A000}{"A95F}
+  \set@cjkx{"A960}{"A97F}{4}
+  \set@other@kchar{"A980}{"ABFF}
+  \set@cjkx{"AC00}{"D7FF}{4}
+  \set@other@kchar{"D800}{"F8FF}
+  \set@cjkx{"F900}{"FAFF}{6}
+  \set@other@kchar{"FB00}{"FF0F}
+  \set@cjkx{"FF10}{"FF19}{6}
+  \set@other@kchar{"FF1A}{"FF20}
+  \set@cjkx{"FF21}{"FF3A}{6}
+  \set@other@kchar{"FF3B}{"FF40}
+  \set@cjkx{"FF41}{"FF5A}{6}
+  \set@other@kchar{"FF5B}{"FF65}
+  \set@cjkx{"FF66}{"FF6F}{6}
+  \set@other@kchar{"FF70}{"FF70}
+  \set@cjkx{"FF71}{"FF9D}{6}
+  \set@other@kchar{"FF9E}{"1AFEF}
+  \set@cjkx{"1AFF0}{"1B16F}{6}
+  \set@other@kchar{"1B170}{"1FFFF}
+  \set@cjkx{"20000}{"323AF}{6}
+  \set@other@kchar{"323B0}{"10FFFF}
+\endgroup
+
 
 % And finally re-catcode commercial-at
 
