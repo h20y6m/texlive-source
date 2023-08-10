@@ -5,7 +5,7 @@ changes from pTeX
    を格納．最上位ビットは \jcharwidowpenalty 挿入可否．
 * \kcatcode の役割は \catcode+\cjkx_code に．
    cjk_code = azyx_{(2)} トークンには付随しない値．
-     x: \jcharwidowpenalty挿入対象ならば1
+     x: 和文文字ノードが\jcharwidowpenalty挿入対象に*ならない*ならば1
      y: この文字の直後の改行で空白を挿入しないならば1
         （実際の挙動は\ptexlineendmodeで）
      z: 和文文字扱い（文字ノードのフォントが\jfont or \tfont）すれば1
