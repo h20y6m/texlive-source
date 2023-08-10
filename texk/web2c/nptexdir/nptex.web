@@ -14062,7 +14062,7 @@ if jfm_flag<>dir_default then
     fget; cx:=fbyte;
     font_info[k].hh.lhfield:=tonum(cx); {|kchar_type|}
     end;
-for k:=char_base[f] to width_base[f]-1 do
+for k:=char_base[f]+bc to width_base[f]-1 do
   begin store_four_quarters(font_info[k].qqqq);
   if (a>=nw)or(b div @'20>=nh)or(b mod @'20>=nd)or
     (c div 4>=ni) then abort;
@@ -15405,7 +15405,7 @@ if total_pages=0 then
   dvi_four(25400000); dvi_four(473628672); {conversion ratio for sp}
   prepare_mag; dvi_four(mag); {magnification factor is frozen}
   old_setting:=selector; selector:=new_string;
-  print(" npTeX output "); print_int(year); print_char(".");
+  print("npTeX output "); print_int(year); print_char(".");
   print_two(month); print_char("."); print_two(day);
   print_char(":"); print_two(time div 60);
   print_two(time mod 60);
@@ -27140,7 +27140,7 @@ else if (mode=vmode)and(head=tail) then
     ("This \lastbox will therefore be void."); error;
   end
 else  begin check_effective_tail(goto done);
-  if not is_char_node(tx) then
+  if not is_char_node(tx)and(head<>tx) then
     if (type(tx)=hlist_node)or(type(tx)=vlist_node)
        or(type(tx)=dir_node) then
       @<Remove the last box, unless it's part of a discretionary@>;

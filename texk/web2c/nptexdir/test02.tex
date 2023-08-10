@@ -1,0 +1,32 @@
+\documentclass{utarticle}
+\usepackage{hyperref,graphics,xcolor}
+\usepackage{fontspec,unicode-math}
+\setmainfont[Ligatures={Rare,Historic,TeX}]{LibertinusSerif-Regular.otf}
+\setsansfont[Ligatures={Rare,Historic,TeX}]{LibertinusSans-Regular.otf}
+\setmathfont{LibertinusMath-Regular.otf}
+
+\begin{document}
+\section{foo τέχνη}
+This is a pen, not a street. ちょっとcheckしちゃった．
+とりあえず\textsf{SANS serif}ゴシックでも．
+
+\cjkxcode`\γ=15\cjkxcode`\ゔ=0\cjkxcode`\ö=6
+\kchardef\hoge=`\ゔ
+\achardef\fuga=`\ö
+
+\section{barあいうえお}
+Gödel ゔ\hoge\fuga\kchar`\2 λ\achar`\λ\\
+$\displaystyle \int_0^α a\gamma γ\sqrt{\frac{uあ}{φ(x∧y)}}\,dx$ vs\ 
+\cjkxcode`\γ=7
+$\displaystyle \int_0^α a\gamma γ\sqrt{\frac{uあ}{φ(x∧y)}}\,dx$.
+\parbox<y>{10zw}{%
+えーっと，「\textcolor{blue}{ある程度は動いて}いる」ような気がします？
+\kansuji1234567890
+}
+
+\cjkxcode`\朝=4
+ほげら明朝
+ほげらゴシック
+ほげら丸ゴシック
+
+\end{document}
