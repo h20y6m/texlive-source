@@ -1,0 +1,28 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesExplPackage{xllegacyenc}%
+  {2023-08-13}{0.0}{\string\usepackage[utf8]{inputenc} on Unicode engines}
+\sys_if_engine_luatex:F {
+  \sys_if_engine_xetex:F {
+    \msg_new:nnn {xllegacyenc} {not-on-unicode-engine}
+      {
+        The~ xllegacyenc~ package~ requires~ either~ XeTeX,~ LuaTeX,~ or~ npTeX.~
+        You~ won't~ need~ this~ package~ in~ other~ engines~ (namely,~ pdfTeX~
+        and~ e-(u)pTeX).
+      }
+    \msg_warning:nn {xllegacyenc} {not-on-unicode-engine}
+    \tex_endinput:D
+  }
+}
+\ExplSyntaxOff
+
+\fontencoding{OT1}\fontfamily{cmr}\selectfont
+\protected\def\DeclareUnicodeCharacter#1#2{%
+  \catcode"#1=13
+  \ifdefined\cjkxcode \cjkxcode"#1=0 \fi
+  \begingroup\lccode`\~="#1 \lowercase{\gdef~{#2}}\endgroup
+}
+\input{lgrenc.dfu}
+\input{utf8enc.dfu}
+
+\endinput
+

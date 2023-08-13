@@ -27875,7 +27875,6 @@ if p<>null then
   @<Append |disp_node| at end of displace area@>;
   space_factor:=1000; inhibit_glue_flag:=false;
   end;
-show_node_list(head);
 end;
 
 @ @<Create a character node |q| for the next...@>=
