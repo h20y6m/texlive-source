@@ -15,14 +15,54 @@
 }
 \ExplSyntaxOff
 
+\renewcommand\encodingdefault{OT1}
+\renewcommand\rmdefault{cmr}
+\renewcommand\sfdefault{cmss}
+\renewcommand\ttdefault{cmtt}
 \fontencoding{OT1}\fontfamily{cmr}\selectfont
 \protected\def\DeclareUnicodeCharacter#1#2{%
-  \catcode"#1=13
-  \ifdefined\cjkxcode \cjkxcode"#1=0 \fi
+  \global\catcode"#1=13
+  \ifdefined\cjkxcode \global\cjkxcode"#1=0 \fi
   \begingroup\lccode`\~="#1 \lowercase{\gdef~{#2}}\endgroup
 }
-\input{lgrenc.dfu}
-\input{utf8enc.dfu}
+\def\DeclareFontEncoding@#1#2#3{%
+  \expandafter
+  \ifx\csname T@#1\endcsname\relax
+    \def\cdp@elt{\noexpand\cdp@elt}%
+    \xdef\cdp@list{\cdp@list\cdp@elt{#1}%
+                    {\default@family}{\default@series}%
+                    {\default@shape}}%
+    \expandafter\let\csname#1-cmd\endcsname\@changed@cmd
+    \begingroup
+      \wlog{Now handling font encoding #1 ...}%
+      \lowercase{%
+        \InputIfFileExists{#1enc.dfu}}%
+           {\wlog{... processing UTF-8 mapping file for font %
+                      encoding #1}}%
+           {\wlog{... no UTF-8 mapping file for font encoding #1}}%
+    \endgroup
+  \else
+     \@font@info{Redeclaring font encoding #1}%
+  \fi
+  \global\@namedef{T@#1}{#2}%
+  \global\@namedef{M@#1}{\default@M#3}%
+  \xdef\LastDeclaredEncoding{#1}%
+  }
+\input{omsenc.dfu}
+\input{ot1enc.dfu}
+\input{t1enc.dfu}
+\input{ts1enc.dfu}
+\DeclareUnicodeCharacter{00A9}{\textcopyright}
+\DeclareUnicodeCharacter{00AA}{\textordfeminine}
+\DeclareUnicodeCharacter{00AE}{\textregistered}
+\DeclareUnicodeCharacter{00BA}{\textordmasculine}
+\DeclareUnicodeCharacter{02C6}{\textasciicircum}
+\DeclareUnicodeCharacter{02DC}{\textasciitilde}
+\DeclareUnicodeCharacter{200C}{\textcompwordmark}
+\DeclareUnicodeCharacter{2026}{\textellipsis}
+\DeclareUnicodeCharacter{2122}{\texttrademark}
+\DeclareUnicodeCharacter{2423}{\textvisiblespace}
+\DeclareUnicodeCharacter{FEFF}{\ifhmode\nobreak\fi}
 
 \endinput
 
