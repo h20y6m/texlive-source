@@ -514,7 +514,7 @@ get_preamble_dvi_info (void)
   pre_id_byte = ch;
   if (ch == XDV_ID || ch == XDV_ID_OLD || ch == XDV_NP_ID)
     dpx_conf.compat_mode = dpx_mode_xdv_mode;
-  is_ptex = ch == (ch == DVI_ID) || (ch == XDV_NP_ID);; /* maybe */
+  is_ptex = (ch == DVI_ID) || (ch == XDV_NP_ID); /* maybe */
   
   dvi_info.unit_num = get_positive_quad(dvi_file, "DVI", "unit_num");
   dvi_info.unit_den = get_positive_quad(dvi_file, "DVI", "unit_den");
@@ -837,13 +837,6 @@ clear_state (void)
   pdf_dev_set_dirmode(0);
   dvi_stack_depth = 0;
   current_font    = -1;
-}
-
-static void print_dvi_state(void){
-  fprintf(stderr, "(%10f,%10f,%10f,%10f,%10f,%10f,%d)",
-    (double)dvi_state.h/65536,(double)dvi_state.v/65536,(double)dvi_state.w/65536,
-    (double)dvi_state.x/65536,(double)dvi_state.y/65536,(double)dvi_state.z/65536,
-    dvi_state.d);
 }
 
 /* Migrated from pdfdev.c:
