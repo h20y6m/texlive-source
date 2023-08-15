@@ -129,7 +129,7 @@ TESTS = tangle.test $(am__EXEEXT_46) ctiedir/ctie.test \
 	$(am__append_76) $(am__append_79) $(am__append_84) \
 	$(am__append_87) $(am__append_108) $(am__append_109) \
 	$(am__append_110) $(am__append_111) $(am__append_119) \
-	$(am__append_122) $(am__append_124) $(am__append_151) \
+	$(am__append_122) $(am__append_124) $(am__append_153) \
 	libmd5/md5.test
 @WEB_TRUE@am__append_1 = $(web_programs)
 @WEB_TRUE@am__append_2 = $(web_tests)
@@ -342,7 +342,16 @@ TESTS = tangle.test $(am__EXEEXT_46) ctiedir/ctie.test \
 @XETEX_SYNCTEX_TRUE@	synctexdir/synctex-common.h \
 @XETEX_SYNCTEX_TRUE@	synctexdir/synctex-xetex.h
 
-@SYNCTEX_TRUE@am__append_151 = $(synctex_tests)
+@NPTEX_SYNCTEX_TRUE@am__append_151 = -I$(srcdir)/synctexdir \
+@NPTEX_SYNCTEX_TRUE@	-D__SyncTeX__ \
+@NPTEX_SYNCTEX_TRUE@	-DSYNCTEX_ENGINE_H=\"synctex-nptex.h\"
+@NPTEX_SYNCTEX_TRUE@am__append_152 = \
+@NPTEX_SYNCTEX_TRUE@	synctexdir/synctex.c \
+@NPTEX_SYNCTEX_TRUE@	synctexdir/synctex.h \
+@NPTEX_SYNCTEX_TRUE@	synctexdir/synctex-common.h \
+@NPTEX_SYNCTEX_TRUE@	synctexdir/synctex-nptex.h
+
+@SYNCTEX_TRUE@am__append_153 = $(synctex_tests)
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/web2c-disable.m4 \
@@ -1487,9 +1496,17 @@ mpost_DEPENDENCIES = libmplibcore.a libmplibextramath.a \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) libmputil.a
-dist_nptex_OBJECTS = nptexdir/nptex-nptexextra.$(OBJEXT)
-am__objects_45 = nptex-nptexini.$(OBJEXT) nptex-nptex0.$(OBJEXT)
-nodist_nptex_OBJECTS = $(am__objects_45) nptex-nptex-pool.$(OBJEXT)
+am__dist_nptex_SOURCES_DIST = nptexdir/nptexextra.c \
+	nptexdir/nptexextra.h nptexdir/etex_version.h \
+	nptexdir/xetex_version.h nptexdir/nptex_version.h \
+	synctexdir/synctex.c synctexdir/synctex.h \
+	synctexdir/synctex-common.h synctexdir/synctex-nptex.h
+@NPTEX_SYNCTEX_TRUE@am__objects_45 =  \
+@NPTEX_SYNCTEX_TRUE@	synctexdir/nptex-synctex.$(OBJEXT)
+dist_nptex_OBJECTS = nptexdir/nptex-nptexextra.$(OBJEXT) \
+	$(am__objects_45)
+am__objects_46 = nptex-nptexini.$(OBJEXT) nptex-nptex0.$(OBJEXT)
+nodist_nptex_OBJECTS = $(am__objects_46) nptex-nptex-pool.$(OBJEXT)
 nptex_OBJECTS = $(dist_nptex_OBJECTS) $(nodist_nptex_OBJECTS)
 @XETEX_MACOSX_FALSE@am__DEPENDENCIES_10 = $(am__DEPENDENCIES_1)
 am__DEPENDENCIES_11 = $(libxetex) $(am__DEPENDENCIES_1) \
@@ -1523,12 +1540,12 @@ am__dist_pdftex_SOURCES_DIST = pdftexdir/pdftexextra.c \
 	pdftexdir/etex_version.h synctexdir/synctex.c \
 	synctexdir/synctex.h synctexdir/synctex-common.h \
 	synctexdir/synctex-pdftex.h
-@PDFTEX_SYNCTEX_TRUE@am__objects_46 =  \
+@PDFTEX_SYNCTEX_TRUE@am__objects_47 =  \
 @PDFTEX_SYNCTEX_TRUE@	synctexdir/pdftex-synctex.$(OBJEXT)
 dist_pdftex_OBJECTS = pdftexdir/pdftex-pdftexextra.$(OBJEXT) \
-	$(am__objects_46)
-am__objects_47 = pdftex-pdftexini.$(OBJEXT) pdftex-pdftex0.$(OBJEXT)
-nodist_pdftex_OBJECTS = $(am__objects_47) pdftex-pdftex-pool.$(OBJEXT)
+	$(am__objects_47)
+am__objects_48 = pdftex-pdftexini.$(OBJEXT) pdftex-pdftex0.$(OBJEXT)
+nodist_pdftex_OBJECTS = $(am__objects_48) pdftex-pdftex-pool.$(OBJEXT)
 pdftex_OBJECTS = $(dist_pdftex_OBJECTS) $(nodist_pdftex_OBJECTS)
 am__DEPENDENCIES_12 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) libmd5.a
@@ -1552,20 +1569,20 @@ nodist_pltotf_OBJECTS = pltotf.$(OBJEXT)
 pltotf_OBJECTS = $(nodist_pltotf_OBJECTS)
 pltotf_LDADD = $(LDADD)
 pltotf_DEPENDENCIES = $(proglib) $(am__DEPENDENCIES_1)
-am__objects_48 = pmpost-pmp.$(OBJEXT)
-am__objects_49 = pmpost-pmpmath.$(OBJEXT)
-am__objects_50 = pmpost-pmpmathbinary.$(OBJEXT)
-am__objects_51 = pmpost-pmpmathdecimal.$(OBJEXT)
-am__objects_52 = pmpost-pmpmathdouble.$(OBJEXT)
-am__objects_53 = pmpost-pmpstrings.$(OBJEXT)
-am__objects_54 = pmpost-pmpxout.$(OBJEXT)
-am__objects_55 = pmpost-ppngout.$(OBJEXT)
-am__objects_56 = pmpost-ppsout.$(OBJEXT)
-am__objects_57 = pmpost-psvgout.$(OBJEXT)
-nodist_pmpost_OBJECTS = $(am__objects_48) $(am__objects_49) \
-	$(am__objects_50) $(am__objects_51) $(am__objects_52) \
-	pmpost-pmpost.$(OBJEXT) $(am__objects_53) $(am__objects_54) \
-	$(am__objects_55) $(am__objects_56) $(am__objects_57) \
+am__objects_49 = pmpost-pmp.$(OBJEXT)
+am__objects_50 = pmpost-pmpmath.$(OBJEXT)
+am__objects_51 = pmpost-pmpmathbinary.$(OBJEXT)
+am__objects_52 = pmpost-pmpmathdecimal.$(OBJEXT)
+am__objects_53 = pmpost-pmpmathdouble.$(OBJEXT)
+am__objects_54 = pmpost-pmpstrings.$(OBJEXT)
+am__objects_55 = pmpost-pmpxout.$(OBJEXT)
+am__objects_56 = pmpost-ppngout.$(OBJEXT)
+am__objects_57 = pmpost-ppsout.$(OBJEXT)
+am__objects_58 = pmpost-psvgout.$(OBJEXT)
+nodist_pmpost_OBJECTS = $(am__objects_49) $(am__objects_50) \
+	$(am__objects_51) $(am__objects_52) $(am__objects_53) \
+	pmpost-pmpost.$(OBJEXT) $(am__objects_54) $(am__objects_55) \
+	$(am__objects_56) $(am__objects_57) $(am__objects_58) \
 	pmpost-ptfmin.$(OBJEXT)
 pmpost_OBJECTS = $(nodist_pmpost_OBJECTS)
 pmpost_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
@@ -1577,8 +1594,8 @@ pooltype_OBJECTS = $(nodist_pooltype_OBJECTS)
 pooltype_LDADD = $(LDADD)
 pooltype_DEPENDENCIES = $(proglib) $(am__DEPENDENCIES_1)
 dist_ptex_OBJECTS = ptexdir/ptex-ptexextra.$(OBJEXT)
-am__objects_58 = ptex-ptexini.$(OBJEXT) ptex-ptex0.$(OBJEXT)
-nodist_ptex_OBJECTS = $(am__objects_58) ptex-ptex-pool.$(OBJEXT)
+am__objects_59 = ptex-ptexini.$(OBJEXT) ptex-ptex0.$(OBJEXT)
+nodist_ptex_OBJECTS = $(am__objects_59) ptex-ptex-pool.$(OBJEXT)
 ptex_OBJECTS = $(dist_ptex_OBJECTS) $(nodist_ptex_OBJECTS)
 am__DEPENDENCIES_13 = libkanji.a $(pproglib) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_1)
@@ -1598,10 +1615,10 @@ tangleboot_LDADD = $(LDADD)
 am__dist_tex_SOURCES_DIST = texextra.c synctexdir/synctex.c \
 	synctexdir/synctex.h synctexdir/synctex-common.h \
 	synctexdir/synctex-tex.h
-@TEX_SYNCTEX_TRUE@am__objects_59 = synctexdir/tex-synctex.$(OBJEXT)
-dist_tex_OBJECTS = tex-texextra.$(OBJEXT) $(am__objects_59)
-am__objects_60 = tex-texini.$(OBJEXT) tex-tex0.$(OBJEXT)
-nodist_tex_OBJECTS = $(am__objects_60) tex-tex-pool.$(OBJEXT)
+@TEX_SYNCTEX_TRUE@am__objects_60 = synctexdir/tex-synctex.$(OBJEXT)
+dist_tex_OBJECTS = tex-texextra.$(OBJEXT) $(am__objects_60)
+am__objects_61 = tex-texini.$(OBJEXT) tex-tex0.$(OBJEXT)
+nodist_tex_OBJECTS = $(am__objects_61) tex-tex-pool.$(OBJEXT)
 tex_OBJECTS = $(dist_tex_OBJECTS) $(nodist_tex_OBJECTS)
 @TEX_SYNCTEX_TRUE@am__DEPENDENCIES_16 = $(am__DEPENDENCIES_1)
 tex_DEPENDENCIES = $(am__DEPENDENCIES_2) $(am__DEPENDENCIES_1) \
@@ -1630,21 +1647,21 @@ am_updvitype_OBJECTS =
 nodist_updvitype_OBJECTS = updvitype-updvitype.$(OBJEXT)
 updvitype_OBJECTS = $(am_updvitype_OBJECTS) \
 	$(nodist_updvitype_OBJECTS)
-am__objects_61 = upmpost-pmp.$(OBJEXT)
-am__objects_62 = upmpost-pmpmath.$(OBJEXT)
-am__objects_63 = upmpost-pmpmathbinary.$(OBJEXT)
-am__objects_64 = upmpost-pmpmathdecimal.$(OBJEXT)
-am__objects_65 = upmpost-pmpmathdouble.$(OBJEXT)
-am__objects_66 = upmpost-pmpstrings.$(OBJEXT)
-am__objects_67 = upmpost-pmpxout.$(OBJEXT)
-am__objects_68 = upmpost-ppngout.$(OBJEXT)
-am__objects_69 = upmpost-ppsout.$(OBJEXT)
-am__objects_70 = upmpost-psvgout.$(OBJEXT)
-am__objects_71 = $(am__objects_61) $(am__objects_62) $(am__objects_63) \
-	$(am__objects_64) $(am__objects_65) upmpost-pmpost.$(OBJEXT) \
-	$(am__objects_66) $(am__objects_67) $(am__objects_68) \
-	$(am__objects_69) $(am__objects_70) upmpost-ptfmin.$(OBJEXT)
-nodist_upmpost_OBJECTS = $(am__objects_71)
+am__objects_62 = upmpost-pmp.$(OBJEXT)
+am__objects_63 = upmpost-pmpmath.$(OBJEXT)
+am__objects_64 = upmpost-pmpmathbinary.$(OBJEXT)
+am__objects_65 = upmpost-pmpmathdecimal.$(OBJEXT)
+am__objects_66 = upmpost-pmpmathdouble.$(OBJEXT)
+am__objects_67 = upmpost-pmpstrings.$(OBJEXT)
+am__objects_68 = upmpost-pmpxout.$(OBJEXT)
+am__objects_69 = upmpost-ppngout.$(OBJEXT)
+am__objects_70 = upmpost-ppsout.$(OBJEXT)
+am__objects_71 = upmpost-psvgout.$(OBJEXT)
+am__objects_72 = $(am__objects_62) $(am__objects_63) $(am__objects_64) \
+	$(am__objects_65) $(am__objects_66) upmpost-pmpost.$(OBJEXT) \
+	$(am__objects_67) $(am__objects_68) $(am__objects_69) \
+	$(am__objects_70) $(am__objects_71) upmpost-ptfmin.$(OBJEXT)
+nodist_upmpost_OBJECTS = $(am__objects_72)
 upmpost_OBJECTS = $(nodist_upmpost_OBJECTS)
 am__DEPENDENCIES_18 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
@@ -1655,8 +1672,8 @@ am_uppltotf_OBJECTS =
 nodist_uppltotf_OBJECTS = uppltotf-uppltotf.$(OBJEXT)
 uppltotf_OBJECTS = $(am_uppltotf_OBJECTS) $(nodist_uppltotf_OBJECTS)
 dist_uptex_OBJECTS = uptexdir/uptex-uptexextra.$(OBJEXT)
-am__objects_72 = uptex-uptexini.$(OBJEXT) uptex-uptex0.$(OBJEXT)
-nodist_uptex_OBJECTS = $(am__objects_72) uptex-uptex-pool.$(OBJEXT)
+am__objects_73 = uptex-uptexini.$(OBJEXT) uptex-uptex0.$(OBJEXT)
+nodist_uptex_OBJECTS = $(am__objects_73) uptex-uptex-pool.$(OBJEXT)
 uptex_OBJECTS = $(dist_uptex_OBJECTS) $(nodist_uptex_OBJECTS)
 am_uptftopl_OBJECTS =
 nodist_uptftopl_OBJECTS = uptftopl-uptftopl.$(OBJEXT)
@@ -1694,12 +1711,12 @@ am__dist_xetex_SOURCES_DIST = xetexdir/xetexextra.c \
 	xetexdir/xetex_version.h synctexdir/synctex.c \
 	synctexdir/synctex.h synctexdir/synctex-common.h \
 	synctexdir/synctex-xetex.h
-@XETEX_SYNCTEX_TRUE@am__objects_73 =  \
+@XETEX_SYNCTEX_TRUE@am__objects_74 =  \
 @XETEX_SYNCTEX_TRUE@	synctexdir/xetex-synctex.$(OBJEXT)
 dist_xetex_OBJECTS = xetexdir/xetex-xetexextra.$(OBJEXT) \
-	$(am__objects_73)
-am__objects_74 = xetex-xetexini.$(OBJEXT) xetex-xetex0.$(OBJEXT)
-nodist_xetex_OBJECTS = $(am__objects_74) xetex-xetex-pool.$(OBJEXT)
+	$(am__objects_74)
+am__objects_75 = xetex-xetexini.$(OBJEXT) xetex-xetex0.$(OBJEXT)
+nodist_xetex_OBJECTS = $(am__objects_75) xetex-xetex-pool.$(OBJEXT)
 xetex_OBJECTS = $(dist_xetex_OBJECTS) $(nodist_xetex_OBJECTS)
 xetex_DEPENDENCIES = $(am__DEPENDENCIES_11) $(am__DEPENDENCIES_2) \
 	$(am__DEPENDENCIES_1)
@@ -2377,6 +2394,7 @@ am__depfiles_remade = ./$(DEPDIR)/aleph-aleph-pool.Po \
 	synctexdir/$(DEPDIR)/libsynctex_a-synctex_parser_utils.Po \
 	synctexdir/$(DEPDIR)/libsynctex_la-synctex_parser.Plo \
 	synctexdir/$(DEPDIR)/libsynctex_la-synctex_parser_utils.Plo \
+	synctexdir/$(DEPDIR)/nptex-synctex.Po \
 	synctexdir/$(DEPDIR)/pdftex-synctex.Po \
 	synctexdir/$(DEPDIR)/synctex-synctex_main.Po \
 	synctexdir/$(DEPDIR)/tex-synctex.Po \
@@ -2550,7 +2568,7 @@ DIST_SOURCES = $(libff_a_SOURCES) $(libkanji_a_SOURCES) \
 	$(gftodvi_SOURCES) himktables.c $(md5main_SOURCES) \
 	$(dist_mf_SOURCES) $(dist_mf_nowin_SOURCES) \
 	$(dist_mflua_SOURCES) $(dist_mfluajit_SOURCES) \
-	$(dist_nptex_SOURCES) $(am__dist_pdftex_SOURCES_DIST) \
+	$(am__dist_nptex_SOURCES_DIST) $(am__dist_pdftex_SOURCES_DIST) \
 	$(pdftosrc_SOURCES) $(dist_ptex_SOURCES) $(synctex_SOURCES) \
 	$(am__dist_tex_SOURCES_DIST) $(ttf2afm_SOURCES) \
 	$(EXTRA_ttf2afm_SOURCES) $(upbibtex_SOURCES) \
@@ -3548,6 +3566,9 @@ EXTRA_DIST = PROJECTS cftests cpascal.h help.h w2c/config.h \
 	synctexdir/synctex-e-rec.ch0 synctexdir/synctex-ep-mem.ch0 \
 	synctexdir/synctex-ep-mem.ch1 synctexdir/synctex-ep-rec.ch0 \
 	synctexdir/synctex-pdf-rec.ch2 synctexdir/synctex-xe-rec.ch3 \
+	synctexdir/synctex-np-mem.ch0 synctexdir/synctex-np-mem.ch1 \
+	synctexdir/synctex-np-rec.ch0 synctexdir/synctex-np-rec.ch1 \
+	synctexdir/synctex-np-rec.ch2 synctexdir/synctex-np-rec.ch3 \
 	$(synctex_tests) libmd5/md5.test
 DISTCLEANFILES = CXXLD.sh tangle.c tangle.h tangle.p tangle-web2c \
 	tangleboot.c tangleboot.h tangleboot.p tangleboot-web2c \
@@ -5442,18 +5463,18 @@ np_tangle = WEBINPUTS=.:$(srcdir)/nptexdir AM_V_P=$(AM_V_P) $(SHELL) ./tangle-sh
 nptex_cppflags = $(xetex_cppflags) -I$(srcdir)/nptexdir $(PTEXENC_INCLUDES)
 nptex_ldadd = $(xetex_ldadd) $(PTEXENC_LIBS)
 nptex_dependencies = $(xetex_dependencies) $(PTEXENC_DEPEND)
-nptex_CPPFLAGS = $(nptex_cppflags)
+nptex_CPPFLAGS = $(nptex_cppflags) $(am__append_151)
 nptex_CFLAGS = $(WARNING_CFLAGS)
 nptex_CXXFLAGS = # $(WARNING_CXXFLAGS)
 nptex_LDADD = $(xetex_ldadd) $(LDADD) $(ipc_socketlibs) $(PTEXENC_LIBS)
-
-# We must create nptexd.h and nptexdir/*_version.h before building the ptex_OBJECTS.
-nptex_prereq = nptexd.h nptexdir/etex_version.h nptexdir/xetex_version.h  nptexdir/nptex_version.h
 nptex_c_h = nptexini.c nptex0.c nptexcoerce.h nptexd.h
 nodist_nptex_SOURCES = $(nptex_c_h) nptex-pool.c
 dist_nptex_SOURCES = nptexdir/nptexextra.c nptexdir/nptexextra.h \
-	nptexdir/etex_version.h nptexdir/xetex_version.h  nptexdir/nptex_version.h
+	nptexdir/etex_version.h nptexdir/xetex_version.h \
+	nptexdir/nptex_version.h $(am__append_152)
 
+# We must create nptexd.h and nptexdir/*_version.h before building the ptex_OBJECTS.
+nptex_prereq = nptexd.h nptexdir/etex_version.h nptexdir/xetex_version.h  nptexdir/nptex_version.h
 nptex_ch_srcs = \
 	nptexdir/nptex.web \
 	nptexdir/tex.ch0 \
@@ -5644,6 +5665,22 @@ pkgconfigdir = ${libdir}/pkgconfig
 
 @XETEX_SYNCTEX_TRUE@xetex_post_ch_synctex = \
 @XETEX_SYNCTEX_TRUE@	synctexdir/synctex-xe-rec.ch3
+
+@NPTEX_SYNCTEX_TRUE@nptex_ch_synctex = \
+@NPTEX_SYNCTEX_TRUE@	synctexdir/synctex-xe-def.ch0 \
+@NPTEX_SYNCTEX_TRUE@    synctexdir/synctex-np-mem.ch0 \
+@NPTEX_SYNCTEX_TRUE@    synctexdir/synctex-mem.ch0 \
+@NPTEX_SYNCTEX_TRUE@    synctexdir/synctex-e-mem.ch0 \
+@NPTEX_SYNCTEX_TRUE@    synctexdir/synctex-np-mem.ch1 \
+@NPTEX_SYNCTEX_TRUE@    synctexdir/synctex-np-rec.ch0 \
+@NPTEX_SYNCTEX_TRUE@    synctexdir/synctex-rec.ch0 \
+@NPTEX_SYNCTEX_TRUE@    synctexdir/synctex-rec.ch1 \
+@NPTEX_SYNCTEX_TRUE@    synctexdir/synctex-np-rec.ch1 \
+@NPTEX_SYNCTEX_TRUE@    synctexdir/synctex-e-rec.ch0 \
+@NPTEX_SYNCTEX_TRUE@    synctexdir/synctex-np-rec.ch2
+
+@NPTEX_SYNCTEX_TRUE@nptex_post_ch_synctex = \
+@NPTEX_SYNCTEX_TRUE@	synctexdir/synctex-np-rec.ch3
 
 
 # SyncTeX Tests
@@ -8252,6 +8289,8 @@ nptexdir/$(DEPDIR)/$(am__dirstamp):
 	@: > nptexdir/$(DEPDIR)/$(am__dirstamp)
 nptexdir/nptex-nptexextra.$(OBJEXT): nptexdir/$(am__dirstamp) \
 	nptexdir/$(DEPDIR)/$(am__dirstamp)
+synctexdir/nptex-synctex.$(OBJEXT): synctexdir/$(am__dirstamp) \
+	synctexdir/$(DEPDIR)/$(am__dirstamp)
 
 nptex$(EXEEXT): $(nptex_OBJECTS) $(nptex_DEPENDENCIES) $(EXTRA_nptex_DEPENDENCIES) 
 	@rm -f nptex$(EXEEXT)
@@ -9234,6 +9273,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@synctexdir/$(DEPDIR)/libsynctex_a-synctex_parser_utils.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@synctexdir/$(DEPDIR)/libsynctex_la-synctex_parser.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@synctexdir/$(DEPDIR)/libsynctex_la-synctex_parser_utils.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@synctexdir/$(DEPDIR)/nptex-synctex.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@synctexdir/$(DEPDIR)/pdftex-synctex.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@synctexdir/$(DEPDIR)/synctex-synctex_main.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@synctexdir/$(DEPDIR)/tex-synctex.Po@am__quote@ # am--include-marker
@@ -17943,6 +17983,20 @@ nptexdir/nptex-nptexextra.obj: nptexdir/nptexextra.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(nptex_CPPFLAGS) $(CPPFLAGS) $(nptex_CFLAGS) $(CFLAGS) -c -o nptexdir/nptex-nptexextra.obj `if test -f 'nptexdir/nptexextra.c'; then $(CYGPATH_W) 'nptexdir/nptexextra.c'; else $(CYGPATH_W) '$(srcdir)/nptexdir/nptexextra.c'; fi`
 
+synctexdir/nptex-synctex.o: synctexdir/synctex.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(nptex_CPPFLAGS) $(CPPFLAGS) $(nptex_CFLAGS) $(CFLAGS) -MT synctexdir/nptex-synctex.o -MD -MP -MF synctexdir/$(DEPDIR)/nptex-synctex.Tpo -c -o synctexdir/nptex-synctex.o `test -f 'synctexdir/synctex.c' || echo '$(srcdir)/'`synctexdir/synctex.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) synctexdir/$(DEPDIR)/nptex-synctex.Tpo synctexdir/$(DEPDIR)/nptex-synctex.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='synctexdir/synctex.c' object='synctexdir/nptex-synctex.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(nptex_CPPFLAGS) $(CPPFLAGS) $(nptex_CFLAGS) $(CFLAGS) -c -o synctexdir/nptex-synctex.o `test -f 'synctexdir/synctex.c' || echo '$(srcdir)/'`synctexdir/synctex.c
+
+synctexdir/nptex-synctex.obj: synctexdir/synctex.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(nptex_CPPFLAGS) $(CPPFLAGS) $(nptex_CFLAGS) $(CFLAGS) -MT synctexdir/nptex-synctex.obj -MD -MP -MF synctexdir/$(DEPDIR)/nptex-synctex.Tpo -c -o synctexdir/nptex-synctex.obj `if test -f 'synctexdir/synctex.c'; then $(CYGPATH_W) 'synctexdir/synctex.c'; else $(CYGPATH_W) '$(srcdir)/synctexdir/synctex.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) synctexdir/$(DEPDIR)/nptex-synctex.Tpo synctexdir/$(DEPDIR)/nptex-synctex.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='synctexdir/synctex.c' object='synctexdir/nptex-synctex.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(nptex_CPPFLAGS) $(CPPFLAGS) $(nptex_CFLAGS) $(CFLAGS) -c -o synctexdir/nptex-synctex.obj `if test -f 'synctexdir/synctex.c'; then $(CYGPATH_W) 'synctexdir/synctex.c'; else $(CYGPATH_W) '$(srcdir)/synctexdir/synctex.c'; fi`
+
 nptex-nptexini.o: nptexini.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(nptex_CPPFLAGS) $(CPPFLAGS) $(nptex_CFLAGS) $(CFLAGS) -MT nptex-nptexini.o -MD -MP -MF $(DEPDIR)/nptex-nptexini.Tpo -c -o nptex-nptexini.o `test -f 'nptexini.c' || echo '$(srcdir)/'`nptexini.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/nptex-nptexini.Tpo $(DEPDIR)/nptex-nptexini.Po
@@ -20608,6 +20662,7 @@ distclean: distclean-recursive
 	-rm -f synctexdir/$(DEPDIR)/libsynctex_a-synctex_parser_utils.Po
 	-rm -f synctexdir/$(DEPDIR)/libsynctex_la-synctex_parser.Plo
 	-rm -f synctexdir/$(DEPDIR)/libsynctex_la-synctex_parser_utils.Plo
+	-rm -f synctexdir/$(DEPDIR)/nptex-synctex.Po
 	-rm -f synctexdir/$(DEPDIR)/pdftex-synctex.Po
 	-rm -f synctexdir/$(DEPDIR)/synctex-synctex_main.Po
 	-rm -f synctexdir/$(DEPDIR)/tex-synctex.Po
@@ -21391,6 +21446,7 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f synctexdir/$(DEPDIR)/libsynctex_a-synctex_parser_utils.Po
 	-rm -f synctexdir/$(DEPDIR)/libsynctex_la-synctex_parser.Plo
 	-rm -f synctexdir/$(DEPDIR)/libsynctex_la-synctex_parser_utils.Plo
+	-rm -f synctexdir/$(DEPDIR)/nptex-synctex.Po
 	-rm -f synctexdir/$(DEPDIR)/pdftex-synctex.Po
 	-rm -f synctexdir/$(DEPDIR)/synctex-synctex_main.Po
 	-rm -f synctexdir/$(DEPDIR)/tex-synctex.Po
@@ -22484,6 +22540,7 @@ xetexdir/xetex-filedump.log xetexdir/xetex-bug73.log xetexdir/xetex.log \
   xetexdir/wcfname.log: xetex$(EXEEXT)
 
 # (end of xetex.am)
+
 $(nptex_OBJECTS): $(nptex_prereq)
 $(nptex_OBJECTS): $(ptex_prereq)
 

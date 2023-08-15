@@ -1,0 +1,35 @@
+@x
+@p procedure vlist_out; {output a |vlist_node| box}
+@y
+@p procedure vlist_out; {output a |vlist_node| box}
+@z
+
+@x
+if upwards then cur_v:=cur_v+depth(this_box) else cur_v:=cur_v-height(this_box);
+@y
+@z
+
+@x
+@<Start vlist {\sl Sync\TeX} information record@>;
+cur_v:=cur_v-height(this_box);
+@y
+@<Start vlist {\sl Sync\TeX} information record@>;
+if upwards then cur_v:=cur_v+depth(this_box) else cur_v:=cur_v-height(this_box);
+@z
+
+@x
+@<Output a box in a vlist@>=
+if list_ptr(p)=null then begin
+  cur_v:=cur_v+height(p);
+  if type(p)<>dir_node then
+    @<Record void list {\sl Sync\TeX} information@>;
+  cur_v:=cur_v+depth(p);
+@y
+@<Output a box in a vlist@>=
+if list_ptr(p)=null then begin
+  if upwards then cur_v:=cur_v-depth(p) else cur_v:=cur_v+height(p);
+  if type(p)<>dir_node then
+    @<Record void list {\sl Sync\TeX} information@>;
+  if upwards then cur_v:=cur_v-height(p) else cur_v:=cur_v+depth(p);
+@z
+

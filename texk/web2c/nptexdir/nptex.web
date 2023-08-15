@@ -4891,7 +4891,8 @@ begin while p<>null do
     glue_node: begin fast_delete_glue_ref(glue_ptr(p));
       if leader_ptr(p)<>null then flush_node_list(leader_ptr(p));
       end;
-    disp_node,kern_node,math_node,penalty_node: do_nothing;
+    disp_node,
+    kern_node,math_node,penalty_node: do_nothing;
     margin_kern_node: begin
         free_node(p, margin_kern_node_size);
         goto done;
@@ -4962,7 +4963,8 @@ while words>0 do
 
 @ @<Case statement to copy...@>=
 case type(p) of
-dir_node,hlist_node,vlist_node,unset_node: begin r:=get_node(box_node_size);
+dir_node,
+hlist_node,vlist_node,unset_node: begin r:=get_node(box_node_size);
   mem[r+7]:=mem[p+7];
   mem[r+6]:=mem[p+6]; mem[r+5]:=mem[p+5]; {copy the last two words}
   add_glue_ref(space_ptr(r)); add_glue_ref(xspace_ptr(r));
@@ -15888,7 +15890,9 @@ for adjusting |v| in most cases, since the baselineskip distance will
 usually be constant.
 
 @<Output a box in a vlist@>=
-if list_ptr(p)=null then cur_v:=cur_v+height(p)+depth(p)
+if list_ptr(p)=null then begin
+    if upwards then cur_v:=cur_v-depth(p)-height(p) else cur_v:=cur_v+height(p)+depth(p);
+  end
 else  begin if upwards then cur_v:=cur_v-depth(p) else cur_v:=cur_v+height(p); synch_v;
   save_h:=dvi_h; save_v:=dvi_v; save_dir:=dvi_dir;
   if cur_dir=right_to_left then cur_h:=left_edge-shift_amount(p)
@@ -34299,7 +34303,8 @@ begin while p<>null do
   begin words:=1; {this setting occurs in more branches than any other}
   if is_char_node(p) then r:=get_avail
   else case type(p) of
-  dir_node,hlist_node,vlist_node: begin r:=get_node(box_node_size);
+  dir_node,
+  hlist_node,vlist_node: begin r:=get_node(box_node_size);
     mem[r+7]:=mem[p+7];
     mem[r+6]:=mem[p+6]; mem[r+5]:=mem[p+5]; {copy the last three words}
     add_glue_ref(space_ptr(r)); add_glue_ref(xspace_ptr(r));
@@ -36372,7 +36377,7 @@ else  begin if cur_val>penalty(equiv(m)) then cur_val:=penalty(equiv(m));
   end;
 end
 
-@* \[54] System-dependent changes for Japanese typesetting, based on \pTeX.
+@* \[54] Japanese typesetting, based on \pTeX.
 @<Declare procedures that scan font-related stuff@>=
 function get_jfm_pos(@!kcode:UnicodeScalar;@!f:internal_font_number):eight_bits;
 var @!jc:UnicodeScalar; {temporary register for KANJI}

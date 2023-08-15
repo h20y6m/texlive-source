@@ -1,0 +1,34 @@
+@x tex.web l.12533
+synch_dir;
+left_edge:=cur_h;
+if upwards then cur_v:=cur_v+depth(this_box) else cur_v:=cur_v-height(this_box);
+@y
+synch_dir;
+if upwards then cur_v:=cur_v+depth(this_box) else cur_v:=cur_v-height(this_box);
+save_loc:=dvi_offset+dvi_ptr; left_edge:=cur_h; cur_v:=cur_v-height(this_box);
+@z
+
+@x
+if list_ptr(p)=null then begin
+    if upwards then cur_v:=cur_v-depth(p)-height(p) else cur_v:=cur_v+height(p)+depth(p);
+  end
+@y
+if list_ptr(p)=null then cur_v:=cur_v+height(p)+depth(p)
+@z
+
+@x synctex-mem.ch0 l.236
+It is initialized by the {\sl Sync\TeX} controller to the command-line option if given.
+The controller may filter some reserved bits.
+
+@ @<Put each...@>=
+primitive("synctex",assign_int,int_base+synctex_code);@/
+@!@:synctex_}{\.{\\synctex} primitive@>
+@y
+It is initialized by the {\sl Sync\TeX} controller to the command-line option if given.
+The controller may filter some reserved bits.
+
+@ @<Put each...@>=
+primitive("synctex",assign_int,int_base+synctex_code);@/
+@!@:synctex_}{\.{\\synctex} primitive@>
+@z
+

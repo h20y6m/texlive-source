@@ -279,6 +279,46 @@ endif XETEX_SYNCTEX
 EXTRA_DIST += \
 	synctexdir/synctex-xe-rec.ch3
 
+## SyncTeX infrastructure: npTeX
+
+if NPTEX_SYNCTEX
+
+nptex_CPPFLAGS += -I$(srcdir)/synctexdir
+
+nptex_ch_synctex = \
+	synctexdir/synctex-xe-def.ch0 \
+    synctexdir/synctex-np-mem.ch0 \
+    synctexdir/synctex-mem.ch0 \
+    synctexdir/synctex-e-mem.ch0 \
+    synctexdir/synctex-np-mem.ch1 \
+    synctexdir/synctex-np-rec.ch0 \
+    synctexdir/synctex-rec.ch0 \
+    synctexdir/synctex-rec.ch1 \
+    synctexdir/synctex-np-rec.ch1 \
+    synctexdir/synctex-e-rec.ch0 \
+    synctexdir/synctex-np-rec.ch2
+
+nptex_post_ch_synctex = \
+	synctexdir/synctex-np-rec.ch3
+
+dist_nptex_SOURCES += \
+	synctexdir/synctex.c \
+	synctexdir/synctex.h \
+	synctexdir/synctex-common.h \
+	synctexdir/synctex-nptex.h
+
+nptex_CPPFLAGS += -D__SyncTeX__ -DSYNCTEX_ENGINE_H=\"synctex-nptex.h\"
+
+endif NPTEX_SYNCTEX
+
+EXTRA_DIST += \
+	synctexdir/synctex-np-mem.ch0 \
+	synctexdir/synctex-np-mem.ch1 \
+	synctexdir/synctex-np-rec.ch0 \
+	synctexdir/synctex-np-rec.ch1 \
+	synctexdir/synctex-np-rec.ch2 \
+	synctexdir/synctex-np-rec.ch3
+
 # SyncTeX Tests
 #
 synctex_tests = synctexdir/synctex.test

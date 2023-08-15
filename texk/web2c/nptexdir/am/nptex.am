@@ -26,7 +26,6 @@ nptex_CFLAGS = $(WARNING_CFLAGS)
 nptex_CXXFLAGS = # $(WARNING_CXXFLAGS)
 nptex_LDADD = $(xetex_ldadd) $(LDADD) $(ipc_socketlibs) $(PTEXENC_LIBS)
 
-nptex_prereq = $(libxetex) nptexdir/etex_version.h nptexdir/xetex_version.h nptexdir/nptex_version.h
 $(nptex_OBJECTS): $(nptex_prereq)
 
 ## npTeX C sources

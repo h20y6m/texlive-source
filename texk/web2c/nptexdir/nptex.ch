@@ -574,10 +574,6 @@ continue:
   prev_p:=link(prev_p); {N.B.: not |prev_p:=p|, |p| might be |lig_trick|}
   p:=link(p);
   until not is_char_node(p);
-  dvi_h:=cur_h;
-  end
-else @<Output the non-|char_node| |p| for |hlist_out|
-    and move to the next node@>
 @y
 @<Output node |p| for |hlist_out|...@>=
 reswitch: if is_char_node(p) then
@@ -630,20 +626,9 @@ continue:
     dvi_out((jc div @"100)mod @"100); dvi_out(jc mod @"100);
     cur_h:=cur_h+char_width(f)(orig_char_info(f)(c)); {not |jc|}
     end;
-  dvi_h:=cur_h; p:=link(p);
+  p:=link(p);
   until not is_char_node(p);
   chain:=false;
-  end
-else @<Output the non-|char_node| |p| for |hlist_out|
-    and move to the next node@>
-@z
-
-@x
-if list_ptr(p)=null then cur_v:=cur_v+height(p)+depth(p)
-@y
-if list_ptr(p)=null then begin
-    if upwards then cur_v:=cur_v-depth(p)-height(p) else cur_v:=cur_v+height(p)+depth(p);
-  end
 @z
 
 @x [32.645] l.12780 - use print_file_name
