@@ -46,9 +46,9 @@ KPSE_LT_HACK
 KPSE_WEB2C_PREPARE
 m4_include([ac/web2c.ac])
 
-# XeTeX now requires C++11 because ICU does :(.
-if test "x$enable_xetex" = xyes; then
-  AC_MSG_NOTICE([checking for C++11, since XeTeX is enabled])
+# XeTeX and npTeX now requires C++11 because ICU does :(.
+if test "x$enable_xetex" = xyes || test "x$enable_nptex" = xyes ; then
+  AC_MSG_NOTICE([checking for C++11, since XeTeX and/or npTeX is enabled])
   AX_CXX_COMPILE_STDCXX([11])
 fi
 
@@ -264,17 +264,18 @@ KPSE_XPDF_FLAGS
 KPSE_ZZIPLIB_FLAGS
 KPSE_TECKIT_FLAGS
 
-# LuaTeX and XeTeX need harfbuzz.
+# LuaTeX, XeTeX and npTeX need harfbuzz.
 if test "x$enable_xetex" = xyes \
-   || test "x$enable_luatex" = xyes || test "x$enable_luatex53" = xyes; then
+   || test "x$enable_luatex" = xyes || test "x$enable_luatex53" = xyes \
+   || test "x$enable_nptex" = xyes ; then
   KPSE_HARFBUZZ_FLAGS
-fi # end xetex/luatex for harfbuzz
+fi # end xetex/nptex/luatex for harfbuzz
 
-# XeTeX, but not LuaTeX, needs icu and graphite.
-if test "x$enable_xetex" = xyes; then
+# XeTeX and npTeX, but not LuaTeX, needs icu and graphite.
+if test "x$enable_xetex" = xyes || test "x$enable_nptex" = xyes ; then
   KPSE_ICU_FLAGS
   KPSE_GRAPHITE2_FLAGS
-fi # end xetex for icu/graphite
+fi # end xetex/nptex for icu/graphite
 
 # Check size of off_t (using <kpathsea/config.h>)
 KPSE_ADD_FLAGS([kpathsea])
