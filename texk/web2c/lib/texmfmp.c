@@ -1847,6 +1847,9 @@ static struct option long_options[]
       { "default-translate-file",    1, 0, 0 },
       { "8bit",                      0, &eightbitp, 1 },
 #endif /* !Aleph */
+#ifdef npTeX
+      { "dvi",                0, &dvioutputp, 1 },
+#endif
 #if defined(XeTeX) || defined(npTeX)
       { "no-pdf",                    0, &nopdfoutput, 1 },
       { "output-driver",             1, 0, 0 },

@@ -417,6 +417,14 @@ warning_index := save_warning_index; {restore |warning_index|}
 end;
 @z
 
+
+@x
+@!dvi_output: boolean;
+@y
+@!dvi_output: boolean;
+@!dvi_output_p: boolean; {was the -dvi option specified}
+@z
+
 @x [29.536] l.10331
   wlog(' (');
   fputs(translate_filename, log_file);
@@ -1001,6 +1009,15 @@ var i,@!j,@!k:integer; {all-purpose integers}
 @y
   if buffer[loc]="*" then incr(loc);
   eTeX_mode:=1; {enter extended mode}
+@z
+
+@x handle -dvi swtch here.
+  @<Initialize variables for \eTeX\ extended mode@>@;
+  end;
+@y
+  @<Initialize variables for \eTeX\ extended mode@>@;
+  end;
+  dvi_output:=dvi_output_p;
 @z
 
 @x [53a.1383] l.??? -etex command line switch
