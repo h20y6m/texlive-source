@@ -23,3 +23,9 @@
                 mem[NODE+TYPE##_node_size-synchronization_field_size].hh.lhfield
 #  define SYNCTEX_LINE_MODEL(NODE,TYPE)\
                 mem[NODE+TYPE##_node_size-synchronization_field_size].hh.rh
+
+#  define box_node_size (8+synchronization_field_size)
+
+#define rule_node 3
+#define glue_node 12
+#define kern_node 13

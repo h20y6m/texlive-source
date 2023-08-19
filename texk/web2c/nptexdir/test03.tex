@@ -1,6 +1,6 @@
-\RequirePackage{xllegacyenc}
+%\RequirePackage{xllegacyenc}
+%\RequirePackage[LGR,T2A,OT1]{fontenc}
 \documentclass{article}
-\usepackage[LGR,T2A,OT1]{fontenc}
 \begin{document}
 \ttfamily
 あーあ€℃←↑↓→\textyen\textcent\textsterling\textsection\textbrokenbar
@@ -8,8 +8,14 @@
 Gödel
 
 [\fontname\font] Köszi {\TeX}, és viszlát!\\
-{\fontencoding{T2A}\selectfont [\fontname\font] До свидания!!}\\
-{\fontencoding{LGR}\selectfont [\fontname\font] Ευχαριστώ}
+%{\fontencoding{T2A}\selectfont [\fontname\font] До свидания!!}\\
+%{\fontencoding{LGR}\selectfont [\fontname\font] Ευχαριστώ}
+
+\noindent\scrollmode
+[\MakeUppercase{Ragıp Hulûsi Özdem}] vs [\MakeUppercase[lang=tr]{Ragıp Hulûsi Özdem}]\\
+[\MakeLowercase{ÌÍĨÌÍĨJ̀J́J̃ Į̀Į́Į̃ }] vs [\MakeLowercase[lang=lt]{ÌÍĨÌÍĨ J̀J́J̃ Į̀Į́Į̃}]\\
+\MakeUppercase{ß}\MakeUppercase[lang=de-alt]{ß}
+
 \end{document}
 
 

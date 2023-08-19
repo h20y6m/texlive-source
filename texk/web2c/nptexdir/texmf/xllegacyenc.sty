@@ -64,5 +64,22 @@
 \DeclareUnicodeCharacter{2423}{\textvisiblespace}
 \DeclareUnicodeCharacter{FEFF}{\ifhmode\nobreak\fi}
 
+\ExplSyntaxOn
+    \cs_set:Npn \__text_change_case_catcode:nn #1#2
+      {
+        \__text_codepoint_compare:nNnTF {#1} < { "80 }
+          {
+            \int_compare:nNnTF {#2} < { "80 }
+              { \__text_char_catcode:N #1  }
+              { 13 }
+          }
+          {
+            \int_compare:nNnTF {#2} < { "80 }
+              { \char_value_catcode:n {#2} }
+              { 13 }
+          }
+      }
+\ExplSyntaxOff
+
 \endinput
 
