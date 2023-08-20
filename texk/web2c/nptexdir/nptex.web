@@ -4035,7 +4035,7 @@ inserted from \.{\\mkern} specifications in math formulas).
 @d explicit=1 {|subtype| of kern nodes from \.{\\kern}}
 @d acc_kern=2 {|subtype| of kern nodes from accents}
 @d ita_kern=3 {|subtype| of kern nodes from \.{\\/}}
-@d space_adjustment=3 {|subtype| of kern nodes from \.{\\XeTeXinterwordspaceshaping} adjustment}
+@d space_adjustment=4 {|subtype| of kern nodes from \.{\\XeTeXinterwordspaceshaping} adjustment}
 
 @# {memory structure for marginal kerns}
 @d margin_kern_node = 40
