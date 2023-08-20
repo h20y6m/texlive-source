@@ -1518,7 +1518,7 @@ nptex_DEPENDENCIES = $(am__DEPENDENCIES_11) $(am__DEPENDENCIES_2) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 nptex_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(nptex_CXXFLAGS) \
-	$(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+	$(CXXFLAGS) $(nptex_LDFLAGS) $(LDFLAGS) -o $@
 nodist_odvicopy_OBJECTS = odvicopy.$(OBJEXT)
 odvicopy_OBJECTS = $(nodist_odvicopy_OBJECTS)
 odvicopy_LDADD = $(LDADD)
@@ -5467,14 +5467,15 @@ nptex_CPPFLAGS = $(nptex_cppflags) $(am__append_151)
 nptex_CFLAGS = $(WARNING_CFLAGS)
 nptex_CXXFLAGS = # $(WARNING_CXXFLAGS)
 nptex_LDADD = $(xetex_ldadd) $(LDADD) $(ipc_socketlibs) $(PTEXENC_LIBS)
+nptex_LDFLAGS = $(xetex_LDFLAGS)
 nptex_c_h = nptexini.c nptex0.c nptexcoerce.h nptexd.h
 nodist_nptex_SOURCES = $(nptex_c_h) nptex-pool.c
 dist_nptex_SOURCES = nptexdir/nptexextra.c nptexdir/nptexextra.h \
 	nptexdir/etex_version.h nptexdir/xetex_version.h \
 	nptexdir/nptex_version.h $(am__append_152)
 
-# We must create nptexd.h and nptexdir/*_version.h before building the ptex_OBJECTS.
-nptex_prereq = nptexd.h nptexdir/etex_version.h nptexdir/xetex_version.h  nptexdir/nptex_version.h
+# We must create nptexd.h and nptexdir/*_version.h before building the nptex_OBJECTS.
+nptex_prereq = nptexd.h nptexdir/etex_version.h nptexdir/xetex_version.h nptexdir/nptex_version.h
 nptex_ch_srcs = \
 	nptexdir/nptex.web \
 	nptexdir/tex.ch0 \
@@ -22540,9 +22541,7 @@ xetexdir/xetex-filedump.log xetexdir/xetex-bug73.log xetexdir/xetex.log \
   xetexdir/wcfname.log: xetex$(EXEEXT)
 
 # (end of xetex.am)
-
 $(nptex_OBJECTS): $(nptex_prereq)
-$(nptex_OBJECTS): $(ptex_prereq)
 
 $(nptex_c_h): nptex-web2c
 	@$(web2c) nptex

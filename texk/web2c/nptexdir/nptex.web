@@ -26276,6 +26276,16 @@ if is_char_node(tail) then
   end
 else if type(tail)=ligature_node then
   begin cx:=qo(character(lig_char(tail))); @<Insert |post_break_penalty|@>;
+  end
+else if type(tail)=whatsit_node then begin
+  if is_native_word_subtype(tail) then
+  begin t:=native_length(tail)-1; cx:=get_native_char(tail,t);
+    if (t>0) and (cx>=@"DC00) and (cx<=@"DFFF) then begin
+      t:=get_native_char(tail, t-1);
+      if (t>=@"D800) and (t<=@"DBFF) then cx:=@"10000+(t-@"D800)*@"400+(cx-@"DC00);
+      end;
+    @<Insert |post_break_penalty|@>;
+    end
   end;
 if direction=dir_tate then
   begin if font_dir[main_f]=dir_tate then disp:=0
