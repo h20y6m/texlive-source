@@ -9606,8 +9606,8 @@ if cur_cs=0 then cur_tok:=(cur_cmd*max_char_val)+cur_chr
 else cur_tok:=cs_token_flag+cur_cs;
 end;
 
-procedure x_token_unless_convert;
-begin while (cur_cmd>max_command)and(cur_cmd<>convert)and(cur_cmd<>the) do
+procedure x_token_if_call;
+begin while (cur_cmd>=call)and(cur_cmd<=long_outer_call) do
   begin expand;
   get_next;
   end;
@@ -25373,7 +25373,7 @@ consideration of the other cases until later.
 @d big_switch=60 {go here to branch on the next token of input}
 @d main_loop=70 {go here to typeset a string of consecutive characters}
 @d collect_native=71 {go here to collect characters in a "native" font string}
-@d collected=72
+@d collected=75
 @d main_loop_wrapup=80 {go here to finish a character or ligature}
 @d main_loop_move=90 {go here to advance the ligature cursor}
 @d main_loop_move_lig=95 {same, when advancing past a generated ligature}
@@ -25581,6 +25581,8 @@ if is_native_font(cur_font) then begin
   @<Append |disp_node| at begin of displace area@>;
   main_h:=0;
   main_f:=cur_font;
+
+collect_native+1:
   native_len:=0;
 
 collect_native:
@@ -25605,7 +25607,7 @@ collect_native:
   if (cur_cmd=letter) or (cur_cmd=other_char) or (cur_cmd=char_given) then
     begin if not is_cjkx_jachar(cur_chr) then goto collect_native end
   else if cur_cmd=achar_given then goto collect_native;
-  x_token_unless_convert;
+  x_token_if_call;
   if (cur_cmd=letter) or (cur_cmd=other_char) or (cur_cmd=char_given) then
     begin if not is_cjkx_jachar(cur_chr) then goto collect_native end
   else if cur_cmd=achar_given then goto collect_native
@@ -25614,8 +25616,8 @@ collect_native:
     if (t=1)or((t=0)and not is_cjkx_jachar(cur_chr)) then goto collect_native
     else cur_cmd:=kchar_given;
   end;
-
-  check_for_post_char_toks(collected);
+  if cur_cmd<=max_command then check_for_post_char_toks(collected);
+    { non-expandable primitives }
 
 collected:
   if (font_mapping[main_f] <> 0) then begin
@@ -25844,6 +25846,23 @@ collected:
       end
     end
   end;
+
+  if cur_cmd>max_command then begin
+    { |cur_cmd| is |if_test|, |convert|, |the|, and~so~on. In this case, 
+      |x_token| might produce another char in the same font. }
+    x_token; native_len:=0;
+    if (cur_cmd=letter) or (cur_cmd=other_char) or (cur_cmd=char_given) then
+      begin if not is_cjkx_jachar(cur_chr) then goto collect_native+1 end
+    else if cur_cmd=achar_given then goto collect_native+1
+    else if cur_cmd=char_num then begin t:=cur_chr;
+      scan_usv_num; cur_chr:=cur_val;
+      if (t=1)or((t=0)and not is_cjkx_jachar(cur_chr)) then goto collect_native+1
+      else cur_cmd:=kchar_given;
+    end;
+    if cur_cmd<=max_command then check_for_post_char_toks(collected+1);
+  end;
+
+collected+1:
   @<Append |disp_node| at end of displace area@>;
   if cur_ptr<>null then goto big_switch
   else begin
