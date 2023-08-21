@@ -9606,6 +9606,15 @@ if cur_cs=0 then cur_tok:=(cur_cmd*max_char_val)+cur_chr
 else cur_tok:=cs_token_flag+cur_cs;
 end;
 
+procedure x_token_unless_convert;
+begin while (cur_cmd>max_command)and(cur_cmd<>convert)and(cur_cmd<>the) do
+  begin expand;
+  get_next;
+  end;
+if cur_cs=0 then cur_tok:=(cur_cmd*max_char_val)+cur_chr
+else cur_tok:=cs_token_flag+cur_cs;
+end;
+
 @ A control sequence that has been \.{\\def}'ed by the user is expanded by
 \TeX's |macro_call| procedure.
 
@@ -25591,7 +25600,7 @@ collect_native:
   if (cur_cmd=letter) or (cur_cmd=other_char) or (cur_cmd=char_given) then
     begin if not is_cjkx_jachar(cur_chr) then goto collect_native end
   else if cur_cmd=achar_given then goto collect_native;
-  x_token;
+  x_token_unless_convert;
   if (cur_cmd=letter) or (cur_cmd=other_char) or (cur_cmd=char_given) then
     begin if not is_cjkx_jachar(cur_chr) then goto collect_native end
   else if cur_cmd=achar_given then goto collect_native
@@ -25832,7 +25841,10 @@ collected:
   end;
   @<Append |disp_node| at end of displace area@>;
   if cur_ptr<>null then goto big_switch
-  else goto reswitch;
+  else begin
+    if (cur_cmd=convert)or(cur_cmd=the) then x_token;
+    goto reswitch;
+  end;
 end;
 { End of added code for native fonts }
 
