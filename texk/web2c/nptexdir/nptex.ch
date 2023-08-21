@@ -417,6 +417,14 @@ warning_index := save_warning_index; {restore |warning_index|}
 end;
 @z
 
+
+@x
+@!dvi_output: boolean;
+@y
+@!dvi_output: boolean;
+@!dvi_output_p: boolean; {was the -dvi option specified}
+@z
+
 @x [29.536] l.10331
   wlog(' (');
   fputs(translate_filename, log_file);
@@ -626,9 +634,17 @@ continue:
     dvi_out((jc div @"100)mod @"100); dvi_out(jc mod @"100);
     cur_h:=cur_h+char_width(f)(orig_char_info(f)(c)); {not |jc|}
     end;
-  p:=link(p);
+  dvi_h:=cur_h; p:=link(p);
   until not is_char_node(p);
   chain:=false;
+@z
+@x
+  dvi_h:=cur_h;
+  end
+else @<Output the non-|char_node| |p| for |hlist_out|
+@y
+  end
+else @<Output the non-|char_node| |p| for |hlist_out|
 @z
 
 @x [32.645] l.12780 - use print_file_name
@@ -1001,6 +1017,15 @@ var i,@!j,@!k:integer; {all-purpose integers}
 @y
   if buffer[loc]="*" then incr(loc);
   eTeX_mode:=1; {enter extended mode}
+@z
+
+@x handle -dvi swtch here.
+  @<Initialize variables for \eTeX\ extended mode@>@;
+  end;
+@y
+  @<Initialize variables for \eTeX\ extended mode@>@;
+  end;
+  dvi_output:=dvi_output_p;
 @z
 
 @x [53a.1383] l.??? -etex command line switch

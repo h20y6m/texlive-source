@@ -25,8 +25,7 @@ nptex_CPPFLAGS = $(nptex_cppflags)
 nptex_CFLAGS = $(WARNING_CFLAGS)
 nptex_CXXFLAGS = # $(WARNING_CXXFLAGS)
 nptex_LDADD = $(xetex_ldadd) $(LDADD) $(ipc_socketlibs) $(PTEXENC_LIBS)
-
-$(nptex_OBJECTS): $(nptex_prereq)
+nptex_LDFLAGS = $(xetex_LDFLAGS)
 
 ## npTeX C sources
 nptex_c_h = nptexini.c nptex0.c nptexcoerce.h nptexd.h
@@ -34,9 +33,9 @@ nodist_nptex_SOURCES = $(nptex_c_h) nptex-pool.c
 dist_nptex_SOURCES = nptexdir/nptexextra.c nptexdir/nptexextra.h \
 	nptexdir/etex_version.h nptexdir/xetex_version.h  nptexdir/nptex_version.h
 
-# We must create nptexd.h and nptexdir/*_version.h before building the ptex_OBJECTS.
-nptex_prereq = nptexd.h nptexdir/etex_version.h nptexdir/xetex_version.h  nptexdir/nptex_version.h
-$(nptex_OBJECTS): $(ptex_prereq)
+# We must create nptexd.h and nptexdir/*_version.h before building the nptex_OBJECTS.
+nptex_prereq = nptexd.h nptexdir/etex_version.h nptexdir/xetex_version.h nptexdir/nptex_version.h
+$(nptex_OBJECTS): $(nptex_prereq)
 
 $(nptex_c_h): nptex-web2c
 	@$(web2c) nptex
@@ -46,7 +45,7 @@ nptex-web2c: nptex.p $(web2c_texmf) nptexdir/nptex.defines
 nptex-pool.c: nptex.pool nptexd.h $(makecpool_stamp)
 	$(makecpool) nptex >$@ || rm -f $@
 
-## Tangling npteX
+## Tangling npTeX
 nptex.p nptex.pool: nptex-tangle
 	$(np_tangle) nptex nptex-final
 nptex-tangle: otangle$(EXEEXT) nptexdir/nptex.web nptex-final.ch tangle-sh

@@ -4035,7 +4035,7 @@ inserted from \.{\\mkern} specifications in math formulas).
 @d explicit=1 {|subtype| of kern nodes from \.{\\kern}}
 @d acc_kern=2 {|subtype| of kern nodes from accents}
 @d ita_kern=3 {|subtype| of kern nodes from \.{\\/}}
-@d space_adjustment=3 {|subtype| of kern nodes from \.{\\XeTeXinterwordspaceshaping} adjustment}
+@d space_adjustment=4 {|subtype| of kern nodes from \.{\\XeTeXinterwordspaceshaping} adjustment}
 
 @# {memory structure for marginal kerns}
 @d margin_kern_node = 40
@@ -13160,6 +13160,7 @@ ship out a box of stuff, we shall use the macro |ensure_dvi_open|.
 
 @<Glob...@>=
 @!output_file_extension: str_number;
+@!dvi_output: boolean;
 @!no_pdf_output: boolean;
 @!dvi_file: byte_file; {the device-independent output goes here}
 @!output_file_name: str_number; {full name of the output file}
@@ -13853,7 +13854,7 @@ if XeTeX_tracing_fonts_state>0 then begin
   end;
   end_diagnostic(false);
 end;
-if quoted_filename then begin
+if (not dvi_output) and quoted_filename then begin
   { quoted name, so try for a native font }
   g:=load_native_font(u,nom,aire,s);
   if g<>null_font then goto done;
@@ -13864,7 +13865,7 @@ end;
   malformed; if there's no room for this font, say so and |goto
   done|; otherwise |incr(font_ptr)| and |goto done|@>;
 if g<>null_font then goto done;
-if not quoted_filename then begin
+if (not dvi_output) and (not quoted_filename) then begin
   { we failed to find a TFM file, so try for a native font }
   g:=load_native_font(u,nom,aire,s);
   if g<>null_font then goto done
@@ -14759,7 +14760,9 @@ users to override the |mag|~setting when a \.{DVI} file is being printed.)
 Finally, |k| and |x| allow the \.{DVI} writer to include a comment, which is not
 interpreted further. The length of comment |x| is |k|, where |0<=k<256|.
 
-@d id_byte=8 {identifies the kind of \.{DVI} files described here}
+@d id_byte=8
+@d dvi_id_byte=2
+@d dvi_post_id_byte=3
 
 @ Font definitions for a given font number |k| contain further parameters
 $$\hbox{|c[4]| |s[4]| |d[4]| |a[1]| |l[1]| |n[a+l]|.}$$
@@ -15411,7 +15414,8 @@ dvi_dir:=dir_yoko; cur_dir_hv:=dvi_dir;
 @<Calculate page dimensions and margins@>;
 ensure_dvi_open;
 if total_pages=0 then
-  begin dvi_out(pre); dvi_out(id_byte); {output the preamble}
+  begin dvi_out(pre);
+  if dvi_output then dvi_out(dvi_id_byte) else dvi_out(id_byte); {output the preamble}
 @^preamble of \.{DVI} file@>
   dvi_four(25400000); dvi_four(473628672); {conversion ratio for sp}
   prepare_mag; dvi_four(mag); {magnification factor is frozen}
@@ -16163,7 +16167,8 @@ else  begin dvi_out(post); {beginning of the postamble}
   dvi_out(max_push div 256); dvi_out(max_push mod 256);@/
   dvi_out((total_pages div 256) mod 256); dvi_out(total_pages mod 256);@/
   @<Output the font definitions for all fonts that were used@>;
-  dvi_out(post_post); dvi_four(last_bop); dvi_out(id_byte);
+  dvi_out(post_post); dvi_four(last_bop);
+  if dvi_output then dvi_out(dvi_post_id_byte) else dvi_out(id_byte);
   k:=4+((dvi_buf_size-dvi_ptr) mod 4); {the number of 223's}
   while k>0 do
     begin dvi_out(223); decr(k);
@@ -26283,6 +26288,16 @@ if is_char_node(tail) then
   end
 else if type(tail)=ligature_node then
   begin cx:=qo(character(lig_char(tail))); @<Insert |post_break_penalty|@>;
+  end
+else if type(tail)=whatsit_node then begin
+  if is_native_word_subtype(tail) then
+  begin t:=native_length(tail)-1; cx:=get_native_char(tail,t);
+    if (t>0) and (cx>=@"DC00) and (cx<=@"DFFF) then begin
+      t:=get_native_char(tail, t-1);
+      if (t>=@"D800) and (t<=@"DBFF) then cx:=@"10000+(t-@"D800)*@"400+(cx-@"DC00);
+      end;
+    @<Insert |post_break_penalty|@>;
+    end
   end;
 if direction=dir_tate then
   begin if font_dir[main_f]=dir_tate then disp:=0
@@ -30813,6 +30828,7 @@ dump/undump macros.
 @<Dump constants for consistency check@>=
 dump_int(@$);@/
 @<Dump the \eTeX\ state@>@/
+if dvi_output then j:=1 else j:=0; dump_int(j);
 dump_int(mem_bot);@/
 dump_int(mem_top);@/
 dump_int(eqtb_size);@/
@@ -30829,6 +30845,9 @@ the same strings. (And it is, of course, a good thing that they do.)
 x:=fmt_file^.int;
 if x<>@$ then goto bad_fmt; {check that strings are the same}
 @/@<Undump the \eTeX\ state@>@/
+undump_int(x); { |dvi_output| }
+if x>0 then begin no_pdf_output:=true; dvi_output:=true end
+else dvi_output:=false;
 undump_int(x);
 if x<>mem_bot then goto bad_fmt;
 undump_int(x);
@@ -31420,6 +31439,10 @@ if (format_ident=0)or(buffer[loc]="&") then
   while (loc<limit)and(buffer[loc]=" ") do incr(loc);
   end;
 if eTeX_ex then wterm_ln('entering extended mode');
+if dvi_output then begin
+  wterm_ln('the output format will be DVI.');
+  output_file_extension:=".dvi"; no_pdf_output:=true
+end;
 if end_line_char_inactive then decr(limit)
 else  buffer[limit]:=end_line_char;
 fix_date_and_time;@/

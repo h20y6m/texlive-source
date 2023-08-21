@@ -27972,7 +27972,7 @@ fi
 fi # end xetex/nptex/luatex for harfbuzz
 
 # XeTeX and npTeX, but not LuaTeX, needs icu and graphite.
-if test "x$enable_xetex" = xyes || test "x$enable_nptex" = xyes; then
+if test "x$enable_xetex" = xyes || test "x$enable_nptex" = xyes ; then
   echo 'tldbg:KPSE_ICU_FLAGS called: more-icu-libs=, icu-config-args=.' >&5
 ##tldbg _KPSE_LIB_FLAGS: Setup icu (-licuxxx) flags.
 echo 'tldbg:_KPSE_LIB_FLAGS called: libdir=icu, libname=icuxxx, options=, tlincl=-DU_STATIC_IMPLEMENTATION -IBLD/libs/icu/include, tllib= BLD/libs/icu/icu-build/lib/libicuuc.a BLD/libs/icu/icu-build/lib/libicudata.a, tlextra=, rebuildsrcdeps=, rebuildblddeps=${top_builddir}/../../libs/icu/include/unicode/uversion.h.' >&5
