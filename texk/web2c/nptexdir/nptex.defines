@@ -192,9 +192,8 @@ authorization from the copyright holders.
 @define function fromUCS ();
 @define function toJIS ();
 @define function toUCS ();
-@define function calcpos ();
-@define function kcatcodekey ();
-@define function BYTE1 ();
-@define function BYTE2 ();
-@define function BYTE3 ();
-@define function BYTE4 ();
+
+@define function getintone ();
+@define procedure setintone ();
+@define function delfamfield();
+@define function delcharfield();
