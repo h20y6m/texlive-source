@@ -26888,9 +26888,9 @@ The first problem is solved by putting a ``context code'' on the |save_stack|,
 just below the two entries that give the dimensions produced by |scan_spec|.
 The context code is either a (signed) shift amount, or it is a large
 integer |>=box_flag|, where |box_flag=@t$2^{30}$@>|. Codes |box_flag| through
-|global_box_flag-1| represent `\.{\\setbox0}' through `\.{\\setbox32767}';
+|global_box_flag-1| represent `\.{\\setbox0}' through `\.{\\setbox65535}';
 codes |global_box_flag| through |ship_out_flag-1| represent
-`\.{\\global\\setbox0}' through `\.{\\global\\setbox32767}';
+`\.{\\global\\setbox0}' through `\.{\\global\\setbox65535}';
 code |ship_out_flag| represents `\.{\\shipout}'; and codes |leader_flag|
 through |leader_flag+2| represent `\.{\\leaders}', `\.{\\cleaders}',
 and `\.{\\xleaders}'.
@@ -26902,9 +26902,9 @@ values to distinguish between them: |box_code|, |copy_code|, |last_box_code|,
 the latter two are used to denote \.{\\vbox} and \.{\\hbox}, respectively.
 
 @d box_flag==@'10000000000 {context code for `\.{\\setbox0}'}
-@d global_box_flag==@'10000100000 {context code for `\.{\\global\\setbox0}'}
-@d ship_out_flag==@'10000200000  {context code for `\.{\\shipout}'}
-@d leader_flag==@'10000200001  {context code for `\.{\\leaders}'}
+@d global_box_flag==@'10000200000 {context code for `\.{\\global\\setbox0}'}
+@d ship_out_flag==@'10000400000  {context code for `\.{\\shipout}'}
+@d leader_flag==@'10000400001  {context code for `\.{\\leaders}'}
 @d box_code=0 {|chr_code| for `\.{\\box}'}
 @d copy_code=1 {|chr_code| for `\.{\\copy}'}
 @d last_box_code=2 {|chr_code| for `\.{\\lastbox}'}
@@ -35704,7 +35704,7 @@ mu_to_glue_code: scan_mu_glue;
 @ @<Cases for fetching a mu value@>=
 glue_to_mu_code: scan_normal_glue;
 
-@ \eTeX\ (in extended mode) supports 32768 (i.e., $2^{15}$) count,
+@ \npTeX\ (in extended mode) supports 65536 (i.e., $2^{16}$) count,
 dimen, skip, muskip, box, and token registers.  As in \TeX\ the first
 256 registers of each kind are realized as arrays in the table of
 equivalents; the additional registers are realized as tree structures
@@ -35714,8 +35714,8 @@ for count and dimen values, |zero_glue| for glue (skip and muskip)
 values, void for boxes, and |null| for token lists (and current marks
 discussed below).
 
-Similarly there are 32768 mark classes; the command \.{\\marks}|n|
-creates a mark node for a given mark class |0<=n<=32767| (where
+Similarly there are 65536 mark classes; the command \.{\\marks}|n|
+creates a mark node for a given mark class |0<=n<=65535| (where
 \.{\\marks0} is synonymous to \.{\\mark}).  The page builder (actually
 the |fire_up| routine) and the |vsplit| routine maintain the current
 values of |top_mark|, |first_mark|, |bot_mark|, |split_first_mark|, and
@@ -35741,7 +35741,7 @@ primitive("splitbotmarks",top_bot_mark,split_bot_mark_code+marks_code);
 @!@:split_bot_marks_}{\.{\\splitbotmarks} primitive@>
 
 @ The |scan_register_num| procedure scans a register number that must
-not exceed 255 in compatibility mode resp.\ 32767 in extended mode.
+not exceed 255 in compatibility mode resp.\ 65535 in extended mode.
 
 @<Declare \eTeX\ procedures for ex...@>=
 procedure@?scan_register_num; forward;@t\2@>
@@ -35762,15 +35762,15 @@ max_reg_num:=255;
 max_reg_help_line:="A register number must be between 0 and 255.";
 
 @ @<Initialize variables for \eTeX\ ext...@>=
-max_reg_num:=32767;
-max_reg_help_line:="A register number must be between 0 and 32767.";
+max_reg_num:=65535;
+max_reg_help_line:="A register number must be between 0 and 65535.";
 
 @ @<Glob...@>=
 @!max_reg_num: halfword; {largest allowed register number}
 @!max_reg_help_line: str_number; {first line of help message}
 
 @ There are eight almost identical doubly linked trees, one for the
-sparse array of the up to 32512 additional registers of each kind,
+sparse array of the up to 65280 additional registers of each kind,
 one for inter-character token lists at specified class transitions, and
 one for the sparse array of the up to 32767 additional mark classes.
 The root of each such tree, if it exists, is an index node containing 64
