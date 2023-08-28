@@ -197,3 +197,6 @@ authorization from the copyright holders.
 @define procedure setintone ();
 @define function delfamfield();
 @define function delcharfield();
+
+@define function kcatcodekey();
+@define function getucsblock();

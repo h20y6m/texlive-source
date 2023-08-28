@@ -10,19 +10,6 @@
 
 #define CJK_CHAR_LIMIT  0x1000000
 
-integer calcpos(integer c)
-{
-    unsigned char c1, c2;
-
-    if(c>=0 && c<=255) return(c);
-    c1 = (c>>8)%256;
-    c2 = c%256;
-
-    c1 = (c1 % 4) * 64;  /* c1 = 0, 64, 128, 192 */
-    c2 = c2 % 64;        /* c2 = 0..63 */
-    return(c1 + c2);     /* ret = 0..255 */
-}
-
 /* Ref. http://www.unicode.org/Public/UNIDATA/Blocks.txt */
 /* # Blocks-15.0.0.txt                                   */
 /* # Date: 2022-01-28, 20:58:00 GMT [KW]                 */
@@ -454,6 +441,10 @@ integer kcatcodekey(integer c)
 
 void initkanji(void) {
   enable_UPTEX (true); set_enc_string ("utf8", "uptex");
+}
+
+integer getucsblock(integer c) {
+  return ucs_range[c];
 }
 
 /* Hand-coded routines for TeX or Metafont in C.  */

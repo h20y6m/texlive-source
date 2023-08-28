@@ -30000,7 +30000,7 @@ and the font families are declared by |def_family|.
 @<Put each...@>=
 primitive("catcode",def_code,cat_code_base);
 @!@:cat_code_}{\.{\\catcode} primitive@>
-primitive("cjkxcode",def_code,cjkx_code_base);
+primitive("cjkxcode",def_code◆,cjkx_code_base);
 @!@:cjkx_code_}{\.{\\cjkxcode} primitive@>
 primitive("prebreakpenalty",def_code,pre_break_penalty_base);
 @!@:pre_break_penalty_}{\.{\\prebreakpenalty} primitive@>
@@ -36788,12 +36788,15 @@ set_kansuji_char: if chr_code>0 then print_esc("kcatcode")
 
 @ @<Assignments@>=
 set_kansuji_char: if cur_chr>0 then
-  begin scan_usv_num; scan_optional_equals; scan_int;
-  print_err("\kcatcode is read-only integer in npTeX");
+  begin scan_usv_num; n:=cur_val; scan_optional_equals; scan_int;
+  if cur_val=15 then @<Set |cjkx_code| to 0 for all characters in a Unicode block @>
+  else begin
+    print_err("Invalid code"); print_int(cur_val); print(") for \kcatcode ");
 @.kcat_code is read_only@>
-  help2("You cannot assign \kcatcode in npTeX, so I'm skipping this control sequence.")@/
-    ("Use combination of \catcode and \cjkx code instead.");@/
-  error; return;
+    help2("In npTeX, \kcatcode is almost read-only integer. So I'm skipping this")@/
+      ("control sequence. Use combination of \catcode and \cjkx code instead.");@/
+    error; return;
+    end;
   end
 else begin
   scan_int; n:=cur_val; scan_optional_equals; scan_usv_num;
@@ -37578,6 +37581,21 @@ current_cjkx_func_code: print_esc("currentcjkxfunc");
 
 @ @<Cases for fetching an integer value@>=
 current_cjkx_func_code: cur_val:=enable_cjkx_func;
+
+@ @<Set |cjkx_code| to 0 for all characters in a Unicode block @>=
+begin m:=kcatcodekey(n);
+if (m=1)or(m=@"1FD) then begin
+  for p:=@"80 to @"FF do if kcatcodekey(p)=m then define(cjkx_code_base+p,data,0)
+  end
+else if (m=@"A2)or(m=@"1FE)or(m=@"1FF) then begin
+  for p:=@"FF00 to @"FFF0 do if kcatcodekey(p)=m then define(cjkx_code_base+p,data,0)
+  end
+else begin cur_val:=get_ucs_block(m); cur_val1:=get_ucs_block(m+1); 
+  for p:=cur_val to cur_val1 do if kcatcodekey(p)=m then define(cjkx_code_base+p,data,0)
+  end;
+end
+
+
 
 @* \[54] System-dependent changes.
 This section should be replaced, if necessary, by any special

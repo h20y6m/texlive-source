@@ -15,11 +15,15 @@ changes from pTeX
     \kcatcode=18 ⇔ \catcode=12 and \cjkxcode= mod 8=7
     \kcatcode=19 ⇔ \catcode=11 and \cjkxcode= mod 8=4
   なお，文字列化すると catcode 12 になることは注意．
- * \kcatcode は読み出しのみ可能．
+ * \kcatcode 読み出し
    \catcode=12 and \cjkxcode mod 8>=4 --> \kcatcode の返り値は 18 (other_kchar)
    \catcode=11 and \cjkxcode mod 8=6, 7 --> 返り値 16 (kanji)
    \catcode=11 and \cjkxocde mod 8=4, 5 --> 返り値 19 (hangul)
    他 --> 返り値 15 (non_cjk)
+ * \kcatcode への代入は 15 のみ可能．
+   →その文字が属する Unicode ブロックに対して，ブロック内の全文字の \cjkxcode を
+    0 にする（ただし，upTeX と同様に Latin-1 Supplement と Halfwidth and Fullwidth Forms
+    は分割している）．
  * \prebreakpenalty, \postbreakpenalty, \xspcode, \inhibitxspcode
    →\catcode などと同じように，Unicode全体分のエントリがある．
  * jchr_widow_penalty_code -> jchar_widow_penalty_code
@@ -47,6 +51,4 @@ changes from pTeX
   * \currentcjktoken, \disablecjktoken, \enablecjktoken, \forcecjktoken
     →\...cjkxfunc として実装
   * \suppresslongerror, \suppressmathparerror, \suppressoutererror
-  * \synctex
-  * \hfi, \vfi, \pagefistretch, \odelcode, \odelimiter, \omathaccent,
-    \omathchar, \omathchardef, \omathcode, \oradical
+  * \hfi, \vfi, \pagefistretch

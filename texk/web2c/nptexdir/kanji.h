@@ -8,5 +8,8 @@
 
 #define delcharfield(x) ((unsigned)(x) & 0x1FFFFF)
 #define delfamfield(x)  ((unsigned)(x)>>21)
+
+extern integer kcatcodekey(integer c);
+extern integer getucsblock(integer c);
 #endif
 
