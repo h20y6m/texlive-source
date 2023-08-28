@@ -5179,7 +5179,9 @@ that might be expanded by `\.{\\the}'.
 @d set_interaction=hyph_data+1 {define level of interaction ( \.{\\batchmode}, etc.~)}
 @d set_auto_spacing=set_interaction+1 {set auto spacing mode
   ( \.{\\autospacing}, \.{\\noautospacing}, \.{\\autoxspacing}, \.{\\noautoxspacing} )}
-@d partoken_name=set_auto_spacing+1 {set |par_token| name}
+@d set_enable_cjkx_func=set_auto_spacing+1 {set cjk mode
+  ( \.{\\enablecjkxfunc}, \.{\\disablecjkxfunc}, \.{\\forcecjkxfunc} )}
+@d partoken_name=set_enable_cjkx_func+1 {set |par_token| name}
 @d max_command=partoken_name {the largest command code seen at |big_switch|}
 
 @ The remaining command codes are extra special, since they cannot get through
@@ -5813,7 +5815,8 @@ registers.
 @d cur_tfont_loc=cur_jfont_loc+1 {internal Japanese font number (TATE direction) }
 @d auto_spacing_code=cur_tfont_loc+1
 @d auto_xspacing_code=auto_spacing_code+1
-@d math_font_base=auto_xspacing_code+1 {table of |number_math_fonts| math font numbers}
+@d enable_cjkx_func_code=auto_xspacing_code+1
+@d math_font_base=enable_cjkx_func_code+1 {table of |number_math_fonts| math font numbers}
 @d cat_code_base=math_font_base+number_math_fonts
   {table of |number_usvs| command codes (the ``catcodes'')}
 @d cjkx_code_base=cat_code_base+number_usvs {table of |number_usvs| cjkx mappings}
@@ -5855,6 +5858,7 @@ registers.
   {Note: |math_code(c)| is the true math code plus |min_halfword|}
 @d auto_spacing==equiv(auto_spacing_code) { \pTeX }
 @d auto_xspacing==equiv(auto_xspacing_code) { \pTeX }
+@d enable_cjkx_func==equiv(enable_cjkx_func_code)
 @d auto_xsp_code(#)==equiv(auto_xsp_code_base+#) { \pTeX }
 @d inhibit_xsp_code(#)==equiv(inhibit_xsp_code_base+#) { \pTeX }
 @d kansuji_char(#)==equiv(kansuji_base+#) { \pTeX }
@@ -5932,6 +5936,7 @@ equiv(cat_code_base):=0; eq_type(cat_code_base):=data;
 eq_level(cat_code_base):=level_one;@/
 eqtb[auto_spacing_code]:=eqtb[cat_code_base];
 eqtb[auto_xspacing_code]:=eqtb[cat_code_base];
+eqtb[enable_cjkx_func_code]:=eqtb[cat_code_base];
 for k:=cat_code_base+1 to int_base-1 do eqtb[k]:=eqtb[cat_code_base];
 for k:=0 to number_usvs-1 do
   begin cat_code(k):=other_char; math_code(k):=hi(k); sf_code(k):=1000;
@@ -6055,8 +6060,13 @@ cjkxcode 6, 14 $\longmapsto$ kcatcode 16 (kanji), 17 (kana)
 cjkxcode 7, 15 $\longmapsto$ kcatcode 18 (other kchar)
 cjkxcode 4, 12 $\longmapsto$ kcatcode 19 (hangul)
 
-@d is_cjkx_ja_math(#)==(cjkx_code(#)>=12)
-@d is_cjkx_jachar(#)==((cjkx_code(#)div 4)mod 2=1)
+@d force_cjkx_threshold=@"080
+@d is_cjkx_ja_math(#)==
+  (( (cjkx_code(#)>=12) and (enable_cjkx_func=0) )
+  or ( (#>=force_cjkx_threshold) and (enable_cjkx_func=2) ))
+@d is_cjkx_jachar(#)==
+  (( ((cjkx_code(#)div 4)mod 2=1) and (enable_cjkx_func=0) )
+  or ( (#>=force_cjkx_threshold) and (enable_cjkx_func=2) ))
 @d is_cjkx_nospc(#)==((cjkx_code(#)div 2)mod 2=1)
 @d is_cjkx_widowpenalty(#)==(cjkx_code(#) mod 2=1)
 
@@ -10398,7 +10408,7 @@ the codes for its extensions: |eTeX_version_code|, \dots\ .
 @#
 @d eTeX_int=pdftex_last_item_codes + 1 {first of \eTeX\ codes for integers}
 @#
-@d XeTeX_int                         = eTeX_int + 10 {base for \XeTeX's command codes}
+@d XeTeX_int                         = eTeX_int + 11 {base for \XeTeX's command codes}
 @d XeTeX_version_code                = XeTeX_int + 0 {code for \.{\\XeTeXversion}}
 @d XeTeX_count_glyphs_code           = XeTeX_int + 1 {code for \.{\\XeTeXcountglyphs}}
 @d XeTeX_count_variations_code       = XeTeX_int + 2 {Deprecated}
@@ -29541,6 +29551,7 @@ the command.
 
 @<Cases of |main_control| that don't...@>=
 any_mode(set_auto_spacing),
+any_mode(set_enable_cjkx_func),
 any_mode(set_kansuji_char),
 any_mode(toks_register),
 any_mode(assign_toks),
@@ -36845,6 +36856,9 @@ used to control between 2byte and 1byte characters.
 @d set_auto_spacing_code=1
 @d reset_auto_xspacing_code=2
 @d set_auto_xspacing_code=3
+@d reset_enable_cjkx_func_code=0
+@d set_enable_cjkx_func_code=1
+@d set_force_cjkx_func_code=2
 
 @<Put each...@>=
 primitive("autospacing",set_auto_spacing,set_auto_spacing_code);
@@ -36855,11 +36869,21 @@ primitive("autoxspacing",set_auto_spacing,set_auto_xspacing_code);
 @!@:auto_xspacing_}{\.{\\autoxspacing} primitive@>
 primitive("noautoxspacing",set_auto_spacing,reset_auto_xspacing_code);
 @!@:no_auto_xspacing_}{\.{\\noautoxspacing} primitive@>
+@!@:enable_cjkx_func_}{\.{\\enablecjkxfunc} primitive@>
+primitive("disablecjkxfunc",set_enable_cjkx_func,set_enable_cjkx_func_code);
+@!@:disable_cjkx_func_}{\.{\\disablecjkxfunc} primitive@>
+primitive("forcecjkxfunc",set_enable_cjkx_func,set_force_cjkx_func_code);
+@!@:force_cjkx_func_}{\.{\\forcecjkxfunc} primitive@>
 
 @ @<Cases of |print_cmd_chr|...@>=
 set_auto_spacing:begin
   if (chr_code mod 2)=0 then print_esc("noauto") else print_esc("auto");
   if chr_code<2 then print("spacing") else print("xspacing");
+end;
+set_enable_cjkx_func:begin
+  if chr_code=0 then print_esc("enable")
+  else if chr_code=1 then print_esc("disable") else print_esc("force");
+  print("cjkxfunc");
 end;
 
 @ @<Assignments@>=
@@ -36868,6 +36892,7 @@ set_auto_spacing:begin
   else begin p:=auto_xspacing_code; cur_chr:=(cur_chr mod 2); end;
   define(p,data,cur_chr);
 end;
+set_enable_cjkx_func: define(enable_cjkx_func_code,data,cur_chr);
 
 @ Following codes are used in section 49.
 
@@ -37539,6 +37564,20 @@ current_xspacing_mode_code: print_esc("currentxspacingmode");
 current_spacing_mode_code: cur_val:=auto_spacing;
 current_xspacing_mode_code: cur_val:=auto_xspacing;
 
+@ The \.{\\currentcjkxfunc} command returns the current \upTeX's
+status of \.{\\(disable|enable|force)cjkxfuncmode}.
+
+@d current_cjkx_func_code=eTeX_int+10 {code for \.{\\currentcjkxfunc}}
+
+@<Generate all \eTeX...@>=
+primitive("currentcjkxfunc",last_item,current_cjkx_func_code);
+@!@:current_cjkx_func_}{\.{\\currentcjkxfunc} primitive@>
+
+@ @<Cases of |last_item| for |print_cmd_chr|@>=
+current_cjkx_func_code: print_esc("currentcjkxfunc");
+
+@ @<Cases for fetching an integer value@>=
+current_cjkx_func_code: cur_val:=enable_cjkx_func;
 
 @* \[54] System-dependent changes.
 This section should be replaced, if necessary, by any special

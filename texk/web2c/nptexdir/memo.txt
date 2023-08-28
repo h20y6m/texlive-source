@@ -32,7 +32,11 @@ changes from pTeX
    \inhibixspcode 初期値：全部 3
    \xspcode 初期値：0-9A-Za-z は 3，その他は 0
    →和文文字については nptex.src で設定
-
+ * \...cjkxfunc: 0 (enable), 1 (disable), 2 (force)
+   0: 既定
+   1: cjkx_code の「z」位が全部 0 であるかのように扱う
+   2: >=0x80 の文字について，cjkx_code の「a」「z」位がどちらも 1 で
+      あるかのように扱う
  * XeTeX で非 BMP の文字がうまく扱えない
    * show_context 中で U+20BB7 -> U+0BB7 と面位置が無視される→解決
    * `\𠮷 （←つちよし）が数値として扱われない→解決
@@ -41,6 +45,7 @@ changes from pTeX
 * npTeX で未実装の e-upTeX プリミティブ
   * \epTeXinputencoding
   * \currentcjktoken, \disablecjktoken, \enablecjktoken, \forcecjktoken
+    →\...cjkxfunc として実装
   * \suppresslongerror, \suppressmathparerror, \suppressoutererror
   * \synctex
   * \hfi, \vfi, \pagefistretch, \odelcode, \odelimiter, \omathaccent,
