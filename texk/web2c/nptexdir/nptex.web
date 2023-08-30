@@ -32433,8 +32433,14 @@ end
 
 @ @<Save current position to |pdf_last_x_pos|, |pdf_last_y_pos|@>=
 begin
-  pdf_last_x_pos:=cur_h + 4736286;
-  pdf_last_y_pos:=cur_page_height - cur_v - 4736286;
+  case dvi_dir of
+  dir_yoko: begin pdf_last_x_pos := cur_h;  pdf_last_y_pos := cur_v;  end;
+  dir_tate: begin pdf_last_x_pos := -cur_v; pdf_last_y_pos := cur_h;  end;
+  dir_dtou: begin pdf_last_x_pos := cur_v;  pdf_last_y_pos := -cur_h; end;
+  endcases;
+  pdf_last_x_pos := pdf_last_x_pos + 4736286;
+  pdf_last_y_pos := cur_page_height - pdf_last_y_pos - 4736286;
+  {4736286 = 1in, the funny DVI origin offset}
 end
 
 @ @<Calculate page dimensions and margins@>=
@@ -32442,10 +32448,14 @@ cur_h_offset:=h_offset + (unity * 7227) / 100;
 cur_v_offset:=v_offset + (unity * 7227) / 100;
 if pdf_page_width <> 0 then
   cur_page_width:=pdf_page_width
+else if (box_dir(p)=dir_tate)or(box_dir(p)=dir_dtou) then
+  cur_page_width:=height(p) + depth(p) + 2*cur_h_offset
 else
   cur_page_width:=width(p) + 2*cur_h_offset;
 if pdf_page_height <> 0 then
   cur_page_height:=pdf_page_height
+else if (box_dir(p)=dir_tate)or(box_dir(p)=dir_dtou) then
+  cur_page_height:=width(p) + 2*cur_v_offset
 else
   cur_page_height:=height(p) + depth(p) + 2*cur_v_offset
 

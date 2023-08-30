@@ -52,3 +52,4 @@ changes from pTeX
     →\...cjkxfunc として実装
   * \suppresslongerror, \suppressmathparerror, \suppressoutererror
   * \hfi, \vfi, \pagefistretch
+  * \readpapersizespecial
