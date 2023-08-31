@@ -60,7 +60,11 @@ authorization from the copyright holders.
 #endif
 
 #define EXTERN extern
+#ifdef npTeX_h
+#include "nptexd.h"
+#else
 #include "xetexd.h"
+#endif
 
 #include "XeTeX_ext.h"
 
@@ -178,6 +182,9 @@ void initversionstring(char **versions)
 #else
         "Compiled with fontconfig version %d.%d.%d; using %d.%d.%d\n"
 #endif
+#ifdef npTeX
+        "Compiled with %s\n"
+#endif
         ;
 
     int len = strlen(fmt)
@@ -192,6 +199,9 @@ void initversionstring(char **versions)
             + strlen(pplib_version)
 #ifndef XETEX_MAC
             + 6 * 3 /* for fontconfig version #s (won't really need 3 digits per field!) */
+#endif
+#ifdef npTeX
+            + 15 + strlen(ptexenc_version_string)
 #endif
             + 6 * 3 /* for graphite2 version #s (ditto) */
             + 6 * 3; /* for freetype version #s (ditto) */
@@ -224,6 +234,9 @@ void initversionstring(char **versions)
         ,
         FC_VERSION / 10000, (FC_VERSION % 10000) / 100, FC_VERSION % 100,
         fc_version / 10000, (fc_version % 10000) / 100, fc_version % 100
+#endif
+#ifdef npTeX
+        , ptexenc_version_string
 #endif
         );
 }

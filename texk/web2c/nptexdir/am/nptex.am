@@ -17,14 +17,17 @@ nodist_EXTRA_nptex_SOURCES = dummy.cxx
 
 np_tangle = WEBINPUTS=.:$(srcdir)/nptexdir AM_V_P=$(AM_V_P) $(SHELL) ./tangle-sh $@ $(OTANGLE)
 
+# Replacement of libxetex.a for npTeX.
+libnptex = libnptex.a
+
 nptex_cppflags = $(xetex_cppflags) -I$(srcdir)/nptexdir $(PTEXENC_INCLUDES)
-nptex_ldadd = $(xetex_ldadd) $(PTEXENC_LIBS)
+nptex_ldadd = $(libnptex) $(xetex_ldadd) $(PTEXENC_LIBS)
 nptex_dependencies = $(xetex_dependencies) $(PTEXENC_DEPEND)
 
 nptex_CPPFLAGS = $(nptex_cppflags)
 nptex_CFLAGS = $(WARNING_CFLAGS)
 nptex_CXXFLAGS = # $(WARNING_CXXFLAGS)
-nptex_LDADD = $(xetex_ldadd) $(LDADD) $(ipc_socketlibs) $(PTEXENC_LIBS)
+nptex_LDADD = $(nptex_ldadd) $(LDADD) $(ipc_socketlibs)
 nptex_LDFLAGS = $(xetex_LDFLAGS)
 
 ## npTeX C sources
@@ -88,3 +91,17 @@ EXTRA_DIST += $(nptex_web_srcs) $(nptex_ch_srcs) nptexdir/nptex.defines
 DISTCLEANFILES += $(nodist_nptex_SOURCES) nptex.web nptex-final.ch \
   nptex-web2c nptex.p nptex.pool nptex-tangle
 
+## libnptex: recompile XeTeX_ext.c with -DnpTeX
+##
+EXTRA_LIBRARIES += libnptex.a
+
+libnptex_a_CPPFLAGS = $(nptex_cppflags) -DnpTeX_h
+libnptex_a_CFLAGS = $(WARNING_CFLAGS)
+libnptex_a_CXXFLAGS = # $(WARNING_CXXFLAGS)
+libnptex_a_OBJCXXFLAGS = # $(WARNING_OBJCXXFLAGS)
+
+libnptex_a_SOURCES = xetexdir/XeTeX_ext.c
+
+# We must create nptexd.h etc. before building the libnptex_a_OBJECTS.
+libnptex_prereq = nptexd.h $(nptex_dependencies)
+$(libnptex_a_OBJECTS): $(libnptex_prereq)

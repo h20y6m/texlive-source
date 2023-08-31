@@ -1138,6 +1138,10 @@ am_libmputil_a_OBJECTS = mplibdir/libmputil_a-avl.$(OBJEXT) \
 	mplibdir/libmputil_a-decNumber.$(OBJEXT) \
 	mplibdir/libmputil_a-decContext.$(OBJEXT)
 libmputil_a_OBJECTS = $(am_libmputil_a_OBJECTS)
+libnptex_a_AR = $(AR) $(ARFLAGS)
+libnptex_a_LIBADD =
+am_libnptex_a_OBJECTS = xetexdir/libnptex_a-XeTeX_ext.$(OBJEXT)
+libnptex_a_OBJECTS = $(am_libnptex_a_OBJECTS)
 libpdftex_a_AR = $(AR) $(ARFLAGS)
 libpdftex_a_LIBADD =
 am__libpdftex_a_SOURCES_DIST = pdftexdir/avl.c pdftexdir/avl.h \
@@ -1514,8 +1518,10 @@ am__DEPENDENCIES_11 = $(libxetex) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) libmd5.a $(am__DEPENDENCIES_10)
-nptex_DEPENDENCIES = $(am__DEPENDENCIES_11) $(am__DEPENDENCIES_2) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+am__DEPENDENCIES_12 = $(libnptex) $(am__DEPENDENCIES_11) \
+	$(am__DEPENDENCIES_1)
+nptex_DEPENDENCIES = $(am__DEPENDENCIES_12) $(am__DEPENDENCIES_2) \
+	$(am__DEPENDENCIES_1)
 nptex_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(nptex_CXXFLAGS) \
 	$(CXXFLAGS) $(nptex_LDFLAGS) $(LDFLAGS) -o $@
@@ -1547,7 +1553,7 @@ dist_pdftex_OBJECTS = pdftexdir/pdftex-pdftexextra.$(OBJEXT) \
 am__objects_48 = pdftex-pdftexini.$(OBJEXT) pdftex-pdftex0.$(OBJEXT)
 nodist_pdftex_OBJECTS = $(am__objects_48) pdftex-pdftex-pool.$(OBJEXT)
 pdftex_OBJECTS = $(dist_pdftex_OBJECTS) $(nodist_pdftex_OBJECTS)
-am__DEPENDENCIES_12 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+am__DEPENDENCIES_13 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) libmd5.a
 pdftex_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(pdftex_CXXFLAGS) \
@@ -1597,14 +1603,14 @@ dist_ptex_OBJECTS = ptexdir/ptex-ptexextra.$(OBJEXT)
 am__objects_59 = ptex-ptexini.$(OBJEXT) ptex-ptex0.$(OBJEXT)
 nodist_ptex_OBJECTS = $(am__objects_59) ptex-ptex-pool.$(OBJEXT)
 ptex_OBJECTS = $(dist_ptex_OBJECTS) $(nodist_ptex_OBJECTS)
-am__DEPENDENCIES_13 = libkanji.a $(pproglib) $(am__DEPENDENCIES_1) \
+am__DEPENDENCIES_14 = libkanji.a $(pproglib) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_1)
 am_synctex_OBJECTS = synctexdir/synctex-synctex_main.$(OBJEXT)
 synctex_OBJECTS = $(am_synctex_OBJECTS)
-am__DEPENDENCIES_14 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
-@MINGW32_TRUE@am__DEPENDENCIES_15 = $(am__DEPENDENCIES_1)
-synctex_DEPENDENCIES = $(am__DEPENDENCIES_14) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_15)
+am__DEPENDENCIES_15 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@MINGW32_TRUE@am__DEPENDENCIES_16 = $(am__DEPENDENCIES_1)
+synctex_DEPENDENCIES = $(am__DEPENDENCIES_15) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_16)
 nodist_tangle_OBJECTS = tangle.$(OBJEXT)
 tangle_OBJECTS = $(nodist_tangle_OBJECTS)
 tangle_LDADD = $(LDADD)
@@ -1620,9 +1626,9 @@ dist_tex_OBJECTS = tex-texextra.$(OBJEXT) $(am__objects_60)
 am__objects_61 = tex-texini.$(OBJEXT) tex-tex0.$(OBJEXT)
 nodist_tex_OBJECTS = $(am__objects_61) tex-tex-pool.$(OBJEXT)
 tex_OBJECTS = $(dist_tex_OBJECTS) $(nodist_tex_OBJECTS)
-@TEX_SYNCTEX_TRUE@am__DEPENDENCIES_16 = $(am__DEPENDENCIES_1)
+@TEX_SYNCTEX_TRUE@am__DEPENDENCIES_17 = $(am__DEPENDENCIES_1)
 tex_DEPENDENCIES = $(am__DEPENDENCIES_2) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_16)
+	$(am__DEPENDENCIES_17)
 nodist_tftopl_OBJECTS = tftopl.$(OBJEXT)
 tftopl_OBJECTS = $(nodist_tftopl_OBJECTS)
 tftopl_LDADD = $(LDADD)
@@ -1641,7 +1647,7 @@ twill_DEPENDENCIES = $(proglib) $(am__DEPENDENCIES_1)
 am_upbibtex_OBJECTS =
 nodist_upbibtex_OBJECTS = upbibtex-upbibtex.$(OBJEXT)
 upbibtex_OBJECTS = $(am_upbibtex_OBJECTS) $(nodist_upbibtex_OBJECTS)
-am__DEPENDENCIES_17 = libukanji.a $(pproglib) $(am__DEPENDENCIES_1) \
+am__DEPENDENCIES_18 = libukanji.a $(pproglib) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_2) $(am__DEPENDENCIES_1)
 am_updvitype_OBJECTS =
 nodist_updvitype_OBJECTS = updvitype-updvitype.$(OBJEXT)
@@ -1663,11 +1669,11 @@ am__objects_72 = $(am__objects_62) $(am__objects_63) $(am__objects_64) \
 	$(am__objects_70) $(am__objects_71) upmpost-ptfmin.$(OBJEXT)
 nodist_upmpost_OBJECTS = $(am__objects_72)
 upmpost_OBJECTS = $(nodist_upmpost_OBJECTS)
-am__DEPENDENCIES_18 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+am__DEPENDENCIES_19 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) libmputil.a
-upmpost_DEPENDENCIES = $(am__DEPENDENCIES_18)
+upmpost_DEPENDENCIES = $(am__DEPENDENCIES_19)
 am_uppltotf_OBJECTS =
 nodist_uppltotf_OBJECTS = uppltotf-uppltotf.$(OBJEXT)
 uppltotf_OBJECTS = $(am_uppltotf_OBJECTS) $(nodist_uppltotf_OBJECTS)
@@ -2402,6 +2408,7 @@ am__depfiles_remade = ./$(DEPDIR)/aleph-aleph-pool.Po \
 	uptexdir/$(DEPDIR)/libukanji_a-kanji.Po \
 	uptexdir/$(DEPDIR)/libukanji_a-kanji_dump.Po \
 	uptexdir/$(DEPDIR)/uptex-uptexextra.Po \
+	xetexdir/$(DEPDIR)/libnptex_a-XeTeX_ext.Po \
 	xetexdir/$(DEPDIR)/libxetex_a-XeTeXFontInst.Po \
 	xetexdir/$(DEPDIR)/libxetex_a-XeTeXFontInst_Mac.Po \
 	xetexdir/$(DEPDIR)/libxetex_a-XeTeXFontMgr.Po \
@@ -2497,12 +2504,12 @@ SOURCES = $(libff_a_SOURCES) $(libkanji_a_SOURCES) \
 	$(nodist_libmplibbackends_a_SOURCES) \
 	$(nodist_libmplibcore_a_SOURCES) \
 	$(nodist_libmplibextramath_a_SOURCES) $(libmputil_a_SOURCES) \
-	$(libpdftex_a_SOURCES) $(EXTRA_libpdftex_a_SOURCES) \
-	$(nodist_libsynctex_a_SOURCES) $(libukanji_a_SOURCES) \
-	$(libunilib_a_SOURCES) $(libxetex_a_SOURCES) \
-	$(libsynctex_la_SOURCES) $(dist_aleph_SOURCES) \
-	$(nodist_aleph_SOURCES) $(nodist_bibtex_SOURCES) \
-	$(nodist_call_luahbtex_SOURCES) \
+	$(libnptex_a_SOURCES) $(libpdftex_a_SOURCES) \
+	$(EXTRA_libpdftex_a_SOURCES) $(nodist_libsynctex_a_SOURCES) \
+	$(libukanji_a_SOURCES) $(libunilib_a_SOURCES) \
+	$(libxetex_a_SOURCES) $(libsynctex_la_SOURCES) \
+	$(dist_aleph_SOURCES) $(nodist_aleph_SOURCES) \
+	$(nodist_bibtex_SOURCES) $(nodist_call_luahbtex_SOURCES) \
 	$(nodist_call_luajithbtex_SOURCES) \
 	$(nodist_call_luajittex_SOURCES) $(nodist_call_luatex_SOURCES) \
 	$(nodist_call_mf_SOURCES) $(nodist_call_mflua_SOURCES) \
@@ -2560,16 +2567,17 @@ DIST_SOURCES = $(libff_a_SOURCES) $(libkanji_a_SOURCES) \
 	$(dist_libmfluajit_a_SOURCES) $(libmfluajitlpeg_a_SOURCES) \
 	$(libmflualpeg_a_SOURCES) $(libmfluaotfcc_a_SOURCES) \
 	$(libmfluapotrace_a_SOURCES) $(libmputil_a_SOURCES) \
-	$(am__libpdftex_a_SOURCES_DIST) $(EXTRA_libpdftex_a_SOURCES) \
-	$(libukanji_a_SOURCES) $(libunilib_a_SOURCES) \
-	$(am__libxetex_a_SOURCES_DIST) $(libsynctex_la_SOURCES) \
-	$(dist_aleph_SOURCES) $(am__dist_eptex_SOURCES_DIST) \
-	$(am__dist_etex_SOURCES_DIST) $(am__dist_euptex_SOURCES_DIST) \
-	$(gftodvi_SOURCES) himktables.c $(md5main_SOURCES) \
-	$(dist_mf_SOURCES) $(dist_mf_nowin_SOURCES) \
-	$(dist_mflua_SOURCES) $(dist_mfluajit_SOURCES) \
-	$(am__dist_nptex_SOURCES_DIST) $(am__dist_pdftex_SOURCES_DIST) \
-	$(pdftosrc_SOURCES) $(dist_ptex_SOURCES) $(synctex_SOURCES) \
+	$(libnptex_a_SOURCES) $(am__libpdftex_a_SOURCES_DIST) \
+	$(EXTRA_libpdftex_a_SOURCES) $(libukanji_a_SOURCES) \
+	$(libunilib_a_SOURCES) $(am__libxetex_a_SOURCES_DIST) \
+	$(libsynctex_la_SOURCES) $(dist_aleph_SOURCES) \
+	$(am__dist_eptex_SOURCES_DIST) $(am__dist_etex_SOURCES_DIST) \
+	$(am__dist_euptex_SOURCES_DIST) $(gftodvi_SOURCES) \
+	himktables.c $(md5main_SOURCES) $(dist_mf_SOURCES) \
+	$(dist_mf_nowin_SOURCES) $(dist_mflua_SOURCES) \
+	$(dist_mfluajit_SOURCES) $(am__dist_nptex_SOURCES_DIST) \
+	$(am__dist_pdftex_SOURCES_DIST) $(pdftosrc_SOURCES) \
+	$(dist_ptex_SOURCES) $(synctex_SOURCES) \
 	$(am__dist_tex_SOURCES_DIST) $(ttf2afm_SOURCES) \
 	$(EXTRA_ttf2afm_SOURCES) $(upbibtex_SOURCES) \
 	$(updvitype_SOURCES) $(uppltotf_SOURCES) $(dist_uptex_SOURCES) \
@@ -3160,8 +3168,8 @@ EXTRA_LIBRARIES = libmf.a libmflua.a libmfluaotfcc.a libmfluapotrace.a \
 	libluajitmisc.a libunilib.a libff.a libluatex.a libluajittex.a \
 	libluatexspecific.a libluajittexspecific.a \
 	libluahbtexspecific.a libluajithbtexspecific.a libluaffi.a \
-	libluaharfbuzz.a libluajitharfbuzz.a libxetex.a libsynctex.a \
-	libmd5.a
+	libluaharfbuzz.a libluajitharfbuzz.a libxetex.a libnptex.a \
+	libsynctex.a libmd5.a
 EXTRA_LTLIBRARIES = libsynctex.la
 lib_LIBRARIES = $(am__append_127)
 lib_LTLIBRARIES = $(am__append_126)
@@ -5460,13 +5468,16 @@ xetex_tests = \
 # Force Automake to use CXXLD for linking
 nodist_EXTRA_nptex_SOURCES = dummy.cxx
 np_tangle = WEBINPUTS=.:$(srcdir)/nptexdir AM_V_P=$(AM_V_P) $(SHELL) ./tangle-sh $@ $(OTANGLE)
+
+# Replacement of libxetex.a for npTeX.
+libnptex = libnptex.a
 nptex_cppflags = $(xetex_cppflags) -I$(srcdir)/nptexdir $(PTEXENC_INCLUDES)
-nptex_ldadd = $(xetex_ldadd) $(PTEXENC_LIBS)
+nptex_ldadd = $(libnptex) $(xetex_ldadd) $(PTEXENC_LIBS)
 nptex_dependencies = $(xetex_dependencies) $(PTEXENC_DEPEND)
 nptex_CPPFLAGS = $(nptex_cppflags) $(am__append_151)
 nptex_CFLAGS = $(WARNING_CFLAGS)
 nptex_CXXFLAGS = # $(WARNING_CXXFLAGS)
-nptex_LDADD = $(xetex_ldadd) $(LDADD) $(ipc_socketlibs) $(PTEXENC_LIBS)
+nptex_LDADD = $(nptex_ldadd) $(LDADD) $(ipc_socketlibs)
 nptex_LDFLAGS = $(xetex_LDFLAGS)
 nptex_c_h = nptexini.c nptex0.c nptexcoerce.h nptexd.h
 nodist_nptex_SOURCES = $(nptex_c_h) nptex-pool.c
@@ -5489,6 +5500,14 @@ nptex_ch_srcs = \
 	xetexdir/char-warning-xetex.ch \
 	tex-binpool.ch
 
+libnptex_a_CPPFLAGS = $(nptex_cppflags) -DnpTeX_h
+libnptex_a_CFLAGS = $(WARNING_CFLAGS)
+libnptex_a_CXXFLAGS = # $(WARNING_CXXFLAGS)
+libnptex_a_OBJCXXFLAGS = # $(WARNING_OBJCXXFLAGS)
+libnptex_a_SOURCES = xetexdir/XeTeX_ext.c
+
+# We must create nptexd.h etc. before building the libnptex_a_OBJECTS.
+libnptex_prereq = nptexd.h $(nptex_dependencies)
 omegaware_programs = odvicopy odvitype otangle wofm2opl wopl2ofm wovf2ovp wovp2ovf
 ow_tangle = WEBINPUTS=$(srcdir)/omegaware $(buildenv) $(TANGLE)
 ow_otangle = WEBINPUTS=.:$(srcdir)/omegaware $(buildenv) $(OTANGLE)
@@ -7805,6 +7824,19 @@ libmputil.a: $(libmputil_a_OBJECTS) $(libmputil_a_DEPENDENCIES) $(EXTRA_libmputi
 	$(AM_V_at)-rm -f libmputil.a
 	$(AM_V_AR)$(libmputil_a_AR) libmputil.a $(libmputil_a_OBJECTS) $(libmputil_a_LIBADD)
 	$(AM_V_at)$(RANLIB) libmputil.a
+xetexdir/$(am__dirstamp):
+	@$(MKDIR_P) xetexdir
+	@: > xetexdir/$(am__dirstamp)
+xetexdir/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) xetexdir/$(DEPDIR)
+	@: > xetexdir/$(DEPDIR)/$(am__dirstamp)
+xetexdir/libnptex_a-XeTeX_ext.$(OBJEXT): xetexdir/$(am__dirstamp) \
+	xetexdir/$(DEPDIR)/$(am__dirstamp)
+
+libnptex.a: $(libnptex_a_OBJECTS) $(libnptex_a_DEPENDENCIES) $(EXTRA_libnptex_a_DEPENDENCIES) 
+	$(AM_V_at)-rm -f libnptex.a
+	$(AM_V_AR)$(libnptex_a_AR) libnptex.a $(libnptex_a_OBJECTS) $(libnptex_a_LIBADD)
+	$(AM_V_at)$(RANLIB) libnptex.a
 pdftexdir/$(am__dirstamp):
 	@$(MKDIR_P) pdftexdir
 	@: > pdftexdir/$(am__dirstamp)
@@ -7943,12 +7975,6 @@ libunilib.a: $(libunilib_a_OBJECTS) $(libunilib_a_DEPENDENCIES) $(EXTRA_libunili
 	$(AM_V_at)-rm -f libunilib.a
 	$(AM_V_AR)$(libunilib_a_AR) libunilib.a $(libunilib_a_OBJECTS) $(libunilib_a_LIBADD)
 	$(AM_V_at)$(RANLIB) libunilib.a
-xetexdir/$(am__dirstamp):
-	@$(MKDIR_P) xetexdir
-	@: > xetexdir/$(am__dirstamp)
-xetexdir/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) xetexdir/$(DEPDIR)
-	@: > xetexdir/$(DEPDIR)/$(am__dirstamp)
 xetexdir/libxetex_a-XeTeXFontInst.$(OBJEXT): xetexdir/$(am__dirstamp) \
 	xetexdir/$(DEPDIR)/$(am__dirstamp)
 xetexdir/libxetex_a-XeTeXFontMgr.$(OBJEXT): xetexdir/$(am__dirstamp) \
@@ -9282,6 +9308,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@uptexdir/$(DEPDIR)/libukanji_a-kanji.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@uptexdir/$(DEPDIR)/libukanji_a-kanji_dump.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@uptexdir/$(DEPDIR)/uptex-uptexextra.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@xetexdir/$(DEPDIR)/libnptex_a-XeTeX_ext.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@xetexdir/$(DEPDIR)/libxetex_a-XeTeXFontInst.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@xetexdir/$(DEPDIR)/libxetex_a-XeTeXFontInst_Mac.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@xetexdir/$(DEPDIR)/libxetex_a-XeTeXFontMgr.Po@am__quote@ # am--include-marker
@@ -16486,6 +16513,20 @@ mplibdir/libmputil_a-decContext.obj: mplibdir/decContext.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmputil_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o mplibdir/libmputil_a-decContext.obj `if test -f 'mplibdir/decContext.c'; then $(CYGPATH_W) 'mplibdir/decContext.c'; else $(CYGPATH_W) '$(srcdir)/mplibdir/decContext.c'; fi`
 
+xetexdir/libnptex_a-XeTeX_ext.o: xetexdir/XeTeX_ext.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libnptex_a_CPPFLAGS) $(CPPFLAGS) $(libnptex_a_CFLAGS) $(CFLAGS) -MT xetexdir/libnptex_a-XeTeX_ext.o -MD -MP -MF xetexdir/$(DEPDIR)/libnptex_a-XeTeX_ext.Tpo -c -o xetexdir/libnptex_a-XeTeX_ext.o `test -f 'xetexdir/XeTeX_ext.c' || echo '$(srcdir)/'`xetexdir/XeTeX_ext.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) xetexdir/$(DEPDIR)/libnptex_a-XeTeX_ext.Tpo xetexdir/$(DEPDIR)/libnptex_a-XeTeX_ext.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='xetexdir/XeTeX_ext.c' object='xetexdir/libnptex_a-XeTeX_ext.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libnptex_a_CPPFLAGS) $(CPPFLAGS) $(libnptex_a_CFLAGS) $(CFLAGS) -c -o xetexdir/libnptex_a-XeTeX_ext.o `test -f 'xetexdir/XeTeX_ext.c' || echo '$(srcdir)/'`xetexdir/XeTeX_ext.c
+
+xetexdir/libnptex_a-XeTeX_ext.obj: xetexdir/XeTeX_ext.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libnptex_a_CPPFLAGS) $(CPPFLAGS) $(libnptex_a_CFLAGS) $(CFLAGS) -MT xetexdir/libnptex_a-XeTeX_ext.obj -MD -MP -MF xetexdir/$(DEPDIR)/libnptex_a-XeTeX_ext.Tpo -c -o xetexdir/libnptex_a-XeTeX_ext.obj `if test -f 'xetexdir/XeTeX_ext.c'; then $(CYGPATH_W) 'xetexdir/XeTeX_ext.c'; else $(CYGPATH_W) '$(srcdir)/xetexdir/XeTeX_ext.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) xetexdir/$(DEPDIR)/libnptex_a-XeTeX_ext.Tpo xetexdir/$(DEPDIR)/libnptex_a-XeTeX_ext.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='xetexdir/XeTeX_ext.c' object='xetexdir/libnptex_a-XeTeX_ext.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libnptex_a_CPPFLAGS) $(CPPFLAGS) $(libnptex_a_CFLAGS) $(CFLAGS) -c -o xetexdir/libnptex_a-XeTeX_ext.obj `if test -f 'xetexdir/XeTeX_ext.c'; then $(CYGPATH_W) 'xetexdir/XeTeX_ext.c'; else $(CYGPATH_W) '$(srcdir)/xetexdir/XeTeX_ext.c'; fi`
+
 pdftexdir/libpdftex_a-avl.o: pdftexdir/avl.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libpdftex_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT pdftexdir/libpdftex_a-avl.o -MD -MP -MF pdftexdir/$(DEPDIR)/libpdftex_a-avl.Tpo -c -o pdftexdir/libpdftex_a-avl.o `test -f 'pdftexdir/avl.c' || echo '$(srcdir)/'`pdftexdir/avl.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) pdftexdir/$(DEPDIR)/libpdftex_a-avl.Tpo pdftexdir/$(DEPDIR)/libpdftex_a-avl.Po
@@ -20671,6 +20712,7 @@ distclean: distclean-recursive
 	-rm -f uptexdir/$(DEPDIR)/libukanji_a-kanji.Po
 	-rm -f uptexdir/$(DEPDIR)/libukanji_a-kanji_dump.Po
 	-rm -f uptexdir/$(DEPDIR)/uptex-uptexextra.Po
+	-rm -f xetexdir/$(DEPDIR)/libnptex_a-XeTeX_ext.Po
 	-rm -f xetexdir/$(DEPDIR)/libxetex_a-XeTeXFontInst.Po
 	-rm -f xetexdir/$(DEPDIR)/libxetex_a-XeTeXFontInst_Mac.Po
 	-rm -f xetexdir/$(DEPDIR)/libxetex_a-XeTeXFontMgr.Po
@@ -21455,6 +21497,7 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f uptexdir/$(DEPDIR)/libukanji_a-kanji.Po
 	-rm -f uptexdir/$(DEPDIR)/libukanji_a-kanji_dump.Po
 	-rm -f uptexdir/$(DEPDIR)/uptex-uptexextra.Po
+	-rm -f xetexdir/$(DEPDIR)/libnptex_a-XeTeX_ext.Po
 	-rm -f xetexdir/$(DEPDIR)/libxetex_a-XeTeXFontInst.Po
 	-rm -f xetexdir/$(DEPDIR)/libxetex_a-XeTeXFontInst_Mac.Po
 	-rm -f xetexdir/$(DEPDIR)/libxetex_a-XeTeXFontMgr.Po
@@ -22571,6 +22614,7 @@ $(srcdir)/nptexdir/nptex_version.h: @MAINTAINER_MODE_TRUE@ nptexdir/nptex.web
 
 nptex-final.ch: tie$(EXEEXT) $(nptex_ch_srcs)
 	$(tie_c) $(nptex_ch_srcs)
+$(libnptex_a_OBJECTS): $(libnptex_prereq)
 odvicopy.c odvicopy.h: odvicopy-web2c
 	@$(web2c) odvicopy
 odvicopy-web2c: odvicopy.p $(web2c_depend)
