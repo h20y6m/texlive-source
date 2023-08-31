@@ -54,9 +54,13 @@ extern void remembersourceinfo (strnumber, int);
 #include <pdftexdir/pdftex.h>
 #endif /* pdfTeX */
 
-#if defined(XeTeX) || defined(npTeX)
+#if defined(XeTeX)
 #include <xetexdir/xetex.h>
 #endif /* XeTeX */
+
+#if defined(npTeX)
+#include <nptexdir/nptex.h>
+#endif /* npTeX */
 
 #ifdef __SyncTeX__
 #include <synctexdir/synctex.h>

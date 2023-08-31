@@ -709,6 +709,36 @@ static int getcUTF8(FILE *fp)
     return EOF;
 }
 
+static int get_utf8_num(int i, FILE *fp)
+{
+    long u = 0;
+    int i2 = EOF, i3 = EOF, i4 = EOF;
+
+    switch (UTF8length(i)) {
+    case 2:
+        i2 = getcUTF8(fp); if (i2 == EOF) return U_REPLACEMENT_CHARACTER;
+        u = UTF8BtoUCS(i, i2);
+        break;
+    case 3:
+        i2 = getcUTF8(fp); if (i2 == EOF) return U_REPLACEMENT_CHARACTER;
+        i3 = getcUTF8(fp); if (i3 == EOF) return U_REPLACEMENT_CHARACTER;
+        u = UTF8CtoUCS(i, i2, i3);
+        if (u == U_BOM) break; /* just ignore */
+          /* voiced sound: まだ */
+        break;
+    case 4:
+        i2 = getcUTF8(fp); if (i2 == EOF) return U_REPLACEMENT_CHARACTER;
+        i3 = getcUTF8(fp); if (i3 == EOF) return U_REPLACEMENT_CHARACTER;
+        i4 = getcUTF8(fp); if (i4 == EOF) return U_REPLACEMENT_CHARACTER;
+        u = UTF8DtoUCS(i, i2, i3, i4);
+        break;
+    default:
+        u = U_REPLACEMENT_CHARACTER;
+        break;
+    }
+    return u;
+}
+
 static void get_utf8(int i, FILE *fp)
 {
     long u = 0, j;
@@ -1123,6 +1153,87 @@ long input_line2(FILE *fp, unsigned char *buff, unsigned char *buff2,
     if (buff2!= NULL) for (i=pos; i<=last; i++) buff2[i] = 0;
     /* buff2 is initialized */
 
+    return last;
+}
+
+int input_line_nptex(FILE *fp, int *buff,
+                 long pos, const long buffsize, int *lastchar, const int enc)
+{
+    long i, j;
+    static boolean injis = false;
+    const int fd = fileno(fp);
+
+    first = last = pos; i = 0;
+
+    while (last < buffsize-30 && (i=getc4(fp)) != EOF && i!='\n' && i!='\r') {
+        /* 30 is enough large size for one char */
+        /* attention: 4 times of write_hex() eats 16byte */
+#ifdef WIN32
+        if (i == 0x1a && first == last &&
+            fd == fileno(stdin) && _isatty(fd)) { /* Ctrl+Z on console */
+                i = EOF;
+                break;
+        } else
+#endif
+        if (i == ESC) {
+            if ((i=getc4(fp)) == '$') { /* ESC '$' (Kanji-in) */
+                i = getc4(fp);
+                if (i == '@' || i == 'B') {
+                    injis = true;
+                } else {               /* broken Kanji-in */
+                    buff[last++] = ESC;
+                    buff[last++] = '$';
+                    if (is_tail(&i, fp)) break;
+                    buff[last++] = i;
+                }
+            } else if (i == '(') {     /* ESC '(' (Kanji-out) */
+                i = getc4(fp);
+                if (i == 'J' || i == 'B' || i == 'H') {
+                    injis = false;
+                } else {               /* broken Kanji-out */
+                    buff[last++] = ESC;
+                    buff[last++] = '(';
+                    if (is_tail(&i, fp)) break;
+                    buff[last++] = i;
+                }
+            } else { /* broken ESC */
+                buff[last++] = ESC;
+                if (is_tail(&i, fp)) break;
+                buff[last++] = i;
+            }
+        } else { /* rather than ESC */
+            if (injis) { /* in JIS */
+                j = getc4(fp);
+                if (is_tail(&j, fp)) {
+                    buff[last++] = i;
+                    i = j;
+                    break;
+                } else { /* JIS encoding */
+                    i = fromJIS(HILO(j, i));
+                    buff[last++] = (i == 0) ? U_REPLACEMENT_CHARACTER : i;
+                }
+            } else {  /* normal */
+                if        (enc == ENC_SJIS && isSJISkanji1(i)) {
+                    j = getc4(fp); 
+                    if (isSJISkanji2(j)) buff[last++] = fromSJIS(HILO(j, i));
+                    else { buff[last++] = i; ungetc4(j, fp); }
+                } else if (enc == ENC_EUC  && isEUCkanji1(i)) {
+                    j = getc4(fp); 
+                    if (isEUCkanji2(j)) buff[last++] = fromEUC(HILO(j, i));
+                    else { buff[last++] = i; ungetc4(j, fp); }
+                } else if (UTF8length(i) > 1) {
+                    buff[last++] = get_utf8_num(i, fp);
+                } else {
+                    buff[last++] = i;
+                }
+            }
+        }
+    }
+
+    if (i != EOF || first != last) buff[last] = '\0';
+    if (i == EOF || i == '\n' || i == '\r') injis = false;
+
+    if (lastchar != NULL) *lastchar = i;
     return last;
 }
 

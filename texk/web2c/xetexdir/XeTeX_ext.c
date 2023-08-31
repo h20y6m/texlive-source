@@ -61,6 +61,7 @@ authorization from the copyright holders.
 
 #define EXTERN extern
 #ifdef npTeX_h
+#include <ptexenc/ptexenc.h>
 #include "nptexd.h"
 #else
 #include "xetexd.h"
@@ -254,6 +255,12 @@ setinputfileencoding(UFILE* f, integer mode, integer encodingData)
         case UTF16BE:
         case UTF16LE:
         case RAW:
+#ifdef npTeX
+        case UTF8_NP:
+        case JIS:
+        case EUC:
+        case SJIS:
+#endif
             f->encodingMode = mode;
             break;
 
@@ -341,7 +348,11 @@ apply_normalization(uint32_t* buf, int len, int norm)
 #endif
 
 int
+#ifndef npTeX
 input_line(UFILE* f)
+#else
+input_line_xetex(UFILE* f)
+#endif
 {
 static char* byteBuffer = NULL;
 static uint32_t *utf32Buf = NULL;
@@ -482,6 +493,52 @@ static uint32_t *utf32Buf = NULL;
     return true;
 }
 
+#ifdef npTeX
+#define ENC_JIS      1
+#define ENC_EUC      2
+#define ENC_SJIS     3
+#define ENC_UTF8     4
+
+int input_line_np(FILE* fp, int enc)
+{
+  int i = EOF;
+  last = input_line_nptex(fp, (int *)buffer,first, bufsize, &i, enc);
+
+  if (i == EOF && last == first) return false;
+  else if (i != EOF && i != '\n' && i != '\r') buffer_overflow();
+
+  buffer[last] = ' ';
+  if (last >= maxbufstack)
+     maxbufstack = last;
+
+  if (i == '\r') {
+    while ((i = GETC(fp)) == EOF && errno == EINTR)
+      ;
+    if (i != '\n')
+      ungetc (i, fp);
+  }
+
+  while (last > first && buffer[last - 1] == ' ')
+    --last;
+
+  return true;
+}
+int input_line(UFILE *f) {
+  switch(f->encodingMode) {
+    case UTF8_NP:
+      return input_line_np(f->f, ENC_UTF8);
+    case JIS:
+      return input_line_np(f->f, ENC_JIS);
+    case EUC:
+      return input_line_np(f->f, ENC_EUC);
+    case SJIS:
+      return input_line_np(f->f, ENC_SJIS);
+    default: return input_line_xetex(f);
+  }
+}
+#endif
+
+
 static void die(const_string s, int i)
 {
     fprintf(stderr, s, i);
@@ -561,7 +618,11 @@ getencodingmodeandinfo(integer* info)
         return AUTO;
     }
     if (strcasecmp(name, "utf8") == 0) {
+#ifdef npTeX
+        return UTF8_NP;
+#else
         return UTF8;
+#endif
     }
     if (strcasecmp(name, "utf16") == 0) {   /* depends on host platform */
 #ifdef WORDS_BIGENDIAN
@@ -579,6 +640,32 @@ getencodingmodeandinfo(integer* info)
     if (strcasecmp(name, "bytes") == 0) {
         return RAW;
     }
+#ifdef npTeX
+    if ((strcasecmp(name, "utf8_nptex") == 0)||(strcasecmp(name, "utf-8") == 0)) {
+        return UTF8;
+    }
+    if (strcasecmp(name, "utf8_xetex") == 0) {
+        return UTF8;
+    }
+    if (strcasecmp(name, "jis") == 0) {
+        return JIS;
+    }
+    if (strcasecmp(name, "sjis") == 0) {
+        return SJIS;
+    }
+    if (strcasecmp(name, "euc") == 0) {
+        return EUC;
+    }
+    if (strcasecmp(name, "iso-2022-jp") == 0) {
+        return JIS;
+    }
+    if (strcasecmp(name, "shift_jis") == 0) {
+        return SJIS;
+    }
+    if (strcasecmp(name, "euc-jp") == 0) {
+        return EUC;
+    }
+#endif
 
     /* try for an ICU converter */
     cnv = ucnv_open(name, &err);
@@ -2620,11 +2707,19 @@ u_open_in(unicodefile* f, integer filefmt, const_string fopen_mode, integer mode
             } else if (B1 == 0xef && B2 == 0xbb) {
                 int B3 = GETC((*f)->f);
                 if (B3 == 0xbf)
+#ifdef npTeX
+                    mode = UTF8_NP;
+#else
                     mode = UTF8;
+#endif
             }
             if (mode == AUTO) {
                 rewind((*f)->f);
-                mode = UTF8;
+#ifdef npTeX
+                    mode = UTF8_NP;
+#else
+                    mode = UTF8;
+#endif
             }
         }
 

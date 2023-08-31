@@ -1217,7 +1217,11 @@ topenin (void)
     termin->f = stdin;
     termin->savedChar = -1;
     termin->skipNextLF = 0;
+#ifdef npTeX
+    termin->encodingMode = UTF8_NP;
+#else
     termin->encodingMode = UTF8;
+#endif
     termin->conversionData = 0;
     inputfile[0] = termin;
   }
@@ -2256,7 +2260,11 @@ u_open_in_or_pipe(unicodefile* f, integer filefmt, const_string fopen_mode, inte
     if (shellenabledp && *(nameoffile+1) == '|') {
       /* the user requested a pipe */
       *f = malloc(sizeof(UFILE));
-      (*f)->encodingMode = (mode == AUTO) ? UTF8 : mode;
+#ifdef npTeX
+      (*f)->encodingMode = (mode == AUTO) ? UTF8_NP : mode;
+#else
+     (*f)->encodingMode = (mode == AUTO) ? UTF8 : mode;
+#endif
       (*f)->conversionData = 0;
       (*f)->savedChar = -1;
       (*f)->skipNextLF = 0;

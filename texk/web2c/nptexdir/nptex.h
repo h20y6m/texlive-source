@@ -115,6 +115,11 @@ authorization from the copyright holders.
 #ifdef WIN32
 #define WIN32CONSOLE                            6
 #endif
+#define UTF8_NP                                 7
+#define JIS                                     8
+#define EUC                                     9
+#define SJIS                                   10
+
 
 /* we don't use xchr, so change the cpascal.h definition of this... */
 #undef Xchr

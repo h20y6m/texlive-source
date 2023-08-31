@@ -96,6 +96,8 @@ extern PTENCDLL int fputs2(const char *s, FILE *fp);
 /* input line with encoding conversion */
 extern PTENCDLL long input_line2(FILE *fp, unsigned char *buff, unsigned char *buff2,
                                 long pos, const long buffsize, int *lastchar);
+extern PTENCDLL int input_line_nptex(FILE *fp, int *buffer,
+    long pos, const long buffsize, int *lastchar, const int enc);
 
 /* set current encoding */
 extern PTENCDLL boolean setinfileenc(FILE *fp, const char *str);
