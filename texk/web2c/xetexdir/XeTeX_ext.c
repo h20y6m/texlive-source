@@ -642,7 +642,7 @@ getencodingmodeandinfo(integer* info)
     }
 #ifdef npTeX
     if ((strcasecmp(name, "utf8_nptex") == 0)||(strcasecmp(name, "utf-8") == 0)) {
-        return UTF8;
+        return UTF8_NP;
     }
     if (strcasecmp(name, "utf8_xetex") == 0) {
         return UTF8;

@@ -684,6 +684,12 @@ static boolean combin_voiced_sound(boolean semi)
     /* always */       buffer[last-1] = BYTE4(i);
     return true;
 }
+static boolean combin_voiced_sound_nptex(int parent, boolean semi)
+{
+    int i = get_voiced_sound(parent, semi);
+    return (i == 0) ? parent : i ;
+    i = toBUFF(fromUCS(i));
+}
 
 static void write_multibyte(long i)
 {
@@ -724,7 +730,6 @@ static int get_utf8_num(int i, FILE *fp)
         i3 = getcUTF8(fp); if (i3 == EOF) return U_REPLACEMENT_CHARACTER;
         u = UTF8CtoUCS(i, i2, i3);
         if (u == U_BOM) break; /* just ignore */
-          /* voiced sound: まだ */
         break;
     case 4:
         i2 = getcUTF8(fp); if (i2 == EOF) return U_REPLACEMENT_CHARACTER;
@@ -1222,7 +1227,16 @@ int input_line_nptex(FILE *fp, int *buff,
                     if (isEUCkanji2(j)) buff[last++] = fromEUC(HILO(j, i));
                     else { buff[last++] = i; ungetc4(j, fp); }
                 } else if (UTF8length(i) > 1) {
-                    buff[last++] = get_utf8_num(i, fp);
+                    j = get_utf8_num(i, fp);
+                    if (last>first) {
+                      if (j == U_VOICED) {
+                        j = combin_voiced_sound_nptex(buff[last-1], false);
+                        if (j>0) buff[last-1] = j;
+                      } else if (j == U_SEMI_VOICED) {
+                        j = combin_voiced_sound_nptex(buff[last-1], true);
+                        if (j>0) buff[last-1] = j;
+                      } else buff[last++] = j;
+                    } else buff[last++] = j;
                 } else {
                     buff[last++] = i;
                 }
