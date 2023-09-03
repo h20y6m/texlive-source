@@ -3036,7 +3036,7 @@ The values defined here are recommended for most 32-bit computers.
 @d max_quarterword=@"FFFF {largest allowable value in a |quarterword|}
 @d min_halfword==-@"FFFFFFF {smallest allowable value in a |halfword|}
 @d max_halfword==@"3FFFFFFF {largest allowable value in a |halfword|}
-@d max_char_val=@"200000 {to separate char and command code}
+@d max_char_val=@"1000000 {to separate char and command code}
 
 @ Here are the inequalities that the quarterword and halfword values
 must satisfy (or rather, the inequalities that they mustn't satisfy):
@@ -6064,12 +6064,18 @@ cjkxcode 4, 12 $\longmapsto$ kcatcode 19 (hangul)
 @d is_cjkx_ja_math(#)==
   (( (cjkx_code(#)>=12) and (enable_cjkx_func=0) )
   or ( (#>=force_cjkx_threshold) and (enable_cjkx_func=2) ))
-@d is_cjkx_jachar(#)==
+@d is_cjkx_jachar_inner(#)==
   (( ((cjkx_code(#)div 4)mod 2=1) and (enable_cjkx_func=0) )
   or ( (#>=force_cjkx_threshold) and (enable_cjkx_func=2) ))
 @d is_cjkx_nospc(#)==((cjkx_code(#)div 2)mod 2=1)
 @d is_cjkx_widowpenalty(#)==(cjkx_code(#) mod 2=1)
 
+@p
+function is_cjkx_jachar(@!i:integer):boolean;
+begin
+if i<too_big_usv then is_cjkx_jachar:=is_cjkx_jachar_inner(i)
+else is_cjkx_jachar:=true;
+end;
 
 @ Region 5 of |eqtb| contains the integer parameters and registers defined
 here, as well as the |del_code| table. The latter table differs from the
@@ -7704,20 +7710,20 @@ we have |left_brace_limit<=t<right_brace_limit|; and it represents a |match| or
 The following definitions take care of these token-oriented constants
 and a few others.
 
-@d cs_token_flag=@"1FFFFFF {amount added to the |eqtb| location in a
+@d cs_token_flag=@"FFFFFFF {amount added to the |eqtb| location in a
   token that stands for a control sequence; is a multiple of~|@"10000|, less~1}
-@d left_brace_token=@"200000 {$2^{21}\cdot|left_brace|$}
-@d left_brace_limit=@"400000 {$2^{21}\cdot(|left_brace|+1)$}
-@d right_brace_token=@"400000 {$2^{21}\cdot|right_brace|$}
-@d right_brace_limit=@"600000 {$2^{21}\cdot(|right_brace|+1)$}
-@d math_shift_token=@"600000 {$2^{21}\cdot|math_shift|$}
-@d tab_token=@"800000 {$2^{21}\cdot|tab_mark|$}
-@d out_param_token=@"A00000 {$2^{21}\cdot|out_param|$}
-@d space_token=@"1400020 {$2^{21}\cdot|spacer|+|" "|$}
-@d letter_token=@"1600000 {$2^{21}\cdot|letter|$}
-@d other_token=@"1800000 {$2^{21}\cdot|other_char|$}
-@d match_token=@"1A00000 {$2^{21}\cdot|match|$}
-@d end_match_token=@"1C00000 {$2^{21}\cdot|end_match|$}
+@d left_brace_token=@"1000000 {$2^{21}\cdot|left_brace|$}
+@d left_brace_limit=@"2000000 {$2^{21}\cdot(|left_brace|+1)$}
+@d right_brace_token=@"2000000 {$2^{21}\cdot|right_brace|$}
+@d right_brace_limit=@"3000000 {$2^{21}\cdot(|right_brace|+1)$}
+@d math_shift_token=@"3000000 {$2^{21}\cdot|math_shift|$}
+@d tab_token=@"4000000 {$2^{21}\cdot|tab_mark|$}
+@d out_param_token=@"5000000 {$2^{21}\cdot|out_param|$}
+@d space_token=@"A000020 {$2^{21}\cdot|spacer|+|" "|$}
+@d letter_token=@"B000000 {$2^{21}\cdot|letter|$}
+@d other_token=@"C000000 {$2^{21}\cdot|other_char|$}
+@d match_token=@"D000000 {$2^{21}\cdot|match|$}
+@d end_match_token=@"E000000 {$2^{21}\cdot|end_match|$}
 @#
 @d protected_token=end_match_token+1 {$2^{21}\cdot|end_match|+1$}
 
@@ -14451,15 +14457,31 @@ end;
 @ Another warning for (u)\pTeX.
 
 @p procedure char_warning_jis(@!f:internal_font_number;@!jc:UnicodeScalar);
+var old_setting: integer; {saved value of |tracing_online|}
 begin if tracing_lost_chars>0 then
-  begin begin_diagnostic;
-  print_nl("Character "); print_char(jc); print(" (");
+ begin old_setting:=tracing_online;
+ if eTeX_ex and(tracing_lost_chars>1) then tracing_online:=1;
+ if tracing_lost_chars > 2 then
+  print_err("Character ")
+ else begin
+  begin_diagnostic;
+  print_nl("Character ")
+ end;
+  if jc < @"10000 then print_ASCII(jc)
+  else print_char(jc); {non-Plane 0 Unicodes can't be sent through |print_ASCII|}
+  print(" (");
   print_hex(jc); print(") cannot be typeset in JIS-encoded JFM ");
   slow_print(font_name[f]);
-  print_char(","); print_nl("so I use .notdef glyph instead.");
-  end_diagnostic(false);
-  end;
-end;
+  print_char(",");
+ if tracing_lost_chars > 2 then
+  begin print_nl("  so I use .notdef glyph instead");
+  help0; error; end
+ else
+  begin print_nl("so I use .notdef glyph instead.");
+  end_diagnostic(false); end;
+ tracing_online:=old_setting;
+ end; {of |tracing_lost_chars>0|}
+end;  {of procedure}
 
 @ Here is a function that returns a pointer to a character node for a
 given character in a given font. If that character doesn't exist,
