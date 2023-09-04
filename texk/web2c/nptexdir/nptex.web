@@ -25571,6 +25571,7 @@ hmode+no_boundary: begin get_x_token;
   end;
 othercases begin
   if abs(mode)=hmode then check_for_post_char_toks(big_switch);
+  space_class:=char_class_boundary;
   case abs(mode)+cur_cmd of
     hmode+spacer: if space_factor=1000 then goto append_normal_space
       else app_space;
@@ -25644,7 +25645,7 @@ each time.
 
 @<Set init...@>=
 ligature_present:=false; cancel_boundary:=false; lft_hit:=false; rt_hit:=false;
-ins_disc:=false;
+ins_disc:=false; prev_class:=char_class_boundary;
 
 @ We leave the |space_factor| unchanged if |sf_code(cur_chr)=0|; otherwise we
 set it equal to |sf_code(cur_chr)|, except that it should never change
@@ -25712,7 +25713,7 @@ are inside the individual sections.
 
 @<Append character |cur_chr|...@>=
 
-prev_class:=char_class_boundary; {boundary}
+prev_class:=space_class; { char_class_boundary; {boundary} }
 
 { added code for native font support }
 if is_native_font(cur_font) then begin
@@ -25756,8 +25757,10 @@ collect_native:
     if (t=1)or((t=0)and not is_cjkx_jachar(cur_chr)) then goto collect_native
     else cur_cmd:=kchar_given;
   end;
-  if cur_cmd<=max_command then check_for_post_char_toks(collected);
-    { non-expandable primitives }
+  if (cur_cmd<=max_command)and(cur_cmd<>letter)and(cur_cmd<>other_char)
+      and(cur_cmd<>char_given)and(cur_cmd<>kchar_given) then
+    check_for_post_char_toks(collected);
+    { non-expandable primitives other than Japanese characters}
 
 collected:
   if (font_mapping[main_f] <> 0) then begin
@@ -25999,7 +26002,9 @@ collected:
       if (t=1)or((t=0)and not is_cjkx_jachar(cur_chr)) then goto collect_native+1
       else cur_cmd:=kchar_given;
     end;
-    if cur_cmd<=max_command then check_for_post_char_toks(collected+1);
+    if (cur_cmd<=max_command)and(cur_cmd<>letter)and(cur_cmd<>other_char)
+        and(cur_cmd<>char_given)and(cur_cmd<>kchar_given) then
+      check_for_post_char_toks(collected+1);
   end;
 
 collected+1:
@@ -26441,6 +26446,8 @@ its_all_over:=false;
 exit:end;
 
 @ @<Append KANJI-character |cur_chr| ...@>=
+prev_class:=space_class;
+
 if is_char_node(tail) then
   begin if not( (last_jchr<>null) and (link(last_jchr)=tail) ) then
     begin cx:=qo(character(tail)); @<Insert |post_break_penalty|@>;
@@ -26531,6 +26538,9 @@ again_2:
   endcases;
 @#
 main_loop_j+3:
+  if ins_kp=max_halfword then check_for_post_char_toks(big_switch)
+  else check_for_inter_char_toks(big_switch);
+
   if ins_kp=true then @<Insert |pre_break_penalty| of |cur_chr|@>;
   if main_f<>null_font then
     begin @<Look ahead for glue or kerning@>;
