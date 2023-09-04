@@ -26538,8 +26538,8 @@ again_2:
   endcases;
 @#
 main_loop_j+3:
-  if ins_kp=max_halfword then check_for_post_char_toks(big_switch)
-  else check_for_inter_char_toks(big_switch);
+  if ins_kp=max_halfword then check_for_post_char_toks(again_2)
+  else check_for_inter_char_toks(again_2);
 
   if ins_kp=true then @<Insert |pre_break_penalty| of |cur_chr|@>;
   if main_f<>null_font then

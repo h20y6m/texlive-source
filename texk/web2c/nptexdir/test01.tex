@@ -89,8 +89,9 @@ shelf\romannumeral0ful
 Y\piyo U\the\lastnodechar}
 
 8Y80Y
+\tenmin
 
-】【【：：
+】【【：：】{\vrule height 8pt width 1pt  depth 10pt}【
 
 \XeTeXcharclass`\あ 200
 \XeTeXcharclass`\【 200
@@ -102,7 +103,9 @@ Y\piyo U\the\lastnodechar}
 \XeTeXinterchartoks 201 100 {{\vrule height 0pt width 1pt  depth 10pt}}
 \XeTeXinterchartoks 200 201 {{\vrule height 5pt width 1pt depth 0pt}}
 
-\message{A}YあいY【】【【：：
+\setbox0=\hbox{YあいY【】【【}
+{\tracingonline1\showboxdepth10000\showboxbreadth10000\showbox0}%
+\leavevmode\unhbox0
 
 
 \tenmin
