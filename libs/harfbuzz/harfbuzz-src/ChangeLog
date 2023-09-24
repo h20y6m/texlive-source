@@ -1,3 +1,1093 @@
+commit 0967a3e24ab5d79cc55dbe224652d8aabd942def
+Author: Khaled Hosny <khaled@aliftype.com>
+Date:   Mon Sep 18 21:18:27 2023 +0300
+
+    8.2.1
+
+ NEWS             | 6 ++++++
+ configure.ac     | 2 +-
+ meson.build      | 2 +-
+ src/hb-version.h | 4 ++--
+ 4 files changed, 10 insertions(+), 4 deletions(-)
+
+commit eab4e07d6c7acce1f9eb26963c9d4d0d00b75ce2
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Sep 18 10:22:37 2023 +0000
+
+    Bump github/codeql-action from 2.21.5 to 2.21.7
+    
+    Bumps [github/codeql-action](https://github.com/github/codeql-action) from 2.21.5 to 2.21.7.
+    - [Release notes](https://github.com/github/codeql-action/releases)
+    - [Changelog](https://github.com/github/codeql-action/blob/main/CHANGELOG.md)
+    - [Commits](https://github.com/github/codeql-action/compare/00e563ead9f72a8461b24876bee2d0c2e8bd2ee8...04daf014b50eaf774287bf3f0f1869d4b4c4b913)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: github/codeql-action
+      dependency-type: direct:production
+      update-type: version-update:semver-patch
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .github/workflows/scorecard.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 609a7cc534aa22466de5deb31f1b8678dee8e111
+Merge: 37457412b c459b8a51
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sun Sep 17 14:59:58 2023 -0600
+
+    Merge pull request #4406 from harfbuzz/unicode-15.1
+    
+    Update to Unicode 15.1.0
+
+commit c459b8a51acf96e0d83d9b961ee3409fb5849389
+Author: David Corbett <corbett.dav@northeastern.edu>
+Date:   Sat Sep 16 10:27:07 2023 -0400
+
+    [Unicode 15.1] Add tests
+
+ test/api/test-unicode.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+commit c6d53ab570e564b8e0226a234d0fd307c297738b
+Author: David Corbett <corbett.dav@northeastern.edu>
+Date:   Sat Sep 16 10:21:11 2023 -0400
+
+    [Unicode 15.1] Update the vowel constraint table
+
+ src/hb-ot-shaper-vowel-constraints.cc | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit f318e104be4c2c58daf92a792b96c6a9974201a1
+Author: David Corbett <corbett.dav@northeastern.edu>
+Date:   Sat Sep 16 10:20:14 2023 -0400
+
+    [Unicode 15.1] Update the Indic table
+
+ src/hb-ot-shaper-indic-table.cc | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+
+commit c03e4c10a4bcab59b447a3d5416f26191c8af788
+Author: David Corbett <corbett.dav@northeastern.edu>
+Date:   Sat Sep 16 10:06:24 2023 -0400
+
+    [Unicode 15.1] Update emoji table and cluster test
+
+ src/hb-unicode-emoji-table.hh                      |   6 +-
+ .../shape/data/in-house/tests/emoji-clusters.tests | 301 +++++++++++++++++++++
+ 2 files changed, 304 insertions(+), 3 deletions(-)
+
+commit d8d4a192bdd0b3e0307046dc25ff813850a910c9
+Author: David Corbett <corbett.dav@northeastern.edu>
+Date:   Sat Sep 16 10:00:07 2023 -0400
+
+    Update IANA Language Subtag Registry to 2023-08-02
+
+ src/hb-ot-tag-table.hh | 17 ++++++++++-------
+ 1 file changed, 10 insertions(+), 7 deletions(-)
+
+commit 6ed6ccac4c6f650ef6abba3929bc48dff12e328d
+Author: David Corbett <corbett.dav@northeastern.edu>
+Date:   Sat Sep 16 09:54:21 2023 -0400
+
+    [Unicode 15.1] Update the USE table
+
+ src/hb-ot-shaper-use-table.hh | 24 ++++++++++++------------
+ 1 file changed, 12 insertions(+), 12 deletions(-)
+
+commit f485b6a9c05b852cafea890069ce87bd5a76c20e
+Author: David Corbett <corbett.dav@northeastern.edu>
+Date:   Sat Sep 16 09:49:29 2023 -0400
+
+    [Unicode 15.1] Update the Arabic joining script list
+
+ src/hb-ot-shaper-arabic-joining-list.hh | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+commit f15fe524423c61dede0b35a148ca917b3746935f
+Author: David Corbett <corbett.dav@northeastern.edu>
+Date:   Sat Sep 16 09:45:51 2023 -0400
+
+    [Unicode 15.1] Update the Arabic table
+
+ src/hb-ot-shaper-arabic-table.hh | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+commit b3705cbf070d3dc984c5b3e18c7657aadd2b1a0f
+Author: David Corbett <corbett.dav@northeastern.edu>
+Date:   Sat Sep 16 09:40:56 2023 -0400
+
+    [Unicode 15.1] Update the UCD table
+
+ src/hb-ucd-table.hh | 3450 ++++++++++++++++++++++++++-------------------------
+ 1 file changed, 1727 insertions(+), 1723 deletions(-)
+
+commit 767f937833f82257169dc278e4aaa22c44bfebf8
+Author: David Corbett <corbett.dav@northeastern.edu>
+Date:   Fri Sep 15 23:11:26 2023 -0400
+
+    [USE] Update the data files
+    
+    This uses the data files from
+    <https://github.com/microsoft/font-tools/tree/9e02b86c85d1a98a1d411e565d36723468f9e884/USE>
+    and closes #4404.
+
+ src/gen-use-table.py                              |   16 +-
+ src/hb-ot-shaper-use-machine.hh                   | 1381 +++++++++++----------
+ src/hb-ot-shaper-use-machine.rl                   |    6 +-
+ src/hb-ot-shaper-use-table.hh                     |  940 +++++++-------
+ src/ms-use/IndicPositionalCategory-Additional.txt |    1 +
+ src/ms-use/IndicSyllabicCategory-Additional.txt   |   57 +-
+ 6 files changed, 1223 insertions(+), 1178 deletions(-)
+
+commit 02c2e24749b9d20ec6371766d7faeb4d5d2caa67
+Author: David Corbett <corbett.dav@northeastern.edu>
+Date:   Sat Sep 16 09:22:43 2023 -0400
+
+    Regenerate files using Ragel 6.10
+
+ src/hb-buffer-deserialize-json.hh         |    8 +-
+ src/hb-buffer-deserialize-text-glyphs.hh  |   10 +-
+ src/hb-buffer-deserialize-text-unicode.hh |   10 +-
+ src/hb-number-parser.hh                   |    8 +-
+ src/hb-ot-shaper-indic-machine.hh         |   14 +-
+ src/hb-ot-shaper-khmer-machine.hh         |   14 +-
+ src/hb-ot-shaper-myanmar-machine.hh       |   14 +-
+ src/hb-ot-shaper-use-machine.hh           | 1875 ++++++++++++++---------------
+ 8 files changed, 942 insertions(+), 1011 deletions(-)
+
+commit 37457412b3212463c5f53119080cd1af375aae23
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Sep 11 10:33:26 2023 +0000
+
+    Bump actions/checkout from 3.5.3 to 4.0.0
+    
+    Bumps [actions/checkout](https://github.com/actions/checkout) from 3.5.3 to 4.0.0.
+    - [Release notes](https://github.com/actions/checkout/releases)
+    - [Changelog](https://github.com/actions/checkout/blob/main/CHANGELOG.md)
+    - [Commits](https://github.com/actions/checkout/compare/c85c95e3d7251135ab7dc9ce3241c5835cc595a9...3df4ab11eba7bda6032a0b82a6bb43b11571feac)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: actions/checkout
+      dependency-type: direct:production
+      update-type: version-update:semver-major
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .github/workflows/arm-ci.yml        | 2 +-
+ .github/workflows/configs-build.yml | 2 +-
+ .github/workflows/coverity-scan.yml | 2 +-
+ .github/workflows/linux-ci.yml      | 2 +-
+ .github/workflows/macos-ci.yml      | 2 +-
+ .github/workflows/msvc-ci.yml       | 2 +-
+ .github/workflows/msys2-ci.yml      | 2 +-
+ .github/workflows/scorecard.yml     | 2 +-
+ 8 files changed, 8 insertions(+), 8 deletions(-)
+
+commit 7384aaae4300da4380ce13adbca0aa7c6fe443e1
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Sep 11 10:33:29 2023 +0000
+
+    Bump actions/upload-artifact from 3.1.2 to 3.1.3
+    
+    Bumps [actions/upload-artifact](https://github.com/actions/upload-artifact) from 3.1.2 to 3.1.3.
+    - [Release notes](https://github.com/actions/upload-artifact/releases)
+    - [Commits](https://github.com/actions/upload-artifact/compare/0b7f8abb1508181956e8e162db84b466c27e18ce...a8a3f3ad30e3422c9c7b888a15615d19a852ae32)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: actions/upload-artifact
+      dependency-type: direct:production
+      update-type: version-update:semver-patch
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .github/workflows/cifuzz.yml    | 2 +-
+ .github/workflows/msys2-ci.yml  | 2 +-
+ .github/workflows/scorecard.yml | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+commit 978918c32a66af41df86386510cf73a4c0e8d393
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Mon Sep 11 11:04:08 2023 +0100
+
+    [aat] Simplify complex condition
+    
+    Based on https://github.com/RazrFalcon/rustybuzz/discussions/79#discussioncomment-6960324
+
+ src/hb-aat-layout-common.hh | 72 ++++++++++++++++++++++-----------------------
+ 1 file changed, 35 insertions(+), 37 deletions(-)
+
+commit 17ee3cd7f4e3123d8289694f59a03c782035103f
+Author: Vincent Torri <vtorri@outlook.fr>
+Date:   Sun Sep 10 07:29:08 2023 +0200
+
+    fix warning with unsigned long
+
+ src/graph/graph.hh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit c1eb66d4159fec311334aee5c0a59384491d3989
+Author: Khaled Hosny <khaled@aliftype.com>
+Date:   Fri Sep 8 21:54:32 2023 +0300
+
+    8.2.0
+
+ NEWS                   | 12 ++++++++++++
+ configure.ac           |  2 +-
+ docs/harfbuzz-docs.xml |  1 +
+ meson.build            |  2 +-
+ src/hb-paint.cc        |  2 +-
+ src/hb-paint.h         |  4 ++--
+ src/hb-version.h       |  6 +++---
+ 7 files changed, 21 insertions(+), 8 deletions(-)
+
+commit d5cb1a315380e9bd78ff377a586b78bc42abafa6
+Author: L. E. Segovia <amy@amyspark.me>
+Date:   Thu Aug 31 23:41:10 2023 -0300
+
+    [meson] Add gitignore entries for wrap sources
+
+ subprojects/.gitignore | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+commit 617e44785476178107c4216964f185937e312a09
+Author: L. E. Segovia <amy@amyspark.me>
+Date:   Thu Aug 31 23:39:29 2023 -0300
+
+    [meson] Set C++14 as minimum as implied by MSVC support
+    
+    Microsoft's STL uses C++14 as minimum. Using C++11 is actually enforced
+    by clang-cl and clang, which will lead to all sorts of compilation
+    errors.
+
+ meson.build | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+commit 15bc9e342f989c7cd27de3a3fb68933259bf59e2
+Author: L. E. Segovia <amy@amyspark.me>
+Date:   Thu Aug 31 23:37:08 2023 -0300
+
+    [meson] Detect Microsoft compilers through _MSC_FULL_VER
+    
+    Microsoft ships three compilers nowadays: MSVC, clang-cl, and Clang.
+    The latter is always skipped by `compiler.get_argument_syntax()`,
+    which leads to the incorrect export macro being applied.
+    
+    This commit also removes the tests that are affected in Microsoft Clang.
+
+ src/meson.build | 30 +++++++++++++++---------------
+ 1 file changed, 15 insertions(+), 15 deletions(-)
+
+commit fd3eb2c6723c3ce241011f1d3429e48c3226af1c
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Thu Aug 24 08:59:18 2023 -0700
+
+    fuzzer fix: https://oss-fuzz.com/testcase-detail/6032126569742336
+
+ src/hb-ot-var-gvar-table.hh                        |  24 ++++++---------------
+ ...ase-minimized-hb-subset-fuzzer-6032126569742336 | Bin 0 -> 1970 bytes
+ 2 files changed, 6 insertions(+), 18 deletions(-)
+
+commit 0340ba1c50da110787a420a633a7b8b2dabe42c4
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Tue Sep 5 14:56:09 2023 +0300
+
+    [bit-page] Add a few operators
+
+ src/hb-bit-page.hh | 3 +++
+ 1 file changed, 3 insertions(+)
+
+commit a0b758f7d779376f4582c968d6fc3c5e7cde1e50
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Sep 4 10:34:27 2023 +0000
+
+    Bump github/codeql-action from 2.21.4 to 2.21.5
+    
+    Bumps [github/codeql-action](https://github.com/github/codeql-action) from 2.21.4 to 2.21.5.
+    - [Release notes](https://github.com/github/codeql-action/releases)
+    - [Changelog](https://github.com/github/codeql-action/blob/main/CHANGELOG.md)
+    - [Commits](https://github.com/github/codeql-action/compare/a09933a12a80f87b87005513f0abb1494c27a716...00e563ead9f72a8461b24876bee2d0c2e8bd2ee8)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: github/codeql-action
+      dependency-type: direct:production
+      update-type: version-update:semver-patch
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .github/workflows/scorecard.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 4cfc6d8e173e800df086d7be078da2e8c5cfca19
+Author: Ben Wagner <bungeman@chromium.org>
+Date:   Thu Aug 31 13:54:34 2023 -0400
+
+    Specify tuple_variations_t special member functions
+    
+    Building with clang complains about the use of `tuple_variations_t`'s
+    implicit copy constructor and copy assignment operator, since automatic
+    generation of these is deprecated when declaring a non-default
+    destructor. This is a good warning because it isn't obvious that copies
+    were being made instead of the object being moved and this struct should
+    be moved and not copied. Declare all the special member functions,
+    defaulting the moves and deleting the copies.
+    
+    After making `tuple_variations_t` move only, an issue is revealed in
+    `hb_vector_t::push` which has been requiring that objects be copyable.
+    Remove the old non-emplacing `push` now that this works with all
+    existing objects and make a single `push` which is more like
+    `std::vector::emplace_back` since that is somewhat what the newer `push`
+    is attempting to do.
+
+ src/hb-ot-var-common.hh |  5 +++++
+ src/hb-vector.hh        | 22 ++--------------------
+ 2 files changed, 7 insertions(+), 20 deletions(-)
+
+commit 4668b43e2cbc9d2ae19a9e9b53ad694da35240a1
+Author: Benoit Pierre <benoit.pierre@gmail.com>
+Date:   Thu Aug 31 19:33:29 2023 +0200
+
+    [meson] add source fallback URL to freetype2 wrap
+
+ subprojects/freetype2.wrap | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit 8d22a57065d286dd2e920ece70c12bba5f59a8b1
+Author: Garret Rieger <grieger@google.com>
+Date:   Mon Aug 28 18:33:31 2023 +0000
+
+    [repacker] fix potential use after free in repacker.
+    
+    During table splitting we iterate over the lookups map which can be modified during table splitting. This can result in a use after free in the iterator. Create a local copy of the lookup indices to avoid this.
+
+ src/hb-repacker.hh | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+commit a1f034eaacb5547fdfc62fd1c4df23f9d2b40104
+Author: Garret Rieger <grieger@google.com>
+Date:   Mon Aug 28 21:10:16 2023 +0000
+
+    [repacker] fix fuzzer failure.
+    
+    Fixes: https://oss-fuzz.com/testcase-detail/6490945267564544
+
+ src/graph/markbasepos-graph.hh                         |   4 +++-
+ ...tcase-minimized-hb-repacker-fuzzer-6490945267564544 | Bin 0 -> 358352 bytes
+ 2 files changed, 3 insertions(+), 1 deletion(-)
+
+commit f380a32825a1b2c51bbe21dc7acb9b3cc0921f69
+Author: Bruce Mitchener <bruce.mitchener@gmail.com>
+Date:   Fri Aug 25 14:01:01 2023 +0700
+
+    Fix some typos.
+
+ CONFIG.md                            |  2 +-
+ src/OT/Layout/GPOS/PairPosFormat2.hh |  2 +-
+ src/hb-bimap.hh                      |  2 +-
+ src/hb-bit-set.hh                    |  4 ++--
+ src/hb-buffer.cc                     |  4 ++--
+ src/hb-buffer.h                      |  2 +-
+ src/hb-font.cc                       |  2 +-
+ src/hb-map.cc                        |  2 +-
+ src/hb-ot-shape.cc                   |  2 +-
+ src/hb-sanitize.hh                   |  2 +-
+ src/hb-set.cc                        | 24 ++++++++++++------------
+ src/hb-vector.hh                     |  2 +-
+ src/hb-wasm-shape.cc                 |  2 +-
+ 13 files changed, 26 insertions(+), 26 deletions(-)
+
+commit c28fdc39b25269aadafca2ba0507c149b2779da2
+Author: Garret Rieger <grieger@google.com>
+Date:   Wed Aug 23 22:16:39 2023 +0000
+
+    [repacker] fix bot failure.
+
+ src/graph/gsubgpos-context.hh | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+commit d7ee328f807cd4890b701d5b2dab5993270ace7f
+Author: Garret Rieger <grieger@google.com>
+Date:   Wed Aug 23 22:06:55 2023 +0000
+
+    [repacker] include the size of all lookup tables in the layer size estimates from the start.
+    
+    In extension promotion previously we incrementally added the contribution of the lookup table to the layer size estimates as the lookups were processed. However, this isn't quite correct as regardless of the promotion decision the full lookup table size will be incurred. So the size should be added to the initial sizes.
+
+ src/hb-repacker.hh | 13 +++++++++----
+ 1 file changed, 9 insertions(+), 4 deletions(-)
+
+commit 5587247d5bb46e3ff5d0c4601b145dfbae50e27c
+Author: Garret Rieger <grieger@google.com>
+Date:   Wed Aug 23 21:54:15 2023 +0000
+
+    [repacker] create only one extension subtable per physical subtable.
+    
+    During extension promotion when multiple lookups refer to a shared subtable node create and reuse a single extension subtable for it. Fixes: https://github.com/fonttools/fonttools/issues/3260.
+
+ src/graph/graph.hh            | 12 +++++++++++
+ src/graph/gsubgpos-context.hh |  1 +
+ src/graph/gsubgpos-graph.hh   | 19 +++++++++++++----
+ src/test-repacker.cc          | 47 +++++++++++++++++++++++++++++++++++++------
+ 4 files changed, 69 insertions(+), 10 deletions(-)
+
+commit 56e8a290328c6628a92971c7837f773194e7584f
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Tue Aug 22 15:49:00 2023 -0600
+
+    Fix static_size declaration
+    
+    I have a vague memory that it was intentionally written
+    that way, but I can't recall :-(.
+
+ src/OT/Color/COLR/COLR.hh | 4 ++--
+ src/hb-null.hh            | 2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+commit 2023384bdf74992c2a38ed7ddc81dfd14d8a6649
+Merge: 970d2c438 dd8d35766
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Tue Aug 22 13:09:26 2023 -0700
+
+    Merge pull request #4368 from googlefonts/support_gvar
+    
+    Initial implementation for gvar partial instancing
+
+commit dd8d35766bb31ef43848180c419c621be302ac5d
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Tue Aug 22 12:54:50 2023 -0700
+
+    [instancer] enable partial instancing tests when experimental api is on
+
+ src/hb-ot-var-common.hh | 2 +-
+ test/subset/meson.build | 5 ++++-
+ 2 files changed, 5 insertions(+), 2 deletions(-)
+
+commit 970d2c438f849700b879d76e8c183c2edfbaccdb
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Aug 21 10:10:17 2023 +0000
+
+    Bump github/codeql-action from 2.21.3 to 2.21.4
+    
+    Bumps [github/codeql-action](https://github.com/github/codeql-action) from 2.21.3 to 2.21.4.
+    - [Release notes](https://github.com/github/codeql-action/releases)
+    - [Changelog](https://github.com/github/codeql-action/blob/main/CHANGELOG.md)
+    - [Commits](https://github.com/github/codeql-action/compare/5b6282e01c62d02e720b81eb8a51204f527c3624...a09933a12a80f87b87005513f0abb1494c27a716)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: github/codeql-action
+      dependency-type: direct:production
+      update-type: version-update:semver-patch
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .github/workflows/scorecard.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 6c7aed1000c52a7236f2368aae2bbedab6b133ff
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Aug 21 10:52:43 2023 +0000
+
+    Bump fonttools from 4.42.0 to 4.42.1 in /.ci
+    
+    Bumps [fonttools](https://github.com/fonttools/fonttools) from 4.42.0 to 4.42.1.
+    - [Release notes](https://github.com/fonttools/fonttools/releases)
+    - [Changelog](https://github.com/fonttools/fonttools/blob/main/NEWS.rst)
+    - [Commits](https://github.com/fonttools/fonttools/compare/4.42.0...4.42.1)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: fonttools
+      dependency-type: direct:production
+      update-type: version-update:semver-patch
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .ci/requirements-fonttools.txt | 70 +++++++++++++++++++++---------------------
+ .ci/requirements.txt           | 70 +++++++++++++++++++++---------------------
+ 2 files changed, 70 insertions(+), 70 deletions(-)
+
+commit ca906e8747ac45ccf235c3f3e9ee9b69a693d7e4
+Author: Garret Rieger <grieger@google.com>
+Date:   Wed Aug 16 23:37:03 2023 +0000
+
+    [repacker] fix fuzzer timeout.
+    
+    Corrects some mistakes in the handling of incoming_edges_ when memory allocation failures happen.
+
+ src/graph/graph.hh                                      |  11 +++++++++--
+ ...stcase-minimized-hb-repacker-fuzzer-6697168080338944 | Bin 0 -> 68766 bytes
+ 2 files changed, 9 insertions(+), 2 deletions(-)
+
+commit c7f2d440f463be31ae24cbae7ceb6ea72a15e990
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Wed Aug 16 09:55:23 2023 -0700
+
+    [hb-view] Better cairo version check
+
+ util/view-cairo.hh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit e714e7d4f3d3bd1a49c460f6c3bd2c3f09192722
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Wed Aug 16 09:54:08 2023 -0700
+
+    [hb-view] Work around old cairo
+    
+    Fixes https://github.com/harfbuzz/harfbuzz/issues/4378
+
+ util/view-cairo.hh | 3 +++
+ 1 file changed, 3 insertions(+)
+
+commit bea26446d2063cadb0cd83c1c627d3eed95cbcf6
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Tue Aug 15 14:20:54 2023 -0700
+
+    [instancer] reference all points for gvar
+    
+    If a point is not referenced and delta is not inferred, set delta to 0
+
+ src/hb-ot-var-common.hh                               |  16 ++++++++++++++--
+ ...tain-all-codepoint.wght=200-300-500,wdth=80-90.ttf | Bin 7452 -> 7292 bytes
+ ...ions.retain-all-codepoint.wght=300-600,wdth=85.ttf | Bin 6780 -> 6760 bytes
+ 3 files changed, 14 insertions(+), 2 deletions(-)
+
+commit 06ff3bcb8db2ac9eac80bef21644c4d70f60573a
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Tue Aug 15 14:41:18 2023 -0600
+
+    [COLR,glyf] Use map instead of set for tracking current glyphs / layers
+
+ src/OT/Color/COLR/COLR.hh | 4 ++--
+ src/OT/glyf/Glyph.hh      | 4 ++--
+ src/hb-ft-colr.hh         | 4 ++--
+ src/hb-map.hh             | 5 +++++
+ 4 files changed, 11 insertions(+), 6 deletions(-)
+
+commit b530e485cdcd466cdfd7f80fd341a67883fb8c71
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Tue Aug 15 14:31:40 2023 -0600
+
+    [glyf] Don't recuse into alread-active composite glyphs
+    
+    Deny loops.
+
+ src/OT/glyf/Glyph.hh | 40 ++++++++++++++++++++++++++++++++++++++--
+ 1 file changed, 38 insertions(+), 2 deletions(-)
+
+commit 8f039ab4d624c545dd472e477c705c3f013f66c6
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Tue Aug 15 11:27:19 2023 -0600
+
+    [COLR] Avoid infinite-loop through PaintColrLayers
+    
+    Fixes https://github.com/harfbuzz/harfbuzz/issues/4376
+    Fixes https://oss-fuzz.com/testcase-detail/5717524023738368
+
+ src/OT/Color/COLR/COLR.hh |  8 ++++++++
+ src/hb-ft-colr.hh         | 10 ++++++++++
+ 2 files changed, 18 insertions(+)
+
+commit 0c80aec10b38c8880b0f353b4774b8843a4b4126
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Tue Aug 15 10:30:38 2023 -0600
+
+    [COLR] Move cycle-detection to the renderer instead of cairo
+    
+    Alternative fix for https://github.com/harfbuzz/harfbuzz/issues/4375
+
+ src/OT/Color/COLR/COLR.hh |  10 ++
+ src/hb-cairo-utils.hh     |   3 -
+ src/hb-cairo.cc           |   8 -
+ src/hb-ft-colr.hh         |  17 +-
+ test/api/results/bad-154  | 440 +---------------------------------------------
+ 5 files changed, 26 insertions(+), 452 deletions(-)
+
+commit 21a894f055bbff6afb45cbcceed89ac92091bb3e
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Tue Aug 15 10:21:26 2023 -0600
+
+    [cairo] Protect against infinite loops
+    
+    Fixes https://github.com/harfbuzz/harfbuzz/issues/4375
+    
+    Maybe we should do this in hb-ft and COLR instead?
+
+ src/hb-cairo-utils.hh | 3 +++
+ src/hb-cairo.cc       | 8 ++++++++
+ 2 files changed, 11 insertions(+)
+
+commit 7d7541e35d5701953e5e768ac1ef41b23223edb1
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Mon Aug 14 17:55:09 2023 -0600
+
+    [test-paint] Print paint-color-glyph
+
+ test/api/results/bad-154    | 34 +++++++++++++++++++++++++++++++++-
+ test/api/results/test-154   |  4 +++-
+ test/api/results/testvf-154 |  4 +++-
+ test/api/test-paint.c       | 15 +++++++++++++++
+ 4 files changed, 54 insertions(+), 3 deletions(-)
+
+commit 5560eb60d75945a331427b0e8112282dc4ff0d94
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Mon Aug 14 17:05:22 2023 -0600
+
+    [paint] Fix docs
+
+ src/hb-paint.h | 9 ---------
+ 1 file changed, 9 deletions(-)
+
+commit 47231bdc701df1f3ba0dafb901dc92db54e7ff78
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Mon Aug 14 16:52:44 2023 -0600
+
+    [COLR/cairo/ft] Fixups to paint-color-glyph and implement for hb-ft
+
+ docs/harfbuzz-sections.txt  |  3 +++
+ src/hb-ft-colr.hh           | 11 ++++++++
+ test/api/results/bad-154    | 66 ++++++++++++++++++++++++++++++++++++++++++++-
+ test/api/results/testvf-154 |  6 ++++-
+ 4 files changed, 84 insertions(+), 2 deletions(-)
+
+commit 58effbcc4f1b6aa1870738f0da3d999f4f1810be
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Mon Aug 14 16:47:01 2023 -0600
+
+    .
+
+ src/OT/Color/COLR/COLR.hh |  5 +++++
+ src/hb-cairo.cc           | 10 +++++++++-
+ test/api/results/test-154 |  6 +++++-
+ test/api/test-paint.c     |  2 +-
+ 4 files changed, 20 insertions(+), 3 deletions(-)
+
+commit 74527670fc5b0517e1d2cba2c26e3695547302e1
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Mon Aug 14 15:57:24 2023 -0600
+
+    [COLR/cairo] Add paint_color_glyph func
+    
+    Implement in cairo to use scaled-font's glyph cache.
+
+ src/OT/Color/COLR/COLR.hh |  4 ++++
+ src/hb-cairo.cc           | 19 ++++++++++++++++++
+ src/hb-paint.cc           | 25 +++++++++++++++++++++++
+ src/hb-paint.h            | 51 +++++++++++++++++++++++++++++++++++++++++++++++
+ src/hb-paint.hh           |  8 ++++++++
+ 5 files changed, 107 insertions(+)
+
+commit 8d19274c2d6e7205dc32d416c60c3542a3f353e9
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Mon Aug 14 14:40:26 2023 -0600
+
+    [layout] Speed up VarStoreInstancer
+
+ src/hb-ot-var-common.hh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 1da4c61550ed8216c811765de6d8904727df0e65
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Aug 14 10:51:00 2023 +0000
+
+    Bump github/codeql-action from 2.21.2 to 2.21.3
+    
+    Bumps [github/codeql-action](https://github.com/github/codeql-action) from 2.21.2 to 2.21.3.
+    - [Release notes](https://github.com/github/codeql-action/releases)
+    - [Changelog](https://github.com/github/codeql-action/blob/main/CHANGELOG.md)
+    - [Commits](https://github.com/github/codeql-action/compare/0ba4244466797eb048eb91a6cd43d5c03ca8bd05...5b6282e01c62d02e720b81eb8a51204f527c3624)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: github/codeql-action
+      dependency-type: direct:production
+      update-type: version-update:semver-patch
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .github/workflows/scorecard.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 8d44562b429afc1cca8cf5472905ae189929a506
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Aug 14 10:50:49 2023 +0000
+
+    Bump hendrikmuhs/ccache-action from 1.2.9 to 1.2.10
+    
+    Bumps [hendrikmuhs/ccache-action](https://github.com/hendrikmuhs/ccache-action) from 1.2.9 to 1.2.10.
+    - [Release notes](https://github.com/hendrikmuhs/ccache-action/releases)
+    - [Commits](https://github.com/hendrikmuhs/ccache-action/compare/ca3acd2731eef11f1572ccb126356c2f9298d35e...6d1841ec156c39a52b1b23a810da917ab98da1f4)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: hendrikmuhs/ccache-action
+      dependency-type: direct:production
+      update-type: version-update:semver-patch
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .github/workflows/linux-ci.yml | 2 +-
+ .github/workflows/macos-ci.yml | 2 +-
+ .github/workflows/msvc-ci.yml  | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+commit a8fb56e0f313558dc1f18df2d76ca691567330b9
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Aug 14 10:36:33 2023 +0000
+
+    Bump meson from 1.2.0 to 1.2.1 in /.ci
+    
+    Bumps [meson](https://github.com/mesonbuild/meson) from 1.2.0 to 1.2.1.
+    - [Release notes](https://github.com/mesonbuild/meson/releases)
+    - [Commits](https://github.com/mesonbuild/meson/compare/1.2.0...1.2.1)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: meson
+      dependency-type: direct:production
+      update-type: version-update:semver-patch
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .ci/requirements.in  | 2 +-
+ .ci/requirements.txt | 6 +++---
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+commit e8eb1dc5ff695427abc137d3d15c4eec64ab6c78
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Wed Aug 9 15:35:59 2023 -0600
+
+    [parse_tag] Accept non-ALNUM in tag name
+
+ src/hb-common.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 9a7afe922b7c661267ecd2211b5199f5ae4df180
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Wed Aug 9 12:00:41 2023 -0600
+
+    [perf] Benchmark glyph painting
+
+ perf/benchmark-font.cc | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+commit 077c4308cc2650bcd761b60c2b64eea77c5d399c
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Wed Aug 9 10:41:04 2023 -0600
+
+    [limits] Increase COLRv1 edge-count
+    
+    We have a "pixel" color font that was easily hitting the limit...
+
+ src/hb-limits.hh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 45c1ad05126c33408ccf862a0fde69f608147f04
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Wed Aug 9 10:27:45 2023 -0600
+
+    [paint] Add tracing
+
+ src/OT/Color/COLR/COLR.hh | 22 ++++++++++++++++++++++
+ src/hb-debug.hh           | 19 +++++++++++++++++--
+ 2 files changed, 39 insertions(+), 2 deletions(-)
+
+commit 483bc0a3847ae55860bd55fa0eb214f899a02b31
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Tue Aug 8 15:58:20 2023 -0600
+
+    [arabic/stch] Center the stretched group over the digits
+    
+    Mostly relevant when there's one digit only.
+    
+    https://github.com/harfbuzz/harfbuzz/issues/4369#issuecomment-1670361856
+
+ src/hb-ot-shaper-arabic.cc                       | 5 ++++-
+ test/shape/data/in-house/tests/arabic-stch.tests | 1 +
+ 2 files changed, 5 insertions(+), 1 deletion(-)
+
+commit 9daef6ed4eda12e13628b1ae8bff590d4e6adaf6
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Tue Aug 8 13:33:11 2023 -0600
+
+    [arabic] Add test for previous commit
+
+ .../fonts/507637795ce4f2975593da54d12b46f76c7cc4cc.ttf   | Bin 0 -> 2200 bytes
+ test/shape/data/in-house/tests/arabic-stch.tests         |   1 +
+ 2 files changed, 1 insertion(+)
+
+commit 313c772989ca838f7ba9c2119ffb953ba8a4418b
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Tue Aug 8 13:06:12 2023 -0600
+
+    [arabic/stch] Also work in left-to-right direction
+    
+    Fixes https://github.com/harfbuzz/harfbuzz/issues/4369
+
+ src/hb-ot-shaper-arabic.cc | 25 ++++++++++++++++++++-----
+ 1 file changed, 20 insertions(+), 5 deletions(-)
+
+commit 40bfabd1f97d7ad665140ba764157a6058e6a3b7
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Tue Aug 8 12:17:25 2023 -0600
+
+    [arabic/stch] Zero advances
+    
+    This was working for our test suite because those glyphs were
+    declared mark and their advances zeroed automatically. But is
+    not the case in eg. the font posted at:
+    
+    https://github.com/harfbuzz/harfbuzz/issues/4369
+
+ src/hb-ot-shaper-arabic.cc | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit 0aa5dafefd85d01d486d0d26b75387df3a2927e3
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Tue Aug 8 08:33:11 2023 -0700
+
+    fix bots.
+    
+    -Also disable partial instancing tests for now, cause the command option
+    is wrapped by experimental_api
+
+ test/subset/data/Makefile.am      | 1 -
+ test/subset/data/Makefile.sources | 1 -
+ test/subset/meson.build           | 2 +-
+ util/hb-subset.cc                 | 4 ++++
+ 4 files changed, 5 insertions(+), 3 deletions(-)
+
+commit 77b158c72d355e8e5e32f0d9748174041fddc8dd
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Mon Aug 7 16:02:02 2023 -0700
+
+    [instancer] add tests for gvar partial instancing
+
+ test/subset/data/Makefile.am                             |   1 +
+ test/subset/data/Makefile.sources                        |   1 +
+ ....retain-all-codepoint.wght=200-300-500,wdth=80-90.ttf | Bin 0 -> 8256 bytes
+ ...iations.retain-all-codepoint.wght=300-600,wdth=85.ttf | Bin 0 -> 7244 bytes
+ ....retain-all-codepoint.wght=200-300-500,wdth=80-90.ttf | Bin 0 -> 7452 bytes
+ ...iations.retain-all-codepoint.wght=300-600,wdth=85.ttf | Bin 0 -> 6780 bytes
+ .../data/profiles/no-tables-with-item-variations.txt     |   1 +
+ test/subset/data/tests/glyf_partial_instancing.tests     |  13 +++++++++++++
+ test/subset/generate-expected-outputs.py                 |   1 +
+ test/subset/meson.build                                  |   1 +
+ 10 files changed, 18 insertions(+)
+
+commit 32cfa37e2edd6a8dbc07c75c010fd2fc68c4346a
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Mon May 8 13:30:39 2023 -0700
+
+    [instancer] command line support for partial instancing
+    
+    -Also updated hb_subset_input_set_axis_range (), so user can define
+    default value as well
+
+ src/hb-subset-input.cc | 19 ++++++++----
+ src/hb-subset.h        |  3 +-
+ util/hb-subset.cc      | 80 ++++++++++++++++++++++++++++++++++++++++----------
+ 3 files changed, 80 insertions(+), 22 deletions(-)
+
+commit 0065658e96c79f8b51c2a702908e84d9d23e0971
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Mon Aug 7 11:12:02 2023 -0700
+
+    [instancer] enable cvar instancing code
+
+ src/hb-subset-input.cc | 1 -
+ src/hb-subset.cc       | 3 +++
+ 2 files changed, 3 insertions(+), 1 deletion(-)
+
+commit 0ba4d539b365039b602d9f88133fc0cae9cd0e30
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Aug 7 11:49:03 2023 -0600
+
+    Bump fonttools from 4.41.1 to 4.42.0 in /.ci (#4365)
+    
+    Bumps [fonttools](https://github.com/fonttools/fonttools) from 4.41.1 to 4.42.0.
+    - [Release notes](https://github.com/fonttools/fonttools/releases)
+    - [Changelog](https://github.com/fonttools/fonttools/blob/main/NEWS.rst)
+    - [Commits](https://github.com/fonttools/fonttools/compare/4.41.1...4.42.0)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: fonttools
+      dependency-type: direct:production
+      update-type: version-update:semver-minor
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+    Co-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+
+ .ci/requirements-fonttools.txt | 70 +++++++++++++++++++++---------------------
+ .ci/requirements.txt           | 70 +++++++++++++++++++++---------------------
+ 2 files changed, 70 insertions(+), 70 deletions(-)
+
+commit 366ffd1ef0f26cf719ee45e08f59fc9fb4b38a05
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Mon Aug 7 10:32:47 2023 -0700
+
+    [instancer] fix move constructor for tuple_delta_t
+
+ src/hb-ot-var-common.hh | 16 +++++++++++-----
+ 1 file changed, 11 insertions(+), 5 deletions(-)
+
+commit 1d91622ddf082cd0777e9ae67876fe13fc7e454d
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Tue Jul 18 09:52:40 2023 -0700
+
+    [instancer] add a hashing impl for floating point type
+
+ src/hb-algs.hh | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+commit 5a4694b6934f9e3ca3dc89cc905b4351920085b6
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Mon Aug 7 09:55:30 2023 -0700
+
+    [instancer] add calc_inferred_deltas() for gvar
+
+ src/hb-ot-var-common.hh    | 104 +++++++++++++++++++++++++++++++++++++++++++++
+ src/test-tuple-varstore.cc |   3 +-
+ 2 files changed, 105 insertions(+), 2 deletions(-)
+
+commit fb44727401d36adc14615deda91574a6e7ec2cd6
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Mon Aug 7 09:44:41 2023 -0700
+
+    [instancer] add instantiate () for gvar
+
+ src/hb-ot-var-common.hh     | 11 ++++++++---
+ src/hb-ot-var-gvar-table.hh | 22 ++++++++++++++++++++++
+ 2 files changed, 30 insertions(+), 3 deletions(-)
+
+commit 746b112faf6adcd4a9d7325b067c4ba46a973a95
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Mon Aug 7 09:26:42 2023 -0700
+
+    [instancer] add serialize () for gvar
+
+ src/hb-ot-var-common.hh     |   6 ++-
+ src/hb-ot-var-cvar-table.hh |   1 +
+ src/hb-ot-var-gvar-table.hh | 114 ++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 120 insertions(+), 1 deletion(-)
+
+commit 3c86b096a9bf310a00086a7ed566cf1436da786c
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Fri Jul 28 16:18:51 2023 -0700
+
+    [instancer] Add instantiate () and compile_bytes() for gvar
+    
+    -Also add support for using shared_points and shared_tuples
+
+ src/hb-ot-var-common.hh     | 85 +++++++++++++++++++++++++++++++++++++--------
+ src/hb-ot-var-cvar-table.hh |  7 ++--
+ src/hb-ot-var-gvar-table.hh | 29 ++++++++++++++++
+ src/test-tuple-varstore.cc  |  2 +-
+ 4 files changed, 106 insertions(+), 17 deletions(-)
+
+commit 198612c1c83d3b19b953a2fcc73406287104e5a2
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Fri Jul 28 15:41:54 2023 -0700
+
+    [instancer] add decompile_glyph_variations () for gvar
+
+ src/hb-ot-var-common.hh     |  1 +
+ src/hb-ot-var-gvar-table.hh | 81 +++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 82 insertions(+)
+
+commit eb116e163e0bb8476cdd53a07630389d25ec3b97
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Fri Jul 28 15:27:07 2023 -0700
+
+    [instancer] Add new_gid->contour_points vector map in subset plan
+    
+    - Add an API in Glyph to export original contour_points vector, which is
+      needed by infer_deltas when merging tuple variations with the same
+      tent
+
+ src/OT/glyf/Glyph.hh              | 57 +++++++++++++++++++++++++++++++++++++++
+ src/hb-ot-var-gvar-table.hh       | 34 -----------------------
+ src/hb-subset-plan-member-list.hh |  3 +++
+ src/hb-subset-plan.cc             | 32 ++++++++++++++++++++++
+ src/hb-subset-plan.hh             | 34 +++++++++++++++++++++++
+ 5 files changed, 126 insertions(+), 34 deletions(-)
+
+commit a0f810effcb497e77be25328a251e608b5863999
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Fri Jul 28 15:04:47 2023 -0700
+
+    [instancer] add struct glyph_variations_t for gvar
+    
+    -Add compile_peak_coords () in tuple_delta_t
+    -Add compile_shared_tuples () for glyph_variations_t
+
+ src/hb-ot-var-common.hh     |  33 ++++++++++++++
+ src/hb-ot-var-gvar-table.hh | 105 ++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 138 insertions(+)
+
+commit cb92210b4cf93f6d7986dc75632c831092b4de19
+Author: Bruce Mitchener <bruce.mitchener@gmail.com>
+Date:   Tue Aug 8 00:19:30 2023 +0700
+
+    Improve Markdown formatting. (#4366)
+
+ BUILD.md  | 23 +++++++++++++----------
+ README.md |  4 ++--
+ 2 files changed, 15 insertions(+), 12 deletions(-)
+
+commit 49dbe0cd30a47258af0523822c924e9698a3e845
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sun Aug 6 15:07:57 2023 -0600
+
+    Another try
+
+ src/OT/Color/COLR/COLR.hh | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+commit 483d4a8741890ac72fa22d167ed53d4e39e9bd1d
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sun Aug 6 14:40:45 2023 -0600
+
+    Fix bot
+
+ src/OT/Layout/GPOS/CursivePosFormat1.hh | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+commit 7989702abadc8fff69a99a47cfad2db08f5b8184
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sun Aug 6 14:17:50 2023 -0600
+
+    Audit and fix up serialize_subset uses
+    
+    Fixes https://github.com/harfbuzz/harfbuzz/issues/4362
+
+ src/OT/Color/COLR/COLR.hh                | 11 ++++++-----
+ src/OT/Layout/GPOS/AnchorMatrix.hh       |  5 +++--
+ src/OT/Layout/GPOS/CursivePosFormat1.hh  | 11 +++++------
+ src/OT/Layout/GPOS/LigatureArray.hh      | 13 +++++++------
+ src/OT/Layout/GPOS/MarkArray.hh          |  6 +++---
+ src/OT/Layout/GPOS/MarkBasePosFormat1.hh | 15 +++++++--------
+ src/OT/Layout/GPOS/MarkLigPosFormat1.hh  | 14 +++++++-------
+ src/OT/Layout/GPOS/MarkMarkPosFormat1.hh | 12 +++++++-----
+ src/OT/Layout/GPOS/MarkRecord.hh         | 11 +++++------
+ src/hb-ot-layout-common.hh               |  3 +--
+ 10 files changed, 51 insertions(+), 50 deletions(-)
+
 commit 1d665c2b521512cdd56964138fc601debd1f1177
 Author: Khaled Hosny <khaled@aliftype.com>
 Date:   Wed Aug 2 23:44:56 2023 +0300
