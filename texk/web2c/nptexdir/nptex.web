@@ -8362,7 +8362,6 @@ at most |error_line|. Non-current input levels whose |token_type| is
 @p procedure show_context; {prints where the scanner is}
 label done;
 var old_setting:0..max_selector; {saved |selector| setting}
-@!s: pointer; {temporary pointer}
 @!nn:integer; {number of contexts shown so far, less one}
 @!bottom_line:boolean; {have we reached the final context to be shown?}
 @<Local variables for formatting calculations@>@/
@@ -22364,7 +22363,6 @@ var q,@!r,@!s:pointer; {temporary registers for list manipulation}
 @!t:quarterword; {used for replacement counts in discretionary nodes}
 @!pen:integer; {use when calculating penalties between lines}
 @!cur_line: halfword; {the current line number being justified}
-@!revdisp:scaled; {temporary value of displacement}
 @!LR_ptr:pointer; {stack of LR codes}
 begin LR_ptr:=LR_save;
 @<Reverse the links of the relevant passive nodes, setting |cur_p| to the
@@ -25535,7 +25533,7 @@ consideration of the other cases until later.
 @t\4@>@<Declare the procedure called |handle_right_brace|@>@;
 procedure main_control; {governs \TeX's activities}
 label big_switch,reswitch,main_loop,main_loop_wrapup,
-  main_loop_j,main_loop_j+1,main_loop_j+3,skip_loop,again_2,
+  main_loop_j,main_loop_j+1,main_loop_j+3,skip_loop,again_2,again_2+1,
   main_loop_move,main_loop_move+1,main_loop_move+2,main_loop_move_lig,
   main_loop_lookahead,main_loop_lookahead+1,
   main_lig_loop,main_lig_loop+1,main_lig_loop+2,
@@ -25543,7 +25541,6 @@ label big_switch,reswitch,main_loop,main_loop_wrapup,
   append_normal_space,exit;
 var@!t:integer; {general-purpose temporary variable}
 @!cx:UnicodeScalar; {kanji character}
-@!kp:pointer; {kinsoku penalty register}
 @!gp,gq:pointer; {temporary registers for list manipulation}
 @!disp:scaled; {displacement register}
 @!ins_kp:boolean; {whether insert kinsoku penalty}
@@ -26499,8 +26496,9 @@ main_loop_j+1: space_factor:=1000;
   end;
   ins_kp:=false;
 again_2:
-  get_next;
   main_i:=orig_char_info(main_f)(cur_l);
+again_2+1:
+  get_next;
   case cur_cmd of
     letter,other_char: begin
       if is_cjkx_jachar(cur_chr) then begin
@@ -26538,8 +26536,8 @@ again_2:
   endcases;
 @#
 main_loop_j+3:
-  if ins_kp=max_halfword then check_for_post_char_toks(again_2)
-  else check_for_inter_char_toks(again_2);
+  if ins_kp=max_halfword then check_for_post_char_toks(again_2+1)
+  else check_for_inter_char_toks(again_2+1);
 
   if ins_kp=true then @<Insert |pre_break_penalty| of |cur_chr|@>;
   if main_f<>null_font then
@@ -34715,8 +34713,7 @@ else  begin push_LR(p);
 @ @<Declare subprocedures for |init_math|@>=
 procedure just_reverse(@!p:pointer);
 label found,done;
-var l,la:pointer; {the new list}
-disp,disp2:scaled; { displacement } disped:boolean;
+var l:pointer; {the new list}
 @!t:pointer; {tail of reversed segment}
 @!q:pointer; {the next node}
 @!m,@!n:halfword; {count of unmatched math nodes}
@@ -37266,7 +37263,7 @@ creating a widow KANJI character line.
 @<Declare procedures needed in |hlist_out|, |vlist_out|@>=
 procedure adjust_hlist(p:pointer;pf:boolean);
 label exit;
-var q,s,t,u,v,x,z:pointer;
+var q,s,t,u,v,z:pointer;
   i,k:integer;
   a: pointer; { temporary pointer for accent }
   insert_skip:no_skip..after_wchar;
