@@ -1,3 +1,877 @@
+commit 18a6e78549e8e04a281129ea8ca784ce85f111b8
+Author: Khaled Hosny <khaled@aliftype.com>
+Date:   Wed Oct 18 01:10:44 2023 +0300
+
+    8.2.2
+
+ NEWS             | 11 +++++++++++
+ configure.ac     |  2 +-
+ meson.build      |  2 +-
+ src/hb-version.h |  4 ++--
+ 4 files changed, 15 insertions(+), 4 deletions(-)
+
+commit 52bc78e70de9f8288e3412a8017f88d2e0a31dea
+Author: Garret Rieger <grieger@google.com>
+Date:   Tue Oct 10 21:44:52 2023 +0000
+
+    s/PairPos/MarkBasePos/ in MarkBasePos repacking implementation.
+
+ src/graph/markbasepos-graph.hh | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit 6190bb0b8ed8af3d182d1936fbe859c15fb0f817
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Mon Oct 16 14:08:31 2023 -0400
+
+    [layout] Change order of feature collection
+    
+    See comments for rationale.
+    
+    Fixes https://github.com/harfbuzz/harfbuzz/issues/4445
+
+ src/hb-ot-layout.cc | 9 +++++++--
+ 1 file changed, 7 insertions(+), 2 deletions(-)
+
+commit 4992456cfadabb6ecbc7b4efc5c1af9ec91f6dd3
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Oct 16 10:07:42 2023 +0000
+
+    Bump ninja from 1.11.1 to 1.11.1.1 in /.ci
+    
+    Bumps [ninja](https://github.com/ninja-build/ninja) from 1.11.1 to 1.11.1.1.
+    - [Release notes](https://github.com/ninja-build/ninja/releases)
+    - [Commits](https://github.com/ninja-build/ninja/commits)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: ninja
+      dependency-type: direct:production
+      update-type: version-update:semver-patch
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .ci/requirements.txt | 34 ++++++++++++++++------------------
+ 1 file changed, 16 insertions(+), 18 deletions(-)
+
+commit 397b32e585cbb29349e0e97fad2e84cb57a9a6d1
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Oct 16 10:29:00 2023 +0000
+
+    Bump github/codeql-action from 2.22.0 to 2.22.3
+    
+    Bumps [github/codeql-action](https://github.com/github/codeql-action) from 2.22.0 to 2.22.3.
+    - [Release notes](https://github.com/github/codeql-action/releases)
+    - [Changelog](https://github.com/github/codeql-action/blob/main/CHANGELOG.md)
+    - [Commits](https://github.com/github/codeql-action/compare/2cb752a87e96af96708ab57187ab6372ee1973ab...0116bc2df50751f9724a2e35ef1f24d22f90e4e1)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: github/codeql-action
+      dependency-type: direct:production
+      update-type: version-update:semver-patch
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .github/workflows/scorecard.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 1f395cbaf91be284f443c27b8b35be0edd788c34
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Thu Oct 12 10:06:00 2023 -0700
+
+    [instancer] templatize the priority queue, use custom type for varstore
+    
+    when instantiating varstore, we need to pop a tuple like
+    (combined_gain, i, j), if combined gain is the same then we compare the
+    value of i, and then j. So we'd like to use custom type as the key when
+    popping from the queue. This would match fonttool's algorithm cause it
+    uses heappop().
+
+ src/graph/graph.hh         |  4 ++--
+ src/hb-ot-var-common.hh    | 47 ++++++++++++++++++++++++++++++++++------------
+ src/hb-priority-queue.hh   |  5 +++--
+ src/test-priority-queue.cc |  4 ++--
+ 4 files changed, 42 insertions(+), 18 deletions(-)
+
+commit bbd53fcfa49e9d4a8b3899ce2c109377886a3ba9
+Author: Garret Rieger <grieger@google.com>
+Date:   Tue Oct 10 21:41:42 2023 +0000
+
+    Remove glyph_map test that uses retain gids.
+    
+    We no longer allow the use of glyph map + retain gids (see: https://github.com/harfbuzz/harfbuzz/blob/main/src/hb-subset-plan.cc#L817). Also add the test to the meson file so it will be run by default.
+
+ test/subset/data/Makefile.am                             |   1 +
+ test/subset/data/Makefile.sources                        |   1 +
+ ...gular.glyph_map_roboto_retain_gids.41,43,61,66,69.ttf | Bin 7936 -> 0 bytes
+ .../data/profiles/glyph_map_roboto_retain_gids.txt       |   4 ----
+ test/subset/data/tests/glyph_map.tests                   |   1 -
+ test/subset/meson.build                                  |   1 +
+ 6 files changed, 3 insertions(+), 5 deletions(-)
+
+commit 9648799e53edae7072505849fb551a6e621b8f6c
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Oct 9 10:34:48 2023 +0000
+
+    Bump ossf/scorecard-action from 2.2.0 to 2.3.0
+    
+    Bumps [ossf/scorecard-action](https://github.com/ossf/scorecard-action) from 2.2.0 to 2.3.0.
+    - [Release notes](https://github.com/ossf/scorecard-action/releases)
+    - [Changelog](https://github.com/ossf/scorecard-action/blob/main/RELEASE.md)
+    - [Commits](https://github.com/ossf/scorecard-action/compare/08b4669551908b1024bb425080c797723083c031...483ef80eb98fb506c348f7d62e28055e49fe2398)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: ossf/scorecard-action
+      dependency-type: direct:production
+      update-type: version-update:semver-minor
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .github/workflows/scorecard.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit cf930decce6cffabff55a8a314eb7f9f34cff322
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Oct 9 10:34:42 2023 +0000
+
+    Bump actions/setup-python from 4.7.0 to 4.7.1
+    
+    Bumps [actions/setup-python](https://github.com/actions/setup-python) from 4.7.0 to 4.7.1.
+    - [Release notes](https://github.com/actions/setup-python/releases)
+    - [Commits](https://github.com/actions/setup-python/compare/61a6322f88396a6271a6ee3565807d608ecaddd1...65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: actions/setup-python
+      dependency-type: direct:production
+      update-type: version-update:semver-patch
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .github/workflows/msvc-ci.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 0cfc4ebfbade5b794956f0eae3939e7b1fade2b8
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Oct 9 10:34:36 2023 +0000
+
+    Bump github/codeql-action from 2.21.9 to 2.22.0
+    
+    Bumps [github/codeql-action](https://github.com/github/codeql-action) from 2.21.9 to 2.22.0.
+    - [Release notes](https://github.com/github/codeql-action/releases)
+    - [Changelog](https://github.com/github/codeql-action/blob/main/CHANGELOG.md)
+    - [Commits](https://github.com/github/codeql-action/compare/ddccb873888234080b77e9bc2d4764d5ccaaccf9...2cb752a87e96af96708ab57187ab6372ee1973ab)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: github/codeql-action
+      dependency-type: direct:production
+      update-type: version-update:semver-minor
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .github/workflows/scorecard.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit a317b5a7ea49c08e21a0e47beaaa5c31f52f28ea
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Oct 9 10:06:13 2023 +0000
+
+    Bump fonttools from 4.43.0 to 4.43.1 in /.ci
+    
+    Bumps [fonttools](https://github.com/fonttools/fonttools) from 4.43.0 to 4.43.1.
+    - [Release notes](https://github.com/fonttools/fonttools/releases)
+    - [Changelog](https://github.com/fonttools/fonttools/blob/main/NEWS.rst)
+    - [Commits](https://github.com/fonttools/fonttools/compare/4.43.0...4.43.1)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: fonttools
+      dependency-type: direct:production
+      update-type: version-update:semver-patch
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .ci/requirements-fonttools.txt | 86 +++++++++++++++++++++---------------------
+ .ci/requirements.txt           | 86 +++++++++++++++++++++---------------------
+ 2 files changed, 86 insertions(+), 86 deletions(-)
+
+commit a7b3fe3523891a81be501c907b6bf817615df174
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Thu Oct 5 12:16:00 2023 -0600
+
+    Fix test
+
+ src/test-tuple-varstore.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit fc563bb437b379334913b15489caec98a504fcd3
+Merge: f26fd69d8 2415d5f23
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Thu Oct 5 11:07:17 2023 -0600
+
+    Merge pull request #4421 from googlefonts/GDEF_GPOS
+    
+    [instancer] support GDEF/GPOS tables
+
+commit f26fd69d858642d76413b8f4068eaf9b57c40a5f
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Oct 2 10:06:40 2023 +0000
+
+    Bump github/codeql-action from 2.21.8 to 2.21.9
+    
+    Bumps [github/codeql-action](https://github.com/github/codeql-action) from 2.21.8 to 2.21.9.
+    - [Release notes](https://github.com/github/codeql-action/releases)
+    - [Changelog](https://github.com/github/codeql-action/blob/main/CHANGELOG.md)
+    - [Commits](https://github.com/github/codeql-action/compare/6a28655e3dcb49cb0840ea372fd6d17733edd8a4...ddccb873888234080b77e9bc2d4764d5ccaaccf9)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: github/codeql-action
+      dependency-type: direct:production
+      update-type: version-update:semver-patch
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .github/workflows/scorecard.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 1522eb9199ed07b8fba9c3131806205834b0a18a
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Oct 2 10:48:02 2023 +0000
+
+    Bump fonttools from 4.42.1 to 4.43.0 in /.ci
+    
+    Bumps [fonttools](https://github.com/fonttools/fonttools) from 4.42.1 to 4.43.0.
+    - [Release notes](https://github.com/fonttools/fonttools/releases)
+    - [Changelog](https://github.com/fonttools/fonttools/blob/main/NEWS.rst)
+    - [Commits](https://github.com/fonttools/fonttools/compare/4.42.1...4.43.0)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: fonttools
+      dependency-type: direct:production
+      update-type: version-update:semver-minor
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .ci/requirements-fonttools.txt | 78 +++++++++++++++++++++++-------------------
+ .ci/requirements.txt           | 78 +++++++++++++++++++++++-------------------
+ 2 files changed, 86 insertions(+), 70 deletions(-)
+
+commit 2d67e52a47945e2563b12e681336ab9d04613aad
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Oct 2 10:47:40 2023 +0000
+
+    Bump meson from 1.2.1 to 1.2.2 in /.ci
+    
+    Bumps [meson](https://github.com/mesonbuild/meson) from 1.2.1 to 1.2.2.
+    - [Release notes](https://github.com/mesonbuild/meson/releases)
+    - [Commits](https://github.com/mesonbuild/meson/compare/1.2.1...1.2.2)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: meson
+      dependency-type: direct:production
+      update-type: version-update:semver-patch
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .ci/requirements.in  | 2 +-
+ .ci/requirements.txt | 6 +++---
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+commit 6e06a193b3e6784b87380641d693fee1e507228e
+Author: Khaled Hosny <khaled@aliftype.com>
+Date:   Sat Sep 30 01:12:16 2023 +0300
+
+    Add some tests for hb_feature_[from|to]_string()
+
+ test/api/test-common.c | 108 +++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 108 insertions(+)
+
+commit f360d704fad6551dd05fe62bf9c4ce2f9a857e03
+Author: jfkthame <jfkthame@gmail.com>
+Date:   Fri Sep 29 13:15:01 2023 +0100
+
+    Check for closing quote in parse_tag
+    
+    Fixes #4414.
+
+ src/hb-common.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 333946b00e849ff6722781bc5e46bd9fcc83311a
+Author: Garret Rieger <grieger@google.com>
+Date:   Thu Sep 28 19:02:37 2023 +0000
+
+    [subset] Fix fuzzer timeout.
+    
+    Fixes https://oss-fuzz.com/testcase-detail/5458896606855168. Limit iteration over coverage in MarkLigPosFormat1 subsetting to the number of glyphs in the liga array.
+
+ src/OT/Layout/GPOS/MarkLigPosFormat1.hh                  |   5 +++--
+ ...-testcase-minimized-hb-subset-fuzzer-5458896606855168 | Bin 0 -> 2410 bytes
+ 2 files changed, 3 insertions(+), 2 deletions(-)
+
+commit 9ceb800ac26fd81a5eaf27ef366d5fce47e80447
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Thu Sep 28 10:37:48 2023 -0700
+
+    fuzzer fix https://oss-fuzz.com/testcase-detail/5842152921628672
+    
+    Access TupleVariationData through blob, because we don't sanitize
+    var_data
+
+ src/hb-ot-var-cvar-table.hh                             |   7 ++++---
+ src/test-tuple-varstore.cc                              |  16 +++++++++++++++-
+ ...testcase-minimized-hb-subset-fuzzer-5842152921628672 | Bin 0 -> 2501 bytes
+ 3 files changed, 19 insertions(+), 4 deletions(-)
+
+commit 7cb7a7999b542cb4ae75a3d289a429a68df6a86a
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Thu Sep 28 09:24:06 2023 -0600
+
+    [map] Fix undefined integer-overflow
+    
+    Fixes https://oss-fuzz.com/testcase-detail/5814850435284992
+
+ src/hb-map.hh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 2415d5f23927cbfcd8a2928f7ecadf7e9626cd51
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Wed Sep 27 13:33:09 2023 -0700
+
+    [instancer] update tests to include GDEF/GPOS tables
+
+ ...n-all-codepoint.wght=200-300-500,wdth=80-90.ttf | Bin 8432 -> 8728 bytes
+ ...s.retain-all-codepoint.wght=300-600,wdth=85.ttf | Bin 7336 -> 7612 bytes
+ ...n-all-codepoint.wght=200-300-500,wdth=80-90.ttf | Bin 7484 -> 7592 bytes
+ ...s.retain-all-codepoint.wght=300-600,wdth=85.ttf | Bin 6848 -> 6956 bytes
+ ...odepoint.wght=200-600,wdth=80-90,CTGR=20-60.ttf | Bin 4108 -> 4340 bytes
+ ...ariations.retain-all-codepoint.wght=300-600.ttf | Bin 6616 -> 6848 bytes
+ ...ariations.retain-all-codepoint.wght=500-800.ttf | Bin 7096 -> 7328 bytes
+ ...ariations.retain-all-codepoint.wght=300-600.ttf | Bin 197056 -> 305092 bytes
+ ...ariations.retain-all-codepoint.wght=500-800.ttf | Bin 145004 -> 250164 bytes
+ .../profiles/no-tables-with-item-variations.txt    |   2 +-
+ 10 files changed, 1 insertion(+), 1 deletion(-)
+
+commit f9b04b2145a2021cc56868daca89c3514f6a8966
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Wed Sep 27 09:36:52 2023 -0700
+
+    [instancer] match fonttools'r order when calculating chars
+    
+    Also fix a bug, make sure map set is happening before std::move
+
+ src/hb-ot-layout-common.hh | 6 ++++--
+ src/hb-ot-var-common.hh    | 4 ++--
+ 2 files changed, 6 insertions(+), 4 deletions(-)
+
+commit f39e9bf1ed52140d2658b4d845f3bbacc215221b
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Mon Sep 25 08:59:11 2023 -0700
+
+    [instancer] instantiate GPOS
+    
+    Just need to update var_idxes and deltas
+
+ src/OT/Layout/GDEF/GDEF.hh          | 18 ++++++++++--------
+ src/OT/Layout/GPOS/AnchorFormat3.hh | 23 ++++++++++++++++++-----
+ src/hb-ot-layout-common.hh          |  4 ++--
+ 3 files changed, 30 insertions(+), 15 deletions(-)
+
+commit 5c6795e2701d7c2031bc3e7c6c1b356961350291
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Thu Sep 21 12:04:03 2023 -0700
+
+    [instancer] make GPOS depend on GDEF when partial instancing
+    
+    GPOS needs to wait for GDEF remapping layout var idxes
+
+ src/hb-subset.cc | 2 ++
+ 1 file changed, 2 insertions(+)
+
+commit c8594baa478d09b60e1553dacae32345efef4272
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Thu Sep 21 11:45:01 2023 -0700
+
+    [instancer] instantiate GDEF varStore
+    
+    And update layout var idxes accordingly
+
+ src/OT/Layout/GDEF/GDEF.hh        | 38 +++++++++++++++++++++++++++++++++++++-
+ src/hb-subset-plan-member-list.hh |  2 +-
+ 2 files changed, 38 insertions(+), 2 deletions(-)
+
+commit 77f24d822e726b0075d9aab4dc8600eb1b7dc481
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Fri Sep 22 14:47:11 2023 -0700
+
+    [instancer] remap layout var_idxes code update
+    
+    make hb_collect_variation_indices_context_t only collect layout
+    variation indices.
+
+ src/OT/Layout/GDEF/GDEF.hh | 26 +++++++++++++++++++-------
+ src/hb-ot-layout-common.hh | 28 +++-------------------------
+ src/hb-subset-plan.cc      | 26 ++++++--------------------
+ 3 files changed, 28 insertions(+), 52 deletions(-)
+
+commit c8c97864e8c810068123ef62947be13675df54c2
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Thu Sep 21 11:29:43 2023 -0700
+
+    [instancer] simplify item_variations_t API calls
+    
+    merge create,instantiate and as_item_varstore into one API
+
+ src/hb-ot-var-common.hh     | 19 +++++++++++++++++--
+ src/hb-ot-var-hvar-table.hh | 18 ++++--------------
+ src/hb-ot-var-mvar-table.hh |  7 +------
+ src/test-item-varstore.cc   |  2 +-
+ 4 files changed, 23 insertions(+), 23 deletions(-)
+
+commit 00de5d0068d189a7dcbd1ccb10f55db95d240340
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Sep 25 10:25:15 2023 +0000
+
+    Bump actions/checkout from 4.0.0 to 4.1.0
+    
+    Bumps [actions/checkout](https://github.com/actions/checkout) from 4.0.0 to 4.1.0.
+    - [Release notes](https://github.com/actions/checkout/releases)
+    - [Changelog](https://github.com/actions/checkout/blob/main/CHANGELOG.md)
+    - [Commits](https://github.com/actions/checkout/compare/3df4ab11eba7bda6032a0b82a6bb43b11571feac...8ade135a41bc03ea155e62e844d188df1ea18608)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: actions/checkout
+      dependency-type: direct:production
+      update-type: version-update:semver-minor
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .github/workflows/arm-ci.yml        | 2 +-
+ .github/workflows/configs-build.yml | 2 +-
+ .github/workflows/coverity-scan.yml | 2 +-
+ .github/workflows/linux-ci.yml      | 2 +-
+ .github/workflows/macos-ci.yml      | 2 +-
+ .github/workflows/msvc-ci.yml       | 2 +-
+ .github/workflows/msys2-ci.yml      | 2 +-
+ .github/workflows/scorecard.yml     | 2 +-
+ 8 files changed, 8 insertions(+), 8 deletions(-)
+
+commit 42b8534b14419580dd35f865944081196217cb6c
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Sep 25 10:25:08 2023 +0000
+
+    Bump github/codeql-action from 2.21.7 to 2.21.8
+    
+    Bumps [github/codeql-action](https://github.com/github/codeql-action) from 2.21.7 to 2.21.8.
+    - [Release notes](https://github.com/github/codeql-action/releases)
+    - [Changelog](https://github.com/github/codeql-action/blob/main/CHANGELOG.md)
+    - [Commits](https://github.com/github/codeql-action/compare/04daf014b50eaf774287bf3f0f1869d4b4c4b913...6a28655e3dcb49cb0840ea372fd6d17733edd8a4)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: github/codeql-action
+      dependency-type: direct:production
+      update-type: version-update:semver-patch
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .github/workflows/scorecard.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 69da5aae028417dacf4c6617e49beb7dfbeb20e3
+Author: inobelar <inobelar@gmail.com>
+Date:   Fri Sep 22 21:27:12 2023 +0000
+
+    Added minor fixes to build without errors with gcc 4.9.2
+
+ src/hb-map.hh    | 22 +++++++++++-----------
+ src/hb-vector.hh |  2 +-
+ 2 files changed, 12 insertions(+), 12 deletions(-)
+
+commit b8121ccbb687dc853118e81810cc0565ce0037d4
+Author: Duncan Overbruck <mail@duncano.de>
+Date:   Thu Sep 21 15:41:09 2023 +0200
+
+    [meson] keep asserts in test programs
+
+ src/meson.build | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 5aa4865a86fd97e76e857823dd4b32c65d2fa0ad
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Wed Sep 20 14:52:58 2023 -0700
+
+    [instancer] fix compile warnings
+    
+    In constructor ‘OT::delta_row_encoding_t::delta_row_encoding_t(OT::delta_row_encoding_t&&)’,
+        inlined from ‘Type* hb_vector_t<Type, sorted>::push(Args&& ...) [with Args = {OT::delta_row_encoding_t}; Type = OT::delta_row_encoding_t; bool sorted = false]’ at ../src/hb-vector.hh:221:12,
+        inlined from ‘bool OT::item_variations_t::as_item_varstore(bool, bool)’ at ../src/hb-ot-var-common.hh:1985:24:
+    ../src/hb-ot-layout-common.hh:2304:8: warning: ‘obj.OT::delta_row_encoding_t::width’ may be used uninitialized [-Wmaybe-uninitialized]
+     2304 | struct delta_row_encoding_t
+          |        ^~~~~~~~~~~~~~~~~~~~
+    ../src/hb-ot-var-common.hh: In member function ‘bool OT::item_variations_t::as_item_varstore(bool, bool)’:
+    ../src/hb-ot-var-common.hh:1981:30: note: ‘obj.OT::delta_row_encoding_t::width’ was declared here
+     1981 |         delta_row_encoding_t obj;
+          |                              ^~~
+    In constructor ‘OT::delta_row_encoding_t::delta_row_encoding_t(OT::delta_row_encoding_t&&)’,
+        inlined from ‘Type* hb_vector_t<Type, sorted>::push(Args&& ...) [with Args = {OT::delta_row_encoding_t}; Type = OT::delta_row_encoding_t; bool sorted = false]’ at ../src/hb-vector.hh:221:12,
+        inlined from ‘bool OT::item_variations_t::as_item_varstore(bool, bool)’ at ../src/hb-ot-var-common.hh:1985:24:
+    ../src/hb-ot-layout-common.hh:2304:8: warning: ‘obj.OT::delta_row_encoding_t::overhead’ may be used uninitialized [-Wmaybe-uninitialized]
+     2304 | struct delta_row_encoding_t
+          |        ^~~~~~~~~~~~~~~~~~~~
+    ../src/hb-ot-var-common.hh: In member function ‘bool OT::item_variations_t::as_item_varstore(bool, bool)’:
+    ../src/hb-ot-var-common.hh:1981:30: note: ‘obj.OT::delta_row_encoding_t::overhead’ was declared here
+     1981 |         delta_row_encoding_t obj;
+
+ src/hb-ot-layout-common.hh | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit 4b3aa0104ea4c7859095b0e78662e440483068da
+Merge: da2c59d71 ef4ff1d6a
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Wed Sep 20 14:37:42 2023 -0600
+
+    Merge pull request #4410 from googlefonts/HVAR_instance
+    
+    [instancer] instantiate HVAR/VVAR
+
+commit da2c59d71f687c38a29389d81d6d6f911994c403
+Author: Thomas Petillon <tpetillon@gmail.com>
+Date:   Tue Sep 19 17:01:04 2023 +0200
+
+    [instancer] Delete redundant code block in cvar subsetting
+    
+    That case is handled in hb-subset.cc.
+    
+    It also made compilation with HB_NO_VAR fail because it accessed table.fvar.
+
+ src/hb-ot-var-cvar-table.hh | 13 -------------
+ 1 file changed, 13 deletions(-)
+
+commit 284889b0317c317ae00fe1a6e32db1f9213cb5e2
+Author: Thomas Petillon <tpetillon@gmail.com>
+Date:   Wed Sep 20 20:17:48 2023 +0200
+
+    [subset] Drop fvar, avar, cvar, MVAR tables when in HB_NO_VAR mode
+
+ src/hb-subset.cc | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+commit ef4ff1d6a4f2343440e278ef1177b07f6af8f5dc
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Wed Sep 20 11:35:33 2023 -0700
+
+    [instancer] make varstore items sorting method match fonttool's
+    
+    Also update expected tests
+
+ src/hb-ot-var-common.hh                            |   9 ++++++++-
+ ...n-all-codepoint.wght=200-300-500,wdth=80-90.ttf | Bin 8432 -> 8432 bytes
+ ...s.retain-all-codepoint.wght=300-600,wdth=85.ttf | Bin 7336 -> 7336 bytes
+ ...n-all-codepoint.wght=200-300-500,wdth=80-90.ttf | Bin 7484 -> 7484 bytes
+ ...s.retain-all-codepoint.wght=300-600,wdth=85.ttf | Bin 6848 -> 6848 bytes
+ ...odepoint.wght=200-600,wdth=80-90,CTGR=20-60.ttf | Bin 4108 -> 4108 bytes
+ ...ariations.retain-all-codepoint.wght=300-600.ttf | Bin 6616 -> 6616 bytes
+ ...ariations.retain-all-codepoint.wght=300-600.ttf | Bin 197056 -> 197056 bytes
+ ...ariations.retain-all-codepoint.wght=500-800.ttf | Bin 145004 -> 145004 bytes
+ 9 files changed, 8 insertions(+), 1 deletion(-)
+
+commit b5f7ca1ab49b3842d3c2ba4ac9fbd0531378d7b6
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Wed Sep 20 11:28:15 2023 -0700
+
+    [instancer] fix bots
+
+ src/hb-ot-var-common.hh     | 2 +-
+ src/hb-ot-var-hvar-table.hh | 4 ++--
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+commit 5ec21d4af4bc620cb58ff715e2a66288128c8d6f
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Wed Sep 20 09:31:03 2023 -0700
+
+    [instancer] fix delta_row_encoding_t constructor
+    
+    always move chars_
+
+ src/hb-ot-layout-common.hh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 2d2818c0963d44cde07e612c5310ac2dc85cc846
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Wed Sep 20 10:30:47 2023 -0700
+
+    [instancer] update expected tests to include HVAR/VVAR tables
+
+ ...n-all-codepoint.wght=200-300-500,wdth=80-90.ttf | Bin 8256 -> 8432 bytes
+ ...s.retain-all-codepoint.wght=300-600,wdth=85.ttf | Bin 7244 -> 7336 bytes
+ ...n-all-codepoint.wght=200-300-500,wdth=80-90.ttf | Bin 7292 -> 7484 bytes
+ ...s.retain-all-codepoint.wght=300-600,wdth=85.ttf | Bin 6760 -> 6848 bytes
+ ...odepoint.wght=200-600,wdth=80-90,CTGR=20-60.ttf | Bin 3800 -> 4108 bytes
+ ...ariations.retain-all-codepoint.wght=300-600.ttf | Bin 6280 -> 6616 bytes
+ ...ariations.retain-all-codepoint.wght=500-800.ttf | Bin 6760 -> 7096 bytes
+ ...ariations.retain-all-codepoint.wght=300-600.ttf | Bin 194432 -> 197056 bytes
+ ...ariations.retain-all-codepoint.wght=500-800.ttf | Bin 143840 -> 145004 bytes
+ .../profiles/no-tables-with-item-variations.txt    |   2 +-
+ 10 files changed, 1 insertion(+), 1 deletion(-)
+
+commit 58e5d45de886319104007249d7e6a2b5b6584247
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Tue Sep 19 10:33:32 2023 -0700
+
+    [instancer] instantiate HVAR/VVAR
+
+ src/hb-ot-var-hvar-table.hh | 87 ++++++++++++++++++++++++++++++++++++++++++---
+ 1 file changed, 83 insertions(+), 4 deletions(-)
+
+commit e81ad14dba9ddc70aca11a46242cfc20b593e878
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Tue Sep 19 13:23:58 2023 -0700
+
+    [instancer] change optimize() to as_item_varstore()
+    
+    which allows another option to skip optimization
+
+ src/hb-ot-var-common.hh     | 23 +++++++++++++++++++++--
+ src/hb-ot-var-mvar-table.hh |  2 +-
+ src/test-item-varstore.cc   |  2 +-
+ 3 files changed, 23 insertions(+), 4 deletions(-)
+
+commit 97d0e7a19f5e341a77c156faaa37eed8df6d8db7
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Tue Sep 19 11:25:14 2023 -0700
+
+    [instancer] add inner_maps as optional argument when creating item_variations_t
+    
+    This allows that we create item_variations_t with only a subset of
+    the original varstore
+
+ src/hb-ot-var-common.hh | 17 ++++++++++++-----
+ 1 file changed, 12 insertions(+), 5 deletions(-)
+
+commit 005582e0cb80821fb5bbbdfb6cef4be05078d060
+Merge: d69813374 da9b83891
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Wed Sep 20 09:10:10 2023 -0600
+
+    Merge pull request #4370 from 2xsaiko/outgoing/cmake-now-for-real
+    
+    Re-do and clean up CMake support, making it use relocatable paths
+
+commit da9b838910e62825717a8b2de8ce9c92e396136e
+Author: Marco Rebhan <me@dblsaiko.net>
+Date:   Tue Aug 8 14:33:03 2023 +0200
+
+    Re-do and clean up CMake support, making it use relocatable paths
+    
+    Closes #4025.
+
+ meson.build                  | 21 ++++++++++
+ meson_options.txt            |  4 ++
+ src/Makefile.am              |  2 +-
+ src/harfbuzz-config.cmake.in | 97 ++++++++------------------------------------
+ src/meson.build              | 92 ++++++++++++++++++++++++++++++++++++++---
+ src/relative_to.py           |  6 +++
+ 6 files changed, 135 insertions(+), 87 deletions(-)
+
+commit d698133743caffe9611b57137cd5027ce076613f
+Merge: 0967a3e24 c330c2917
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Tue Sep 19 13:30:43 2023 -0600
+
+    Merge pull request #4393 from googlefonts/instantiate_item_varstore
+    
+    [instancer] instantiate item varstore
+
+commit b5a1c2b483263896e563402cd285a46229e42f3c
+Author: Marco Rebhan <me@dblsaiko.net>
+Date:   Mon Aug 7 01:55:10 2023 +0200
+
+    Revert "Pass through absolute paths to cmake config directly"
+    
+    This reverts commit db292f6f0238581a489aa8cddc585129b6e920cd.
+
+ src/harfbuzz-config.cmake.in | 44 ++++++++++++++++++++++++++++++++++++--------
+ src/meson.build              |  4 ++--
+ 2 files changed, 38 insertions(+), 10 deletions(-)
+
+commit c330c2917524ad8a15340e5fa1df5a57a1409efa
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Mon Sep 18 12:14:21 2023 -0700
+
+    [instancer] add a unit testcase for instantiating item variations
+
+ src/Makefile.am           |  5 ++++
+ src/meson.build           |  1 +
+ src/test-item-varstore.cc | 66 +++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 72 insertions(+)
+
+commit 7741fa329998f23ef1495f9828c919ae2f6ada1e
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Mon Sep 18 10:44:47 2023 -0700
+
+    [instancer] bug fix: dont add duplicate rows into delta_row_encoding_t
+    
+    Also fix compile_varidx_map()
+
+ src/hb-ot-var-common.hh | 57 ++++++++++++++++++++++++++++---------------------
+ 1 file changed, 33 insertions(+), 24 deletions(-)
+
+commit 6c658b410593e15416a800daf8fd0492c69d9ba5
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Fri Sep 15 11:49:47 2023 -0700
+
+    [instancer] bug fix
+
+ src/hb-ot-var-common.hh | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+commit 11cc47964695661c2a0e8ba24d80304ac1457ab6
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Mon Sep 11 09:57:14 2023 -0700
+
+    [instancer] fix columns and get_chars_overhead() in delta_row_encoding_t
+    
+    make columns a vector of uint8_t so it supports more than 32 columns
+
+ src/hb-ot-layout-common.hh | 29 +++++++++++++++++++----------
+ src/hb-ot-var-common.hh    |  1 +
+ 2 files changed, 20 insertions(+), 10 deletions(-)
+
+commit 6e49128afda813238cfbccd304db1c55ed98f0e5
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Fri Sep 1 10:27:40 2023 -0700
+
+    [instancer] always check and update default wght/width/slnt if necessary
+    
+    Sometimes default values in original file are incorrect, and if default value for an axis is not changed, then these values won't be updated
+
+ src/hb-ot-os2-table.hh                             |  23 ++++++++-------------
+ src/hb-ot-post-table.hh                            |  10 ++++-----
+ ...ariations.retain-all-codepoint.wght=300-600.ttf | Bin 0 -> 194432 bytes
+ ...ariations.retain-all-codepoint.wght=500-800.ttf | Bin 0 -> 143840 bytes
+ test/subset/data/tests/update_def_wght.tests       |  12 +++++++++++
+ test/subset/meson.build                            |   6 +++++-
+ 6 files changed, 31 insertions(+), 20 deletions(-)
+
+commit 7b5daff5eb347a29d9d9d59f2a41f938781d84de
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Thu Aug 31 17:50:34 2023 -0700
+
+    [instancer] add tests for mvar partial instancing
+
+ ...-all-codepoint.wght=200-600,wdth=80-90,CTGR=20-60.ttf | Bin 0 -> 3800 bytes
+ ...item-variations.retain-all-codepoint.wght=300-600.ttf | Bin 0 -> 6280 bytes
+ ...item-variations.retain-all-codepoint.wght=500-800.ttf | Bin 0 -> 6760 bytes
+ .../data/profiles/no-tables-with-item-variations.txt     |   2 +-
+ test/subset/data/tests/mvar_partial_instance.tests       |  13 +++++++++++++
+ test/subset/meson.build                                  |   2 +-
+ 6 files changed, 15 insertions(+), 2 deletions(-)
+
+commit 45c2d05d0068ebd4fe5a9ea6ca38af5d8bab57c9
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Thu Aug 31 15:45:22 2023 -0700
+
+    [instancer] add subset() for MVAR
+
+ src/hb-ot-var-mvar-table.hh | 61 ++++++++++++++++++++++++++++++++++++++++++++-
+ src/hb-subset-input.cc      |  1 -
+ src/hb-subset.cc            |  4 +++
+ 3 files changed, 64 insertions(+), 2 deletions(-)
+
+commit e4e1ac44f062078ed7da04321f8269df9f202c7b
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Thu Aug 31 15:34:26 2023 -0700
+
+    [instancer] add serialize() for VariationStore
+    
+    Input region_list and encoding_rows are from item_variations_t
+
+ src/hb-ot-layout-common.hh | 106 +++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 106 insertions(+)
+
+commit 2326879229535f97ce099958e494005d1092ee5b
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Thu Aug 31 15:28:06 2023 -0700
+
+    [instancer] add serialize() for VarRegionList
+    
+    The region list argument comes from item_variations_t.get_region_list()
+
+ src/hb-ot-layout-common.hh        | 47 +++++++++++++++++++++++++++++++++++++++
+ src/hb-subset-plan-member-list.hh |  2 ++
+ src/hb-subset-plan.cc             |  1 +
+ 3 files changed, 50 insertions(+)
+
+commit b153af8553a8cce1c93682b63a2b4756e44986be
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Thu Aug 31 13:12:08 2023 -0700
+
+    [instancer] add optimize(), which optimizes varstore's storage
+
+ src/hb-ot-var-common.hh | 225 ++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 225 insertions(+)
+
+commit 3565ad815009ff74fc42dc5ef23ad8a2bf8fdecf
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Thu Aug 31 13:07:54 2023 -0700
+
+    [instancer] add build_region_list() method
+
+ src/hb-ot-var-common.hh | 73 +++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 73 insertions(+)
+
+commit e4db29b102c78cec7c42469e01656c3ac5365863
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Thu Aug 31 12:59:39 2023 -0700
+
+    [instancer] add instantiate() method
+    
+    Also make change_tuple_variations_axis_limits() deterministic, use
+    sorted vector instead of iterating map keys
+
+ src/hb-ot-var-common.hh | 44 +++++++++++++++++++++++++++++++++++++-------
+ 1 file changed, 37 insertions(+), 7 deletions(-)
+
+commit 5f058a93388caa0ce5c6d3800d7dbf97e3273dc8
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Thu Aug 31 12:55:04 2023 -0700
+
+    [instancer] add create_from_item_varstore () method
+
+ src/hb-ot-layout-common.hh | 63 +++++++++++++++++++++++++++++++++++++++++++++-
+ src/hb-ot-var-common.hh    | 62 +++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 124 insertions(+), 1 deletion(-)
+
+commit 152448881fffbe46ae6ffb884351b86dcc7354d8
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Thu Aug 31 12:40:30 2023 -0700
+
+    [instancer] add struct definition item_variations_t
+    
+    And struct delta_row_encoding_t
+
+ src/hb-ot-layout-common.hh | 141 +++++++++++++++++++++++++++++++++++++++++++++
+ src/hb-ot-var-common.hh    |  47 +++++++++++++++
+ 2 files changed, 188 insertions(+)
+
 commit 0967a3e24ab5d79cc55dbe224652d8aabd942def
 Author: Khaled Hosny <khaled@aliftype.com>
 Date:   Mon Sep 18 21:18:27 2023 +0300

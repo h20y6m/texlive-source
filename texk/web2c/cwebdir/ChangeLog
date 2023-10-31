@@ -1,3 +1,23 @@
+2023-10-29  Andreas Scherer  <https://ascherer.github.io>
+
+	* ctwill-proofsort,
+	* ctwill.test: Make 'proofsort' like 'refsort'.
+
+2023-10-25  Andreas Scherer  <https://ascherer.github.io>
+
+	* cwebmac.tex,
+	* texinputs/pdfctproofmac.tex,
+	* texinputs/pdfctwimac.tex: Bring PDF/HINT macros together.
+
+2023-10-18  Andreas Scherer  <https://ascherer.github.io>
+
+	* cwebmac.tex,
+	* cwebman-w2c.ch: Minor redactions in the CWEB manual and macros.
+
+2023-10-15  Andreas Scherer  <https://ascherer.github.io>
+
+	* cwebman-w2c.ch: Fix display in Skim and Acrobat Reader on macOS.
+
 2023-09-30  Andreas Scherer  <https://ascherer.github.io>
 
 	* Makefile,
