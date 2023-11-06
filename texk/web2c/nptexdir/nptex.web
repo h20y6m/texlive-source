@@ -15998,7 +15998,7 @@ var left_edge: scaled; {the left coordinate for this box}
 begin cur_g:=0; cur_glue:=float_constant(0);
 this_box:=temp_ptr; g_order:=glue_order(this_box);
 g_sign:=glue_sign(this_box); p:=list_ptr(this_box);
-upwards:=(subtype(this_box)=min_quarterword+1);
+upwards:=(qo(subtype(this_box))>=16);
 incr(cur_s);
 if cur_s>0 then dvi_out(push);
 if cur_s>max_push then max_push:=cur_s;
@@ -16808,7 +16808,7 @@ var r:pointer; {the box node that will be returned}
 @!g:pointer; {points to a glue specification}
 @!o:glue_ord; {order of infinity}
 begin last_badness:=0; r:=get_node(box_node_size); type(r):=vlist_node;
-if XeTeX_upwards then subtype(r):=min_quarterword+1 else subtype(r):=min_quarterword;
+if XeTeX_upwards then subtype(r):=qi(16) else subtype(r):=qi(0);
 shift_amount(r):=0; set_box_dir(r)(dir_default);
 space_ptr(r):=zero_glue; xspace_ptr(r):=zero_glue;
 add_glue_ref(zero_glue); add_glue_ref(zero_glue);
