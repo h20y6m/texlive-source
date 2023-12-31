@@ -1,3 +1,1829 @@
+commit 894a1f72ee93a1fd8dc1d9218cb3fd8f048be29a
+Author: Khaled Hosny <khaled@aliftype.com>
+Date:   Sat Nov 11 15:57:54 2023 +0200
+
+    8.3.0
+
+ NEWS                | 15 +++++++++++++++
+ configure.ac        |  2 +-
+ meson.build         |  2 +-
+ src/hb-deprecated.h |  2 +-
+ src/hb-version.h    |  6 +++---
+ 5 files changed, 21 insertions(+), 6 deletions(-)
+
+commit 2b5af6f42e6ba4b6eb67f807267fd5821744c519
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Fri Nov 10 15:23:27 2023 -0700
+
+    [subset-plan] Micro-optimize set iteration
+    
+    Getting ranges is faster even with the current trivial implementation.
+
+ src/hb-subset-plan.cc | 16 ++++++++++------
+ 1 file changed, 10 insertions(+), 6 deletions(-)
+
+commit 90fc809f15b5b7e46f1b17dfa64141936679125d
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Fri Nov 10 15:05:08 2023 -0700
+
+    [set] Minor likely and __prev__
+
+ src/hb-bit-set-invertible.hh | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit 6d3b7931fdcae3e266b3b58e39ad7085783c0e0e
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Fri Nov 10 14:51:34 2023 -0700
+
+    [subset-plan] Add a couple of allocs
+
+ src/hb-subset-plan.cc | 2 ++
+ 1 file changed, 2 insertions(+)
+
+commit d46cd93b6a03f6614a91803fa7d027fc6b917bc1
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Fri Nov 10 14:36:37 2023 -0700
+
+    [map] Speed up copy-constructor
+
+ src/hb-map.hh | 24 +++++++++++++++++++++++-
+ 1 file changed, 23 insertions(+), 1 deletion(-)
+
+commit e7879d6c554d1edaf02a211d6ba9de4fe2b3fbf4
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Fri Nov 10 14:13:20 2023 -0700
+
+    [map] Micro-optimize destruction
+
+ src/hb-map.hh | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+commit d9357a1a67cef1f328f1acc436d78f0852b05970
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Fri Nov 10 14:08:03 2023 -0700
+
+    [cmap] Speed up Format12/13 collect_mapping
+
+ src/hb-ot-cmap-table.hh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit ae6ea6f4b7ed2e05e76e36c56eac86c3cc9ccbd7
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Fri Nov 10 13:52:34 2023 -0700
+
+    [cmap] Micro-optimize
+
+ src/hb-ot-cmap-table.hh | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+
+commit 330c32f90256e6a38488faab4c0f692f18d52d42
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Fri Nov 10 12:27:48 2023 -0700
+
+    [graph] Another preallocation
+
+ src/graph/graph.hh | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit 9c4d3c3c70d1f4f33294da7ab409c64bdbc12be7
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Fri Nov 10 12:24:26 2023 -0700
+
+    [graph] Pre-alloc priority-heap array
+
+ src/graph/graph.hh       | 1 +
+ src/hb-priority-queue.hh | 3 +++
+ 2 files changed, 4 insertions(+)
+
+commit 29f8d9f795426da68c8526312c61f727f4f124b5
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Thu Nov 9 09:29:02 2023 -0700
+
+    [gen-use-table] Fix __doc__
+
+ src/gen-use-table.py | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+commit aaf632581a9ba01f4534501f7a0cd715ea5bd4f0
+Merge: 2d001a0ad 32ee89dd4
+Author: خالد حسني (Khaled Hosny) <khaled@aliftype.com>
+Date:   Fri Nov 10 17:28:48 2023 +0200
+
+    Merge pull request #4492 from dalboris/fix-cmake-darwin-library-location
+    
+    [cmake] Fix double dots in CMake library location on macOS
+
+commit 32ee89dd480ed15903a70c2bfaeda69f348af5e1
+Author: Boris Dalstein <dalboris@gmail.com>
+Date:   Fri Nov 10 13:48:24 2023 +0100
+
+    [cmake] Fix double dots in CMake library location on macOS
+
+ src/meson.build | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 2d001a0adc996dee2d8562b218ac9cc3d96816aa
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Wed Nov 8 11:11:51 2023 -0800
+
+    [subset] OTS doesn't allow ligature attachment offset to be 0
+
+ src/OT/Layout/GPOS/AnchorMatrix.hh                      |   5 ++---
+ test/subset/data/Makefile.am                            |   1 +
+ test/subset/data/Makefile.sources                       |   1 +
+ ...Bangla-latin-subset.default.retain-all-codepoint.ttf | Bin 0 -> 40128 bytes
+ test/subset/data/fonts/AnekBangla-latin-subset.ttf      | Bin 0 -> 40128 bytes
+ .../data/tests/layout.empty_ligature_offset.tests       |   8 ++++++++
+ test/subset/meson.build                                 |   1 +
+ 7 files changed, 13 insertions(+), 3 deletions(-)
+
+commit 0cbbed57e3a63476d9924eae197ddc07999d79ef
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Tue Nov 7 09:51:46 2023 -0700
+
+    [README] Add Godot Engine
+
+ README.md | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit 9701b0024e43d356cf23fccca5c59409b0928dc9
+Author: Garret Rieger <grieger@google.com>
+Date:   Mon Nov 6 22:14:31 2023 +0000
+
+    [subset] Always place CFF1/2 char strings at the end of the packed table.
+    
+    Makes the behaviour from HB_SUBSET_FLAGS_IFTB_REQUIREMENTS the default.
+
+ src/hb-subset-cff1.cc                              |  18 ++++++------------
+ src/hb-subset-cff2.cc                              |  18 ++++++------------
+ test/api/fonts/AdobeVFPrototype.abc.otf            | Bin 5164 -> 5160 bytes
+ test/api/fonts/AdobeVFPrototype.abc.static.otf     | Bin 2576 -> 2576 bytes
+ test/api/fonts/AdobeVFPrototype.ac.nohints.otf     | Bin 4384 -> 4384 bytes
+ test/api/fonts/AdobeVFPrototype.ac.nosubrs.otf     | Bin 4464 -> 4464 bytes
+ test/api/fonts/AdobeVFPrototype.ac.otf             | Bin 4584 -> 4580 bytes
+ test/api/fonts/AdobeVFPrototype.ac.retaingids.otf  | Bin 4584 -> 4584 bytes
+ .../SourceHanSans-Regular.41,4C2E.nohints.otf      | Bin 2376 -> 2328 bytes
+ ...urceHanSans-Regular.41,4C2E.nosubrs.nohints.otf | Bin 2360 -> 2312 bytes
+ .../SourceHanSans-Regular.41,4C2E.nosubrs.otf      | Bin 2548 -> 2500 bytes
+ test/api/fonts/SourceHanSans-Regular.41,4C2E.otf   | Bin 2572 -> 2524 bytes
+ .../SourceHanSans-Regular.41,4C2E.retaingids.otf   | Bin 2664 -> 2608 bytes
+ test/api/fonts/SourceSansPro-Regular.abc.otf       | Bin 1808 -> 1772 bytes
+ .../api/fonts/SourceSansPro-Regular.ac.nohints.otf | Bin 1592 -> 1544 bytes
+ .../SourceSansPro-Regular.ac.nosubrs.nohints.otf   | Bin 1540 -> 1492 bytes
+ .../api/fonts/SourceSansPro-Regular.ac.nosubrs.otf | Bin 1632 -> 1584 bytes
+ test/api/fonts/SourceSansPro-Regular.ac.otf        | Bin 1704 -> 1656 bytes
+ .../fonts/SourceSansPro-Regular.ac.retaingids.otf  | Bin 1708 -> 1660 bytes
+ test/api/fonts/cff1_dotsect.nohints.otf            | Bin 3132 -> 2892 bytes
+ test/api/fonts/cff1_expert.2D,F6E9,FB00.otf        | Bin 1412 -> 1412 bytes
+ test/api/fonts/cff1_seac.C0.otf                    | Bin 1600 -> 1564 bytes
+ ...tore.notdef-outline-retain-gids.61,62,63,64.otf | Bin 5676 -> 5676 bytes
+ ..._var_store.notdef-outline-retain-gids.61,62.otf | Bin 4776 -> 4776 bytes
+ ..._var_store.notdef-outline-retain-gids.61,63.otf | Bin 4588 -> 4588 bytes
+ ..._var_store.notdef-outline-retain-gids.61,64.otf | Bin 4764 -> 4764 bytes
+ ...bit_var_store.notdef-outline-retain-gids.61.otf | Bin 4128 -> 4128 bytes
+ ...bit_var_store.notdef-outline-retain-gids.62.otf | Bin 3904 -> 3904 bytes
+ ...bit_var_store.notdef-outline-retain-gids.63.otf | Bin 3828 -> 3828 bytes
+ ...bit_var_store.notdef-outline-retain-gids.64.otf | Bin 3800 -> 3800 bytes
+ .../32bit_var_store.notdef-outline.61,62,63,64.otf | Bin 5676 -> 5676 bytes
+ .../32bit_var_store.notdef-outline.61,62.otf       | Bin 4776 -> 4776 bytes
+ .../32bit_var_store.notdef-outline.61,63.otf       | Bin 4584 -> 4584 bytes
+ .../32bit_var_store.notdef-outline.61,64.otf       | Bin 4744 -> 4744 bytes
+ .../32bit_var_store.notdef-outline.61.otf          | Bin 4128 -> 4128 bytes
+ .../32bit_var_store.notdef-outline.62.otf          | Bin 3892 -> 3892 bytes
+ .../32bit_var_store.notdef-outline.63.otf          | Bin 3812 -> 3812 bytes
+ .../32bit_var_store.notdef-outline.64.otf          | Bin 3780 -> 3780 bytes
+ ...subroutinize-retain-gids.1FC,21,41,20,62,63.otf | Bin 20128 -> 20128 bytes
+ ...outline-desubroutinize-retain-gids.61,62,63.otf | Bin 2280 -> 2280 bytes
+ ...e-desubroutinize-retain-gids.D7,D8,D9,DA,DE.otf | Bin 30448 -> 30448 bytes
+ ...f-outline-desubroutinize.1FC,21,41,20,62,63.otf | Bin 2356 -> 2356 bytes
+ ...ular.notdef-outline-desubroutinize.61,62,63.otf | Bin 2084 -> 2084 bytes
+ ...otdef-outline-desubroutinize.D7,D8,D9,DA,DE.otf | Bin 2252 -> 2252 bytes
+ ...subroutinize-retain-gids.1FC,21,41,20,62,63.otf | Bin 19960 -> 19960 bytes
+ ...p-hints-desubroutinize-retain-gids.61,62,63.otf | Bin 2156 -> 2156 bytes
+ ...s-desubroutinize-retain-gids.D7,D8,D9,DA,DE.otf | Bin 30280 -> 30280 bytes
+ ...rop-hints-desubroutinize.1FC,21,41,20,62,63.otf | Bin 2184 -> 2184 bytes
+ ...-outline-drop-hints-desubroutinize.61,62,63.otf | Bin 1960 -> 1960 bytes
+ ...ne-drop-hints-desubroutinize.D7,D8,D9,DA,DE.otf | Bin 2088 -> 2088 bytes
+ ...e-drop-hints-retain-gids.1FC,21,41,20,62,63.otf | Bin 20052 -> 20052 bytes
+ ...def-outline-drop-hints-retain-gids.61,62,63.otf | Bin 2196 -> 2196 bytes
+ ...tline-drop-hints-retain-gids.D7,D8,D9,DA,DE.otf | Bin 30296 -> 30296 bytes
+ ...otdef-outline-drop-hints.1FC,21,41,20,62,63.otf | Bin 2268 -> 2268 bytes
+ ...-Regular.notdef-outline-drop-hints.61,62,63.otf | Bin 2028 -> 2028 bytes
+ ...ar.notdef-outline-drop-hints.D7,D8,D9,DA,DE.otf | Bin 2104 -> 2104 bytes
+ ...tdef-outline-retain-gids.1FC,21,41,20,62,63.otf | Bin 20284 -> 20284 bytes
+ ...Regular.notdef-outline-retain-gids.61,62,63.otf | Bin 2348 -> 2348 bytes
+ ...r.notdef-outline-retain-gids.D7,D8,D9,DA,DE.otf | Bin 30464 -> 30464 bytes
+ ...o-Regular.notdef-outline.1FC,21,41,20,62,63.otf | Bin 2500 -> 2500 bytes
+ ...urceSansPro-Regular.notdef-outline.61,62,63.otf | Bin 2180 -> 2180 bytes
+ ...nsPro-Regular.notdef-outline.D7,D8,D9,DA,DE.otf | Bin 2272 -> 2272 bytes
+ ...ubset.default.3042,3044,3046,3048,304A,304B.otf | Bin 4820 -> 4820 bytes
+ ...ubset.default.3042,3044,3046,73E0,5EA6,8F38.otf | Bin 6196 -> 6196 bytes
+ ...eHanSans-Regular_subset.default.61,63,65,6B.otf | Bin 2540 -> 2540 bytes
+ ...ubset.default.660E,6975,73E0,5EA6,8F38,6E05.otf | Bin 6640 -> 6640 bytes
+ .../SourceHanSans-Regular_subset.default.660E.otf  | Bin 2444 -> 2444 bytes
+ ...e-retain-gids.3042,3044,3046,3048,304A,304B.otf | Bin 129820 -> 129820 bytes
+ ...e-retain-gids.3042,3044,3046,73E0,5EA6,8F38.otf | Bin 130840 -> 130840 bytes
+ ...bset.desubroutinize-retain-gids.61,63,65,6B.otf | Bin 3364 -> 3364 bytes
+ ...e-retain-gids.660E,6975,73E0,5EA6,8F38,6E05.otf | Bin 121956 -> 121956 bytes
+ ...ular_subset.desubroutinize-retain-gids.660E.otf | Bin 50744 -> 50744 bytes
+ ...esubroutinize.3042,3044,3046,3048,304A,304B.otf | Bin 4656 -> 4656 bytes
+ ...esubroutinize.3042,3044,3046,73E0,5EA6,8F38.otf | Bin 5840 -> 5840 bytes
+ ...s-Regular_subset.desubroutinize.61,63,65,6B.otf | Bin 2472 -> 2472 bytes
+ ...esubroutinize.660E,6975,73E0,5EA6,8F38,6E05.otf | Bin 6132 -> 6132 bytes
+ ...eHanSans-Regular_subset.desubroutinize.660E.otf | Bin 2428 -> 2428 bytes
+ ...e-retain-gids.3042,3044,3046,3048,304A,304B.otf | Bin 129376 -> 129376 bytes
+ ...e-retain-gids.3042,3044,3046,73E0,5EA6,8F38.otf | Bin 130220 -> 130220 bytes
+ ...ints-desubroutinize-retain-gids.61,63,65,6B.otf | Bin 3244 -> 3244 bytes
+ ...e-retain-gids.660E,6975,73E0,5EA6,8F38,6E05.otf | Bin 121180 -> 121180 bytes
+ ....drop-hints-desubroutinize-retain-gids.660E.otf | Bin 50516 -> 50516 bytes
+ ...esubroutinize.3042,3044,3046,3048,304A,304B.otf | Bin 4348 -> 4348 bytes
+ ...esubroutinize.3042,3044,3046,73E0,5EA6,8F38.otf | Bin 5324 -> 5324 bytes
+ ...ubset.drop-hints-desubroutinize.61,63,65,6B.otf | Bin 2368 -> 2368 bytes
+ ...esubroutinize.660E,6975,73E0,5EA6,8F38,6E05.otf | Bin 5456 -> 5456 bytes
+ ...gular_subset.drop-hints-desubroutinize.660E.otf | Bin 2292 -> 2292 bytes
+ ...s-retain-gids.3042,3044,3046,3048,304A,304B.otf | Bin 129516 -> 129516 bytes
+ ...s-retain-gids.3042,3044,3046,73E0,5EA6,8F38.otf | Bin 130528 -> 130528 bytes
+ ...r_subset.drop-hints-retain-gids.61,63,65,6B.otf | Bin 3208 -> 3208 bytes
+ ...s-retain-gids.660E,6975,73E0,5EA6,8F38,6E05.otf | Bin 121680 -> 121680 bytes
+ ...-Regular_subset.drop-hints-retain-gids.660E.otf | Bin 50532 -> 50532 bytes
+ ...et.drop-hints.3042,3044,3046,3048,304A,304B.otf | Bin 4484 -> 4484 bytes
+ ...et.drop-hints.3042,3044,3046,73E0,5EA6,8F38.otf | Bin 5628 -> 5628 bytes
+ ...nSans-Regular_subset.drop-hints.61,63,65,6B.otf | Bin 2400 -> 2400 bytes
+ ...et.drop-hints.660E,6975,73E0,5EA6,8F38,6E05.otf | Bin 5952 -> 5952 bytes
+ ...ourceHanSans-Regular_subset.drop-hints.660E.otf | Bin 2304 -> 2304 bytes
+ ...t.retain-gids.3042,3044,3046,3048,304A,304B.otf | Bin 129980 -> 129980 bytes
+ ...t.retain-gids.3042,3044,3046,73E0,5EA6,8F38.otf | Bin 131196 -> 131196 bytes
+ ...Sans-Regular_subset.retain-gids.61,63,65,6B.otf | Bin 3364 -> 3364 bytes
+ ...t.retain-gids.660E,6975,73E0,5EA6,8F38,6E05.otf | Bin 122460 -> 122460 bytes
+ ...urceHanSans-Regular_subset.retain-gids.660E.otf | Bin 50760 -> 50760 bytes
+ ...otoSerifMyanmar-Regular.notdef-outline.1092.otf | Bin 1392 -> 1392 bytes
+ ...tline-drop-hints-retain-gids.4E00,4E02,4E03.otf | Bin 1404 -> 1404 bytes
+ ...ef-outline-drop-hints-retain-gids.4E00,4E03.otf | Bin 1292 -> 1292 bytes
+ ...tline-drop-hints-retain-gids.4E00,4E05,4E07.otf | Bin 1416 -> 1416 bytes
+ ...tline-drop-hints-retain-gids.4E02,4E03,4E08.otf | Bin 1736 -> 1736 bytes
+ ....notdef-outline-drop-hints-retain-gids.4E02.otf | Bin 1048 -> 1048 bytes
+ ....notdef-outline-drop-hints-retain-gids.4E03.otf | Bin 1140 -> 1140 bytes
+ ...-drop-hints-retain-gids.4E05,4E07,4E08,4E09.otf | Bin 2000 -> 2000 bytes
+ ...ef-outline-drop-hints-retain-gids.4E08,4E09.otf | Bin 1888 -> 1888 bytes
+ ....notdef-outline-drop-hints-retain-gids.4E08.otf | Bin 1560 -> 1560 bytes
+ ...drop-hints-retain-gids.retain-all-codepoint.otf | Bin 2452 -> 2452 bytes
+ ...t1.notdef-outline-drop-hints.4E00,4E02,4E03.otf | Bin 1308 -> 1308 bytes
+ ...4_font1.notdef-outline-drop-hints.4E00,4E03.otf | Bin 1188 -> 1188 bytes
+ ...t1.notdef-outline-drop-hints.4E00,4E05,4E07.otf | Bin 1280 -> 1280 bytes
+ ...t1.notdef-outline-drop-hints.4E02,4E03,4E08.otf | Bin 1528 -> 1528 bytes
+ ...cmap14_font1.notdef-outline-drop-hints.4E02.otf | Bin 944 -> 944 bytes
+ ...cmap14_font1.notdef-outline-drop-hints.4E03.otf | Bin 1028 -> 1028 bytes
+ ...tdef-outline-drop-hints.4E05,4E07,4E08,4E09.otf | Bin 1796 -> 1796 bytes
+ ...4_font1.notdef-outline-drop-hints.4E08,4E09.otf | Bin 1672 -> 1672 bytes
+ ...cmap14_font1.notdef-outline-drop-hints.4E08.otf | Bin 1336 -> 1336 bytes
+ ...def-outline-drop-hints.retain-all-codepoint.otf | Bin 2296 -> 2296 bytes
+ ...14_font1.notdef-outline-gids.4E00,4E02,4E03.otf | Bin 1408 -> 1408 bytes
+ .../cmap14_font1.notdef-outline-gids.4E00,4E03.otf | Bin 1396 -> 1396 bytes
+ ...14_font1.notdef-outline-gids.4E00,4E05,4E07.otf | Bin 1640 -> 1640 bytes
+ ...14_font1.notdef-outline-gids.4E02,4E03,4E08.otf | Bin 1760 -> 1760 bytes
+ .../cmap14_font1.notdef-outline-gids.4E02.otf      | Bin 1332 -> 1332 bytes
+ .../cmap14_font1.notdef-outline-gids.4E03.otf      | Bin 1372 -> 1372 bytes
+ ...nt1.notdef-outline-gids.4E05,4E07,4E08,4E09.otf | Bin 2184 -> 2184 bytes
+ .../cmap14_font1.notdef-outline-gids.4E08,4E09.otf | Bin 2056 -> 2056 bytes
+ .../cmap14_font1.notdef-outline-gids.4E08.otf      | Bin 1720 -> 1720 bytes
+ ...t1.notdef-outline-gids.retain-all-codepoint.otf | Bin 2400 -> 2400 bytes
+ ...ont1.notdef-outline-name-ids.4E00,4E02,4E03.otf | Bin 1308 -> 1308 bytes
+ ...p14_font1.notdef-outline-name-ids.4E00,4E03.otf | Bin 1184 -> 1184 bytes
+ ...ont1.notdef-outline-name-ids.4E00,4E05,4E07.otf | Bin 1280 -> 1280 bytes
+ ...ont1.notdef-outline-name-ids.4E02,4E03,4E08.otf | Bin 1528 -> 1528 bytes
+ .../cmap14_font1.notdef-outline-name-ids.4E02.otf  | Bin 944 -> 944 bytes
+ .../cmap14_font1.notdef-outline-name-ids.4E03.otf  | Bin 1028 -> 1028 bytes
+ ...notdef-outline-name-ids.4E05,4E07,4E08,4E09.otf | Bin 1796 -> 1796 bytes
+ ...p14_font1.notdef-outline-name-ids.4E08,4E09.otf | Bin 1668 -> 1668 bytes
+ .../cmap14_font1.notdef-outline-name-ids.4E08.otf  | Bin 1336 -> 1336 bytes
+ ...otdef-outline-name-ids.retain-all-codepoint.otf | Bin 2296 -> 2296 bytes
+ ...1.notdef-outline-retain-gids.4E00,4E02,4E03.otf | Bin 1472 -> 1472 bytes
+ ..._font1.notdef-outline-retain-gids.4E00,4E03.otf | Bin 1360 -> 1360 bytes
+ ...1.notdef-outline-retain-gids.4E00,4E05,4E07.otf | Bin 1480 -> 1480 bytes
+ ...1.notdef-outline-retain-gids.4E02,4E03,4E08.otf | Bin 1804 -> 1804 bytes
+ ...map14_font1.notdef-outline-retain-gids.4E02.otf | Bin 1116 -> 1116 bytes
+ ...map14_font1.notdef-outline-retain-gids.4E03.otf | Bin 1208 -> 1208 bytes
+ ...def-outline-retain-gids.4E05,4E07,4E08,4E09.otf | Bin 2068 -> 2068 bytes
+ ..._font1.notdef-outline-retain-gids.4E08,4E09.otf | Bin 1956 -> 1956 bytes
+ ...map14_font1.notdef-outline-retain-gids.4E08.otf | Bin 1628 -> 1628 bytes
+ ...ef-outline-retain-gids.retain-all-codepoint.otf | Bin 2520 -> 2520 bytes
+ .../cmap14_font1.notdef-outline.4E00,4E02,4E03.otf | Bin 1376 -> 1376 bytes
+ .../cmap14_font1.notdef-outline.4E00,4E03.otf      | Bin 1252 -> 1252 bytes
+ .../cmap14_font1.notdef-outline.4E00,4E05,4E07.otf | Bin 1348 -> 1348 bytes
+ .../cmap14_font1.notdef-outline.4E02,4E03,4E08.otf | Bin 1596 -> 1596 bytes
+ .../cmap14/cmap14_font1.notdef-outline.4E02.otf    | Bin 1012 -> 1012 bytes
+ .../cmap14/cmap14_font1.notdef-outline.4E03.otf    | Bin 1096 -> 1096 bytes
+ ...14_font1.notdef-outline.4E05,4E07,4E08,4E09.otf | Bin 1864 -> 1864 bytes
+ .../cmap14_font1.notdef-outline.4E08,4E09.otf      | Bin 1736 -> 1736 bytes
+ .../cmap14/cmap14_font1.notdef-outline.4E08.otf    | Bin 1404 -> 1404 bytes
+ ...4_font1.notdef-outline.retain-all-codepoint.otf | Bin 2364 -> 2364 bytes
+ ...tline-drop-hints-retain-gids.4E00,4E02,4E03.otf | Bin 1404 -> 1404 bytes
+ ...ef-outline-drop-hints-retain-gids.4E00,4E03.otf | Bin 1292 -> 1292 bytes
+ ...tline-drop-hints-retain-gids.4E00,4E05,4E07.otf | Bin 1420 -> 1420 bytes
+ ...tline-drop-hints-retain-gids.4E02,4E03,4E08.otf | Bin 1736 -> 1736 bytes
+ ....notdef-outline-drop-hints-retain-gids.4E02.otf | Bin 1044 -> 1044 bytes
+ ....notdef-outline-drop-hints-retain-gids.4E03.otf | Bin 1136 -> 1136 bytes
+ ...-drop-hints-retain-gids.4E05,4E07,4E08,4E09.otf | Bin 2000 -> 2000 bytes
+ ...ef-outline-drop-hints-retain-gids.4E08,4E09.otf | Bin 1884 -> 1884 bytes
+ ....notdef-outline-drop-hints-retain-gids.4E08.otf | Bin 1556 -> 1556 bytes
+ ...drop-hints-retain-gids.retain-all-codepoint.otf | Bin 2448 -> 2448 bytes
+ ...t2.notdef-outline-drop-hints.4E00,4E02,4E03.otf | Bin 1308 -> 1308 bytes
+ ...4_font2.notdef-outline-drop-hints.4E00,4E03.otf | Bin 1188 -> 1188 bytes
+ ...t2.notdef-outline-drop-hints.4E00,4E05,4E07.otf | Bin 1284 -> 1284 bytes
+ ...t2.notdef-outline-drop-hints.4E02,4E03,4E08.otf | Bin 1528 -> 1528 bytes
+ ...cmap14_font2.notdef-outline-drop-hints.4E02.otf | Bin 940 -> 940 bytes
+ ...cmap14_font2.notdef-outline-drop-hints.4E03.otf | Bin 1024 -> 1024 bytes
+ ...tdef-outline-drop-hints.4E05,4E07,4E08,4E09.otf | Bin 1796 -> 1796 bytes
+ ...4_font2.notdef-outline-drop-hints.4E08,4E09.otf | Bin 1668 -> 1668 bytes
+ ...cmap14_font2.notdef-outline-drop-hints.4E08.otf | Bin 1332 -> 1332 bytes
+ ...def-outline-drop-hints.retain-all-codepoint.otf | Bin 2292 -> 2292 bytes
+ ...14_font2.notdef-outline-gids.4E00,4E02,4E03.otf | Bin 1408 -> 1408 bytes
+ .../cmap14_font2.notdef-outline-gids.4E00,4E03.otf | Bin 1396 -> 1396 bytes
+ ...14_font2.notdef-outline-gids.4E00,4E05,4E07.otf | Bin 1644 -> 1644 bytes
+ ...14_font2.notdef-outline-gids.4E02,4E03,4E08.otf | Bin 1760 -> 1760 bytes
+ .../cmap14_font2.notdef-outline-gids.4E02.otf      | Bin 1328 -> 1328 bytes
+ .../cmap14_font2.notdef-outline-gids.4E03.otf      | Bin 1368 -> 1368 bytes
+ ...nt2.notdef-outline-gids.4E05,4E07,4E08,4E09.otf | Bin 2184 -> 2184 bytes
+ .../cmap14_font2.notdef-outline-gids.4E08,4E09.otf | Bin 2052 -> 2052 bytes
+ .../cmap14_font2.notdef-outline-gids.4E08.otf      | Bin 1716 -> 1716 bytes
+ ...t2.notdef-outline-gids.retain-all-codepoint.otf | Bin 2396 -> 2396 bytes
+ ...ont2.notdef-outline-name-ids.4E00,4E02,4E03.otf | Bin 1308 -> 1308 bytes
+ ...p14_font2.notdef-outline-name-ids.4E00,4E03.otf | Bin 1184 -> 1184 bytes
+ ...ont2.notdef-outline-name-ids.4E00,4E05,4E07.otf | Bin 1284 -> 1284 bytes
+ ...ont2.notdef-outline-name-ids.4E02,4E03,4E08.otf | Bin 1528 -> 1528 bytes
+ .../cmap14_font2.notdef-outline-name-ids.4E02.otf  | Bin 940 -> 940 bytes
+ .../cmap14_font2.notdef-outline-name-ids.4E03.otf  | Bin 1024 -> 1024 bytes
+ ...notdef-outline-name-ids.4E05,4E07,4E08,4E09.otf | Bin 1796 -> 1796 bytes
+ ...p14_font2.notdef-outline-name-ids.4E08,4E09.otf | Bin 1664 -> 1664 bytes
+ .../cmap14_font2.notdef-outline-name-ids.4E08.otf  | Bin 1332 -> 1332 bytes
+ ...otdef-outline-name-ids.retain-all-codepoint.otf | Bin 2292 -> 2292 bytes
+ ...2.notdef-outline-retain-gids.4E00,4E02,4E03.otf | Bin 1472 -> 1472 bytes
+ ..._font2.notdef-outline-retain-gids.4E00,4E03.otf | Bin 1360 -> 1360 bytes
+ ...2.notdef-outline-retain-gids.4E00,4E05,4E07.otf | Bin 1484 -> 1484 bytes
+ ...2.notdef-outline-retain-gids.4E02,4E03,4E08.otf | Bin 1804 -> 1804 bytes
+ ...map14_font2.notdef-outline-retain-gids.4E02.otf | Bin 1112 -> 1112 bytes
+ ...map14_font2.notdef-outline-retain-gids.4E03.otf | Bin 1204 -> 1204 bytes
+ ...def-outline-retain-gids.4E05,4E07,4E08,4E09.otf | Bin 2068 -> 2068 bytes
+ ..._font2.notdef-outline-retain-gids.4E08,4E09.otf | Bin 1952 -> 1952 bytes
+ ...map14_font2.notdef-outline-retain-gids.4E08.otf | Bin 1624 -> 1624 bytes
+ ...ef-outline-retain-gids.retain-all-codepoint.otf | Bin 2516 -> 2516 bytes
+ .../cmap14_font2.notdef-outline.4E00,4E02,4E03.otf | Bin 1376 -> 1376 bytes
+ .../cmap14_font2.notdef-outline.4E00,4E03.otf      | Bin 1252 -> 1252 bytes
+ .../cmap14_font2.notdef-outline.4E00,4E05,4E07.otf | Bin 1352 -> 1352 bytes
+ .../cmap14_font2.notdef-outline.4E02,4E03,4E08.otf | Bin 1596 -> 1596 bytes
+ .../cmap14/cmap14_font2.notdef-outline.4E02.otf    | Bin 1008 -> 1008 bytes
+ .../cmap14/cmap14_font2.notdef-outline.4E03.otf    | Bin 1092 -> 1092 bytes
+ ...14_font2.notdef-outline.4E05,4E07,4E08,4E09.otf | Bin 1864 -> 1864 bytes
+ .../cmap14_font2.notdef-outline.4E08,4E09.otf      | Bin 1732 -> 1732 bytes
+ .../cmap14/cmap14_font2.notdef-outline.4E08.otf    | Bin 1400 -> 1400 bytes
+ ...4_font2.notdef-outline.retain-all-codepoint.otf | Bin 2360 -> 2360 bytes
+ ...ep-all-layout-features.retain-all-codepoint.otf | Bin 12796 -> 12796 bytes
+ .../AdobeVFPrototype.default.61,62,63.otf          | Bin 5160 -> 5160 bytes
+ .../SourceSansPro-Regular.default.61,62,63.otf     | Bin 2180 -> 2180 bytes
+ ...fault.retain-all-codepoint.wght=650,CNTR=50.otf | Bin 41760 -> 41760 bytes
+ ...F-ABC.default.retain-all-codepoint.wght=800.otf | Bin 1488 -> 1488 bytes
+ ...C.retain-gids.retain-all-codepoint.wght=800.otf | Bin 1488 -> 1488 bytes
+ ...ubrules_f1.layout-test-retain-gids.41,42,43.otf | Bin 2132 -> 2132 bytes
+ ...e_subrules_f1.layout-test-retain-gids.41,42.otf | Bin 2012 -> 2012 bytes
+ ...e_subrules_f1.layout-test-retain-gids.41,43.otf | Bin 2020 -> 2020 bytes
+ ...iple_subrules_f1.layout-test-retain-gids.41.otf | Bin 1896 -> 1896 bytes
+ ...ayout-test-retain-gids.retain-all-codepoint.otf | Bin 3992 -> 3992 bytes
+ ...1_multiple_subrules_f1.layout-test.41,42,43.otf | Bin 1420 -> 1420 bytes
+ ...ext1_multiple_subrules_f1.layout-test.41,42.otf | Bin 1304 -> 1304 bytes
+ ...ext1_multiple_subrules_f1.layout-test.41,43.otf | Bin 1300 -> 1300 bytes
+ ...ontext1_multiple_subrules_f1.layout-test.41.otf | Bin 1192 -> 1192 bytes
+ ...ubrules_f1.layout-test.retain-all-codepoint.otf | Bin 3992 -> 3992 bytes
+ ...ubrules_f1.layout-test-retain-gids.41,42,43.otf | Bin 2148 -> 2148 bytes
+ ...e_subrules_f1.layout-test-retain-gids.41,42.otf | Bin 2024 -> 2024 bytes
+ ...e_subrules_f1.layout-test-retain-gids.41,43.otf | Bin 2020 -> 2020 bytes
+ ...iple_subrules_f1.layout-test-retain-gids.41.otf | Bin 1896 -> 1896 bytes
+ ...ayout-test-retain-gids.retain-all-codepoint.otf | Bin 4008 -> 4008 bytes
+ ...2_multiple_subrules_f1.layout-test.41,42,43.otf | Bin 1436 -> 1436 bytes
+ ...ext2_multiple_subrules_f1.layout-test.41,42.otf | Bin 1316 -> 1316 bytes
+ ...ext2_multiple_subrules_f1.layout-test.41,43.otf | Bin 1300 -> 1300 bytes
+ ...ontext2_multiple_subrules_f1.layout-test.41.otf | Bin 1192 -> 1192 bytes
+ ...ubrules_f1.layout-test.retain-all-codepoint.otf | Bin 4008 -> 4008 bytes
+ ..._simple_f1.layout-test-retain-gids.41,42,43.otf | Bin 2112 -> 2112 bytes
+ ...xt3_simple_f1.layout-test-retain-gids.41,42.otf | Bin 1892 -> 1892 bytes
+ ...xt3_simple_f1.layout-test-retain-gids.41,43.otf | Bin 2000 -> 2000 bytes
+ ...ntext3_simple_f1.layout-test-retain-gids.41.otf | Bin 1876 -> 1876 bytes
+ ...ayout-test-retain-gids.retain-all-codepoint.otf | Bin 3972 -> 3972 bytes
+ ...pos_context3_simple_f1.layout-test.41,42,43.otf | Bin 1400 -> 1400 bytes
+ .../gpos_context3_simple_f1.layout-test.41,42.otf  | Bin 1184 -> 1184 bytes
+ .../gpos_context3_simple_f1.layout-test.41,43.otf  | Bin 1280 -> 1280 bytes
+ .../gpos_context3_simple_f1.layout-test.41.otf     | Bin 1172 -> 1172 bytes
+ ..._simple_f1.layout-test.retain-all-codepoint.otf | Bin 3972 -> 3972 bytes
+ ...ototype.layout-test-retain-gids.41,42,43,57.otf | Bin 5920 -> 5920 bytes
+ ...FPrototype.layout-test-retain-gids.41,42,43.otf | Bin 5208 -> 5208 bytes
+ ...beVFPrototype.layout-test-retain-gids.41,42.otf | Bin 4728 -> 4728 bytes
+ ...FPrototype.layout-test-retain-gids.41,56,57.otf | Bin 5044 -> 5044 bytes
+ ...AdobeVFPrototype.layout-test-retain-gids.41.otf | Bin 3992 -> 3992 bytes
+ ...beVFPrototype.layout-test-retain-gids.42,57.otf | Bin 5036 -> 5036 bytes
+ .../AdobeVFPrototype.layout-test.41,42,43,57.otf   | Bin 5476 -> 5476 bytes
+ .../AdobeVFPrototype.layout-test.41,42,43.otf      | Bin 4948 -> 4948 bytes
+ .../AdobeVFPrototype.layout-test.41,42.otf         | Bin 4464 -> 4464 bytes
+ .../AdobeVFPrototype.layout-test.41,56,57.otf      | Bin 4616 -> 4616 bytes
+ .../AdobeVFPrototype.layout-test.41.otf            | Bin 3764 -> 3764 bytes
+ .../AdobeVFPrototype.layout-test.42,57.otf         | Bin 4596 -> 4596 bytes
+ .../gpos1_2_font.layout-test-retain-gids.41,43.otf | Bin 2044 -> 2044 bytes
+ .../gpos1_2_font.layout-test-retain-gids.41,46.otf | Bin 2204 -> 2204 bytes
+ .../gpos1_2_font.layout-test-retain-gids.41.otf    | Bin 1916 -> 1916 bytes
+ .../gpos1_2_font.layout-test-retain-gids.42,44.otf | Bin 1964 -> 1964 bytes
+ .../gpos1_2_font.layout-test-retain-gids.43,46.otf | Bin 2068 -> 2068 bytes
+ ...ayout-test-retain-gids.retain-all-codepoint.otf | Bin 3848 -> 3848 bytes
+ .../layout.gpos/gpos1_2_font.layout-test.41,43.otf | Bin 1324 -> 1324 bytes
+ .../layout.gpos/gpos1_2_font.layout-test.41,46.otf | Bin 1452 -> 1452 bytes
+ .../layout.gpos/gpos1_2_font.layout-test.41.otf    | Bin 1212 -> 1212 bytes
+ .../layout.gpos/gpos1_2_font.layout-test.42,44.otf | Bin 1232 -> 1232 bytes
+ .../layout.gpos/gpos1_2_font.layout-test.43,46.otf | Bin 1316 -> 1316 bytes
+ ...os1_2_font.layout-test.retain-all-codepoint.otf | Bin 3848 -> 3848 bytes
+ ...s2_1_font7.layout-test-retain-gids.21,23,25.otf | Bin 1728 -> 1728 bytes
+ ...gpos2_1_font7.layout-test-retain-gids.21,23.otf | Bin 1604 -> 1604 bytes
+ ...gpos2_1_font7.layout-test-retain-gids.2E,23.otf | Bin 1912 -> 1912 bytes
+ ...s2_1_font7.layout-test-retain-gids.41,42,43.otf | Bin 1976 -> 1976 bytes
+ ...ayout-test-retain-gids.retain-all-codepoint.otf | Bin 3868 -> 3868 bytes
+ .../gpos2_1_font7.layout-test.21,23,25.otf         | Bin 1384 -> 1384 bytes
+ .../gpos2_1_font7.layout-test.21,23.otf            | Bin 1276 -> 1276 bytes
+ .../gpos2_1_font7.layout-test.2E,23.otf            | Bin 1476 -> 1476 bytes
+ .../gpos2_1_font7.layout-test.41,42,43.otf         | Bin 1264 -> 1264 bytes
+ ...s2_1_font7.layout-test.retain-all-codepoint.otf | Bin 3868 -> 3868 bytes
+ ...s2_2_font5.layout-test-retain-gids.21,23,25.otf | Bin 1780 -> 1780 bytes
+ ...gpos2_2_font5.layout-test-retain-gids.21,23.otf | Bin 1656 -> 1656 bytes
+ ...gpos2_2_font5.layout-test-retain-gids.2E,23.otf | Bin 1912 -> 1912 bytes
+ ...s2_2_font5.layout-test-retain-gids.41,42,43.otf | Bin 1976 -> 1976 bytes
+ ...ayout-test-retain-gids.retain-all-codepoint.otf | Bin 3904 -> 3904 bytes
+ .../gpos2_2_font5.layout-test.21,23,25.otf         | Bin 1436 -> 1436 bytes
+ .../gpos2_2_font5.layout-test.21,23.otf            | Bin 1328 -> 1328 bytes
+ .../gpos2_2_font5.layout-test.2E,23.otf            | Bin 1476 -> 1476 bytes
+ .../gpos2_2_font5.layout-test.41,42,43.otf         | Bin 1264 -> 1264 bytes
+ ...s2_2_font5.layout-test.retain-all-codepoint.otf | Bin 3904 -> 3904 bytes
+ .../gpos3_font3.layout-test-retain-gids.28,29.otf  | Bin 1700 -> 1700 bytes
+ .../gpos3_font3.layout-test-retain-gids.28,2B.otf  | Bin 1836 -> 1836 bytes
+ .../gpos3_font3.layout-test-retain-gids.29,2B.otf  | Bin 1744 -> 1744 bytes
+ ...pos3_font3.layout-test-retain-gids.41,42,43.otf | Bin 1972 -> 1972 bytes
+ ...ayout-test-retain-gids.retain-all-codepoint.otf | Bin 3908 -> 3908 bytes
+ .../layout.gpos3/gpos3_font3.layout-test.28,29.otf | Bin 1308 -> 1308 bytes
+ .../layout.gpos3/gpos3_font3.layout-test.28,2B.otf | Bin 1428 -> 1428 bytes
+ .../layout.gpos3/gpos3_font3.layout-test.29,2B.otf | Bin 1336 -> 1336 bytes
+ .../gpos3_font3.layout-test.41,42,43.otf           | Bin 1260 -> 1260 bytes
+ ...pos3_font3.layout-test.retain-all-codepoint.otf | Bin 3908 -> 3908 bytes
+ ...chors_1.layout-test-retain-gids.41,42,43,44.otf | Bin 2336 -> 2336 bytes
+ ...chors_1.layout-test-retain-gids.41,42,43,45.otf | Bin 2332 -> 2332 bytes
+ ..._anchors_1.layout-test-retain-gids.41,42,43.otf | Bin 2096 -> 2096 bytes
+ ...ple_anchors_1.layout-test-retain-gids.41,42.otf | Bin 1892 -> 1892 bytes
+ ...rs_1.layout-test-retain-gids.41,43,44,45,46.otf | Bin 2692 -> 2692 bytes
+ ..._anchors_1.layout-test-retain-gids.41,43,44.otf | Bin 2328 -> 2328 bytes
+ ..._anchors_1.layout-test-retain-gids.41,43,45.otf | Bin 2328 -> 2328 bytes
+ ...ple_anchors_1.layout-test-retain-gids.41,43.otf | Bin 2092 -> 2092 bytes
+ ...ltiple_anchors_1.layout-test-retain-gids.41.otf | Bin 1876 -> 1876 bytes
+ ...ayout-test-retain-gids.retain-all-codepoint.otf | Bin 3996 -> 3996 bytes
+ ..._multiple_anchors_1.layout-test.41,42,43,44.otf | Bin 1620 -> 1620 bytes
+ ..._multiple_anchors_1.layout-test.41,42,43,45.otf | Bin 1600 -> 1600 bytes
+ ...os4_multiple_anchors_1.layout-test.41,42,43.otf | Bin 1384 -> 1384 bytes
+ .../gpos4_multiple_anchors_1.layout-test.41,42.otf | Bin 1184 -> 1184 bytes
+ ...ltiple_anchors_1.layout-test.41,43,44,45,46.otf | Bin 1964 -> 1964 bytes
+ ...os4_multiple_anchors_1.layout-test.41,43,44.otf | Bin 1604 -> 1604 bytes
+ ...os4_multiple_anchors_1.layout-test.41,43,45.otf | Bin 1592 -> 1592 bytes
+ .../gpos4_multiple_anchors_1.layout-test.41,43.otf | Bin 1372 -> 1372 bytes
+ .../gpos4_multiple_anchors_1.layout-test.41.otf    | Bin 1172 -> 1172 bytes
+ ..._anchors_1.layout-test.retain-all-codepoint.otf | Bin 3996 -> 3996 bytes
+ ...5_font1.layout-test-retain-gids.41,42,43,44.otf | Bin 2360 -> 2360 bytes
+ ...5_font1.layout-test-retain-gids.41,42,43,45.otf | Bin 2356 -> 2356 bytes
+ ...pos5_font1.layout-test-retain-gids.41,42,43.otf | Bin 2120 -> 2120 bytes
+ ...pos5_font1.layout-test-retain-gids.41,42,44.otf | Bin 2276 -> 2276 bytes
+ ...pos5_font1.layout-test-retain-gids.41,42,45.otf | Bin 2260 -> 2260 bytes
+ .../gpos5_font1.layout-test-retain-gids.41,42.otf  | Bin 2012 -> 2012 bytes
+ .../gpos5_font1.layout-test-retain-gids.41,43.otf  | Bin 2016 -> 2016 bytes
+ .../gpos5_font1.layout-test-retain-gids.41.otf     | Bin 1892 -> 1892 bytes
+ .../gpos5_font1.layout-test-retain-gids.42.otf     | Bin 1764 -> 1764 bytes
+ ...ayout-test-retain-gids.retain-all-codepoint.otf | Bin 4064 -> 4064 bytes
+ .../gpos5_font1.layout-test.41,42,43,44.otf        | Bin 1644 -> 1644 bytes
+ .../gpos5_font1.layout-test.41,42,43,45.otf        | Bin 1624 -> 1624 bytes
+ .../gpos5_font1.layout-test.41,42,43.otf           | Bin 1408 -> 1408 bytes
+ .../gpos5_font1.layout-test.41,42,44.otf           | Bin 1552 -> 1552 bytes
+ .../gpos5_font1.layout-test.41,42,45.otf           | Bin 1524 -> 1524 bytes
+ .../layout.gpos5/gpos5_font1.layout-test.41,42.otf | Bin 1304 -> 1304 bytes
+ .../layout.gpos5/gpos5_font1.layout-test.41,43.otf | Bin 1296 -> 1296 bytes
+ .../layout.gpos5/gpos5_font1.layout-test.41.otf    | Bin 1188 -> 1188 bytes
+ .../layout.gpos5/gpos5_font1.layout-test.42.otf    | Bin 1048 -> 1048 bytes
+ ...pos5_font1.layout-test.retain-all-codepoint.otf | Bin 4064 -> 4064 bytes
+ ...6_font1.layout-test-retain-gids.41,42,43,44.otf | Bin 2312 -> 2312 bytes
+ ...6_font1.layout-test-retain-gids.41,42,43,45.otf | Bin 2308 -> 2308 bytes
+ ...pos6_font1.layout-test-retain-gids.41,42,43.otf | Bin 2072 -> 2072 bytes
+ .../gpos6_font1.layout-test-retain-gids.41,42.otf  | Bin 1868 -> 1868 bytes
+ ...ont1.layout-test-retain-gids.41,43,44,45,46.otf | Bin 2668 -> 2668 bytes
+ ...pos6_font1.layout-test-retain-gids.41,43,44.otf | Bin 2304 -> 2304 bytes
+ ...pos6_font1.layout-test-retain-gids.41,43,45.otf | Bin 2304 -> 2304 bytes
+ .../gpos6_font1.layout-test-retain-gids.41,43.otf  | Bin 2068 -> 2068 bytes
+ .../gpos6_font1.layout-test-retain-gids.41.otf     | Bin 1852 -> 1852 bytes
+ ...ayout-test-retain-gids.retain-all-codepoint.otf | Bin 3972 -> 3972 bytes
+ .../gpos6_font1.layout-test.41,42,43,44.otf        | Bin 1596 -> 1596 bytes
+ .../gpos6_font1.layout-test.41,42,43,45.otf        | Bin 1576 -> 1576 bytes
+ .../gpos6_font1.layout-test.41,42,43.otf           | Bin 1360 -> 1360 bytes
+ .../layout.gpos6/gpos6_font1.layout-test.41,42.otf | Bin 1160 -> 1160 bytes
+ .../gpos6_font1.layout-test.41,43,44,45,46.otf     | Bin 1940 -> 1940 bytes
+ .../gpos6_font1.layout-test.41,43,44.otf           | Bin 1580 -> 1580 bytes
+ .../gpos6_font1.layout-test.41,43,45.otf           | Bin 1568 -> 1568 bytes
+ .../layout.gpos6/gpos6_font1.layout-test.41,43.otf | Bin 1348 -> 1348 bytes
+ .../layout.gpos6/gpos6_font1.layout-test.41.otf    | Bin 1148 -> 1148 bytes
+ ...pos6_font1.layout-test.retain-all-codepoint.otf | Bin 3972 -> 3972 bytes
+ ...ules_f1.layout-test-retain-gids.30,31,32,33.otf | Bin 2400 -> 2400 bytes
+ ...ubrules_f1.layout-test-retain-gids.41,42,43.otf | Bin 2020 -> 2020 bytes
+ ...ayout-test-retain-gids.retain-all-codepoint.otf | Bin 4012 -> 4012 bytes
+ ...ultiple_subrules_f1.layout-test.30,31,32,33.otf | Bin 1928 -> 1928 bytes
+ ...1_multiple_subrules_f1.layout-test.41,42,43.otf | Bin 1308 -> 1308 bytes
+ ...ubrules_f1.layout-test.retain-all-codepoint.otf | Bin 4012 -> 4012 bytes
+ ...ules_f1.layout-test-retain-gids.30,31,32,33.otf | Bin 2420 -> 2420 bytes
+ ...ubrules_f1.layout-test-retain-gids.41,42,43.otf | Bin 2020 -> 2020 bytes
+ ...ayout-test-retain-gids.retain-all-codepoint.otf | Bin 4044 -> 4044 bytes
+ ...ultiple_subrules_f1.layout-test.30,31,32,33.otf | Bin 1948 -> 1948 bytes
+ ...2_multiple_subrules_f1.layout-test.41,42,43.otf | Bin 1308 -> 1308 bytes
+ ...ubrules_f1.layout-test.retain-all-codepoint.otf | Bin 4044 -> 4044 bytes
+ ...mple_f1.layout-test-retain-gids.30,31,32,33.otf | Bin 2392 -> 2392 bytes
+ ..._simple_f1.layout-test-retain-gids.41,42,43.otf | Bin 1996 -> 1996 bytes
+ ...ayout-test-retain-gids.retain-all-codepoint.otf | Bin 3980 -> 3980 bytes
+ ...chaining3_simple_f1.layout-test.30,31,32,33.otf | Bin 1920 -> 1920 bytes
+ ...os_chaining3_simple_f1.layout-test.41,42,43.otf | Bin 1284 -> 1284 bytes
+ ..._simple_f1.layout-test.retain-all-codepoint.otf | Bin 3980 -> 3980 bytes
+ .../gpos9_font2.layout-test-retain-gids.41,42.otf  | Bin 1960 -> 1960 bytes
+ .../gpos9_font2.layout-test-retain-gids.41.otf     | Bin 1920 -> 1920 bytes
+ .../gpos9_font2.layout-test-retain-gids.42.otf     | Bin 1792 -> 1792 bytes
+ .../layout.gpos9/gpos9_font2.layout-test.41,42.otf | Bin 1252 -> 1252 bytes
+ .../layout.gpos9/gpos9_font2.layout-test.41.otf    | Bin 1216 -> 1216 bytes
+ .../layout.gpos9/gpos9_font2.layout-test.42.otf    | Bin 1076 -> 1076 bytes
+ ...stitution.layout-test-retain-gids.53A9,53F1.otf | Bin 5076 -> 5076 bytes
+ ...e_substitution.layout-test-retain-gids.53A9.otf | Bin 4656 -> 4656 bytes
+ ...e_substitution.layout-test-retain-gids.53F1.otf | Bin 2996 -> 2996 bytes
+ ...ayout-test-retain-gids.retain-all-codepoint.otf | Bin 6764 -> 6764 bytes
+ ...lternate_substitution.layout-test.53A9,53F1.otf | Bin 4952 -> 4952 bytes
+ ...sub_alternate_substitution.layout-test.53A9.otf | Bin 4504 -> 4504 bytes
+ ...sub_alternate_substitution.layout-test.53F1.otf | Bin 2804 -> 2804 bytes
+ ...bstitution.layout-test.retain-all-codepoint.otf | Bin 6672 -> 6672 bytes
+ ...ubrules_f2.layout-test-retain-gids.41,42,43.otf | Bin 2236 -> 2236 bytes
+ ...e_subrules_f2.layout-test-retain-gids.41,42.otf | Bin 2208 -> 2208 bytes
+ ...e_subrules_f2.layout-test-retain-gids.41,43.otf | Bin 2032 -> 2032 bytes
+ ...iple_subrules_f2.layout-test-retain-gids.41.otf | Bin 1908 -> 1908 bytes
+ ...ayout-test-retain-gids.retain-all-codepoint.otf | Bin 3988 -> 3988 bytes
+ ...1_multiple_subrules_f2.layout-test.41,42,43.otf | Bin 1440 -> 1440 bytes
+ ...ext1_multiple_subrules_f2.layout-test.41,42.otf | Bin 1400 -> 1400 bytes
+ ...ext1_multiple_subrules_f2.layout-test.41,43.otf | Bin 1312 -> 1312 bytes
+ ...ontext1_multiple_subrules_f2.layout-test.41.otf | Bin 1204 -> 1204 bytes
+ ...ubrules_f2.layout-test.retain-all-codepoint.otf | Bin 3988 -> 3988 bytes
+ ...ubrules_f2.layout-test-retain-gids.41,42,43.otf | Bin 2252 -> 2252 bytes
+ ...e_subrules_f2.layout-test-retain-gids.41,42.otf | Bin 2220 -> 2220 bytes
+ ...e_subrules_f2.layout-test-retain-gids.41,43.otf | Bin 2032 -> 2032 bytes
+ ...iple_subrules_f2.layout-test-retain-gids.41.otf | Bin 1908 -> 1908 bytes
+ ...ayout-test-retain-gids.retain-all-codepoint.otf | Bin 4004 -> 4004 bytes
+ ...2_multiple_subrules_f2.layout-test.41,42,43.otf | Bin 1456 -> 1456 bytes
+ ...ext2_multiple_subrules_f2.layout-test.41,42.otf | Bin 1412 -> 1412 bytes
+ ...ext2_multiple_subrules_f2.layout-test.41,43.otf | Bin 1312 -> 1312 bytes
+ ...ontext2_multiple_subrules_f2.layout-test.41.otf | Bin 1204 -> 1204 bytes
+ ...ubrules_f2.layout-test.retain-all-codepoint.otf | Bin 4004 -> 4004 bytes
+ ...cessive_f1.layout-test-retain-gids.41,42,43.otf | Bin 2016 -> 2016 bytes
+ ...successive_f1.layout-test-retain-gids.41,42.otf | Bin 1912 -> 1912 bytes
+ ...successive_f1.layout-test-retain-gids.41,43.otf | Bin 2020 -> 2020 bytes
+ ...t3_successive_f1.layout-test-retain-gids.41.otf | Bin 1896 -> 1896 bytes
+ ...ayout-test-retain-gids.retain-all-codepoint.otf | Bin 4008 -> 4008 bytes
+ ...context3_successive_f1.layout-test.41,42,43.otf | Bin 1304 -> 1304 bytes
+ ...ub_context3_successive_f1.layout-test.41,42.otf | Bin 1204 -> 1204 bytes
+ ...ub_context3_successive_f1.layout-test.41,43.otf | Bin 1300 -> 1300 bytes
+ .../gsub_context3_successive_f1.layout-test.41.otf | Bin 1192 -> 1192 bytes
+ ...cessive_f1.layout-test.retain-all-codepoint.otf | Bin 4008 -> 4008 bytes
+ ...ules_f1.layout-test-retain-gids.30,31,32,33.otf | Bin 2372 -> 2372 bytes
+ ...ubrules_f1.layout-test-retain-gids.41,42,43.otf | Bin 2032 -> 2032 bytes
+ ...ayout-test-retain-gids.retain-all-codepoint.otf | Bin 3984 -> 3984 bytes
+ ...ultiple_subrules_f1.layout-test.30,31,32,33.otf | Bin 1900 -> 1900 bytes
+ ...1_multiple_subrules_f1.layout-test.41,42,43.otf | Bin 1320 -> 1320 bytes
+ ...ubrules_f1.layout-test.retain-all-codepoint.otf | Bin 3984 -> 3984 bytes
+ ...ules_f1.layout-test-retain-gids.30,31,32,33.otf | Bin 2400 -> 2400 bytes
+ ...ubrules_f1.layout-test-retain-gids.41,42,43.otf | Bin 2032 -> 2032 bytes
+ ...ayout-test-retain-gids.retain-all-codepoint.otf | Bin 4016 -> 4016 bytes
+ ...ultiple_subrules_f1.layout-test.30,31,32,33.otf | Bin 1928 -> 1928 bytes
+ ...2_multiple_subrules_f1.layout-test.41,42,43.otf | Bin 1320 -> 1320 bytes
+ ...ubrules_f1.layout-test.retain-all-codepoint.otf | Bin 4016 -> 4016 bytes
+ ...mple_f2.layout-test-retain-gids.30,31,32,33.otf | Bin 2360 -> 2360 bytes
+ ..._simple_f2.layout-test-retain-gids.41,42,43.otf | Bin 2008 -> 2008 bytes
+ ...ayout-test-retain-gids.retain-all-codepoint.otf | Bin 3952 -> 3952 bytes
+ ...chaining3_simple_f2.layout-test.30,31,32,33.otf | Bin 1888 -> 1888 bytes
+ ...ub_chaining3_simple_f2.layout-test.41,42,43.otf | Bin 1296 -> 1296 bytes
+ ..._simple_f2.layout-test.retain-all-codepoint.otf | Bin 3952 -> 3952 bytes
+ ...test-retain-gids.41,42,43,44,45,46,47,48,49.otf | Bin 3208 -> 3208 bytes
+ ...ayout-test-retain-gids.41,42,43,44,45,46,47.otf | Bin 2828 -> 2828 bytes
+ ...ayout-test-retain-gids.41,42,43,44,45,46,4D.otf | Bin 2896 -> 2896 bytes
+ ...ayout-test-retain-gids.41,42,43,44,45,46,51.otf | Bin 2900 -> 2900 bytes
+ ...d.layout-test-retain-gids.41,42,43,44,45,46.otf | Bin 2564 -> 2564 bytes
+ ...ly_created.layout-test-retain-gids.41,42,43.otf | Bin 2008 -> 2008 bytes
+ ...manually_created.layout-test-retain-gids.41.otf | Bin 1888 -> 1888 bytes
+ ...manually_created.layout-test-retain-gids.61.otf | Bin 2608 -> 2608 bytes
+ ...ayout-test-retain-gids.retain-all-codepoint.otf | Bin 4048 -> 4048 bytes
+ ...ated.layout-test.41,42,43,44,45,46,47,48,49.otf | Bin 2404 -> 2404 bytes
+ ...ly_created.layout-test.41,42,43,44,45,46,47.otf | Bin 2012 -> 2012 bytes
+ ...ly_created.layout-test.41,42,43,44,45,46,4D.otf | Bin 2012 -> 2012 bytes
+ ...ly_created.layout-test.41,42,43,44,45,46,51.otf | Bin 2060 -> 2060 bytes
+ ...ually_created.layout-test.41,42,43,44,45,46.otf | Bin 1844 -> 1844 bytes
+ ...gsub8_manually_created.layout-test.41,42,43.otf | Bin 1296 -> 1296 bytes
+ .../gsub8_manually_created.layout-test.41.otf      | Bin 1184 -> 1184 bytes
+ .../gsub8_manually_created.layout-test.61.otf      | Bin 1556 -> 1556 bytes
+ ...ly_created.layout-test.retain-all-codepoint.otf | Bin 4048 -> 4048 bytes
+ 471 files changed, 12 insertions(+), 24 deletions(-)
+
+commit c6884377ecea2fbd3021dd98f20883b31339ccc1
+Author: Garret Rieger <grieger@google.com>
+Date:   Mon Nov 6 20:21:46 2023 +0000
+
+    [subset] Add HB_SUBSET_FLAGS_IFTB_REQUIREMENTS flag.
+    
+    When enabled the output subset conforms to the requirements for a base font to be patched by IFTB patches. IFTB is a proposed incremental font transfer patch. This new flag is set as experimental. Currently, setting this flag causes the output subset to also use long offsets for outline data in loca/glyf, gvar, CFF, and CFF2.
+    
+    This change is a version of https://github.com/skef/harfbuzz/commit/3ae2fe2084d96f61d8ad1bbe42a6ef4e62ec830a rebased onto head w/ tests added.
+
+ src/hb-ot-cff-common.hh                            |  12 +++--
+ src/hb-ot-var-gvar-table.hh                        |   7 ++-
+ src/hb-subset-cff1.cc                              |  55 ++++++++++++++------
+ src/hb-subset-cff2.cc                              |  56 +++++++++++++++------
+ src/hb-subset-plan.cc                              |  10 ++--
+ src/hb-subset.h                                    |   6 +++
+ test/api/fonts/AdobeVFPrototype.abc.long_off.otf   | Bin 0 -> 5172 bytes
+ test/api/fonts/Roboto-Variable.abc.long_loca.ttf   | Bin 0 -> 11396 bytes
+ test/api/fonts/Roboto-Variable.abc.ttf             | Bin 0 -> 11384 bytes
+ .../fonts/SourceSansPro-Regular.abc.long_off.otf   | Bin 0 -> 1788 bytes
+ test/api/test-subset-cff1.c                        |  32 ++++++++++++
+ test/api/test-subset-cff2.c                        |  31 ++++++++++++
+ test/api/test-subset-glyf.c                        |  33 ++++++++++++
+ .../AdobeVFPrototype.default.61,62,63.otf          | Bin 0 -> 5160 bytes
+ ...AdobeVFPrototype.iftb_requirements.61,62,63.otf | Bin 0 -> 5172 bytes
+ .../Roboto-Variable.default.61,62,63.ttf           | Bin 0 -> 11384 bytes
+ .../Roboto-Variable.iftb_requirements.61,62,63.ttf | Bin 0 -> 11396 bytes
+ .../SourceSansPro-Regular.default.61,62,63.otf     | Bin 0 -> 2180 bytes
+ ...eSansPro-Regular.iftb_requirements.61,62,63.otf | Bin 0 -> 2196 bytes
+ test/subset/data/profiles/iftb_requirements.txt    |   1 +
+ test/subset/data/tests/iftb_requirements.tests     |  14 ++++++
+ test/subset/meson.build                            |   1 +
+ util/hb-subset.cc                                  |   7 ++-
+ 23 files changed, 223 insertions(+), 42 deletions(-)
+
+commit c3c32b0176716ead26f36dd2cc01928898999408
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Mon Nov 6 09:57:34 2023 -0700
+
+    Add xkcd.png
+
+ Makefile.am |   1 +
+ README.md   |   2 ++
+ xkcd.png    | Bin 0 -> 52751 bytes
+ 3 files changed, 3 insertions(+)
+
+commit c2f42fbb146c04ba557ceb31a8eac9bd5f3d65ea
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Mon Nov 6 11:49:11 2023 -0800
+
+    fix meson compiled_tests
+
+ src/meson.build                     | 28 ++++++++++++++--------------
+ src/test-subset-instancer-solver.cc |  2 +-
+ 2 files changed, 15 insertions(+), 15 deletions(-)
+
+commit d550e16acc61e8c25dbafd9f19f62b25cd4e79f1
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Mon Nov 6 10:31:05 2023 -0800
+
+    [instancer] Recalc avgcharwidth after instancing
+
+ src/hb-ot-os2-table.hh                             |  22 +++++++++++++++++++++
+ src/hb-subset.cc                                   |   1 +
+ ...r-new.default.retain-all-codepoint.wght=300.ttf | Bin 131708 -> 131708 bytes
+ ...r-new.default.retain-all-codepoint.wght=700.ttf | Bin 131584 -> 131584 bytes
+ ...i-ABC.default.retain-all-codepoint.wght=300.ttf | Bin 5788 -> 5788 bytes
+ ...i-ABC.default.retain-all-codepoint.wght=700.ttf | Bin 5784 -> 5784 bytes
+ ...t.retain-all-codepoint.wght=200-300,opsz=14.ttf | Bin 10136 -> 10136 bytes
+ ...ain-all-codepoint.wght=400,wdth=100,opsz=14.ttf | Bin 6404 -> 6404 bytes
+ ...set.default.retain-all-codepoint.wdth=112.5.ttf | Bin 2668 -> 2668 bytes
+ ...subset.default.retain-all-codepoint.wdth=75.ttf | Bin 3296 -> 3296 bytes
+ ...ayout-features.retain-all-codepoint.wdth=75.ttf | Bin 4500 -> 4500 bytes
+ ...fault.retain-all-codepoint.wght=150,wdth=80.ttf | Bin 114196 -> 114196 bytes
+ ...fault.retain-all-codepoint.wght=300,wdth=90.ttf | Bin 114296 -> 114296 bytes
+ ...anges.retain-all-codepoint.wght=150,wdth=80.ttf | Bin 114196 -> 114196 bytes
+ ...anges.retain-all-codepoint.wght=300,wdth=90.ttf | Bin 114296 -> 114296 bytes
+ ...ubset.default.retain-all-codepoint.wght=300.ttf | Bin 3300 -> 3300 bytes
+ ...n-all-codepoint.wght=200-300-500,wdth=80-90.ttf | Bin 8708 -> 8708 bytes
+ ...t.retain-all-codepoint.wght=300-600,wdth=85.ttf | Bin 7592 -> 7592 bytes
+ ...n-all-codepoint.wght=200-300-500,wdth=80-90.ttf | Bin 7568 -> 7568 bytes
+ ...t.retain-all-codepoint.wght=300-600,wdth=85.ttf | Bin 6932 -> 6932 bytes
+ .../MPLUS1-Variable.default.30DD.wght=100.ttf      | Bin 1404 -> 1404 bytes
+ .../MPLUS1-Variable.default.30DD.wght=400.ttf      | Bin 1656 -> 1656 bytes
+ ...retain-all-codepoint.wght=100,ELGR=1,ELSH=2.ttf | Bin 2224 -> 2224 bytes
+ ...retain-all-codepoint.wght=100,ELGR=1,ELSH=2.ttf | Bin 2676 -> 2676 bytes
+ ...fault.retain-all-codepoint.wght=650,CNTR=50.otf | Bin 41760 -> 41760 bytes
+ ...F-ABC.default.retain-all-codepoint.wght=800.otf | Bin 1488 -> 1488 bytes
+ ...C.retain-gids.retain-all-codepoint.wght=800.otf | Bin 1488 -> 1488 bytes
+ ...oldit.default.retain-all-codepoint.wght=900.ttf | Bin 2488 -> 2488 bytes
+ ...fault.retain-all-codepoint.wght=200,wdth=90.ttf | Bin 6736 -> 6736 bytes
+ ...fault.retain-all-codepoint.wght=650,wdth=85.ttf | Bin 6688 -> 6688 bytes
+ ...fault.retain-all-codepoint.wght=200,wdth=90.ttf | Bin 6416 -> 6416 bytes
+ ...fault.retain-all-codepoint.wght=650,wdth=85.ttf | Bin 6368 -> 6368 bytes
+ ...etain-all-codepoint.wght=150,wdth=80,CTGR=0.ttf | Bin 1396 -> 1396 bytes
+ ...etain-all-codepoint.wght=300,wdth=90,CTGR=0.ttf | Bin 1432 -> 1432 bytes
+ ...odepoint.wght=200-600,wdth=80-90,CTGR=20-60.ttf | Bin 4300 -> 4300 bytes
+ ...c.default.retain-all-codepoint.wght=300-600.ttf | Bin 6808 -> 6808 bytes
+ ...c.default.retain-all-codepoint.wght=500-800.ttf | Bin 7288 -> 7288 bytes
+ ...lt.retain-all-codepoint.wght=400,wdth=100.0.ttf | Bin 6780 -> 6780 bytes
+ ...ult.retain-all-codepoint.wght=drop,wdth=100.ttf | Bin 6780 -> 6780 bytes
+ ...epoint.wght=400,CASL=0,CRSV=0,MONO=0,slnt=0.ttf | Bin 1884 -> 1884 bytes
+ ...n.default.retain-all-codepoint.wght=300-600.ttf | Bin 305092 -> 305092 bytes
+ ...n.default.retain-all-codepoint.wght=500-800.ttf | Bin 250164 -> 250164 bytes
+ ...ubset.default.retain-all-codepoint.wght=400.ttf | Bin 1848 -> 1848 bytes
+ ...et.drop-hints.retain-all-codepoint.wght=400.ttf | Bin 1824 -> 1824 bytes
+ test/subset/generate-expected-outputs.py           |   2 +-
+ 45 files changed, 24 insertions(+), 1 deletion(-)
+
+commit d053426bb469883bf1a40dd97fa4d57ef6d1ac47
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Mon Nov 6 11:44:14 2023 -0700
+
+    Format
+
+ src/hb-sanitize.hh | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+commit 2f528ce4ed806575be3aba361551568acba354d8
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Mon Nov 6 11:40:19 2023 -0700
+
+    Tweak a couple more barriers
+
+ src/OT/Color/CPAL/CPAL.hh       |  4 ++--
+ src/hb-aat-layout-morx-table.hh | 10 ++++++----
+ 2 files changed, 8 insertions(+), 6 deletions(-)
+
+commit f31fb431552b2408ffea24a9469720cc99e9c939
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Mon Nov 6 11:29:30 2023 -0700
+
+    Remove a couple unnecessary barriers
+
+ src/hb-ot-os2-table.hh  | 6 +++---
+ src/hb-ot-post-table.hh | 2 +-
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+commit d10cc79a6c95b11c6aefab464cfdb66dcc7f5fb5
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Mon Nov 6 10:41:30 2023 -0700
+
+    Move a couple of barriers
+
+ src/OT/Layout/GPOS/AnchorFormat3.hh | 10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
+
+commit 80cb6b580fbef90e37a2ec8105e18407af912568
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Mon Nov 6 09:00:33 2023 -0800
+
+    [instancer_solver] port solver fix: where axisDef < lower and upper < axisMax
+    
+    Port from https://github.com/fonttools/fonttools/commit/f1e56cd757ed457ffd3b58c262d3f4c2e4586555
+
+ src/hb-subset-instancer-solver.cc   |  8 +++++---
+ src/test-subset-instancer-solver.cc | 10 ++++++++++
+ 2 files changed, 15 insertions(+), 3 deletions(-)
+
+commit 64305568d7ed267b98d162026153a93e89ceba5c
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Nov 6 10:39:24 2023 +0000
+
+    Bump fonttools from 4.43.1 to 4.44.0 in /.ci
+    
+    Bumps [fonttools](https://github.com/fonttools/fonttools) from 4.43.1 to 4.44.0.
+    - [Release notes](https://github.com/fonttools/fonttools/releases)
+    - [Changelog](https://github.com/fonttools/fonttools/blob/main/NEWS.rst)
+    - [Commits](https://github.com/fonttools/fonttools/compare/4.43.1...4.44.0)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: fonttools
+      dependency-type: direct:production
+      update-type: version-update:semver-minor
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .ci/requirements-fonttools.txt | 86 ++++++++++++++++++-------------------
+ .ci/requirements.txt           | 96 +++++++++++++++++++++---------------------
+ 2 files changed, 91 insertions(+), 91 deletions(-)
+
+commit 920c40cd43dd7b10b7ecba3d82a46f5fea88536f
+Merge: fd5eb10d3 36f5e654a
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sun Nov 5 07:05:47 2023 -0700
+
+    Merge pull request #4480 from harfbuzz/sanitize-barrier-properly
+    
+    Sanitize barrier properly
+    
+    https://github.com/harfbuzz/harfbuzz/pull/4480
+
+commit 36f5e654a641824271f26c814705590bd45ffea0
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sat Nov 4 16:17:32 2023 -0600
+
+    [circleci] Roll back msan/tsan ubuntu image
+    
+    Job gets stuck at compiling with the newer image :(.
+
+ .circleci/config.yml | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit 6ff0932722b1455efc6685bab9c0c3f6cba446b5
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sat Nov 4 15:33:32 2023 -0600
+
+    [circleci] Roll images
+
+ .circleci/config.yml | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
+
+commit 7ee7e2e340be46205dc675a1cb80ff6330a78b53
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sat Nov 4 15:02:28 2023 -0600
+
+    [sanitize] Add remaining hb_barrier() annotations
+    
+    I'm sure I've forgot some. But this is a good start.
+
+ src/hb-ot-cmap-table.hh        |  3 +++
+ src/hb-ot-hdmx-table.hh        |  2 ++
+ src/hb-ot-head-table.hh        |  1 +
+ src/hb-ot-hhea-table.hh        |  4 +++-
+ src/hb-ot-kern-table.hh        |  9 ++++++---
+ src/hb-ot-layout-base-table.hh |  2 ++
+ src/hb-ot-layout-common.hh     | 17 +++++++++++++++--
+ src/hb-ot-layout-gsubgpos.hh   | 10 ++++++++++
+ src/hb-ot-layout-jstf-table.hh |  1 +
+ src/hb-ot-math-table.hh        |  3 +++
+ src/hb-ot-maxp-table.hh        |  3 ++-
+ src/hb-ot-meta-table.hh        |  2 ++
+ src/hb-ot-os2-table.hh         |  8 +++++---
+ src/hb-ot-post-table.hh        | 20 ++++++++++++++++++--
+ src/hb-ot-stat-table.hh        |  3 +++
+ src/hb-ot-var-avar-table.hh    |  3 +++
+ src/hb-ot-var-common.hh        |  2 ++
+ src/hb-ot-var-cvar-table.hh    |  3 ++-
+ src/hb-ot-var-fvar-table.hh    |  3 +++
+ src/hb-ot-var-gvar-table.hh    |  4 +++-
+ src/hb-ot-var-hvar-table.hh    |  1 +
+ src/hb-ot-var-mvar-table.hh    |  2 ++
+ src/hb-ot-vorg-table.hh        |  1 +
+ 23 files changed, 93 insertions(+), 14 deletions(-)
+
+commit 3a9262cc3de4be58804cdd431dd4ae9fa9bfbe7a
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sat Nov 4 12:52:46 2023 -0600
+
+    [sanitize] More hb_barrier() annotations
+
+ src/OT/Color/CPAL/CPAL.hh                          | 10 ++++++++-
+ src/OT/Color/sbix/sbix.hh                          |  1 +
+ src/OT/Color/svg/svg.hh                            |  1 +
+ src/OT/Layout/Common/Coverage.hh                   |  1 +
+ src/OT/Layout/GDEF/GDEF.hh                         |  4 ++++
+ src/OT/Layout/GPOS/Anchor.hh                       |  1 +
+ src/OT/Layout/GPOS/AnchorMatrix.hh                 |  2 ++
+ src/OT/Layout/GPOS/MarkMarkPosFormat1.hh           |  1 +
+ src/OT/Layout/GPOS/PairPosFormat1.hh               |  1 +
+ src/OT/Layout/GPOS/PairSet.hh                      |  6 +++--
+ src/OT/Layout/GPOS/SinglePosFormat1.hh             |  1 +
+ src/OT/Layout/GPOS/ValueFormat.hh                  |  1 +
+ .../Layout/GSUB/ReverseChainSingleSubstFormat1.hh  |  2 ++
+ src/OT/name/name.hh                                |  5 ++++-
+ src/graph/classdef-graph.hh                        |  3 +++
+ src/graph/coverage-graph.hh                        |  3 +++
+ src/graph/gsubgpos-graph.hh                        |  4 ++++
+ src/graph/markbasepos-graph.hh                     |  3 +++
+ src/graph/pairpos-graph.hh                         |  3 +++
+ src/hb-aat-layout-ankr-table.hh                    |  1 +
+ src/hb-aat-layout-bsln-table.hh                    |  1 +
+ src/hb-aat-layout-common.hh                        |  6 +++++
+ src/hb-aat-layout-feat-table.hh                    |  2 ++
+ src/hb-aat-layout-just-table.hh                    |  3 +++
+ src/hb-aat-layout-kerx-table.hh                    | 17 +++++++++-----
+ src/hb-aat-layout-morx-table.hh                    | 26 ++++++++++++++++------
+ src/hb-aat-layout-opbd-table.hh                    |  1 +
+ src/hb-aat-layout-trak-table.hh                    |  2 ++
+ src/hb-aat-ltag-table.hh                           |  5 ++++-
+ src/hb-open-file.hh                                |  6 +++++
+ src/hb-open-type.hh                                | 14 +++++++++++-
+ src/hb-ot-cff-common.hh                            | 19 ++++++++++++----
+ src/hb-ot-cff1-table.hh                            | 23 ++++++++++++++++---
+ src/hb-ot-cff2-table.hh                            | 12 +++++++++-
+ 34 files changed, 164 insertions(+), 27 deletions(-)
+
+commit 30672c7e75097377e08f3cc91ddd7e4c14a76033
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Fri Nov 3 18:52:03 2023 -0600
+
+    Add hb_barrier()
+    
+    And annotate some more.
+
+ src/OT/Color/CBDT/CBDT.hh               |  6 ++++++
+ src/OT/Color/COLR/COLR.hh               | 17 +++++++++++++----
+ src/OT/Layout/GPOS/AnchorFormat3.hh     |  4 ++--
+ src/OT/Layout/GPOS/AnchorMatrix.hh      |  2 +-
+ src/OT/Layout/GPOS/CursivePosFormat1.hh |  4 ++--
+ src/OT/Layout/GPOS/ValueFormat.hh       |  2 +-
+ src/hb-aat-layout-kerx-table.hh         | 16 ++++++++--------
+ src/hb-aat-layout-morx-table.hh         | 14 +++++++-------
+ src/hb-atomic.hh                        |  6 ++++++
+ src/hb-ot-layout-common.hh              |  4 ++--
+ src/hb-sanitize.hh                      |  9 +--------
+ 11 files changed, 49 insertions(+), 35 deletions(-)
+
+commit 775320a4f6c320efd998df22879d9037b0ee1ab9
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Fri Nov 3 18:38:12 2023 -0600
+
+    [sanitize] Add barriers to runtime-checked values
+
+ src/OT/Layout/GPOS/AnchorFormat3.hh     | 4 ++--
+ src/OT/Layout/GPOS/AnchorMatrix.hh      | 1 +
+ src/OT/Layout/GPOS/CursivePosFormat1.hh | 2 ++
+ src/OT/Layout/GPOS/ValueFormat.hh       | 1 +
+ src/hb-aat-layout-kerx-table.hh         | 8 ++++++++
+ src/hb-aat-layout-morx-table.hh         | 9 +++++++--
+ 6 files changed, 21 insertions(+), 4 deletions(-)
+
+commit cf49f3f2cbec8fbdc654d45e2f4b8e9c8d91db47
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Fri Nov 3 18:20:14 2023 -0600
+
+    [sanitize] Add barrier()
+
+ src/hb-ot-layout-common.hh |  2 ++
+ src/hb-sanitize.hh         | 12 ++++++++----
+ 2 files changed, 10 insertions(+), 4 deletions(-)
+
+commit b16f18004482f2981155e0ff94b34aab57b38812
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Fri Nov 3 17:51:50 2023 -0600
+
+    [sanitize] Yet another hack to "fix" barrier issue
+
+ src/hb-atomic.hh   | 4 ++--
+ src/hb-sanitize.hh | 5 ++++-
+ 2 files changed, 6 insertions(+), 3 deletions(-)
+
+commit fd5eb10d3b4cfee1bb10614ff6719378c949492e
+Merge: cdcad93b7 6baf791e6
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Fri Nov 3 15:30:15 2023 -0600
+
+    Merge pull request #4477 from googlefonts/fix_feature_variations
+    
+    [instancer] Fix feature variations collect lookups
+
+commit cdcad93b737c4553b98fdc0c57f6432c5643c97a
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Fri Nov 3 12:45:16 2023 -0600
+
+    [set] Mark as realloc-movable
+
+ src/hb-set.hh | 2 ++
+ 1 file changed, 2 insertions(+)
+
+commit 6baf791e6f5ef38f18876aa952a506858c383c0e
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Fri Nov 3 11:06:07 2023 -0700
+
+    [instancer] add tests
+
+ ...on-subset.default.retain-all-codepoint.wdth=112.5.ttf | Bin 0 -> 2668 bytes
+ test/subset/data/fonts/AnekBangla-question-subset.ttf    | Bin 0 -> 4488 bytes
+ .../feature_variation_instance_collect_lookups.tests     |  11 +++++++++++
+ test/subset/meson.build                                  |   1 +
+ 4 files changed, 12 insertions(+)
+
+commit aca55dbe36eafb0f69081323b679f2a5bf51239c
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Fri Nov 3 10:51:37 2023 -0700
+
+    [instancer] fix feature variations collect lookups
+    
+    We already know which record to keep, so just collect lookups and no
+    need to check the substitutes_map
+
+ src/hb-ot-layout-common.hh   | 12 ++----------
+ src/hb-ot-layout-gsubgpos.hh |  3 +--
+ src/hb-ot-layout.cc          |  2 +-
+ src/hb-subset-plan.cc        |  2 +-
+ 4 files changed, 5 insertions(+), 14 deletions(-)
+
+commit 7766e67b336b9477c99aeff5d417d57b30b5cb6e
+Merge: 413af0a9b f05636e1b
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Fri Nov 3 11:38:21 2023 -0600
+
+    Merge pull request #4474 from googlefonts/fix_value_format
+    
+    [instancer] fix value format for SinglePos/PairPos when strip_hints is on
+
+commit f05636e1be2664df8356df4adf5f1af1c7628bcd
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Thu Nov 2 09:18:15 2023 -0700
+
+    [instancer] fix build issue after rebase
+
+ src/OT/Layout/GPOS/ValueFormat.hh | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit 31b5b2b1d7470dbcebc3bc5eb68ce8cfaca6667b
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Thu Nov 2 09:08:36 2023 -0700
+
+    [instancer] add tests for valueformat
+
+ ...rmat-subset.default.retain-all-codepoint.wght=400.ttf | Bin 0 -> 1848 bytes
+ ...t-subset.drop-hints.retain-all-codepoint.wght=400.ttf | Bin 0 -> 1824 bytes
+ .../data/fonts/NotoSansOriya-valueformat-subset.ttf      | Bin 0 -> 3048 bytes
+ .../data/tests/value_format_partial_instance.tests       |  12 ++++++++++++
+ test/subset/meson.build                                  |   1 +
+ 5 files changed, 13 insertions(+)
+
+commit 6c017a1162265bee8c5d09cd89aef26ef25afe51
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Wed Nov 1 09:54:46 2023 -0700
+
+    [instancer] SinglePos/PairPos: do not strip_hints for partial instancing
+
+ src/OT/Layout/GDEF/GDEF.hh             |  1 +
+ src/OT/Layout/GPOS/Common.hh           |  2 +-
+ src/OT/Layout/GPOS/PairPosFormat1.hh   | 37 +++++++++++++---------
+ src/OT/Layout/GPOS/PairPosFormat2.hh   | 37 +++++++++++++---------
+ src/OT/Layout/GPOS/SinglePos.hh        | 13 +++-----
+ src/OT/Layout/GPOS/SinglePosFormat1.hh | 26 +++++++++++++++-
+ src/OT/Layout/GPOS/SinglePosFormat2.hh | 38 ++++++++++++++++++++++-
+ src/OT/Layout/GPOS/ValueFormat.hh      | 57 ++++++++++++++--------------------
+ src/hb-subset-plan.cc                  |  1 +
+ src/hb-subset-plan.hh                  |  3 ++
+ src/hb-subset.cc                       |  2 +-
+ 11 files changed, 143 insertions(+), 74 deletions(-)
+
+commit 413af0a9b2cc3bebf559f0f5e459cc98c5ee955e
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Thu Nov 2 11:14:48 2023 -0700
+
+    [instancer] When partial instancing, subset LigCaretList after VarStore instantiation
+
+ src/OT/Layout/GDEF/GDEF.hh                         |   4 +++-
+ ...ubset.default.retain-all-codepoint.wght=300.ttf | Bin 0 -> 3300 bytes
+ ...ns-BlackItalic.default.retain-all-codepoint.ttf | Bin 120020 -> 120020 bytes
+ ...lackItalic.glyph-names.retain-all-codepoint.ttf | Bin 132264 -> 132264 bytes
+ ...kItalic.notdef-outline.retain-all-codepoint.ttf | Bin 120020 -> 120020 bytes
+ ...taliqUrdu-Bold.default.retain-all-codepoint.ttf | Bin 543364 -> 543364 bytes
+ ...qUrdu-Bold.retain-gids.retain-all-codepoint.ttf | Bin 543364 -> 543364 bytes
+ test/subset/data/fonts/AnekBangla-subset.ttf       | Bin 0 -> 5456 bytes
+ test/subset/data/tests/gdef_partial_instance.tests |  11 +++++++++++
+ test/subset/meson.build                            |   1 +
+ 10 files changed, 15 insertions(+), 1 deletion(-)
+
+commit f57c64d8257e449230979b59ec3b98ed643775be
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Thu Nov 2 11:21:44 2023 -0600
+
+    [ci] Try fixing msvc builds again
+    
+    https://gitlab.gnome.org/GNOME/glib/-/issues/3134
+
+ .ci/requirements.in  | 1 +
+ .ci/requirements.txt | 8 +++++++-
+ 2 files changed, 8 insertions(+), 1 deletion(-)
+
+commit 724360813b7916bb4a000b361796f63230e7c8c0
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Thu Nov 2 11:01:49 2023 -0600
+
+    [ci] Roll lxml forward
+    
+    Should help fixing the msvc fails.
+
+ .ci/requirements.txt | 201 +++++++++++++++++++++++++++++----------------------
+ 1 file changed, 113 insertions(+), 88 deletions(-)
+
+commit b532945987935db56503ad8ffb0655331798af5f
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Wed Nov 1 16:53:26 2023 -0600
+
+    [tuple_delta_t] Micro-optimize encoding vector access
+
+ src/hb-ot-var-common.hh | 22 +++++++++++-----------
+ 1 file changed, 11 insertions(+), 11 deletions(-)
+
+commit 59cfb4c570b0e11470900264b151295e64226947
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Wed Nov 1 16:25:50 2023 -0600
+
+    [instancing] Micro-optimize a loop
+
+ src/hb-ot-var-common.hh | 21 +++++++++++++--------
+ 1 file changed, 13 insertions(+), 8 deletions(-)
+
+commit 29d49eced8a9f4a9a6148972b0ba4430a2f7f6bf
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Wed Nov 1 15:55:47 2023 -0600
+
+    [vector] Introduce realloc_moves tag
+    
+    Some types (even aggregate) can be moved using realloc().
+    Extend the fast path to hb_hashmap and tuple_delta_t.
+
+ src/hb-array.hh         | 2 ++
+ src/hb-map.hh           | 2 ++
+ src/hb-ot-var-common.hh | 2 ++
+ src/hb-vector.hh        | 7 ++++---
+ 4 files changed, 10 insertions(+), 3 deletions(-)
+
+commit 7b46d772c44d6f0ee09c0c403fefa833cb385d9e
+Author: Garret Rieger <grieger@google.com>
+Date:   Wed Nov 1 20:07:07 2023 +0000
+
+    [instancer] Update help message for --instance.
+    
+    Remove note about partial instancing not being supported. Add --variations flag as an alternate name for --instance. This matches other hb utils.
+
+ util/hb-subset.cc | 22 +++++++++++++---------
+ 1 file changed, 13 insertions(+), 9 deletions(-)
+
+commit 9d0bc085eeadf9385ae28ee460a9a5e686564917
+Merge: f6f35f73b 2804127ac
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Tue Oct 31 22:25:07 2023 -0600
+
+    Merge pull request #4469 from harfbuzz/typed-offsets
+    
+    Typed offsets
+
+commit 2804127ac91d0fde162c034f9cb4d7d3fe9e369b
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Tue Oct 31 15:12:55 2023 -0600
+
+    [Value] Typed offsets
+
+ src/OT/Layout/GPOS/PairPosFormat2.hh   |  2 +-
+ src/OT/Layout/GPOS/PairSet.hh          |  2 +-
+ src/OT/Layout/GPOS/PairValueRecord.hh  |  4 ++--
+ src/OT/Layout/GPOS/SinglePosFormat1.hh |  2 +-
+ src/OT/Layout/GPOS/SinglePosFormat2.hh |  2 +-
+ src/OT/Layout/GPOS/ValueFormat.hh      | 37 ++++++++++++++++++----------------
+ 6 files changed, 26 insertions(+), 23 deletions(-)
+
+commit 38546acd8391dbad3439a81302ff8e7032eb2ae1
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Tue Oct 31 14:56:09 2023 -0600
+
+    [typed-offset] Fix sanitize()
+
+ src/OT/Layout/GPOS/CursivePosFormat1.hh | 2 +-
+ src/hb-open-type.hh                     | 4 ++--
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+commit 62117801b8c17d939cccc4c8ce0fe6a0b6a69d31
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Tue Oct 31 14:50:45 2023 -0600
+
+    [AnchorMatrix] Annotate offset base type
+
+ src/OT/Layout/GPOS/AnchorMatrix.hh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 4f219385a692b4dfd7d0a926b21c61b21f92085d
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Tue Oct 31 14:33:23 2023 -0600
+
+    [CursivePosFormat1] Use typed offsets for EntryExitRecord
+
+ src/OT/Layout/GPOS/CursivePosFormat1.hh | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+commit b37cc61d45618b3ac6e7a45386a1bccfad37b02f
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Tue Oct 31 14:26:42 2023 -0600
+
+    Add base types to OffsetTo<>
+    
+    Unused so far.
+
+ src/OT/Layout/types.hh          |  8 ++++----
+ src/hb-aat-layout-morx-table.hh |  4 ++--
+ src/hb-open-type.hh             | 42 ++++++++++++++++++++---------------------
+ 3 files changed, 27 insertions(+), 27 deletions(-)
+
+commit f6f35f73bc865eeb68b74c257f49d66b6a0e76b0
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Fri Oct 27 09:31:07 2023 -0700
+
+    [instancer] add tests for feature variations partial instancing
+
+ ...Oriya-subset.default.retain-all-codepoint.wdth=75.ttf | Bin 0 -> 3296 bytes
+ ...-all-layout-features.retain-all-codepoint.wdth=75.ttf | Bin 0 -> 4500 bytes
+ test/subset/data/fonts/NotoSansOriya-subset.ttf          | Bin 0 -> 6212 bytes
+ .../data/tests/feature_variations_partial_instance.tests |  12 ++++++++++++
+ test/subset/meson.build                                  |   1 +
+ 5 files changed, 13 insertions(+)
+
+commit 091e538daf396b009e01f5f7d54acbfdbd3b392d
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Thu Oct 26 12:52:08 2023 -0700
+
+    [instancer] support partial instancing for FeatureVariations
+
+ src/hb-ot-layout-common.hh        | 110 ++++++++++++++++++++++++++++++--------
+ src/hb-ot-layout-gsubgpos.hh      |  10 +---
+ src/hb-ot-layout.cc               |   2 +-
+ src/hb-subset-plan-member-list.hh |   9 ++++
+ src/hb-subset-plan.cc             |  41 +++++++++-----
+ 5 files changed, 128 insertions(+), 44 deletions(-)
+
+commit e5040c2352fd7c95090176a63f2d9043e4de0739
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Oct 30 10:02:16 2023 +0000
+
+    Bump ossf/scorecard-action from 2.3.0 to 2.3.1
+    
+    Bumps [ossf/scorecard-action](https://github.com/ossf/scorecard-action) from 2.3.0 to 2.3.1.
+    - [Release notes](https://github.com/ossf/scorecard-action/releases)
+    - [Changelog](https://github.com/ossf/scorecard-action/blob/main/RELEASE.md)
+    - [Commits](https://github.com/ossf/scorecard-action/compare/483ef80eb98fb506c348f7d62e28055e49fe2398...0864cf19026789058feabb7e87baa5f140aac736)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: ossf/scorecard-action
+      dependency-type: direct:production
+      update-type: version-update:semver-patch
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .github/workflows/scorecard.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 16a76829f71e633c165bba9e7ff00cfb00a5d984
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Oct 30 10:02:12 2023 +0000
+
+    Bump github/codeql-action from 2.22.4 to 2.22.5
+    
+    Bumps [github/codeql-action](https://github.com/github/codeql-action) from 2.22.4 to 2.22.5.
+    - [Release notes](https://github.com/github/codeql-action/releases)
+    - [Changelog](https://github.com/github/codeql-action/blob/main/CHANGELOG.md)
+    - [Commits](https://github.com/github/codeql-action/compare/49abf0ba24d0b7953cb586944e918a0b92074c80...74483a38d39275f33fcff5f35b679b5ca4a26a99)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: github/codeql-action
+      dependency-type: direct:production
+      update-type: version-update:semver-patch
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .github/workflows/scorecard.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit bf08205625ac69a1d6fc7b0e066a8a5ed6ef908b
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Fri Oct 27 12:24:33 2023 -0600
+
+    [deprecated] Add a mis-spelled macro
+    
+    Fixes https://github.com/harfbuzz/harfbuzz/issues/4464
+
+ docs/harfbuzz-sections.txt |  1 +
+ src/hb-aat-layout.h        |  4 ++--
+ src/hb-deprecated.h        | 11 ++++++++++-
+ 3 files changed, 13 insertions(+), 3 deletions(-)
+
+commit 598de82f3aa6f9f6cbc6c271d0905350e598b281
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Fri Oct 27 12:13:13 2023 -0600
+
+    [hb-subset] Fix warning
+
+ util/hb-subset.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 9fc45f70ad42b87072ced65b8c58b87af005f265
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Thu Oct 5 14:06:39 2023 -0600
+
+    [ReverseChainSingleSubst] Minor optimization
+
+ src/OT/Layout/GSUB/ReverseChainSingleSubstFormat1.hh | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+commit 156de3c048237c5953d96ed5e7bdb53261456692
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Oct 23 10:35:02 2023 +0000
+
+    Bump meson from 1.2.2 to 1.2.3 in /.ci
+    
+    Bumps [meson](https://github.com/mesonbuild/meson) from 1.2.2 to 1.2.3.
+    - [Release notes](https://github.com/mesonbuild/meson/releases)
+    - [Commits](https://github.com/mesonbuild/meson/compare/1.2.2...1.2.3)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: meson
+      dependency-type: direct:production
+      update-type: version-update:semver-patch
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .ci/requirements.in  | 2 +-
+ .ci/requirements.txt | 6 +++---
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+commit d7cd687b74fd8e103fb52964a079cd667c1847de
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Oct 23 10:15:11 2023 +0000
+
+    Bump github/codeql-action from 2.22.3 to 2.22.4
+    
+    Bumps [github/codeql-action](https://github.com/github/codeql-action) from 2.22.3 to 2.22.4.
+    - [Release notes](https://github.com/github/codeql-action/releases)
+    - [Changelog](https://github.com/github/codeql-action/blob/main/CHANGELOG.md)
+    - [Commits](https://github.com/github/codeql-action/compare/0116bc2df50751f9724a2e35ef1f24d22f90e4e1...49abf0ba24d0b7953cb586944e918a0b92074c80)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: github/codeql-action
+      dependency-type: direct:production
+      update-type: version-update:semver-patch
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .github/workflows/scorecard.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 4d123ece5fd5d5c78d530e1c302ea4daa316d5cc
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Oct 23 10:14:58 2023 +0000
+
+    Bump actions/checkout from 4.1.0 to 4.1.1
+    
+    Bumps [actions/checkout](https://github.com/actions/checkout) from 4.1.0 to 4.1.1.
+    - [Release notes](https://github.com/actions/checkout/releases)
+    - [Changelog](https://github.com/actions/checkout/blob/main/CHANGELOG.md)
+    - [Commits](https://github.com/actions/checkout/compare/8ade135a41bc03ea155e62e844d188df1ea18608...b4ffde65f46336ab88eb53be808477a3936bae11)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: actions/checkout
+      dependency-type: direct:production
+      update-type: version-update:semver-patch
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .github/workflows/arm-ci.yml        | 2 +-
+ .github/workflows/configs-build.yml | 2 +-
+ .github/workflows/coverity-scan.yml | 2 +-
+ .github/workflows/linux-ci.yml      | 2 +-
+ .github/workflows/macos-ci.yml      | 2 +-
+ .github/workflows/msvc-ci.yml       | 2 +-
+ .github/workflows/msys2-ci.yml      | 2 +-
+ .github/workflows/scorecard.yml     | 2 +-
+ 8 files changed, 8 insertions(+), 8 deletions(-)
+
+commit b0150ffd05523c7cef9b3c91a8d6050177fceda3
+Author: 一丝 <percyley@qq.com>
+Date:   Fri Oct 20 21:53:14 2023 +0800
+
+    [subset] keep East Asian spacing vhal, halt, chws, vchw by default
+    
+    Closes: https://github.com/harfbuzz/harfbuzz/issues/4451
+
+ src/hb-subset-input.cc | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+commit fde1c3692a4a1e45ee48954fb486ae6c036a5687
+Merge: 38f351d11 e595fe75c
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Thu Oct 19 11:04:34 2023 -0600
+
+    Merge pull request #4452 from googlefonts/fix_test
+    
+    [subset] bug fixes for GDEF
+
+commit e595fe75cceb5146cc490804d2619ce31464208e
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Wed Oct 18 16:00:06 2023 -0700
+
+    fix bots
+    
+    partial instancing tests are wrapped by experimenal_api, do not enable
+    them in Makefile
+
+ src/hb-ot-layout-common.hh        | 2 +-
+ test/subset/data/Makefile.am      | 1 -
+ test/subset/data/Makefile.sources | 1 -
+ 3 files changed, 1 insertion(+), 3 deletions(-)
+
+commit 38f351d113fcc66cd4aaafbcee952a6067f315a9
+Author: Alexander Borsuk <me@alex.bio>
+Date:   Wed Oct 18 01:52:18 2023 +0200
+
+    [docs] Fixed links to freetype FT_LOAD_XXX flags
+    
+    Signed-off-by: Alexander Borsuk <me@alex.bio>
+
+ src/hb-ft.cc | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit ce46698929999669000182b8e72aa4b9c0d8ce40
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Wed Oct 18 15:49:57 2023 -0700
+
+    [subset] update tests
+    
+    to reflect changes in GDEF.MarkGlyphSetsDef and Lookup.MarkFilteringSet
+
+ ...r-new.default.retain-all-codepoint.wght=300.ttf | Bin 131712 -> 131708 bytes
+ ...r-new.default.retain-all-codepoint.wght=700.ttf | Bin 131588 -> 131584 bytes
+ ...i-ABC.default.retain-all-codepoint.wght=300.ttf | Bin 5808 -> 5788 bytes
+ ...i-ABC.default.retain-all-codepoint.wght=700.ttf | Bin 5804 -> 5784 bytes
+ .../Comfortaa-Regular-new.default.61,62,63.ttf     | Bin 7060 -> 7036 bytes
+ .../basics/Comfortaa-Regular-new.default.61,63.ttf | Bin 6692 -> 6668 bytes
+ .../basics/Comfortaa-Regular-new.default.61.ttf    | Bin 6328 -> 6300 bytes
+ .../basics/Comfortaa-Regular-new.default.62.ttf    | Bin 6200 -> 6172 bytes
+ .../basics/Comfortaa-Regular-new.default.63.ttf    | Bin 6256 -> 6228 bytes
+ ...Regular-new.drop-hints-retain-gids.61,62,63.ttf | Bin 4608 -> 4580 bytes
+ ...aa-Regular-new.drop-hints-retain-gids.61,63.ttf | Bin 4312 -> 4284 bytes
+ ...ortaa-Regular-new.drop-hints-retain-gids.61.ttf | Bin 3724 -> 3696 bytes
+ ...ortaa-Regular-new.drop-hints-retain-gids.62.ttf | Bin 3900 -> 3872 bytes
+ ...ortaa-Regular-new.drop-hints-retain-gids.63.ttf | Bin 3972 -> 3944 bytes
+ .../Comfortaa-Regular-new.drop-hints.61,62,63.ttf  | Bin 2600 -> 2576 bytes
+ .../Comfortaa-Regular-new.drop-hints.61,63.ttf     | Bin 2296 -> 2272 bytes
+ .../basics/Comfortaa-Regular-new.drop-hints.61.ttf | Bin 1976 -> 1948 bytes
+ .../basics/Comfortaa-Regular-new.drop-hints.62.ttf | Bin 1900 -> 1872 bytes
+ .../basics/Comfortaa-Regular-new.drop-hints.63.ttf | Bin 1968 -> 1940 bytes
+ .../basics/Comfortaa-Regular-new.gids.61,62,63.ttf | Bin 7988 -> 7964 bytes
+ .../basics/Comfortaa-Regular-new.gids.61,63.ttf    | Bin 7628 -> 7604 bytes
+ .../basics/Comfortaa-Regular-new.gids.61.ttf       | Bin 7256 -> 7232 bytes
+ .../basics/Comfortaa-Regular-new.gids.62.ttf       | Bin 7184 -> 7160 bytes
+ .../basics/Comfortaa-Regular-new.gids.63.ttf       | Bin 7180 -> 7156 bytes
+ .../Comfortaa-Regular-new.glyph-names.61,62,63.ttf | Bin 7072 -> 7048 bytes
+ .../Comfortaa-Regular-new.glyph-names.61,63.ttf    | Bin 6700 -> 6676 bytes
+ .../Comfortaa-Regular-new.glyph-names.61.ttf       | Bin 6336 -> 6308 bytes
+ .../Comfortaa-Regular-new.glyph-names.62.ttf       | Bin 6208 -> 6180 bytes
+ .../Comfortaa-Regular-new.glyph-names.63.ttf       | Bin 6264 -> 6236 bytes
+ ...gular-new.keep-all-layout-features.61,62,63.ttf | Bin 7508 -> 7484 bytes
+ ...-Regular-new.keep-all-layout-features.61,63.ttf | Bin 7144 -> 7120 bytes
+ ...taa-Regular-new.keep-all-layout-features.61.ttf | Bin 6776 -> 6748 bytes
+ ...taa-Regular-new.keep-all-layout-features.62.ttf | Bin 6200 -> 6172 bytes
+ ...taa-Regular-new.keep-all-layout-features.63.ttf | Bin 6256 -> 6228 bytes
+ ...fortaa-Regular-new.layout-features.61,62,63.ttf | Bin 7060 -> 7036 bytes
+ ...Comfortaa-Regular-new.layout-features.61,63.ttf | Bin 6692 -> 6668 bytes
+ .../Comfortaa-Regular-new.layout-features.61.ttf   | Bin 6328 -> 6300 bytes
+ .../Comfortaa-Regular-new.layout-features.62.ttf   | Bin 6200 -> 6172 bytes
+ .../Comfortaa-Regular-new.layout-features.63.ttf   | Bin 6256 -> 6228 bytes
+ .../Comfortaa-Regular-new.name-ids.61,62,63.ttf    | Bin 6800 -> 6776 bytes
+ .../Comfortaa-Regular-new.name-ids.61,63.ttf       | Bin 6432 -> 6408 bytes
+ .../basics/Comfortaa-Regular-new.name-ids.61.ttf   | Bin 6068 -> 6040 bytes
+ .../basics/Comfortaa-Regular-new.name-ids.62.ttf   | Bin 5940 -> 5912 bytes
+ .../basics/Comfortaa-Regular-new.name-ids.63.ttf   | Bin 5996 -> 5968 bytes
+ ...mfortaa-Regular-new.name-languages.61,62,63.ttf | Bin 7060 -> 7036 bytes
+ .../Comfortaa-Regular-new.name-languages.61,63.ttf | Bin 6692 -> 6668 bytes
+ .../Comfortaa-Regular-new.name-languages.61.ttf    | Bin 6328 -> 6300 bytes
+ .../Comfortaa-Regular-new.name-languages.62.ttf    | Bin 6200 -> 6172 bytes
+ .../Comfortaa-Regular-new.name-languages.63.ttf    | Bin 6256 -> 6228 bytes
+ .../Comfortaa-Regular-new.name-legacy.61,62,63.ttf | Bin 7060 -> 7036 bytes
+ .../Comfortaa-Regular-new.name-legacy.61,63.ttf    | Bin 6692 -> 6668 bytes
+ .../Comfortaa-Regular-new.name-legacy.61.ttf       | Bin 6328 -> 6300 bytes
+ .../Comfortaa-Regular-new.name-legacy.62.ttf       | Bin 6200 -> 6172 bytes
+ .../Comfortaa-Regular-new.name-legacy.63.ttf       | Bin 6256 -> 6228 bytes
+ ...egular-new.no-prune-unicode-ranges.61,62,63.ttf | Bin 7060 -> 7036 bytes
+ ...a-Regular-new.no-prune-unicode-ranges.61,63.ttf | Bin 6692 -> 6668 bytes
+ ...rtaa-Regular-new.no-prune-unicode-ranges.61.ttf | Bin 6328 -> 6300 bytes
+ ...rtaa-Regular-new.no-prune-unicode-ranges.62.ttf | Bin 6200 -> 6172 bytes
+ ...rtaa-Regular-new.no-prune-unicode-ranges.63.ttf | Bin 6256 -> 6228 bytes
+ ...mfortaa-Regular-new.notdef-outline.61,62,63.ttf | Bin 7652 -> 7628 bytes
+ .../Comfortaa-Regular-new.notdef-outline.61,63.ttf | Bin 7284 -> 7260 bytes
+ .../Comfortaa-Regular-new.notdef-outline.61.ttf    | Bin 6920 -> 6892 bytes
+ .../Comfortaa-Regular-new.notdef-outline.62.ttf    | Bin 6796 -> 6768 bytes
+ .../Comfortaa-Regular-new.notdef-outline.63.ttf    | Bin 6844 -> 6816 bytes
+ .../Comfortaa-Regular-new.retain-gids.61,62,63.ttf | Bin 9068 -> 9040 bytes
+ .../Comfortaa-Regular-new.retain-gids.61,63.ttf    | Bin 8708 -> 8680 bytes
+ .../Comfortaa-Regular-new.retain-gids.61.ttf       | Bin 8076 -> 8048 bytes
+ .../Comfortaa-Regular-new.retain-gids.62.ttf       | Bin 8200 -> 8172 bytes
+ .../Comfortaa-Regular-new.retain-gids.63.ttf       | Bin 8260 -> 8232 bytes
+ .../basics/Roboto-Regular.abc.default.61,62,63.ttf | Bin 2412 -> 2396 bytes
+ .../basics/Roboto-Regular.abc.default.61,63.ttf    | Bin 2208 -> 2192 bytes
+ .../basics/Roboto-Regular.abc.default.61.ttf       | Bin 2008 -> 1988 bytes
+ .../basics/Roboto-Regular.abc.default.62.ttf       | Bin 1876 -> 1856 bytes
+ .../basics/Roboto-Regular.abc.default.63.ttf       | Bin 1932 -> 1912 bytes
+ ...to-Regular.abc.default.retain-all-codepoint.ttf | Bin 2412 -> 2396 bytes
+ ...Regular.abc.drop-hints-retain-gids.61,62,63.ttf | Bin 1152 -> 1136 bytes
+ ...to-Regular.abc.drop-hints-retain-gids.61,63.ttf | Bin 1072 -> 1052 bytes
+ ...oboto-Regular.abc.drop-hints-retain-gids.61.ttf | Bin 944 -> 924 bytes
+ ...oboto-Regular.abc.drop-hints-retain-gids.62.ttf | Bin 840 -> 820 bytes
+ ...oboto-Regular.abc.drop-hints-retain-gids.63.ttf | Bin 928 -> 908 bytes
+ ...drop-hints-retain-gids.retain-all-codepoint.ttf | Bin 1152 -> 1136 bytes
+ .../Roboto-Regular.abc.drop-hints.61,62,63.ttf     | Bin 1152 -> 1136 bytes
+ .../basics/Roboto-Regular.abc.drop-hints.61,63.ttf | Bin 1056 -> 1040 bytes
+ .../basics/Roboto-Regular.abc.drop-hints.61.ttf    | Bin 944 -> 924 bytes
+ .../basics/Roboto-Regular.abc.drop-hints.62.ttf    | Bin 836 -> 816 bytes
+ .../basics/Roboto-Regular.abc.drop-hints.63.ttf    | Bin 916 -> 896 bytes
+ ...Regular.abc.drop-hints.retain-all-codepoint.ttf | Bin 1152 -> 1136 bytes
+ .../basics/Roboto-Regular.abc.gids.61,62,63.ttf    | Bin 2412 -> 2396 bytes
+ .../basics/Roboto-Regular.abc.gids.61,63.ttf       | Bin 2412 -> 2396 bytes
+ .../expected/basics/Roboto-Regular.abc.gids.61.ttf | Bin 2412 -> 2396 bytes
+ .../expected/basics/Roboto-Regular.abc.gids.62.ttf | Bin 2412 -> 2396 bytes
+ .../expected/basics/Roboto-Regular.abc.gids.63.ttf | Bin 2412 -> 2396 bytes
+ ...oboto-Regular.abc.gids.retain-all-codepoint.ttf | Bin 2412 -> 2396 bytes
+ .../Roboto-Regular.abc.glyph-names.61,62,63.ttf    | Bin 2412 -> 2396 bytes
+ .../Roboto-Regular.abc.glyph-names.61,63.ttf       | Bin 2208 -> 2192 bytes
+ .../basics/Roboto-Regular.abc.glyph-names.61.ttf   | Bin 2008 -> 1988 bytes
+ .../basics/Roboto-Regular.abc.glyph-names.62.ttf   | Bin 1876 -> 1856 bytes
+ .../basics/Roboto-Regular.abc.glyph-names.63.ttf   | Bin 1932 -> 1912 bytes
+ ...egular.abc.glyph-names.retain-all-codepoint.ttf | Bin 2412 -> 2396 bytes
+ ...gular.abc.keep-all-layout-features.61,62,63.ttf | Bin 2412 -> 2396 bytes
+ ...-Regular.abc.keep-all-layout-features.61,63.ttf | Bin 2208 -> 2192 bytes
+ ...oto-Regular.abc.keep-all-layout-features.61.ttf | Bin 2008 -> 1988 bytes
+ ...oto-Regular.abc.keep-all-layout-features.62.ttf | Bin 1876 -> 1856 bytes
+ ...oto-Regular.abc.keep-all-layout-features.63.ttf | Bin 1932 -> 1912 bytes
+ ...ep-all-layout-features.retain-all-codepoint.ttf | Bin 2412 -> 2396 bytes
+ ...Roboto-Regular.abc.layout-features.61,62,63.ttf | Bin 2412 -> 2396 bytes
+ .../Roboto-Regular.abc.layout-features.61,63.ttf   | Bin 2208 -> 2192 bytes
+ .../Roboto-Regular.abc.layout-features.61.ttf      | Bin 2008 -> 1988 bytes
+ .../Roboto-Regular.abc.layout-features.62.ttf      | Bin 1876 -> 1856 bytes
+ .../Roboto-Regular.abc.layout-features.63.ttf      | Bin 1932 -> 1912 bytes
+ ...ar.abc.layout-features.retain-all-codepoint.ttf | Bin 2412 -> 2396 bytes
+ .../Roboto-Regular.abc.name-ids.61,62,63.ttf       | Bin 2412 -> 2396 bytes
+ .../basics/Roboto-Regular.abc.name-ids.61,63.ttf   | Bin 2208 -> 2192 bytes
+ .../basics/Roboto-Regular.abc.name-ids.61.ttf      | Bin 2008 -> 1988 bytes
+ .../basics/Roboto-Regular.abc.name-ids.62.ttf      | Bin 1876 -> 1856 bytes
+ .../basics/Roboto-Regular.abc.name-ids.63.ttf      | Bin 1932 -> 1912 bytes
+ ...o-Regular.abc.name-ids.retain-all-codepoint.ttf | Bin 2412 -> 2396 bytes
+ .../Roboto-Regular.abc.name-languages.61,62,63.ttf | Bin 2412 -> 2396 bytes
+ .../Roboto-Regular.abc.name-languages.61,63.ttf    | Bin 2208 -> 2192 bytes
+ .../Roboto-Regular.abc.name-languages.61.ttf       | Bin 2008 -> 1988 bytes
+ .../Roboto-Regular.abc.name-languages.62.ttf       | Bin 1876 -> 1856 bytes
+ .../Roboto-Regular.abc.name-languages.63.ttf       | Bin 1932 -> 1912 bytes
+ ...lar.abc.name-languages.retain-all-codepoint.ttf | Bin 2412 -> 2396 bytes
+ .../Roboto-Regular.abc.name-legacy.61,62,63.ttf    | Bin 2412 -> 2396 bytes
+ .../Roboto-Regular.abc.name-legacy.61,63.ttf       | Bin 2208 -> 2192 bytes
+ .../basics/Roboto-Regular.abc.name-legacy.61.ttf   | Bin 2008 -> 1988 bytes
+ .../basics/Roboto-Regular.abc.name-legacy.62.ttf   | Bin 1876 -> 1856 bytes
+ .../basics/Roboto-Regular.abc.name-legacy.63.ttf   | Bin 1932 -> 1912 bytes
+ ...egular.abc.name-legacy.retain-all-codepoint.ttf | Bin 2412 -> 2396 bytes
+ ...egular.abc.no-prune-unicode-ranges.61,62,63.ttf | Bin 2412 -> 2396 bytes
+ ...o-Regular.abc.no-prune-unicode-ranges.61,63.ttf | Bin 2208 -> 2192 bytes
+ ...boto-Regular.abc.no-prune-unicode-ranges.61.ttf | Bin 2008 -> 1988 bytes
+ ...boto-Regular.abc.no-prune-unicode-ranges.62.ttf | Bin 1876 -> 1856 bytes
+ ...boto-Regular.abc.no-prune-unicode-ranges.63.ttf | Bin 1932 -> 1912 bytes
+ ...o-prune-unicode-ranges.retain-all-codepoint.ttf | Bin 2412 -> 2396 bytes
+ .../Roboto-Regular.abc.notdef-outline.61,62,63.ttf | Bin 2412 -> 2396 bytes
+ .../Roboto-Regular.abc.notdef-outline.61,63.ttf    | Bin 2208 -> 2192 bytes
+ .../Roboto-Regular.abc.notdef-outline.61.ttf       | Bin 2008 -> 1988 bytes
+ .../Roboto-Regular.abc.notdef-outline.62.ttf       | Bin 1876 -> 1856 bytes
+ .../Roboto-Regular.abc.notdef-outline.63.ttf       | Bin 1932 -> 1912 bytes
+ ...lar.abc.notdef-outline.retain-all-codepoint.ttf | Bin 2412 -> 2396 bytes
+ .../Roboto-Regular.abc.retain-gids.61,62,63.ttf    | Bin 2412 -> 2396 bytes
+ .../Roboto-Regular.abc.retain-gids.61,63.ttf       | Bin 2224 -> 2204 bytes
+ .../basics/Roboto-Regular.abc.retain-gids.61.ttf   | Bin 2008 -> 1988 bytes
+ .../basics/Roboto-Regular.abc.retain-gids.62.ttf   | Bin 1884 -> 1864 bytes
+ .../basics/Roboto-Regular.abc.retain-gids.63.ttf   | Bin 1948 -> 1928 bytes
+ ...egular.abc.retain-gids.retain-all-codepoint.ttf | Bin 2412 -> 2396 bytes
+ .../colrv1_copy_varstore/Foldit.default.41,42.ttf  | Bin 43860 -> 43840 bytes
+ .../colrv1_copy_varstore/Foldit.default.41.ttf     | Bin 43048 -> 43028 bytes
+ .../Foldit.default.retain-all-codepoint.ttf        | Bin 44336 -> 44324 bytes
+ .../Foldit.drop-hints-retain-gids.41,42.ttf        | Bin 43836 -> 43816 bytes
+ .../Foldit.drop-hints-retain-gids.41.ttf           | Bin 43032 -> 43012 bytes
+ ...drop-hints-retain-gids.retain-all-codepoint.ttf | Bin 44300 -> 44288 bytes
+ .../Foldit.drop-hints.41,42.ttf                    | Bin 43820 -> 43800 bytes
+ .../colrv1_copy_varstore/Foldit.drop-hints.41.ttf  | Bin 43016 -> 42996 bytes
+ .../Foldit.drop-hints.retain-all-codepoint.ttf     | Bin 44300 -> 44288 bytes
+ .../Foldit.retain-gids.41,42.ttf                   | Bin 43876 -> 43856 bytes
+ .../colrv1_copy_varstore/Foldit.retain-gids.41.ttf | Bin 43064 -> 43044 bytes
+ .../Foldit.retain-gids.retain-all-codepoint.ttf    | Bin 44336 -> 44324 bytes
+ ...ain-all-codepoint.wght=400,wdth=100,opsz=14.ttf | Bin 6408 -> 6404 bytes
+ .../Roboto-Regular.default.1FC,21,41,20,62,63.ttf  | Bin 3004 -> 2984 bytes
+ ...ar.default.61,62,63,64,65,66,67,68,69,6A,6B.ttf | Bin 4800 -> 4780 bytes
+ .../full-font/Roboto-Regular.default.61,62,63.ttf  | Bin 2632 -> 2616 bytes
+ .../Roboto-Regular.default.D7,D8,D9,DA,DE.ttf      | Bin 2960 -> 2944 bytes
+ ...oboto-Regular.drop-hints.1FC,21,41,20,62,63.ttf | Bin 1556 -> 1536 bytes
+ ...drop-hints.61,62,63,64,65,66,67,68,69,6A,6B.ttf | Bin 2452 -> 2432 bytes
+ .../Roboto-Regular.drop-hints.61,62,63.ttf         | Bin 1372 -> 1356 bytes
+ .../Roboto-Regular.drop-hints.D7,D8,D9,DA,DE.ttf   | Bin 1584 -> 1568 bytes
+ ....filter-scripts-features.1FC,21,41,20,62,63.ttf | Bin 2856 -> 2836 bytes
+ ...ilter-scripts-features.2.1FC,21,41,20,62,63.ttf | Bin 2856 -> 2836 bytes
+ ...features.2.61,62,63,64,65,66,67,68,69,6A,6B.ttf | Bin 4560 -> 4540 bytes
+ ...-Regular.filter-scripts-features.2.61,62,63.ttf | Bin 2484 -> 2468 bytes
+ ...ar.filter-scripts-features.2.D7,D8,D9,DA,DE.ttf | Bin 2828 -> 2812 bytes
+ ...s-features.61,62,63,64,65,66,67,68,69,6A,6B.ttf | Bin 3932 -> 3916 bytes
+ ...to-Regular.filter-scripts-features.61,62,63.ttf | Bin 2484 -> 2468 bytes
+ ...ular.filter-scripts-features.D7,D8,D9,DA,DE.ttf | Bin 2828 -> 2812 bytes
+ ...o-Regular.filter-scripts.1FC,21,41,20,62,63.ttf | Bin 2972 -> 2952 bytes
+ ...er-scripts.61,62,63,64,65,66,67,68,69,6A,6B.ttf | Bin 4140 -> 4124 bytes
+ .../Roboto-Regular.filter-scripts.61,62,63.ttf     | Bin 2600 -> 2584 bytes
+ ...oboto-Regular.filter-scripts.D7,D8,D9,DA,DE.ttf | Bin 2928 -> 2912 bytes
+ ...oboto-Regular.no-scripts.1FC,21,41,20,62,63.ttf | Bin 2836 -> 2816 bytes
+ ...no-scripts.61,62,63,64,65,66,67,68,69,6A,6B.ttf | Bin 3912 -> 3896 bytes
+ .../Roboto-Regular.no-scripts.61,62,63.ttf         | Bin 2464 -> 2448 bytes
+ .../Roboto-Regular.no-scripts.D7,D8,D9,DA,DE.ttf   | Bin 2808 -> 2792 bytes
+ ....filter-scripts-features.1FC,21,41,20,62,63.ttf | Bin 3476 -> 3472 bytes
+ ...ilter-scripts-features.2.1FC,21,41,20,62,63.ttf | Bin 3476 -> 3472 bytes
+ ...features.2.61,62,63,64,65,66,67,68,69,6A,6B.ttf | Bin 8700 -> 8696 bytes
+ ...le-Roman.filter-scripts-features.2.61,62,63.ttf | Bin 3476 -> 3472 bytes
+ ...an.filter-scripts-features.2.D7,D8,D9,DA,DE.ttf | Bin 3948 -> 3940 bytes
+ ...s-features.61,62,63,64,65,66,67,68,69,6A,6B.ttf | Bin 6584 -> 6580 bytes
+ ...able-Roman.filter-scripts-features.61,62,63.ttf | Bin 3476 -> 3472 bytes
+ ...oman.filter-scripts-features.D7,D8,D9,DA,DE.ttf | Bin 3948 -> 3940 bytes
+ ...ariable-Roman.no-scripts.1FC,21,41,20,62,63.ttf | Bin 3456 -> 3452 bytes
+ ...no-scripts.61,62,63,64,65,66,67,68,69,6A,6B.ttf | Bin 6564 -> 6560 bytes
+ ...urceSerifVariable-Roman.no-scripts.61,62,63.ttf | Bin 3456 -> 3452 bytes
+ ...rifVariable-Roman.no-scripts.D7,D8,D9,DA,DE.ttf | Bin 3928 -> 3920 bytes
+ ...fault.retain-all-codepoint.wght=150,wdth=80.ttf | Bin 114200 -> 114196 bytes
+ ...fault.retain-all-codepoint.wght=300,wdth=90.ttf | Bin 114300 -> 114296 bytes
+ ...anges.retain-all-codepoint.wght=150,wdth=80.ttf | Bin 114200 -> 114196 bytes
+ ...anges.retain-all-codepoint.wght=300,wdth=90.ttf | Bin 114300 -> 114296 bytes
+ ...n-all-codepoint.wght=200-300-500,wdth=80-90.ttf | Bin 8728 -> 8708 bytes
+ ...t.retain-all-codepoint.wght=300-600,wdth=85.ttf | Bin 7612 -> 7592 bytes
+ ...n-all-codepoint.wght=200-300-500,wdth=80-90.ttf | Bin 7592 -> 7568 bytes
+ ...t.retain-all-codepoint.wght=300-600,wdth=85.ttf | Bin 6956 -> 6932 bytes
+ ...oto-Regular.glyph_map_roboto.41,43,61,66,69.ttf | Bin 3996 -> 3980 bytes
+ .../MPLUS1-Variable.default.30DD.wght=100.ttf      | Bin 1460 -> 1404 bytes
+ .../MPLUS1-Variable.default.30DD.wght=400.ttf      | Bin 1712 -> 1656 bytes
+ ...retain-all-codepoint.wght=100,ELGR=1,ELSH=2.ttf | Bin 2244 -> 2224 bytes
+ ...retain-all-codepoint.wght=100,ELGR=1,ELSH=2.ttf | Bin 2696 -> 2676 bytes
+ ...F-ABC.default.retain-all-codepoint.wght=800.otf | Bin 1508 -> 1488 bytes
+ ...C.retain-gids.retain-all-codepoint.wght=800.otf | Bin 1508 -> 1488 bytes
+ ...oldit.default.retain-all-codepoint.wght=900.ttf | Bin 2508 -> 2488 bytes
+ ...fault.retain-all-codepoint.wght=200,wdth=90.ttf | Bin 6760 -> 6736 bytes
+ ...fault.retain-all-codepoint.wght=650,wdth=85.ttf | Bin 6712 -> 6688 bytes
+ ...fault.retain-all-codepoint.wght=200,wdth=90.ttf | Bin 6440 -> 6416 bytes
+ ...fault.retain-all-codepoint.wght=650,wdth=85.ttf | Bin 6392 -> 6368 bytes
+ .../Roboto-Regular.default.1E00,303.ttf            | Bin 2472 -> 2464 bytes
+ .../layout.gdef/Roboto-Regular.default.303.ttf     | Bin 2076 -> 2068 bytes
+ .../Roboto-Regular.default.309,20,30F.ttf          | Bin 2148 -> 2140 bytes
+ .../layout.gdef/Roboto-Regular.default.323.ttf     | Bin 1968 -> 1960 bytes
+ .../Roboto-Regular.default.41,42,43.ttf            | Bin 2532 -> 2516 bytes
+ .../Roboto-Regular.drop-hints.1E00,303.ttf         | Bin 1328 -> 1320 bytes
+ .../layout.gdef/Roboto-Regular.drop-hints.303.ttf  | Bin 1072 -> 1064 bytes
+ .../Roboto-Regular.drop-hints.309,20,30F.ttf       | Bin 1108 -> 1100 bytes
+ .../layout.gdef/Roboto-Regular.drop-hints.323.ttf  | Bin 1016 -> 1008 bytes
+ .../Roboto-Regular.drop-hints.41,42,43.ttf         | Bin 1348 -> 1332 bytes
+ .../Roboto-Regular.keep-gdef-gpos.1E00,303.ttf     | Bin 2472 -> 2464 bytes
+ .../Roboto-Regular.keep-gdef-gpos.303.ttf          | Bin 2076 -> 2068 bytes
+ .../Roboto-Regular.keep-gdef-gpos.309,20,30F.ttf   | Bin 2148 -> 2140 bytes
+ .../Roboto-Regular.keep-gdef-gpos.323.ttf          | Bin 1968 -> 1960 bytes
+ .../Roboto-Regular.keep-gdef-gpos.41,42,43.ttf     | Bin 2532 -> 2516 bytes
+ ...ular.default.627,644,623,62D,644,627,645,2E.ttf | Bin 17564 -> 17552 bytes
+ ...astaliqUrdu-Regular.default.627,644,62D,628.ttf | Bin 24532 -> 24520 bytes
+ .../NotoNastaliqUrdu-Regular.default.627,644.ttf   | Bin 7776 -> 7752 bytes
+ ...-Regular.default.633,645,627,621,20,644,627.ttf | Bin 23232 -> 23212 bytes
+ .../NotoNastaliqUrdu-Regular.default.633,6D2.ttf   | Bin 14292 -> 14280 bytes
+ ...otoNastaliqUrdu-Regular.default.63A,64A,631.ttf | Bin 26124 -> 26116 bytes
+ ....retain-gids.627,644,623,62D,644,627,645,2E.ttf | Bin 24224 -> 24212 bytes
+ ...liqUrdu-Regular.retain-gids.627,644,62D,628.ttf | Bin 30432 -> 30420 bytes
+ ...otoNastaliqUrdu-Regular.retain-gids.627,644.ttf | Bin 13380 -> 13360 bytes
+ ...ular.retain-gids.633,645,627,621,20,644,627.ttf | Bin 28888 -> 28864 bytes
+ ...otoNastaliqUrdu-Regular.retain-gids.633,6D2.ttf | Bin 20132 -> 20120 bytes
+ ...astaliqUrdu-Regular.retain-gids.63A,64A,631.ttf | Bin 31984 -> 31976 bytes
+ ...HebrewLatin-Regular.default.392,3a7,3b2,3c7.ttf | Bin 2464 -> 2404 bytes
+ ...wLatin-Regular.default.retain-all-codepoint.ttf | Bin 129952 -> 129896 bytes
+ ...ewLatin-Regular.layout-test.392,3a7,3b2,3c7.ttf | Bin 2588 -> 2528 bytes
+ ...in-Regular.layout-test.retain-all-codepoint.ttf | Bin 151928 -> 151868 bytes
+ ...ewLatin-Regular.retain-gids.392,3a7,3b2,3c7.ttf | Bin 13484 -> 13424 bytes
+ ...in-Regular.retain-gids.retain-all-codepoint.ttf | Bin 133056 -> 132996 bytes
+ .../Roboto-Regular.smallcaps.default.41,42,43.ttf  | Bin 2424 -> 2408 bytes
+ .../Roboto-Regular.smallcaps.default.41,43.ttf     | Bin 2232 -> 2216 bytes
+ .../layout/Roboto-Regular.smallcaps.default.41.ttf | Bin 2044 -> 2024 bytes
+ .../layout/Roboto-Regular.smallcaps.default.43.ttf | Bin 2076 -> 2056 bytes
+ .../Roboto-Regular.smallcaps.default.CA,CB.ttf     | Bin 2348 -> 2332 bytes
+ ...boto-Regular.smallcaps.retain-gids.41,42,43.ttf | Bin 2676 -> 2660 bytes
+ .../Roboto-Regular.smallcaps.retain-gids.41,43.ttf | Bin 2496 -> 2476 bytes
+ .../Roboto-Regular.smallcaps.retain-gids.41.ttf    | Bin 2296 -> 2276 bytes
+ .../Roboto-Regular.smallcaps.retain-gids.43.ttf    | Bin 2344 -> 2324 bytes
+ .../Roboto-Regular.smallcaps.retain-gids.CA,CB.ttf | Bin 6436 -> 6420 bytes
+ ...odepoint.wght=200-600,wdth=80-90,CTGR=20-60.ttf | Bin 4324 -> 4300 bytes
+ ...c.default.retain-all-codepoint.wght=300-600.ttf | Bin 6832 -> 6808 bytes
+ ...c.default.retain-all-codepoint.wght=500-800.ttf | Bin 7312 -> 7288 bytes
+ ...-Regular.no-layout-closure-gids.no-unicodes.ttf | Bin 2612 -> 2592 bytes
+ ...Regular.no-layout-closure-gids2.no-unicodes.ttf | Bin 2800 -> 2780 bytes
+ ...lt.retain-all-codepoint.wght=400,wdth=100.0.ttf | Bin 6804 -> 6780 bytes
+ ...ult.retain-all-codepoint.wght=drop,wdth=100.ttf | Bin 6804 -> 6780 bytes
+ .../Roboto-Regular.gids.61,62,63,30D9.ttf          | Bin 2680 -> 2664 bytes
+ 267 files changed, 0 insertions(+), 0 deletions(-)
+
+commit 8ceed6ee72edd49163714e8f4ce072f104f58277
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Wed Oct 18 15:43:40 2023 -0700
+
+    [subset] fix Lookup.MarkFilteringSet to use the new indices
+
+ src/OT/Layout/GDEF/GDEF.hh        | 23 +++++++++++++++++++++++
+ src/hb-ot-layout-common.hh        | 16 +++++++++++++---
+ src/hb-subset-plan-member-list.hh |  3 +++
+ src/hb-subset-plan.cc             | 21 +++++++++++++++++++++
+ 4 files changed, 60 insertions(+), 3 deletions(-)
+
+commit 510456e9532734af5417b43be71e9e4acc460c7b
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Wed Oct 18 14:26:11 2023 -0700
+
+    [subset] don't retain empty coverage in MarkGlyphSetsDef
+
+ src/OT/Layout/GDEF/GDEF.hh | 15 +++++++++++----
+ 1 file changed, 11 insertions(+), 4 deletions(-)
+
+commit 16ee24c050660b7075a16c1a1b9f5702e38b65f4
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Wed Oct 18 12:43:36 2023 -0700
+
+    [subset] bug fix for GDEF
+    
+    don't use embed(this), snapshot and revert to lower version if needed
+
+ src/OT/Layout/GDEF/GDEF.hh | 12 ++++++++++--
+ 1 file changed, 10 insertions(+), 2 deletions(-)
+
+commit bde6fb83ea6b0c68d17e2d6362f52fdb2828f6ab
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Wed Oct 18 10:21:02 2023 -0700
+
+    add missing file for test empty_region_vardata
+
+ test/subset/data/fonts/RobotoFlex-Variable.ABC.ttf | Bin 0 -> 27440 bytes
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+
+commit 57dac23d794cac20f94396f5da60d4745df9d39c
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Tue Oct 17 17:11:13 2023 -0700
+
+    [instancer] add tests
+    
+    Also update tests to gei rid of no-tables-with-item-variations profile
+
+ test/subset/data/Makefile.am                          |   1 +
+ test/subset/data/Makefile.sources                     |   1 +
+ ...ault.retain-all-codepoint.wght=200-300,opsz=14.ttf | Bin 0 -> 10136 bytes
+ ...retain-all-codepoint.wght=400,wdth=100,opsz=14.ttf | Bin 0 -> 6408 bytes
+ ...ain-all-codepoint.wght=200-300-500,wdth=80-90.ttf} | Bin
+ ...ult.retain-all-codepoint.wght=300-600,wdth=85.ttf} | Bin
+ ...ain-all-codepoint.wght=200-300-500,wdth=80-90.ttf} | Bin
+ ...ult.retain-all-codepoint.wght=300-600,wdth=85.ttf} | Bin
+ ...-codepoint.wght=200-600,wdth=80-90,CTGR=20-60.ttf} | Bin 4340 -> 4324 bytes
+ ...abc.default.retain-all-codepoint.wght=300-600.ttf} | Bin 6848 -> 6832 bytes
+ ...abc.default.retain-all-codepoint.wght=500-800.ttf} | Bin 7328 -> 7312 bytes
+ ...man.default.retain-all-codepoint.wght=300-600.ttf} | Bin
+ ...man.default.retain-all-codepoint.wght=500-800.ttf} | Bin
+ .../data/profiles/no-tables-with-item-variations.txt  |   1 -
+ test/subset/data/tests/empty_region_vardata.tests     |  13 +++++++++++++
+ test/subset/data/tests/glyf_partial_instancing.tests  |   2 +-
+ test/subset/data/tests/mvar_partial_instance.tests    |   2 +-
+ test/subset/data/tests/update_def_wght.tests          |   2 +-
+ test/subset/meson.build                               |   1 +
+ 19 files changed, 19 insertions(+), 4 deletions(-)
+
+commit 8585d600c400d541741c3553aa5e14083076560c
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Tue Oct 17 14:30:17 2023 -0700
+
+    [instancer] update variable device flags in ValueFormat
+
+ src/OT/Layout/GPOS/Common.hh           |  2 +-
+ src/OT/Layout/GPOS/PairPosFormat1.hh   | 38 ++++++++++++++++++-------------
+ src/OT/Layout/GPOS/PairPosFormat2.hh   | 24 ++++++++++++--------
+ src/OT/Layout/GPOS/SinglePos.hh        | 11 ++++-----
+ src/OT/Layout/GPOS/SinglePosFormat1.hh |  2 +-
+ src/OT/Layout/GPOS/SinglePosFormat2.hh |  2 +-
+ src/OT/Layout/GPOS/ValueFormat.hh      | 41 +++++++++++++++++++++++++++++++---
+ 7 files changed, 84 insertions(+), 36 deletions(-)
+
+commit 1a5dd610beed2f6afd0d4f369b57c814e2b9abb6
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Mon Oct 16 09:47:16 2023 -0700
+
+    [instancer] retain empty rows when region is empty and item_count is not
+
+ src/hb-ot-var-common.hh | 30 ++++++++++++++++++++----------
+ 1 file changed, 20 insertions(+), 10 deletions(-)
+
+commit 45a7f9cec377df71de4a512720d695186cc23afa
+Author: David Manthey <david.manthey@kitware.com>
+Date:   Wed Oct 18 08:28:23 2023 -0400
+
+    Change the shebang used for python
+    
+    The shebang `/usr/bin/python3` assumes python3 is installed in /usr/bin,
+    which isn't always true (e.g., in the manylinux docker image).  Using
+    `/usr/bin/env python3` uses the python3 that is in the path, which is
+    more flexible.
+
+ src/relative_to.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
 commit 18a6e78549e8e04a281129ea8ca784ce85f111b8
 Author: Khaled Hosny <khaled@aliftype.com>
 Date:   Wed Oct 18 01:10:44 2023 +0300
