@@ -78,6 +78,8 @@ nptex_ch_srcs = \
 	tex.ch \
 	tracingstacklevels.ch \
 	partoken.ch \
+	locnull-optimize.ch \
+	unbalanced-braces.ch \
 	showstream.ch \
 	$(nptex_ch_synctex) \
 	nptexdir/nptex.ch \

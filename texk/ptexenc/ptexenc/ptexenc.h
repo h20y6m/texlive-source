@@ -102,6 +102,8 @@ extern PTENCDLL int input_line_nptex(FILE *fp, int *buffer,
 /* set current encoding */
 extern PTENCDLL boolean setinfileenc(FILE *fp, const char *str);
 extern PTENCDLL boolean setstdinenc(const char *str);
+extern PTENCDLL boolean setfileenc(const char *str);
+extern PTENCDLL char *ptenc_guess_enc(FILE *fp, boolean chk_bom, boolean chk_nl);
 
 #ifdef WIN32
 extern PTENCDLL void clear_infile_enc(FILE *fp);
