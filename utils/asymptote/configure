@@ -759,7 +759,6 @@ enable_readline
 enable_static
 enable_fftw
 enable_eigen
-enable_xdr
 enable_gsl
 enable_gl
 enable_offscreen
@@ -1414,7 +1413,6 @@ Optional Features:
   --enable-static[=no]    link against static libraries
   --enable-fftw[=yes]     enable FFTW Library
   --enable-eigen[=yes]    enable Eigen Library
-  --enable-xdr[=yes]      enable XDR/V3D support
   --enable-gsl[=yes]      enable GNU Scientific Library
   --enable-gl[=yes]       enable OpenGL Library
   --enable-offscreen[=no] use OSMesa library to implement offscreen rendering
@@ -7617,9 +7615,11 @@ then :
 fi
 
 
+LDSTATIC=""
 STATIC=""
 DYNAMIC=""
 if test "x$enable_static" = "xyes"; then
+  LDSTATIC="-static "
   STATIC="-Wl,-Bstatic "
   DYNAMIC="-Wl,-Bdynamic "
 fi
@@ -7628,8 +7628,11 @@ fi
 
 
 
+
+
 if test "x$enable_readline" != "xno"; then
 CPPFLAGS="$CPPFLAGS "`pkg-config --cflags readline`
+LDFLAGS="$LDFLAGS "`pkg-config --libs readline`
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -7653,9 +7656,8 @@ _ACEOF
 if ac_fn_cxx_try_compile "$LINENO"
 then :
 
-PKGFLAGS=`pkg-config --libs readline`
-LDFLAGS_SAVE=$LDFLAGS
-LDFLAGS="$LDFLAGS ""$STATIC ""$PKGFLAGS""$DYNAMIC "
+LDFLAGS0=$LDFLAGS
+LDFLAGS=$LDFLAGS$LDSTATIC
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for history_list in -lreadline" >&5
 printf %s "checking for history_list in -lreadline... " >&6; }
 if test ${ac_cv_lib_readline_history_list+y}
@@ -7693,13 +7695,16 @@ printf "%s\n" "$ac_cv_lib_readline_history_list" >&6; }
 if test "x$ac_cv_lib_readline_history_list" = xyes
 then :
 
+
 printf "%s\n" "#define HAVE_LIBREADLINE 1" >>confdefs.h
+
+LIBS=$LIBS$STATIC"-lreadline "$DYNAMIC
 
 else $as_nop
   if test "x$enable_static" = "xyes"; then
 
-LDFLAGS="$LDFLAGS_SAVE ""$PKGFLAGS"
 { ac_cv_lib_readline_history_list=; unset ac_cv_lib_readline_history_list;}
+LDFLAGS=$LDFLAGS0
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for history_list in -lreadline" >&5
 printf %s "checking for history_list in -lreadline... " >&6; }
 if test ${ac_cv_lib_readline_history_list+y}
@@ -7854,6 +7859,7 @@ fi
 
 fi
 
+LDFLAGS=$LDFLAGS0
 
 else $as_nop
 
@@ -7912,11 +7918,9 @@ fi
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
 
-CPPFLAGS="$CPPFLAGS "`pkg-config --cflags tinfo`
 
-PKGFLAGS=`pkg-config --libs tinfo`
-LDFLAGS_SAVE=$LDFLAGS
-LDFLAGS="$LDFLAGS ""$STATIC ""$PKGFLAGS""$DYNAMIC "
+LDFLAGS0=$LDFLAGS
+LDFLAGS=$LDFLAGS$LDSTATIC
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for tgetent in -ltinfo" >&5
 printf %s "checking for tgetent in -ltinfo... " >&6; }
 if test ${ac_cv_lib_tinfo_tgetent+y}
@@ -7954,13 +7958,16 @@ printf "%s\n" "$ac_cv_lib_tinfo_tgetent" >&6; }
 if test "x$ac_cv_lib_tinfo_tgetent" = xyes
 then :
 
+
 printf "%s\n" "#define HAVE_LIBTINFO 1" >>confdefs.h
+
+LIBS=$LIBS$STATIC"-ltinfo "$DYNAMIC
 
 else $as_nop
   if test "x$enable_static" = "xyes"; then
 
-LDFLAGS="$LDFLAGS_SAVE ""$PKGFLAGS"
 { ac_cv_lib_tinfo_tgetent=; unset ac_cv_lib_tinfo_tgetent;}
+LDFLAGS=$LDFLAGS0
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for tgetent in -ltinfo" >&5
 printf %s "checking for tgetent in -ltinfo... " >&6; }
 if test ${ac_cv_lib_tinfo_tgetent+y}
@@ -8014,9 +8021,9 @@ fi
 
 fi
 
+LDFLAGS=$LDFLAGS0
 
 
-CPPFLAGS="$CPPFLAGS "`pkg-config --cflags ncurses`
        for ac_header in ncurses/curses.h ncurses.h curses.h
 do :
   as_ac_Header=`printf "%s\n" "ac_cv_header_$ac_header" | $as_tr_sh`
@@ -8031,9 +8038,8 @@ fi
 
 done
 
-PKGFLAGS=`pkg-config --libs ncurses`
-LDFLAGS_SAVE=$LDFLAGS
-LDFLAGS="$LDFLAGS ""$STATIC ""$PKGFLAGS""$DYNAMIC "
+LDFLAGS0=$LDFLAGS
+LDFLAGS=$LDFLAGS$LDSTATIC
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for setupterm in -lncurses" >&5
 printf %s "checking for setupterm in -lncurses... " >&6; }
 if test ${ac_cv_lib_ncurses_setupterm+y}
@@ -8071,13 +8077,16 @@ printf "%s\n" "$ac_cv_lib_ncurses_setupterm" >&6; }
 if test "x$ac_cv_lib_ncurses_setupterm" = xyes
 then :
 
+
 printf "%s\n" "#define HAVE_LIBCURSES 1" >>confdefs.h
+
+LIBS=$LIBS$STATIC"-lncurses "$DYNAMIC
 
 else $as_nop
   if test "x$enable_static" = "xyes"; then
 
-LDFLAGS="$LDFLAGS_SAVE ""$PKGFLAGS"
 { ac_cv_lib_ncurses_setupterm=; unset ac_cv_lib_ncurses_setupterm;}
+LDFLAGS=$LDFLAGS0
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for setupterm in -lncurses" >&5
 printf %s "checking for setupterm in -lncurses... " >&6; }
 if test ${ac_cv_lib_ncurses_setupterm+y}
@@ -8211,6 +8220,7 @@ fi
 
 fi
 
+LDFLAGS=$LDFLAGS0
 
 fi
 
@@ -8223,13 +8233,13 @@ fi
 
 if test "x$enable_fftw" != "xno"; then
 CPPFLAGS="$CPPFLAGS "`pkg-config --cflags fftw3`
+LDFLAGS="$LDFLAGS "`pkg-config --libs fftw3`
 ac_fn_cxx_check_header_compile "$LINENO" "fftw3.h" "ac_cv_header_fftw3_h" "$ac_includes_default"
 if test "x$ac_cv_header_fftw3_h" = xyes
 then :
 
-PKGFLAGS=`pkg-config --libs fftw3`
-LDFLAGS_SAVE=$LDFLAGS
-LDFLAGS="$LDFLAGS ""$STATIC ""$PKGFLAGS""$DYNAMIC "
+LDFLAGS0=$LDFLAGS
+LDFLAGS=$LDFLAGS$LDSTATIC
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for fftw_execute in -lfftw3" >&5
 printf %s "checking for fftw_execute in -lfftw3... " >&6; }
 if test ${ac_cv_lib_fftw3_fftw_execute+y}
@@ -8267,13 +8277,16 @@ printf "%s\n" "$ac_cv_lib_fftw3_fftw_execute" >&6; }
 if test "x$ac_cv_lib_fftw3_fftw_execute" = xyes
 then :
 
+
 printf "%s\n" "#define HAVE_LIBFFTW3 1" >>confdefs.h
+
+LIBS=$LIBS$STATIC"-lfftw3 "$DYNAMIC
 
 else $as_nop
   if test "x$enable_static" = "xyes"; then
 
-LDFLAGS="$LDFLAGS_SAVE ""$PKGFLAGS"
 { ac_cv_lib_fftw3_fftw_execute=; unset ac_cv_lib_fftw3_fftw_execute;}
+LDFLAGS=$LDFLAGS0
 { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for fftw_execute in -lfftw3" >&5
 printf %s "checking for fftw_execute in -lfftw3... " >&6; }
 if test ${ac_cv_lib_fftw3_fftw_execute+y}
@@ -8327,6 +8340,7 @@ fi
 
 fi
 
+LDFLAGS=$LDFLAGS0
 
 else $as_nop
   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: *** Header file fftw3.h not found: will compile without optional fast Fourier transforms. ***" >&5
@@ -8431,18 +8445,12 @@ then :
 fi
 
 
-# Check whether --enable-xdr was given.
-if test ${enable_xdr+y}
-then :
-  enableval=$enable_xdr;
-fi
-
-if test "x$enable_xdr" != "xno"; then
 case "$OSTYPE" in
      darwin*)
      ;;
      *)
      CPPFLAGS="$CPPFLAGS "`pkg-config --cflags libtirpc`
+     LDFLAGS="$LDFLAGS "`pkg-config --libs libtirpc`
      ;;
 esac
 
@@ -8459,18 +8467,13 @@ main (void)
 _ACEOF
 if ac_fn_cxx_try_compile "$LINENO"
 then :
-
-PKGFLAGS=`pkg-config --libs libtirpc`
-LDFLAGS_SAVE=$LDFLAGS
-LDFLAGS="$LDFLAGS ""$STATIC ""$PKGFLAGS""$DYNAMIC "
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for xdrstdio_create in -ltirpc" >&5
-printf %s "checking for xdrstdio_create in -ltirpc... " >&6; }
-if test ${ac_cv_lib_tirpc_xdrstdio_create+y}
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for library containing xdrstdio_create" >&5
+printf %s "checking for library containing xdrstdio_create... " >&6; }
+if test ${ac_cv_search_xdrstdio_create+y}
 then :
   printf %s "(cached) " >&6
 else $as_nop
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-ltirpc  $LIBS"
+  ac_func_search_save_LIBS=$LIBS
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -8485,88 +8488,51 @@ return conftest::xdrstdio_create ();
   return 0;
 }
 _ACEOF
-if ac_fn_cxx_try_link "$LINENO"
+for ac_lib in '' nsl tirpc
+do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_cxx_try_link "$LINENO"
 then :
-  ac_cv_lib_tirpc_xdrstdio_create=yes
-else $as_nop
-  ac_cv_lib_tirpc_xdrstdio_create=no
+  ac_cv_search_xdrstdio_create=$ac_res
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_tirpc_xdrstdio_create" >&5
-printf "%s\n" "$ac_cv_lib_tirpc_xdrstdio_create" >&6; }
-if test "x$ac_cv_lib_tirpc_xdrstdio_create" = xyes
+    conftest$ac_exeext
+  if test ${ac_cv_search_xdrstdio_create+y}
 then :
+  break
+fi
+done
+if test ${ac_cv_search_xdrstdio_create+y}
+then :
+
+else $as_nop
+  ac_cv_search_xdrstdio_create=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_xdrstdio_create" >&5
+printf "%s\n" "$ac_cv_search_xdrstdio_create" >&6; }
+ac_res=$ac_cv_search_xdrstdio_create
+if test "$ac_res" != no
+then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+fi
+
 
 printf "%s\n" "#define HAVE_LIBTIRPC 1" >>confdefs.h
 
 else $as_nop
-  if test "x$enable_static" = "xyes"; then
-
-LDFLAGS="$LDFLAGS_SAVE ""$PKGFLAGS"
-{ ac_cv_lib_tirpc_xdrstdio_create=; unset ac_cv_lib_tirpc_xdrstdio_create;}
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for xdrstdio_create in -ltirpc" >&5
-printf %s "checking for xdrstdio_create in -ltirpc... " >&6; }
-if test ${ac_cv_lib_tirpc_xdrstdio_create+y}
-then :
-  printf %s "(cached) " >&6
-else $as_nop
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-ltirpc  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-namespace conftest {
-  extern "C" int xdrstdio_create ();
-}
-int
-main (void)
-{
-return conftest::xdrstdio_create ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_link "$LINENO"
-then :
-  ac_cv_lib_tirpc_xdrstdio_create=yes
-else $as_nop
-  ac_cv_lib_tirpc_xdrstdio_create=no
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_tirpc_xdrstdio_create" >&5
-printf "%s\n" "$ac_cv_lib_tirpc_xdrstdio_create" >&6; }
-if test "x$ac_cv_lib_tirpc_xdrstdio_create" = xyes
-then :
-  printf "%s\n" "#define HAVE_LIBTIRPC 1" >>confdefs.h
-
-  LIBS="-ltirpc $LIBS"
-
-else $as_nop
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: *** Could not find libtirpc; XDR/V3D support disabled ***" >&5
-printf "%s\n" "$as_me: *** Could not find libtirpc; XDR/V3D support disabled ***" >&6;}
-fi
-
-
-else
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: *** Could not find libtirpc; XDR/V3D support disabled ***" >&5
-printf "%s\n" "$as_me: *** Could not find libtirpc; XDR/V3D support disabled ***" >&6;}
-fi
-
-fi
-
-
-else $as_nop
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: *** Broken rpc headers; XDR/V3D support disabled ***" >&5
-printf "%s\n" "$as_me: *** Broken rpc headers; XDR/V3D support disabled ***" >&6;}
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: *** Broken rpc headers; XDR/V3D support disabled ***" >&5
+printf "%s\n" "$as_me: WARNING: *** Broken rpc headers; XDR/V3D support disabled ***" >&2;}
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
 
 # Check whether --enable-gsl was given.
 if test ${enable_gsl+y}
