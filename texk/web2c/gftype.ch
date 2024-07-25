@@ -15,12 +15,17 @@
 % turns on images.  There is no terminal input to this program.
 % Output is to stdout, and may, of course, be redirected.
 
+@x [0] l.30
+\def\title{GFtype}
+@y
+\def\title{GF$\,$\lowercase{type} changes for C}
+@z
+
 @x [0] WEAVE: print changes only.
 \pageno=\contentspagenumber \advance\pageno by 1
 @y
 \pageno=\contentspagenumber \advance\pageno by 1
 \let\maybe=\iffalse
-\def\title{GF$\,$\lowercase{type} changes for C}
 @z
 
 @x [1] Define my_name
@@ -374,7 +379,7 @@ othercases abort('internal error')
 endcases;
 @z
 
-@x [64] Break up the second oversized case statement.
+@x [51] Break up the second oversized case statement.
 sixty_four_cases(new_row_0), sixty_four_cases(new_row_0+64),
  thirty_seven_cases(new_row_0+128):
   @<Translate a |new_row| command@>;
@@ -398,7 +403,7 @@ othercases error('undefined command ',o:1,'!')
 endcases
 @z
 
-@x [65] No label and no dialog; finish last line written.
+@x [66] No label and no dialog; finish last line written.
 @p begin initialize; {get all variables initialized}
 dialog; {set up all the options}
 @<Process the preamble@>;
@@ -423,7 +428,7 @@ print_ln(' altogether.');
 end.
 @z
 
-@x System-dependent changes.
+@x [73] System-dependent changes.
 This section should be replaced, if necessary, by changes to the program
 that are necessary to make \.{GFtype} work at a particular installation.
 It is usually best to design your change file so that all changes to

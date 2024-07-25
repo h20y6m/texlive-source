@@ -15,12 +15,17 @@
 % 01/16/90 (SR)  Version 3.1.
 % (more recent changes in the ChangeLog)
 
+@x [0] l.28
+\def\title{TF\lowercase{to}PL}
+@y
+\def\title{TF\lowercase{to}PL changes for C}
+@z
+
 @x [0] WEAVE: print changes only.
 \pageno=\contentspagenumber \advance\pageno by 1
 @y
 \pageno=\contentspagenumber \advance\pageno by 1
 \let\maybe=\iffalse
-\def\title{TF\lowercase{to}PL changes for C}
 @z
 
 @x [1] Define my_name
@@ -75,7 +80,7 @@ procedure initialize; {this procedure gets things started properly}
 @y
 @z
 
-@x [5] Increase sizes to match vptovf.
+@x [4] Increase sizes to match vptovf.
 @!tfm_size=30000; {maximum length of |tfm| data, in bytes}
 @!lig_size=5000; {maximum length of |lig_kern| program, in words}
 @!hash_size=5003; {preferably a prime number, a bit larger than the number

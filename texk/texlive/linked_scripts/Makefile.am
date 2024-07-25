@@ -235,6 +235,7 @@ texmf_other_scripts = \
 	texfindpkg/texfindpkg.lua \
 	texdoc/texdoc.tlu \
 	texfot/texfot.pl \
+	texlive/extractbb.lua \
 	texlive/fmtutil-sys.sh \
 	texlive/fmtutil-user.sh \
 	texlive/fmtutil.pl \
@@ -256,6 +257,7 @@ texmf_other_scripts = \
 	thumbpdf/thumbpdf.pl \
 	tlcockpit/tlcockpit.sh \
 	tlshell/tlshell.tcl \
+	typog/typog-grep.pl \
 	ulqda/ulqda.pl \
 	urlbst/urlbst \
 	vpe/vpe.pl \

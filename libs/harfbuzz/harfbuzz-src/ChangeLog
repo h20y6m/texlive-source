@@ -1,3 +1,1905 @@
+commit 30485ee8c3d43c553afb9d78b9924cb71c8d2f19
+Author: Khaled Hosny <khaled@aliftype.com>
+Date:   Mon May 13 23:45:50 2024 +0300
+
+    Typo
+
+ NEWS | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 9ea29789d7e85900853a0bd54f968c33ecd52b93
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Mon May 13 14:43:47 2024 -0600
+
+    [aat] Minor
+
+ src/hb-aat-layout-common.hh     | 2 +-
+ src/hb-aat-layout-morx-table.hh | 8 ++++----
+ 2 files changed, 5 insertions(+), 5 deletions(-)
+
+commit 71b1ba7aa678771b34ea4a0c062aa8622bc3ffaf
+Author: Khaled Hosny <khaled@aliftype.com>
+Date:   Mon May 13 23:07:51 2024 +0300
+
+    8.5.0
+
+ NEWS                   | 15 +++++++++++++++
+ configure.ac           |  2 +-
+ docs/harfbuzz-docs.xml |  1 +
+ meson.build            |  2 +-
+ src/hb-subset-input.cc |  4 ++--
+ src/hb-subset.h        |  2 +-
+ src/hb-version.h       |  4 ++--
+ 7 files changed, 23 insertions(+), 7 deletions(-)
+
+commit 0660a4d408736e663c1c7274fff400be546f998f
+Author: Garret Rieger <grieger@google.com>
+Date:   Mon May 13 19:28:57 2024 +0000
+
+    [subset] fix fuzzer found heap use after free in BASE subsetting.
+
+ src/hb-subset-plan.cc                                    |   4 +++-
+ ...-testcase-minimized-hb-subset-fuzzer-6696597055406080 | Bin 0 -> 1054 bytes
+ 2 files changed, 3 insertions(+), 1 deletion(-)
+
+commit 3f38ffd633b143e13e1899073d5d33fd9ad3a9e1
+Author: Garret Rieger <grieger@google.com>
+Date:   Mon May 13 18:50:43 2024 +0000
+
+    [subset] Fix remaining double conversion warnings.
+
+ src/hb-ot-layout-common.hh        | 12 ++++++------
+ src/hb-ot-var-avar-table.hh       |  8 ++++----
+ src/hb-ot-var-common.hh           | 10 +++++++---
+ src/hb-subset-input.cc            |  8 ++++----
+ src/hb-subset-instancer-solver.hh |  2 +-
+ src/test-item-varstore.cc         |  4 ++--
+ 6 files changed, 24 insertions(+), 20 deletions(-)
+
+commit 6253b3a905ff516aabac62516c28a86eececb7b9
+Author: Steve Lhomme <robux4@ycbcr.xyz>
+Date:   Mon May 13 11:01:58 2024 +0200
+
+    [meson] build ragel as a native tool
+    
+    When cross compiling it will build a target (host) binary that can't be run on the building machine.
+    
+    Also remove the install flag which is not compatible with the native flag, but the custom built ragel is correctly picked.
+
+ subprojects/packagefiles/ragel/meson.build | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 31c45e841f0763860946aa8ec6b0ffad5907310e
+Merge: 3609ebb0d 3d3c6db4b
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Mon May 13 10:20:12 2024 -0700
+
+    Merge pull request #4711 from harfbuzz/aat-set-digest
+    
+    [aat] Use set digest to speed up
+
+commit 3609ebb0d134212f0113906f5d100cdb94126c96
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Mon May 13 11:05:04 2024 -0600
+
+    [htmx] Return non-variable advance if no glyf table available
+    
+    Fixes https://github.com/harfbuzz/harfbuzz/issues/4706
+
+ src/hb-ot-hmtx-table.hh | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+commit 3d3c6db4b2de657c535b2d6c04446a99a9e99876
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Mon May 13 11:00:21 2024 -0600
+
+    [kern] Allow format 1 / 3 in OT-style kern table
+    
+    Otherwise we were failing to sanitize them, and Bad Things
+    were happening after.
+
+ src/hb-aat-layout-kerx-table.hh | 4 ++--
+ src/hb-aat-layout-morx-table.hh | 8 ++++----
+ src/hb-ot-kern-table.hh         | 4 ++--
+ 3 files changed, 8 insertions(+), 8 deletions(-)
+
+commit fb6074259483fe0132e3ed4dc5e8bc5efb3ecfa9
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon May 13 10:27:02 2024 +0000
+
+    Bump github/codeql-action from 3.25.3 to 3.25.4
+    
+    Bumps [github/codeql-action](https://github.com/github/codeql-action) from 3.25.3 to 3.25.4.
+    - [Release notes](https://github.com/github/codeql-action/releases)
+    - [Changelog](https://github.com/github/codeql-action/blob/main/CHANGELOG.md)
+    - [Commits](https://github.com/github/codeql-action/compare/d39d31e687223d841ef683f52467bd88e9b21c14...ccf74c947955fd1cf117aef6a0e4e66191ef6f61)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: github/codeql-action
+      dependency-type: direct:production
+      update-type: version-update:semver-patch
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .github/workflows/scorecard.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 364ae509b5901c9d4019d9794ed570bc82fc6248
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon May 13 10:27:05 2024 +0000
+
+    Bump ossf/scorecard-action from 2.3.1 to 2.3.3
+    
+    Bumps [ossf/scorecard-action](https://github.com/ossf/scorecard-action) from 2.3.1 to 2.3.3.
+    - [Release notes](https://github.com/ossf/scorecard-action/releases)
+    - [Changelog](https://github.com/ossf/scorecard-action/blob/main/RELEASE.md)
+    - [Commits](https://github.com/ossf/scorecard-action/compare/0864cf19026789058feabb7e87baa5f140aac736...dc50aa9510b46c811795eb24b2f1ba02a914e534)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: ossf/scorecard-action
+      dependency-type: direct:production
+      update-type: version-update:semver-patch
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .github/workflows/scorecard.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 44d8489fddd98d1f092849836cec4f95678d88cb
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon May 13 10:27:10 2024 +0000
+
+    Bump actions/checkout from 4.1.4 to 4.1.5
+    
+    Bumps [actions/checkout](https://github.com/actions/checkout) from 4.1.4 to 4.1.5.
+    - [Release notes](https://github.com/actions/checkout/releases)
+    - [Changelog](https://github.com/actions/checkout/blob/main/CHANGELOG.md)
+    - [Commits](https://github.com/actions/checkout/compare/0ad4b8fadaa221de15dcec353f45205ec38ea70b...44c2b7a8a4ea60a981eaca3cf939b5f4305c123b)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: actions/checkout
+      dependency-type: direct:production
+      update-type: version-update:semver-patch
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .github/workflows/arm-ci.yml        | 2 +-
+ .github/workflows/configs-build.yml | 2 +-
+ .github/workflows/coverity-scan.yml | 2 +-
+ .github/workflows/linux-ci.yml      | 2 +-
+ .github/workflows/macos-ci.yml      | 2 +-
+ .github/workflows/msvc-ci.yml       | 2 +-
+ .github/workflows/msys2-ci.yml      | 2 +-
+ .github/workflows/scorecard.yml     | 2 +-
+ 8 files changed, 8 insertions(+), 8 deletions(-)
+
+commit e2ab6c7bc87cb3f52329278bd8419d58b4f85c4d
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sun May 12 15:25:13 2024 -0600
+
+    [kern/kerx] Add accelerator and set-digest filtering
+
+ src/hb-aat-layout-common.hh     |  18 ++++-
+ src/hb-aat-layout-kerx-table.hh | 143 ++++++++++++++++++++++++++++++++++++++--
+ src/hb-aat-layout.cc            |   9 ++-
+ src/hb-ot-face-table-list.hh    |   4 +-
+ src/hb-ot-face.cc               |   1 +
+ src/hb-ot-kern-table.hh         |  67 ++++++++++++++++++-
+ src/hb-ot-layout-gsubgpos.hh    |   2 +-
+ src/hb-ot-layout.cc             |   8 +--
+ src/hb-set-digest.hh            |   8 +--
+ 9 files changed, 234 insertions(+), 26 deletions(-)
+
+commit 5f32c60d05f4664ad28ae450fdb25326b688ad7d
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sun May 12 15:16:25 2024 -0600
+
+    [kerx] Remove set-digests since accelerator is not shared
+
+ src/hb-aat-layout-kerx-table.hh | 18 +-----------------
+ 1 file changed, 1 insertion(+), 17 deletions(-)
+
+commit ebbec7713bbdb405844e46015db2bef178e9e069
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sun May 12 15:10:21 2024 -0600
+
+    [kern] Use the sanitized version from face
+    
+    I'm not sure why kern/kerx/morx were written this way
+    before.
+
+ src/hb-ot-layout.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 23e4a3cf2612ef240b8d882c7031f5f6a8d7c91f
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sun May 12 10:49:46 2024 -0600
+
+    [aat/morx] Add an accelerator
+
+ src/hb-aat-layout-common.hh     |  62 +++++++------
+ src/hb-aat-layout-morx-table.hh | 195 +++++++++++++++++++++++++++++++++++++---
+ src/hb-aat-layout.cc            |  44 ++++-----
+ src/hb-ot-face-table-list.hh    |   4 +-
+ src/hb-ot-face.cc               |   1 +
+ src/hb-set-digest.hh            |   4 +
+ 6 files changed, 250 insertions(+), 60 deletions(-)
+
+commit 0828ccc5dc8db56dc64f248a0e6657a322334a40
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sun May 12 10:06:06 2024 -0600
+
+    [aat] Move buffer out of StateTableDriver
+
+ src/hb-aat-layout-common.hh     | 13 ++++++-------
+ src/hb-aat-layout-kerx-table.hh | 19 ++++++++++---------
+ src/hb-aat-layout-morx-table.hh | 40 ++++++++++++++++++++--------------------
+ 3 files changed, 36 insertions(+), 36 deletions(-)
+
+commit bba0c0e27cf22244d6ffcd9dffc8e9ad1f4c1bc6
+Author: David Corbett <corbett.dav@northeastern.edu>
+Date:   Sat May 11 23:15:35 2024 -0400
+
+    Add test-cff.cc
+
+ src/Makefile.am |  5 ++++
+ src/meson.build |  1 +
+ src/test-cff.cc | 75 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 81 insertions(+)
+
+commit 0db136b1b09232083d99e4315dd4432ed0195d2c
+Author: David Corbett <corbett.dav@northeastern.edu>
+Date:   Thu May 9 11:49:48 2024 -0400
+
+    [subset-cff] Shorten output of `encode_num_tp`
+
+ src/hb-subset-cff-common.hh                        |  57 ++++++++++++++++++---
+ test/api/fonts/AdobeVFPrototype.abc.static.otf     | Bin 2576 -> 2576 bytes
+ ...obeVFPrototype.default.all.wght=650,CNTR=50.otf | Bin 41760 -> 41760 bytes
+ .../Cantarell-VF-ABC.default.all.wght=800.otf      | Bin 1488 -> 1488 bytes
+ .../Cantarell-VF-ABC.retain-gids.all.wght=800.otf  | Bin 1488 -> 1488 bytes
+ 5 files changed, 51 insertions(+), 6 deletions(-)
+
+commit 5a405b310e617c1ee87491401c98f70dff2e2a51
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sat May 11 10:03:47 2024 -0600
+
+    [aat] First sketch at using hb_set_digest_t
+    
+    They are not cached in an accelerator yet.
+
+ src/hb-aat-layout-common.hh     | 100 ++++++++++++++++++++++++++++++++++++++--
+ src/hb-aat-layout-kerx-table.hh |  25 ++++++++--
+ 2 files changed, 118 insertions(+), 7 deletions(-)
+
+commit 51582558075557db274de8893bc43b1f0fd37893
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sat May 11 09:25:22 2024 -0600
+
+    [set-digest] Add operator []. Also auto-initialize
+
+ src/hb-set-digest.hh | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+commit 3d75d445e474b9f5bde7ab47514498f30836de50
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Sat May 11 08:58:58 2024 -0600
+
+    [set] Clarify add_range() params
+
+ src/hb-set.hh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 7975c9cabda33f6f02fb7dd3d54dd8e46dc84950
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Wed May 8 10:11:03 2024 -0700
+
+    [instancer] bug fix for COLRv1, add missing mapping to VarIdx::NO_VARIATION
+
+ src/hb-subset-plan.cc                                  |  17 +++++++++++++----
+ .../Foldit.default.41.wght=300-600.ttf                 | Bin 0 -> 2396 bytes
+ .../instantiate_colrv1/Foldit.default.41.wght=900.ttf  | Bin 0 -> 1704 bytes
+ .../KalniaGlaze.default.41.wght=300-600.ttf            | Bin 0 -> 3096 bytes
+ .../KalniaGlaze.default.41.wght=900.ttf                | Bin 0 -> 2544 bytes
+ .../KalniaGlaze.default.all.wght=300-600.ttf           | Bin 0 -> 5612 bytes
+ .../KalniaGlaze.default.all.wght=900.ttf               | Bin 0 -> 4088 bytes
+ test/subset/data/fonts/KalniaGlaze.ttf                 | Bin 0 -> 5944 bytes
+ test/subset/data/tests/instantiate_colrv1.tests        |   2 ++
+ 9 files changed, 15 insertions(+), 4 deletions(-)
+
+commit b74a7ecc93e283d059df51ee4f46961a782bcdb8
+Author: Garret Rieger <grieger@google.com>
+Date:   Tue May 7 19:53:01 2024 +0000
+
+    Fix IUP differences accoss platforms.
+    
+    - Slightly increase the tolerance to account for differences in floating point math across platforms.
+    - The specific issue is a fused multiply add (d = d1 + (x - x1) * scale; in hb-subset-instancer-iup.cc)
+    - Also fix more implicit double conversion warnings.
+
+ src/hb-ot-var-common.hh        |  2 +-
+ src/hb-subset-instancer-iup.cc | 28 ++++++++++++++--------------
+ test/subset/meson.build        |  9 +--------
+ 3 files changed, 16 insertions(+), 23 deletions(-)
+
+commit 0e1ffd77f90cd81320557d4ebce285b121c7325c
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Tue May 7 13:55:03 2024 -0700
+
+    [instancer] add a warning for CFF partial instancing
+    
+    It's not supported yet
+
+ src/hb-subset-cff2.cc | 3 +++
+ 1 file changed, 3 insertions(+)
+
+commit a3d8a59dc2f365728e6ac7ecaa87413ddcaf1d19
+Author: Garret Rieger <grieger@google.com>
+Date:   Tue May 7 18:32:56 2024 +0000
+
+    Fix double to float cast warning.
+
+ src/hb-subset-plan.cc | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+commit 6ef69f749dae3c5819cb4eb502c103276d649c27
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Tue May 7 10:43:48 2024 -0700
+
+    [cff2] Minor init
+
+ src/hb-cff2-interp-cs.hh | 8 ++------
+ 1 file changed, 2 insertions(+), 6 deletions(-)
+
+commit ca6425704defad269380e9433ec0e9b2afc61d75
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Tue May 7 10:19:30 2024 -0700
+
+    Rename result_t to rebase_tent_result_t
+
+ src/hb-ot-var-common.hh             | 28 ++++++++--------
+ src/hb-subset-instancer-solver.cc   | 18 +++++------
+ src/hb-subset-instancer-solver.hh   |  8 +++--
+ src/test-subset-instancer-solver.cc | 64 ++++++++++++++++++-------------------
+ 4 files changed, 60 insertions(+), 58 deletions(-)
+
+commit 847ead35887a085724515724d9f6ac38ffc8a74f
+Merge: a96f7c878 a5c9c8269
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Mon May 6 14:58:48 2024 -0600
+
+    Merge pull request #4691 from googlefonts/colrv1
+    
+    [instancer] support partial instancing for COLRv1
+
+commit a96f7c878413b1de5061cc6961685edc191f9e2f
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon May 6 20:41:37 2024 +0000
+
+    Bump jinja2 from 3.1.3 to 3.1.4 in /.ci
+    
+    Bumps [jinja2](https://github.com/pallets/jinja) from 3.1.3 to 3.1.4.
+    - [Release notes](https://github.com/pallets/jinja/releases)
+    - [Changelog](https://github.com/pallets/jinja/blob/main/CHANGES.rst)
+    - [Commits](https://github.com/pallets/jinja/compare/3.1.3...3.1.4)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: jinja2
+      dependency-type: indirect
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .ci/requirements.txt | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+commit a5c9c82692f3ec6a7b831ec312966882ebc8c49c
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Mon May 6 13:22:49 2024 -0700
+
+    rename expected files from *.retain-all-codepoint.* to *.all.*
+    
+    This is to fix file name too long error
+    tar: harfbuzz-8.4.0/test/subset/data/expected/sync_vmetrics/playwrite_mm.subset.default.retain-all-codepoint.SPED=25,YEXT=520,wght=100-400,slnt=18.iup_optimize.ttf: file name is too long (cannot be split); not dumped
+    tar: Exiting with failure status due to previous errors
+
+ ...0.ttf => Comfortaa-Regular-new.default.all.wght=300.ttf} | Bin
+ ...0.ttf => Comfortaa-Regular-new.default.all.wght=700.ttf} | Bin
+ ...point.wght=300.ttf => Muli-ABC.default.all.wght=300.ttf} | Bin
+ ...point.wght=700.ttf => Muli-ABC.default.all.wght=700.ttf} | Bin
+ ...-codepoint.ttf => Comfortaa-Regular-new.default.all.ttf} | Bin
+ ...=> Comfortaa-Regular-new.drop-hints-retain-gids.all.ttf} | Bin
+ ...depoint.ttf => Comfortaa-Regular-new.drop-hints.all.ttf} | Bin
+ ...all-codepoint.ttf => Comfortaa-Regular-new.gids.all.ttf} | Bin
+ ...epoint.ttf => Comfortaa-Regular-new.glyph-names.all.ttf} | Bin
+ ... Comfortaa-Regular-new.keep-all-layout-features.all.ttf} | Bin
+ ...nt.ttf => Comfortaa-Regular-new.layout-features.all.ttf} | Bin
+ ...codepoint.ttf => Comfortaa-Regular-new.name-ids.all.ttf} | Bin
+ ...int.ttf => Comfortaa-Regular-new.name-languages.all.ttf} | Bin
+ ...epoint.ttf => Comfortaa-Regular-new.name-legacy.all.ttf} | Bin
+ ...> Comfortaa-Regular-new.no-prune-unicode-ranges.all.ttf} | Bin
+ ...int.ttf => Comfortaa-Regular-new.notdef-outline.all.ttf} | Bin
+ ...epoint.ttf => Comfortaa-Regular-new.retain-gids.all.ttf} | Bin
+ ...int.ttf => NanumMyeongjo-Regular-subset.default.all.ttf} | Bin
+ ...mMyeongjo-Regular-subset.drop-hints-retain-gids.all.ttf} | Bin
+ ....ttf => NanumMyeongjo-Regular-subset.drop-hints.all.ttf} | Bin
+ ...epoint.ttf => NanumMyeongjo-Regular-subset.gids.all.ttf} | Bin
+ ...ttf => NanumMyeongjo-Regular-subset.glyph-names.all.ttf} | Bin
+ ...yeongjo-Regular-subset.keep-all-layout-features.all.ttf} | Bin
+ ...=> NanumMyeongjo-Regular-subset.layout-features.all.ttf} | Bin
+ ...nt.ttf => NanumMyeongjo-Regular-subset.name-ids.all.ttf} | Bin
+ ... => NanumMyeongjo-Regular-subset.name-languages.all.ttf} | Bin
+ ...ttf => NanumMyeongjo-Regular-subset.name-legacy.all.ttf} | Bin
+ ...Myeongjo-Regular-subset.no-prune-unicode-ranges.all.ttf} | Bin
+ ... => NanumMyeongjo-Regular-subset.notdef-outline.all.ttf} | Bin
+ ...ttf => NanumMyeongjo-Regular-subset.retain-gids.all.ttf} | Bin
+ ...all-codepoint.ttf => Roboto-Regular.abc.default.all.ttf} | Bin
+ ...tf => Roboto-Regular.abc.drop-hints-retain-gids.all.ttf} | Bin
+ ...-codepoint.ttf => Roboto-Regular.abc.drop-hints.all.ttf} | Bin
+ ...in-all-codepoint.ttf => Roboto-Regular.abc.gids.all.ttf} | Bin
+ ...codepoint.ttf => Roboto-Regular.abc.glyph-names.all.ttf} | Bin
+ ... => Roboto-Regular.abc.keep-all-layout-features.all.ttf} | Bin
+ ...point.ttf => Roboto-Regular.abc.layout-features.all.ttf} | Bin
+ ...ll-codepoint.ttf => Roboto-Regular.abc.name-ids.all.ttf} | Bin
+ ...epoint.ttf => Roboto-Regular.abc.name-languages.all.ttf} | Bin
+ ...codepoint.ttf => Roboto-Regular.abc.name-legacy.all.ttf} | Bin
+ ...f => Roboto-Regular.abc.no-prune-unicode-ranges.all.ttf} | Bin
+ ...epoint.ttf => Roboto-Regular.abc.notdef-outline.all.ttf} | Bin
+ ...codepoint.ttf => Roboto-Regular.abc.retain-gids.all.ttf} | Bin
+ ...p14_font1.notdef-outline-drop-hints-retain-gids.all.otf} | Bin
+ ...t.otf => cmap14_font1.notdef-outline-drop-hints.all.otf} | Bin
+ ...depoint.otf => cmap14_font1.notdef-outline-gids.all.otf} | Bin
+ ...int.otf => cmap14_font1.notdef-outline-name-ids.all.otf} | Bin
+ ....otf => cmap14_font1.notdef-outline-retain-gids.all.otf} | Bin
+ ...ll-codepoint.otf => cmap14_font1.notdef-outline.all.otf} | Bin
+ ...p14_font2.notdef-outline-drop-hints-retain-gids.all.otf} | Bin
+ ...t.otf => cmap14_font2.notdef-outline-drop-hints.all.otf} | Bin
+ ...depoint.otf => cmap14_font2.notdef-outline-gids.all.otf} | Bin
+ ...int.otf => cmap14_font2.notdef-outline-name-ids.all.otf} | Bin
+ ....otf => cmap14_font2.notdef-outline-retain-gids.all.otf} | Bin
+ ...ll-codepoint.otf => cmap14_font2.notdef-outline.all.otf} | Bin
+ ...4Variable-Roman_subset.keep-all-layout-features.all.otf} | Bin
+ ....retain-all-codepoint.ttf => TestCOLRv1.default.all.ttf} | Bin
+ ...epoint.ttf => TestCOLRv1.drop-hints-retain-gids.all.ttf} | Bin
+ ...tain-all-codepoint.ttf => TestCOLRv1.drop-hints.all.ttf} | Bin
+ ...ain-all-codepoint.ttf => TestCOLRv1.retain-gids.all.ttf} | Bin
+ ...ault.retain-all-codepoint.ttf => Foldit.default.all.ttf} | Bin
+ ...-codepoint.ttf => Foldit.drop-hints-retain-gids.all.ttf} | Bin
+ ...s.retain-all-codepoint.ttf => Foldit.drop-hints.all.ttf} | Bin
+ ....retain-all-codepoint.ttf => Foldit.retain-gids.all.ttf} | Bin
+ ...e.ABC.default.all.wght=200-300,opsz=14.iup_optimize.ttf} | Bin
+ ...oFlex-Variable.ABC.default.all.wght=200-300,opsz=14.ttf} | Bin
+ ....default.all.wght=400,wdth=100,opsz=14.iup_optimize.ttf} | Bin
+ ...-Variable.ABC.default.all.wght=400,wdth=100,opsz=14.ttf} | Bin
+ ...question-subset.default.all.wdth=112.5.iup_optimize.ttf} | Bin
+ ...> AnekBangla-question-subset.default.all.wdth=112.5.ttf} | Bin
+ ...toSansOriya-subset.default.all.wdth=75.iup_optimize.ttf} | Bin
+ ...=75.ttf => NotoSansOriya-subset.default.all.wdth=75.ttf} | Bin
+ ...t.keep-all-layout-features.all.wdth=75.iup_optimize.ttf} | Bin
+ ...nsOriya-subset.keep-all-layout-features.all.wdth=75.ttf} | Bin
+ ...ttf => Roboto-Variable.default.all.wght=150,wdth=80.ttf} | Bin
+ ...ttf => Roboto-Variable.default.all.wght=300,wdth=90.ttf} | Bin
+ ...riable.no-prune-unicode-ranges.all.wght=150,wdth=80.ttf} | Bin
+ ...riable.no-prune-unicode-ranges.all.wght=300,wdth=90.ttf} | Bin
+ ...AnekBangla-subset.default.all.wght=300.iup_optimize.ttf} | Bin
+ ...t=300.ttf => AnekBangla-subset.default.all.wght=300.ttf} | Bin
+ ...int.ttf => glyf_bug_3131.drop-hints-retain-gids.all.ttf} | Bin
+ ...-all-codepoint.ttf => glyf_bug_3131.retain-gids.all.ttf} | Bin
+ ...efault.all.wght=200-300-500,wdth=80-90.iup_optimize.ttf} | Bin
+ ...ariable.ABC.default.all.wght=200-300-500,wdth=80-90.ttf} | Bin
+ ...e.ABC.default.all.wght=300-600,wdth=85.iup_optimize.ttf} | Bin
+ ...oboto-Variable.ABC.default.all.wght=300-600,wdth=85.ttf} | Bin
+ ...efault.all.wght=200-300-500,wdth=80-90.iup_optimize.ttf} | Bin
+ ...e.composite.default.all.wght=200-300-500,wdth=80-90.ttf} | Bin
+ ...osite.default.all.wght=300-600,wdth=85.iup_optimize.ttf} | Bin
+ ...Variable.composite.default.all.wght=300-600,wdth=85.ttf} | Bin
+ ...all-codepoint.ttf => Ubuntu-Regular.glyph-names.all.ttf} | Bin
+ ...int.wght=700.ttf => RobotoMono.default.all.wght=700.ttf} | Bin
+ ...2.ttf => Handjet.default.all.wght=100,ELGR=1,ELSH=2.ttf} | Bin
+ ...> Handjet.notdef-outline.all.wght=100,ELGR=1,ELSH=2.ttf} | Bin
+ ....ttf => NotoSerifHK-subset.default.all.wght=400-600.ttf} | Bin
+ ...=500.ttf => NotoSerifHK-subset.default.all.wght=500.ttf} | Bin
+ ...tf => AdobeVFPrototype.default.all.wght=650,CNTR=50.otf} | Bin
+ ...ht=800.otf => Cantarell-VF-ABC.default.all.wght=800.otf} | Bin
+ ...00.otf => Cantarell-VF-ABC.retain-gids.all.wght=800.otf} | Bin
+ ...wght=300-600.ttf => Foldit.default.all.wght=300-600.ttf} | Bin
+ ...depoint.wght=900.ttf => Foldit.default.all.wght=900.ttf} | Bin
+ ...=> Roboto-Variable.ABC.default.all.wght=200,wdth=90.ttf} | Bin
+ ...=> Roboto-Variable.ABC.default.all.wght=650,wdth=85.ttf} | Bin
+ ...oto-Variable.composite.default.all.wght=200,wdth=90.ttf} | Bin
+ ...oto-Variable.composite.default.all.wght=650,wdth=85.ttf} | Bin
+ ...t1_multiple_subrules_f1.layout-test-retain-gids.all.otf} | Bin
+ ... gpos_context1_multiple_subrules_f1.layout-test.all.otf} | Bin
+ ...t2_multiple_subrules_f1.layout-test-retain-gids.all.otf} | Bin
+ ... gpos_context2_multiple_subrules_f1.layout-test.all.otf} | Bin
+ ...gpos_context3_simple_f1.layout-test-retain-gids.all.otf} | Bin
+ ...oint.otf => gpos_context3_simple_f1.layout-test.all.otf} | Bin
+ ...=> NotoSansNewa-Regular.layout-test-retain-gids.all.ttf} | Bin
+ ...depoint.ttf => NotoSansNewa-Regular.layout-test.all.ttf} | Bin
+ ...oint.ttf => SpectralSC-ExtraLightItalic.default.all.ttf} | Bin
+ ....ttf => SpectralSC-ExtraLightItalic.glyph-names.all.ttf} | Bin
+ ...f => SpectralSC-ExtraLightItalic.notdef-outline.all.ttf} | Bin
+ ...depoint.ttf => AlegreyaSans-BlackItalic.default.all.ttf} | Bin
+ ...int.ttf => AlegreyaSans-BlackItalic.glyph-names.all.ttf} | Bin
+ ....ttf => AlegreyaSans-BlackItalic.notdef-outline.all.ttf} | Bin
+ ...odepoint.ttf => AnekBangla-latin-subset.default.all.ttf} | Bin
+ ...point.ttf => IndicTestJalandhar-Regular.default.all.ttf} | Bin
+ ...nt.ttf => IndicTestJalandhar-Regular.drop-hints.all.ttf} | Bin
+ ...int.ttf => IndicTestJalandhar-Regular.keep-gdef.all.ttf} | Bin
+ ...odepoint.ttf => IndicTestHowrah-Regular.default.all.ttf} | Bin
+ ...point.ttf => IndicTestHowrah-Regular.drop-hints.all.ttf} | Bin
+ ...oint.ttf => IndicTestHowrah-Regular.retain-gids.all.ttf} | Bin
+ ...int.otf => gpos1_2_font.layout-test-retain-gids.all.otf} | Bin
+ ...n-all-codepoint.otf => gpos1_2_font.layout-test.all.otf} | Bin
+ ...nt.otf => gpos2_1_font7.layout-test-retain-gids.all.otf} | Bin
+ ...-all-codepoint.otf => gpos2_1_font7.layout-test.all.otf} | Bin
+ ...nt.otf => gpos2_2_font5.layout-test-retain-gids.all.otf} | Bin
+ ...-all-codepoint.otf => gpos2_2_font5.layout-test.all.otf} | Bin
+ ...oint.otf => gpos3_font3.layout-test-retain-gids.all.otf} | Bin
+ ...in-all-codepoint.otf => gpos3_font3.layout-test.all.otf} | Bin
+ ...pos4_multiple_anchors_1.layout-test-retain-gids.all.otf} | Bin
+ ...int.otf => gpos4_multiple_anchors_1.layout-test.all.otf} | Bin
+ ...oint.otf => gpos5_font1.layout-test-retain-gids.all.otf} | Bin
+ ...in-all-codepoint.otf => gpos5_font1.layout-test.all.otf} | Bin
+ ...oint.otf => gpos6_font1.layout-test-retain-gids.all.otf} | Bin
+ ...in-all-codepoint.otf => gpos6_font1.layout-test.all.otf} | Bin
+ ...g1_multiple_subrules_f1.layout-test-retain-gids.all.otf} | Bin
+ ...gpos_chaining1_multiple_subrules_f1.layout-test.all.otf} | Bin
+ ...g2_multiple_subrules_f1.layout-test-retain-gids.all.otf} | Bin
+ ...gpos_chaining2_multiple_subrules_f1.layout-test.all.otf} | Bin
+ ...pos_chaining3_simple_f1.layout-test-retain-gids.all.otf} | Bin
+ ...int.otf => gpos_chaining3_simple_f1.layout-test.all.otf} | Bin
+ ..._alternate_substitution.layout-test-retain-gids.all.otf} | Bin
+ ....otf => gsub_alternate_substitution.layout-test.all.otf} | Bin
+ ...t1_multiple_subrules_f2.layout-test-retain-gids.all.otf} | Bin
+ ... gsub_context1_multiple_subrules_f2.layout-test.all.otf} | Bin
+ ...t2_multiple_subrules_f2.layout-test-retain-gids.all.otf} | Bin
+ ... gsub_context2_multiple_subrules_f2.layout-test.all.otf} | Bin
+ ..._context3_successive_f1.layout-test-retain-gids.all.otf} | Bin
+ ....otf => gsub_context3_successive_f1.layout-test.all.otf} | Bin
+ ....ttf => Molengo-Regular.layout-test-retain-gids.all.ttf} | Bin
+ ...ll-codepoint.ttf => Molengo-Regular.layout-test.all.ttf} | Bin
+ ...g1_multiple_subrules_f1.layout-test-retain-gids.all.otf} | Bin
+ ...gsub_chaining1_multiple_subrules_f1.layout-test.all.otf} | Bin
+ ...g2_multiple_subrules_f1.layout-test-retain-gids.all.otf} | Bin
+ ...gsub_chaining2_multiple_subrules_f1.layout-test.all.otf} | Bin
+ ...sub_chaining3_simple_f2.layout-test-retain-gids.all.otf} | Bin
+ ...int.otf => gsub_chaining3_simple_f2.layout-test.all.otf} | Bin
+ ... gsub8_manually_created.layout-test-retain-gids.all.otf} | Bin
+ ...point.otf => gsub8_manually_created.layout-test.all.otf} | Bin
+ ...-codepoint.ttf => NotoNastaliqUrdu-Bold.default.all.ttf} | Bin
+ ...epoint.ttf => NotoNastaliqUrdu-Bold.retain-gids.all.ttf} | Bin
+ ...depoint.ttf => NotoNastaliqUrdu-Regular.default.all.ttf} | Bin
+ ...int.ttf => NotoNastaliqUrdu-Regular.retain-gids.all.ttf} | Bin
+ ...etain-all-codepoint.ttf => Tinos-Italic.default.all.ttf} | Bin
+ ...n-all-codepoint.ttf => Tinos-Italic.glyph-names.all.ttf} | Bin
+ ...ll-codepoint.ttf => Tinos-Italic.notdef-outline.all.ttf} | Bin
+ ...n-all-codepoint.ttf => Tinos-Italic.retain-gids.all.ttf} | Bin
+ ...oint.ttf => NotoIKEAHebrewLatin-Regular.default.all.ttf} | Bin
+ ....ttf => NotoIKEAHebrewLatin-Regular.layout-test.all.ttf} | Bin
+ ....ttf => NotoIKEAHebrewLatin-Regular.retain-gids.all.ttf} | Bin
+ ...ll-codepoint.ttf => STIXTwoMath-Regular.default.all.ttf} | Bin
+ ...odepoint.ttf => STIXTwoMath-Regular.glyph-names.all.ttf} | Bin
+ ...point.ttf => STIXTwoMath-Regular.notdef-outline.all.ttf} | Bin
+ ...odepoint.ttf => STIXTwoMath-Regular.retain-gids.all.ttf} | Bin
+ ...ain-all-codepoint.ttf => Caudex-Regular.default.all.ttf} | Bin
+ ...all-codepoint.ttf => Caudex-Regular.glyph-names.all.ttf} | Bin
+ ....ttf => Caudex-Regular.keep-all-layout-features.all.ttf} | Bin
+ ...-codepoint.ttf => Caudex-Regular.notdef-outline.all.ttf} | Bin
+ ...all-codepoint.ttf => Caudex-Regular.retain-gids.all.ttf} | Bin
+ ...toSans-VF.abc.no-layout.all.wght=150,wdth=80,CTGR=0.ttf} | Bin
+ ...toSans-VF.abc.no-layout.all.wght=300,wdth=90,CTGR=0.ttf} | Bin
+ ...all.wght=200-600,wdth=80-90,CTGR=20-60.iup_optimize.ttf} | Bin
+ ....abc.default.all.wght=200-600,wdth=80-90,CTGR=20-60.ttf} | Bin
+ ...toSans-VF.abc.default.all.wght=300-600.iup_optimize.ttf} | Bin
+ ...600.ttf => NotoSans-VF.abc.default.all.wght=300-600.ttf} | Bin
+ ...toSans-VF.abc.default.all.wght=500-800.iup_optimize.ttf} | Bin
+ ...800.ttf => NotoSans-VF.abc.default.all.wght=500-800.ttf} | Bin
+ ...Roboto-Variable.ABC.default.all.wght=400,wdth=100.0.ttf} | Bin
+ ... Roboto-Variable.ABC.default.all.wght=drop,wdth=100.ttf} | Bin
+ ...oint.ttf => SreeKrushnadevaraya-Regular.default.all.ttf} | Bin
+ ....ttf => SreeKrushnadevaraya-Regular.glyph-names.all.ttf} | Bin
+ ...f => SreeKrushnadevaraya-Regular.notdef-outline.all.ttf} | Bin
+ ....ttf => SreeKrushnadevaraya-Regular.retain-gids.all.ttf} | Bin
+ ....no-layout.all.wght=400,CASL=0,CRSV=0,MONO=0,slnt=0.ttf} | Bin
+ ....no-layout.all.wght=500,CASL=0,CRSV=0,MONO=0,slnt=0.ttf} | Bin
+ ....SPED=25,YEXT=520,wght=100-400,slnt=18.iup_optimize.ttf} | Bin
+ ...t.default.all.SPED=25,YEXT=520,wght=100-400,slnt=18.ttf} | Bin
+ ...ariable-Roman.default.all.wght=300-600.iup_optimize.ttf} | Bin
+ ... SourceSerifVariable-Roman.default.all.wght=300-600.ttf} | Bin
+ ...ariable-Roman.default.all.wght=500-800.iup_optimize.ttf} | Bin
+ ... SourceSerifVariable-Roman.default.all.wght=500-800.ttf} | Bin
+ ...alueformat-subset.default.all.wght=400.iup_optimize.ttf} | Bin
+ ...toSansOriya-valueformat-subset.default.all.wght=400.ttf} | Bin
+ ...eformat-subset.drop-hints.all.wght=400.iup_optimize.ttf} | Bin
+ ...ansOriya-valueformat-subset.drop-hints.all.wght=400.ttf} | Bin
+ test/subset/subset_test_suite.py                            |   2 +-
+ 211 files changed, 1 insertion(+), 1 deletion(-)
+
+commit 3b3c154bd1da1969199a5d4add1a643ab057a828
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Mon May 6 12:56:23 2024 -0700
+
+    add back missing tests that were disabled when wrapped by experimental
+
+ test/subset/data/Makefile.am      | 11 +++++++++++
+ test/subset/data/Makefile.sources | 11 +++++++++++
+ 2 files changed, 22 insertions(+)
+
+commit 6c8985724e257b1525da6698bf7ce054a3dad9a5
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Thu May 2 10:11:06 2024 -0700
+
+    fix bots
+
+ src/OT/Color/COLR/COLR.hh         | 2 +-
+ test/subset/data/Makefile.am      | 1 -
+ test/subset/data/Makefile.sources | 1 -
+ test/subset/meson.build           | 2 +-
+ 4 files changed, 2 insertions(+), 4 deletions(-)
+
+commit f614a7d3095c2ad8fe3551ffee4a44adc2c4b14c
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Thu May 2 10:05:18 2024 -0700
+
+    [instancer] add/update tests for COLRv1 instancing
+
+ test/subset/data/Makefile.am                          |   2 +-
+ test/subset/data/Makefile.sources                     |   2 +-
+ .../expected/colrv1/TestCOLRv1.default.E000,E004.ttf  | Bin 940 -> 940 bytes
+ .../colrv1/TestCOLRv1.default.E002,E003,E004.ttf      | Bin 1248 -> 1248 bytes
+ .../expected/colrv1/TestCOLRv1.default.E003,E004.ttf  | Bin 1044 -> 1044 bytes
+ .../TestCOLRv1.default.retain-all-codepoint.ttf       | Bin 1532 -> 1532 bytes
+ .../TestCOLRv1.drop-hints-retain-gids.E000,E004.ttf   | Bin 1020 -> 1020 bytes
+ ...stCOLRv1.drop-hints-retain-gids.E002,E003,E004.ttf | Bin 1304 -> 1304 bytes
+ .../TestCOLRv1.drop-hints-retain-gids.E003,E004.ttf   | Bin 1124 -> 1124 bytes
+ ...v1.drop-hints-retain-gids.retain-all-codepoint.ttf | Bin 1532 -> 1532 bytes
+ .../colrv1/TestCOLRv1.drop-hints.E000,E004.ttf        | Bin 940 -> 940 bytes
+ .../colrv1/TestCOLRv1.drop-hints.E002,E003,E004.ttf   | Bin 1248 -> 1248 bytes
+ .../colrv1/TestCOLRv1.drop-hints.E003,E004.ttf        | Bin 1044 -> 1044 bytes
+ .../TestCOLRv1.drop-hints.retain-all-codepoint.ttf    | Bin 1532 -> 1532 bytes
+ .../colrv1/TestCOLRv1.retain-gids.E000,E004.ttf       | Bin 1020 -> 1020 bytes
+ .../colrv1/TestCOLRv1.retain-gids.E002,E003,E004.ttf  | Bin 1304 -> 1304 bytes
+ .../colrv1/TestCOLRv1.retain-gids.E003,E004.ttf       | Bin 1124 -> 1124 bytes
+ .../TestCOLRv1.retain-gids.retain-all-codepoint.ttf   | Bin 1532 -> 1532 bytes
+ .../colrv1_copy_varstore/Foldit.default.41,42.ttf     | Bin 43840 -> 0 bytes
+ .../colrv1_copy_varstore/Foldit.default.41.ttf        | Bin 43028 -> 0 bytes
+ .../Foldit.default.retain-all-codepoint.ttf           | Bin 44324 -> 0 bytes
+ .../Foldit.drop-hints-retain-gids.41,42.ttf           | Bin 43816 -> 0 bytes
+ .../Foldit.drop-hints-retain-gids.41.ttf              | Bin 43012 -> 0 bytes
+ ...it.drop-hints-retain-gids.retain-all-codepoint.ttf | Bin 44288 -> 0 bytes
+ .../colrv1_copy_varstore/Foldit.drop-hints.41,42.ttf  | Bin 43800 -> 0 bytes
+ .../colrv1_copy_varstore/Foldit.drop-hints.41.ttf     | Bin 42996 -> 0 bytes
+ .../Foldit.drop-hints.retain-all-codepoint.ttf        | Bin 44288 -> 0 bytes
+ .../colrv1_copy_varstore/Foldit.retain-gids.41,42.ttf | Bin 43856 -> 0 bytes
+ .../colrv1_copy_varstore/Foldit.retain-gids.41.ttf    | Bin 43044 -> 0 bytes
+ .../Foldit.retain-gids.retain-all-codepoint.ttf       | Bin 44324 -> 0 bytes
+ .../colrv1_subset_varstore/Foldit.default.41,42.ttf   | Bin 0 -> 3536 bytes
+ .../colrv1_subset_varstore/Foldit.default.41.ttf      | Bin 0 -> 2628 bytes
+ .../Foldit.default.retain-all-codepoint.ttf           | Bin 0 -> 4060 bytes
+ .../Foldit.drop-hints-retain-gids.41,42.ttf           | Bin 0 -> 3512 bytes
+ .../Foldit.drop-hints-retain-gids.41.ttf              | Bin 0 -> 2612 bytes
+ ...it.drop-hints-retain-gids.retain-all-codepoint.ttf | Bin 0 -> 4024 bytes
+ .../Foldit.drop-hints.41,42.ttf                       | Bin 0 -> 3496 bytes
+ .../colrv1_subset_varstore/Foldit.drop-hints.41.ttf   | Bin 0 -> 2596 bytes
+ .../Foldit.drop-hints.retain-all-codepoint.ttf        | Bin 0 -> 4024 bytes
+ .../Foldit.retain-gids.41,42.ttf                      | Bin 0 -> 3552 bytes
+ .../colrv1_subset_varstore/Foldit.retain-gids.41.ttf  | Bin 0 -> 2644 bytes
+ .../Foldit.retain-gids.retain-all-codepoint.ttf       | Bin 0 -> 4060 bytes
+ ...ldit.default.retain-all-codepoint.wght=300-600.ttf | Bin 0 -> 4004 bytes
+ ...py_varstore.tests => colrv1_subset_varstore.tests} |   3 +++
+ test/subset/data/tests/instantiate_colrv1.tests       |   1 +
+ test/subset/meson.build                               |   2 +-
+ 46 files changed, 7 insertions(+), 3 deletions(-)
+
+commit 247039de5afebacf0a84b4c59ae814c9743c23c5
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Fri Apr 26 13:36:52 2024 -0700
+
+    [instancer] partial instantiating support for COLRv1
+    
+    Also add subset support for COLRv1 VarStore/DeltaSetIndexMap
+
+ src/OT/Color/COLR/COLR.hh         | 201 ++++++++++++++++++++++++++++++++++----
+ src/hb-subset-plan-member-list.hh |   4 +
+ src/hb-subset-plan.cc             |  56 ++++++++++-
+ 3 files changed, 240 insertions(+), 21 deletions(-)
+
+commit 625a9a963ac4dc885e72fb68ee51cbe07c4fd76b
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Fri May 3 14:52:53 2024 -0700
+
+    [instancer] use correct constant for No VARIATIONS index
+
+ src/hb-ot-layout-base-table.hh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit ebcdadbf546dc7a067bb18f1fa232c4871faf943
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Fri May 3 14:24:56 2024 -0700
+
+    [instancer] add tests for instantiating BASE table
+
+ ...-subset.default.retain-all-codepoint.wght=400-600.ttf | Bin 0 -> 2680 bytes
+ ...ifHK-subset.default.retain-all-codepoint.wght=500.ttf | Bin 0 -> 1932 bytes
+ test/subset/data/fonts/NotoSerifHK-subset.ttf            | Bin 0 -> 3248 bytes
+ test/subset/data/tests/instantiate_base.tests            |  15 +++++++++++++++
+ test/subset/meson.build                                  |   1 +
+ 5 files changed, 16 insertions(+)
+
+commit c5a85a73fa66fee7524f5e39ba5751e25b5b0f49
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Fri May 3 09:44:14 2024 -0700
+
+    [instancer] support BASE table
+
+ src/hb-ot-layout-base-table.hh    | 64 ++++++++++++++++++++++++++++++++++-----
+ src/hb-subset-plan-member-list.hh |  2 +-
+ src/hb-subset-plan.cc             | 10 +++---
+ 3 files changed, 64 insertions(+), 12 deletions(-)
+
+commit 4d2380f56d780b9bd9825e95989f1185cb9a961d
+Merge: f03bf4997 f145ab2f1
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Fri May 3 14:05:56 2024 -0500
+
+    Merge pull request #4693 from harfbuzz/promote-vf-api
+    
+    [instancer] Promote partial instancing API out of experimental.
+
+commit f145ab2f1ef326746cd625493d4b5af2271bd967
+Author: Garret Rieger <grieger@google.com>
+Date:   Fri May 3 18:24:33 2024 +0000
+
+    Disable empty_region_vardata test when running on 32bit machines.
+
+ test/subset/meson.build | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+commit e81c8c1312f2c9140960520cedeea8264ca7f0ee
+Author: Garret Rieger <grieger@google.com>
+Date:   Fri May 3 18:06:14 2024 +0000
+
+    Change tolerance from float to double.
+
+ src/hb-ot-var-common.hh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 36e82fd5b35b29044d7bc24be3326ed8d0fc6e26
+Author: Garret Rieger <grieger@google.com>
+Date:   Fri May 3 17:33:37 2024 +0000
+
+    Use sizeof(repeat_x_deltas[0]) instead of sizeof(int).
+
+ src/hb-subset-instancer-iup.cc | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+
+commit f03bf49978070c165a4e6c5fc86d7b1fde02f038
+Author: Khaled Hosny <khaled@aliftype.com>
+Date:   Fri May 3 00:35:40 2024 +0300
+
+    [ci] Try to fix finding ICU on macOS runner
+
+ .github/workflows/macos-ci.yml | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+commit 91f54d4bae20a109382c913340b4c67da781f4e0
+Author: Khaled Hosny <khaled@aliftype.com>
+Date:   Fri May 3 00:15:38 2024 +0300
+
+    [ci] Try to fix pip install on macOS runner
+    
+    Use setup-python action which which I think uses venv so pip install
+    will not fail as now installing system-wide packages with pip is
+    disallowed.
+
+ .github/workflows/linux-ci.yml | 4 ++++
+ .github/workflows/macos-ci.yml | 7 ++++++-
+ 2 files changed, 10 insertions(+), 1 deletion(-)
+
+commit 0617266273ade741b4ed34648f5f7cb55741ddec
+Author: Garret Rieger <grieger@google.com>
+Date:   Thu May 2 22:05:03 2024 +0000
+
+    Test using double's in IUP optimizatio code.
+    
+    Trying to resolve delta differences on MINGW 32bit.
+
+ src/hb-subset-instancer-iup.cc | 46 +++++++++++++++++++++---------------------
+ src/hb-subset-instancer-iup.hh |  2 +-
+ 2 files changed, 24 insertions(+), 24 deletions(-)
+
+commit ba1f194a1d62164be439a7f1f8ed9a87da9f7061
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Thu May 2 12:18:11 2024 -0600
+
+    [gsubgpos] Reduce stack use in recursion
+
+ src/OT/Layout/GSUB/Ligature.hh                     |  15 +++-
+ src/hb-ot-layout-gsubgpos.hh                       |  81 ++++++++++++++++++---
+ .../crash-06c15853f99560aafddeda9f0879327b38475e07 | Bin 0 -> 103 bytes
+ 3 files changed, 84 insertions(+), 12 deletions(-)
+
+commit 4cf606f6740ffaa618a61d24517eeeb199cf1729
+Author: Garret Rieger <grieger@google.com>
+Date:   Thu May 2 20:46:29 2024 +0000
+
+    [instancer] Promote partial instancing api out of experimental.
+
+ docs/harfbuzz-sections.txt  |  4 ++--
+ perf/benchmark-subset.cc    |  2 --
+ src/gen-def.py              |  2 --
+ src/hb-ot-var-gvar-table.hh |  5 +----
+ src/hb-subset-input.cc      |  7 ++-----
+ src/hb-subset-plan.cc       |  2 --
+ src/hb-subset.h             | 11 +++++------
+ test/subset/meson.build     | 20 ++++++++++----------
+ util/hb-subset.cc           |  5 +----
+ util/helper-subset.hh       |  2 --
+ 10 files changed, 21 insertions(+), 39 deletions(-)
+
+commit c04d0a295f7ca081f8d086acf329e9be099b791c
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Thu Apr 25 14:57:36 2024 -0700
+
+    [subset] generate colrv1 varsotre inner_maps in the plan
+    
+    Also merge remap_variation_indices APIs used by GDEF and BASE into 1
+
+ src/OT/Color/COLR/COLR.hh         |  40 ++++++++++++--
+ src/OT/Layout/GDEF/GDEF.hh        |  41 --------------
+ src/hb-subset-plan-member-list.hh |   2 +
+ src/hb-subset-plan.cc             | 109 +++++++++++++++++++++++---------------
+ 4 files changed, 105 insertions(+), 87 deletions(-)
+
+commit 690893e3673815c90d2635894e111c5170ec8656
+Author: Qunxin Liu <qxliu@google.com>
+Date:   Mon Oct 2 09:09:53 2023 -0700
+
+    [subset] collect variation indices for COLRv1
+
+ src/OT/Color/COLR/COLR.hh           | 75 ++++++++++++++++++++++++++++++++-----
+ src/OT/Color/COLR/colrv1-closure.hh | 50 ++++++++++++++++++++-----
+ src/hb-subset-plan.cc               |  3 +-
+ 3 files changed, 107 insertions(+), 21 deletions(-)
+
+commit 6ac7a05cdc2f3597bd65c30bd2ab019991761a33
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Apr 29 10:49:34 2024 +0000
+
+    Bump actions/upload-artifact from 4.3.2 to 4.3.3
+    
+    Bumps [actions/upload-artifact](https://github.com/actions/upload-artifact) from 4.3.2 to 4.3.3.
+    - [Release notes](https://github.com/actions/upload-artifact/releases)
+    - [Commits](https://github.com/actions/upload-artifact/compare/1746f4ab65b179e0ea60a494b83293b640dd5bba...65462800fd760344b1a7b4382951275a0abb4808)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: actions/upload-artifact
+      dependency-type: direct:production
+      update-type: version-update:semver-patch
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .github/workflows/cifuzz.yml    | 2 +-
+ .github/workflows/msys2-ci.yml  | 2 +-
+ .github/workflows/scorecard.yml | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+commit 11f37aac8fe7db9eca96fbc0fb8dfcad4bae3b1e
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Apr 29 10:49:30 2024 +0000
+
+    Bump hendrikmuhs/ccache-action from 1.2.12 to 1.2.13
+    
+    Bumps [hendrikmuhs/ccache-action](https://github.com/hendrikmuhs/ccache-action) from 1.2.12 to 1.2.13.
+    - [Release notes](https://github.com/hendrikmuhs/ccache-action/releases)
+    - [Commits](https://github.com/hendrikmuhs/ccache-action/compare/faf867a11c028c0b483fb2ae72b6fc8f7d842714...c92f40bee50034e84c763e33b317c77adaa81c92)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: hendrikmuhs/ccache-action
+      dependency-type: direct:production
+      update-type: version-update:semver-patch
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .github/workflows/linux-ci.yml | 2 +-
+ .github/workflows/macos-ci.yml | 2 +-
+ .github/workflows/msvc-ci.yml  | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+commit 77b9b8c862a51ae80cda1d9abeee2a965d65739b
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Apr 29 10:49:25 2024 +0000
+
+    Bump github/codeql-action from 3.25.1 to 3.25.3
+    
+    Bumps [github/codeql-action](https://github.com/github/codeql-action) from 3.25.1 to 3.25.3.
+    - [Release notes](https://github.com/github/codeql-action/releases)
+    - [Changelog](https://github.com/github/codeql-action/blob/main/CHANGELOG.md)
+    - [Commits](https://github.com/github/codeql-action/compare/c7f9125735019aa87cfc361530512d50ea439c71...d39d31e687223d841ef683f52467bd88e9b21c14)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: github/codeql-action
+      dependency-type: direct:production
+      update-type: version-update:semver-patch
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .github/workflows/scorecard.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit c7b4f16ae8b516b2d97830d9b2df62e7090d24ec
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Apr 29 10:49:17 2024 +0000
+
+    Bump actions/checkout from 4.1.3 to 4.1.4
+    
+    Bumps [actions/checkout](https://github.com/actions/checkout) from 4.1.3 to 4.1.4.
+    - [Release notes](https://github.com/actions/checkout/releases)
+    - [Changelog](https://github.com/actions/checkout/blob/main/CHANGELOG.md)
+    - [Commits](https://github.com/actions/checkout/compare/1d96c772d19495a3b5c517cd2bc0cb401ea0529f...0ad4b8fadaa221de15dcec353f45205ec38ea70b)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: actions/checkout
+      dependency-type: direct:production
+      update-type: version-update:semver-patch
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .github/workflows/arm-ci.yml        | 2 +-
+ .github/workflows/configs-build.yml | 2 +-
+ .github/workflows/coverity-scan.yml | 2 +-
+ .github/workflows/linux-ci.yml      | 2 +-
+ .github/workflows/macos-ci.yml      | 2 +-
+ .github/workflows/msvc-ci.yml       | 2 +-
+ .github/workflows/msys2-ci.yml      | 2 +-
+ .github/workflows/scorecard.yml     | 2 +-
+ 8 files changed, 8 insertions(+), 8 deletions(-)
+
+commit aeadd7c1a682d7bdbc9ae5a39dd1f7ba12394679
+Author: Garret Rieger <grieger@google.com>
+Date:   Tue Apr 23 19:50:19 2024 +0000
+
+    [subset] Offsets in BaseLangSysRecord are relative to the parent table and not the BaseLangSysRecord.
+    
+    https://learn.microsoft.com/en-us/typography/opentype/spec/base#baselangsysrecord-1
+
+ src/hb-ot-layout-base-table.hh | 11 ++++++-----
+ 1 file changed, 6 insertions(+), 5 deletions(-)
+
+commit 33cae9b4f5cc9905e28c0e704b061f712e8b2b3e
+Author: Garret Rieger <grieger@google.com>
+Date:   Fri Apr 19 21:58:10 2024 +0000
+
+    [repacker] If repacking fails for GSUB/GPOS try re-running with extension promotion and table splitting.
+
+ src/hb-repacker.hh | 18 +++++++++++++-----
+ 1 file changed, 13 insertions(+), 5 deletions(-)
+
+commit adab75fbaa410e622aab5dbdfe3b3340ec5f59e0
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Apr 22 10:33:25 2024 +0000
+
+    Bump actions/upload-artifact from 4.3.1 to 4.3.2
+    
+    Bumps [actions/upload-artifact](https://github.com/actions/upload-artifact) from 4.3.1 to 4.3.2.
+    - [Release notes](https://github.com/actions/upload-artifact/releases)
+    - [Commits](https://github.com/actions/upload-artifact/compare/5d5d22a31266ced268874388b861e4b58bb5c2f3...1746f4ab65b179e0ea60a494b83293b640dd5bba)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: actions/upload-artifact
+      dependency-type: direct:production
+      update-type: version-update:semver-patch
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .github/workflows/cifuzz.yml    | 2 +-
+ .github/workflows/msys2-ci.yml  | 2 +-
+ .github/workflows/scorecard.yml | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+commit 7aab4847db2abfa91ffe9b03b7cb0f1ee8102a17
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Apr 22 10:33:33 2024 +0000
+
+    Bump github/codeql-action from 3.24.10 to 3.25.1
+    
+    Bumps [github/codeql-action](https://github.com/github/codeql-action) from 3.24.10 to 3.25.1.
+    - [Release notes](https://github.com/github/codeql-action/releases)
+    - [Changelog](https://github.com/github/codeql-action/blob/main/CHANGELOG.md)
+    - [Commits](https://github.com/github/codeql-action/compare/4355270be187e1b672a7a1c7c7bae5afdc1ab94a...c7f9125735019aa87cfc361530512d50ea439c71)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: github/codeql-action
+      dependency-type: direct:production
+      update-type: version-update:semver-minor
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .github/workflows/scorecard.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit e2892805a9a0512b5d8c066e3754aefbadcfc070
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Apr 22 10:33:38 2024 +0000
+
+    Bump actions/checkout from 4.1.2 to 4.1.3
+    
+    Bumps [actions/checkout](https://github.com/actions/checkout) from 4.1.2 to 4.1.3.
+    - [Release notes](https://github.com/actions/checkout/releases)
+    - [Changelog](https://github.com/actions/checkout/blob/main/CHANGELOG.md)
+    - [Commits](https://github.com/actions/checkout/compare/9bb56186c3b09b4f86b1c65136769dd318469633...1d96c772d19495a3b5c517cd2bc0cb401ea0529f)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: actions/checkout
+      dependency-type: direct:production
+      update-type: version-update:semver-patch
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .github/workflows/arm-ci.yml        | 2 +-
+ .github/workflows/configs-build.yml | 2 +-
+ .github/workflows/coverity-scan.yml | 2 +-
+ .github/workflows/linux-ci.yml      | 2 +-
+ .github/workflows/macos-ci.yml      | 2 +-
+ .github/workflows/msvc-ci.yml       | 2 +-
+ .github/workflows/msys2-ci.yml      | 2 +-
+ .github/workflows/scorecard.yml     | 2 +-
+ 8 files changed, 8 insertions(+), 8 deletions(-)
+
+commit a69a6cb09ee0ea1296c3bbd30c66b56f21afb6b6
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Tue Apr 16 17:08:06 2024 -0600
+
+    Avoid a copy
+
+ src/hb-ot-var-common.hh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 2cfa55056cdbcaf724971f26d098fc118fd3f81b
+Author: Garret Rieger <grieger@google.com>
+Date:   Wed Mar 27 23:21:57 2024 +0000
+
+    [instancer] Switch to doubles for delta calculations.
+    
+    FontTools uses double's internally so match FontTool's precision so we get the same results more often for floating point calculations.
+
+ src/hb-algs.hh                                     |   4 +
+ src/hb-ot-os2-table.hh                             |   2 +-
+ src/hb-ot-post-table.hh                            |   2 +-
+ src/hb-ot-stat-table.hh                            |   3 +-
+ src/hb-ot-var-common.hh                            |  52 +--
+ src/hb-ot-var-fvar-table.hh                        |   7 +-
+ src/hb-subset-instancer-solver.cc                  |  76 ++--
+ src/hb-subset-instancer-solver.hh                  |  24 +-
+ src/test-subset-instancer-solver.cc                | 390 ++++++++++-----------
+ src/test-tuple-varstore.cc                         |  22 +-
+ ...nt.wght=200-300-500,wdth=80-90.iup_optimize.ttf | Bin 8684 -> 8684 bytes
+ ...n-all-codepoint.wght=200-300-500,wdth=80-90.ttf | Bin 8708 -> 8708 bytes
+ ...nt.wght=200-300-500,wdth=80-90.iup_optimize.ttf | Bin 7516 -> 7516 bytes
+ ...n-all-codepoint.wght=200-300-500,wdth=80-90.ttf | Bin 7568 -> 7568 bytes
+ .../data/tests/glyf_partial_instancing.tests       |   4 -
+ 15 files changed, 295 insertions(+), 291 deletions(-)
+
+commit f8ebf27a721daf05fd34215ed661f6e07a7b699e
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Apr 15 10:32:58 2024 +0000
+
+    Bump setuptools from 69.2.0 to 69.5.1 in /.ci
+    
+    Bumps [setuptools](https://github.com/pypa/setuptools) from 69.2.0 to 69.5.1.
+    - [Release notes](https://github.com/pypa/setuptools/releases)
+    - [Changelog](https://github.com/pypa/setuptools/blob/main/NEWS.rst)
+    - [Commits](https://github.com/pypa/setuptools/compare/v69.2.0...v69.5.1)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: setuptools
+      dependency-type: direct:production
+      update-type: version-update:semver-minor
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .ci/requirements.txt | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+commit 71200c13418ce0050a84ce7f1ea5a6eafefa31e1
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Apr 15 10:21:59 2024 +0000
+
+    Bump codecov/codecov-action from 4.2.0 to 4.3.0
+    
+    Bumps [codecov/codecov-action](https://github.com/codecov/codecov-action) from 4.2.0 to 4.3.0.
+    - [Release notes](https://github.com/codecov/codecov-action/releases)
+    - [Changelog](https://github.com/codecov/codecov-action/blob/main/CHANGELOG.md)
+    - [Commits](https://github.com/codecov/codecov-action/compare/7afa10ed9b269c561c2336fd862446844e0cbf71...84508663e988701840491b86de86b666e8a86bed)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: codecov/codecov-action
+      dependency-type: direct:production
+      update-type: version-update:semver-minor
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .github/workflows/linux-ci.yml | 2 +-
+ .github/workflows/macos-ci.yml | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 39b5ae79f0e4018ecb004c1a27d6c9f16492f5a5
+Author: Timo Suoranta <timo.suoranta@supercell.com>
+Date:   Fri Apr 12 17:15:09 2024 +0300
+
+    Fix for #4395
+
+ CMakeLists.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit c053e8f29257814e11ad61493dbbe29f27656de4
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Thu Apr 11 08:58:49 2024 -0600
+
+    [aat] Simplify (or not?) SubtableGlyphCoverage.sanitize()
+
+ src/hb-aat-layout-common.hh | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+commit d137d5579908ae29a4fecdc2e31a9987fc0c6c1c
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Thu Apr 11 08:53:17 2024 -0600
+
+    [aat] Add (unused) SubtableGlyphCoverage
+
+ src/hb-aat-layout-common.hh     | 32 ++++++++++++++++++++++++++++++++
+ src/hb-aat-layout-kerx-table.hh | 10 ++++++++++
+ src/hb-aat-layout-morx-table.hh | 11 +++++++++--
+ 3 files changed, 51 insertions(+), 2 deletions(-)
+
+commit d8d2a98b8daa282b28672f5058e1d45c1b6b1fe5
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Thu Apr 11 07:45:41 2024 -0600
+
+    [aat] Whitespace
+
+ src/hb-aat-layout-common.hh | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+commit b3e4721af7969b1bc46f974107e1f555a96eface
+Author: Khaled Hosny <khaled@aliftype.com>
+Date:   Tue Apr 9 18:54:36 2024 +0200
+
+    Revert "[ci] Enable experimental_api on distcheck job"
+    
+    This reverts commit 89570d195962a4a9fce98eda450a5567782f26d3.
+
+ .circleci/config.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 607931b39612bceac28b3a819517c74ed2e88751
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Apr 8 10:04:44 2024 +0000
+
+    Bump fonttools from 4.50.0 to 4.51.0 in /.ci
+    
+    Bumps [fonttools](https://github.com/fonttools/fonttools) from 4.50.0 to 4.51.0.
+    - [Release notes](https://github.com/fonttools/fonttools/releases)
+    - [Changelog](https://github.com/fonttools/fonttools/blob/main/NEWS.rst)
+    - [Commits](https://github.com/fonttools/fonttools/compare/4.50.0...4.51.0)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: fonttools
+      dependency-type: direct:production
+      update-type: version-update:semver-minor
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .ci/requirements-fonttools.txt | 86 +++++++++++++++++++++---------------------
+ .ci/requirements.txt           | 86 +++++++++++++++++++++---------------------
+ 2 files changed, 86 insertions(+), 86 deletions(-)
+
+commit cd825c9ae8ad834edcf041c35be67112b33ddfe4
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Apr 8 10:47:51 2024 +0000
+
+    Bump github/codeql-action from 3.24.9 to 3.24.10
+    
+    Bumps [github/codeql-action](https://github.com/github/codeql-action) from 3.24.9 to 3.24.10.
+    - [Release notes](https://github.com/github/codeql-action/releases)
+    - [Changelog](https://github.com/github/codeql-action/blob/main/CHANGELOG.md)
+    - [Commits](https://github.com/github/codeql-action/compare/1b1aada464948af03b950897e5eb522f92603cc2...4355270be187e1b672a7a1c7c7bae5afdc1ab94a)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: github/codeql-action
+      dependency-type: direct:production
+      update-type: version-update:semver-patch
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .github/workflows/scorecard.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 51dcc99c872d93d80147573456d146de9a8d11e8
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Apr 8 10:47:54 2024 +0000
+
+    Bump codecov/codecov-action from 4.1.1 to 4.2.0
+    
+    Bumps [codecov/codecov-action](https://github.com/codecov/codecov-action) from 4.1.1 to 4.2.0.
+    - [Release notes](https://github.com/codecov/codecov-action/releases)
+    - [Changelog](https://github.com/codecov/codecov-action/blob/main/CHANGELOG.md)
+    - [Commits](https://github.com/codecov/codecov-action/compare/c16abc29c95fcf9174b58eb7e1abf4c866893bc8...7afa10ed9b269c561c2336fd862446844e0cbf71)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: codecov/codecov-action
+      dependency-type: direct:production
+      update-type: version-update:semver-minor
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .github/workflows/linux-ci.yml | 2 +-
+ .github/workflows/macos-ci.yml | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit c84acc8e0703ee35a2ea15b259a4f04a7b3e5abf
+Author: Garret Rieger <grieger@google.com>
+Date:   Mon Apr 8 23:46:14 2024 +0000
+
+    [subset] Fix fuzzer found memory leak.
+    
+    Fixes https://oss-fuzz.com/testcase-detail/6159925345583104.
+
+ src/hb-ot-layout-common.hh                              |   2 ++
+ ...testcase-minimized-hb-subset-fuzzer-6159925345583104 | Bin 0 -> 46421 bytes
+ 2 files changed, 2 insertions(+)
+
+commit 89570d195962a4a9fce98eda450a5567782f26d3
+Author: Khaled Hosny <khaled@aliftype.com>
+Date:   Tue Apr 9 01:56:27 2024 +0200
+
+    [ci] Enable experimental_api on distcheck job
+
+ .circleci/config.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 12dcafe01505f60027e5b30c5e30d4cbce976dd1
+Author: Garret Rieger <grieger@google.com>
+Date:   Mon Apr 8 22:59:32 2024 +0000
+
+    Add test-hb-subset-parsing.c to extra dist. Needed for meson compile w/ experimental api.
+
+ util/Makefile.am | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit f3727c4767262365c232e2fe74d8d96512b3b90e
+Author: David Corbett <corbett.dav@northeastern.edu>
+Date:   Thu Apr 4 19:04:59 2024 -0400
+
+    Recognize ot_languages2’s disambiguation priority
+
+ src/gen-tag-table.py   | 18 +++++++++++-------
+ src/hb-ot-tag-table.hh | 45 ++++-----------------------------------------
+ 2 files changed, 15 insertions(+), 48 deletions(-)
+
+commit 2fcace77b2137abb44468a04e87d8716294641a9
+Author: Garret Rieger <grieger@google.com>
+Date:   Tue Apr 2 17:42:14 2024 +0000
+
+    [subet] Don't use experimental api flag in benchmark if not compiled with experimental api.
+
+ perf/benchmark-subset.cc | 2 ++
+ 1 file changed, 2 insertions(+)
+
+commit 41612df9d378705352e6745c89732563138c150b
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Apr 1 10:57:16 2024 +0000
+
+    Bump actions/setup-python from 5.0.0 to 5.1.0
+    
+    Bumps [actions/setup-python](https://github.com/actions/setup-python) from 5.0.0 to 5.1.0.
+    - [Release notes](https://github.com/actions/setup-python/releases)
+    - [Commits](https://github.com/actions/setup-python/compare/0a5c61591373683505ea898e09a3ea4f39ef2b9c...82c7e631bb3cdc910f68e0081d67478d79c6982d)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: actions/setup-python
+      dependency-type: direct:production
+      update-type: version-update:semver-minor
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .github/workflows/msvc-ci.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit d5d05a9866ec28ba7ab369c069e4fdaeb06b6382
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Apr 1 10:57:19 2024 +0000
+
+    Bump codecov/codecov-action from 4.1.0 to 4.1.1
+    
+    Bumps [codecov/codecov-action](https://github.com/codecov/codecov-action) from 4.1.0 to 4.1.1.
+    - [Release notes](https://github.com/codecov/codecov-action/releases)
+    - [Changelog](https://github.com/codecov/codecov-action/blob/main/CHANGELOG.md)
+    - [Commits](https://github.com/codecov/codecov-action/compare/54bcd8715eee62d40e33596ef5e8f0f48dbbccab...c16abc29c95fcf9174b58eb7e1abf4c866893bc8)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: codecov/codecov-action
+      dependency-type: direct:production
+      update-type: version-update:semver-patch
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .github/workflows/linux-ci.yml | 2 +-
+ .github/workflows/macos-ci.yml | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 7de2d11150a8cdfaa5859c845846f5063b6a8197
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Mon Apr 1 01:54:09 2024 -0600
+
+    Fix autotools test
+
+ src/check-c-linkage-decls.py | 1 +
+ src/hb-cplusplus.hh          | 3 ---
+ src/hb-wasm-api.h            | 3 +++
+ 3 files changed, 4 insertions(+), 3 deletions(-)
+
+commit 2bd6124737c71df248c6b3af1d201aab93acc428
+Author: Khaled Hosny <khaled@aliftype.com>
+Date:   Sat Mar 30 02:20:21 2024 +0200
+
+    Fix Python warning
+    
+    fix_get_types.py:14: SyntaxWarning: invalid escape sequence '\('
+
+ src/fix_get_types.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 63973005bc07aba599b47fdd4cf788647b601ccd
+Author: Khaled Hosny <khaled@aliftype.com>
+Date:   Fri Mar 29 16:26:17 2024 +0200
+
+    8.4.0
+
+ NEWS                   | 13 +++++++++++++
+ configure.ac           |  2 +-
+ docs/harfbuzz-docs.xml |  1 +
+ meson.build            |  2 +-
+ src/hb-buffer.cc       |  4 ++--
+ src/hb-version.h       |  6 +++---
+ 6 files changed, 21 insertions(+), 7 deletions(-)
+
+commit 5b34058d35eea1b93a77ead5d0a1a8e9b33c2d6a
+Merge: 990fb14d7 69f9c29ec
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Thu Mar 28 18:56:29 2024 -0600
+
+    Merge pull request #4640 from googlefonts/gdef
+    
+    [subset] When serializing GDEF ensure that varstore is packed last.
+
+commit 69f9c29ec1bff4411f46be63f1b887f42cc74d24
+Author: Garret Rieger <grieger@google.com>
+Date:   Fri Mar 29 00:19:16 2024 +0000
+
+    [repacker] add tests of serializer repack_last().
+
+ src/test-repacker.cc | 112 ++++++++++++++++++++++++++++++++++++++++++++++-----
+ 1 file changed, 101 insertions(+), 11 deletions(-)
+
+commit 992953fd3e9b721e8ef5ebf3cb0044b92833e510
+Author: Garret Rieger <grieger@google.com>
+Date:   Thu Mar 28 23:12:21 2024 +0000
+
+    [subset] updated comment.
+
+ src/OT/Layout/GDEF/GDEF.hh | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit 96f0038e3969d175e131daee6f47e77876f3837d
+Author: Garret Rieger <grieger@google.com>
+Date:   Thu Mar 28 23:11:16 2024 +0000
+
+    [subset] cast.
+
+ src/OT/Layout/GDEF/GDEF.hh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 6e87481731e0945f71e8cb9556f30ffcd2388fcf
+Author: Garret Rieger <grieger@google.com>
+Date:   Wed Mar 27 17:47:57 2024 +0000
+
+    [subset] add virtual links to keep the gdef varstore last.
+
+ src/OT/Layout/GDEF/GDEF.hh                         |  19 +++++--
+ src/hb-serialize.hh                                |  60 ++++++++++++++++++---
+ ...r-new.default.retain-all-codepoint.wght=300.ttf | Bin 131708 -> 131708 bytes
+ ...aa-Regular-new.default.retain-all-codepoint.ttf | Bin 222684 -> 222684 bytes
+ ...drop-hints-retain-gids.retain-all-codepoint.ttf | Bin 191560 -> 191560 bytes
+ ...Regular-new.drop-hints.retain-all-codepoint.ttf | Bin 191512 -> 191512 bytes
+ ...ortaa-Regular-new.gids.retain-all-codepoint.ttf | Bin 222684 -> 222684 bytes
+ ...egular-new.glyph-names.retain-all-codepoint.ttf | Bin 229676 -> 229676 bytes
+ ...ep-all-layout-features.retain-all-codepoint.ttf | Bin 223380 -> 223380 bytes
+ ...ar-new.layout-features.retain-all-codepoint.ttf | Bin 220876 -> 220876 bytes
+ ...a-Regular-new.name-ids.retain-all-codepoint.ttf | Bin 222424 -> 222424 bytes
+ ...lar-new.name-languages.retain-all-codepoint.ttf | Bin 222684 -> 222684 bytes
+ ...egular-new.name-legacy.retain-all-codepoint.ttf | Bin 222684 -> 222684 bytes
+ ...o-prune-unicode-ranges.retain-all-codepoint.ttf | Bin 222684 -> 222684 bytes
+ ...lar-new.notdef-outline.retain-all-codepoint.ttf | Bin 223280 -> 223280 bytes
+ ...egular-new.retain-gids.retain-all-codepoint.ttf | Bin 222732 -> 222732 bytes
+ ...codepoint.wght=200-300,opsz=14.iup_optimize.ttf | Bin 9988 -> 9988 bytes
+ ...t.retain-all-codepoint.wght=200-300,opsz=14.ttf | Bin 10136 -> 10136 bytes
+ ...ifVariable-Roman.default.1FC,21,41,20,62,63.ttf | Bin 3888 -> 3888 bytes
+ ...an.default.61,62,63,64,65,66,67,68,69,6A,6B.ttf | Bin 9704 -> 9704 bytes
+ .../SourceSerifVariable-Roman.default.61,62,63.ttf | Bin 3784 -> 3784 bytes
+ ...eSerifVariable-Roman.default.D7,D8,D9,DA,DE.ttf | Bin 4324 -> 4324 bytes
+ ...ariable-Roman.drop-hints.1FC,21,41,20,62,63.ttf | Bin 3864 -> 3864 bytes
+ ...drop-hints.61,62,63,64,65,66,67,68,69,6A,6B.ttf | Bin 9704 -> 9704 bytes
+ ...urceSerifVariable-Roman.drop-hints.61,62,63.ttf | Bin 3784 -> 3784 bytes
+ ...rifVariable-Roman.drop-hints.D7,D8,D9,DA,DE.ttf | Bin 4324 -> 4324 bytes
+ ...ble-Roman.filter-scripts.1FC,21,41,20,62,63.ttf | Bin 3856 -> 3856 bytes
+ ...er-scripts.61,62,63,64,65,66,67,68,69,6A,6B.ttf | Bin 9548 -> 9548 bytes
+ ...SerifVariable-Roman.filter-scripts.61,62,63.ttf | Bin 3752 -> 3752 bytes
+ ...ariable-Roman.filter-scripts.D7,D8,D9,DA,DE.ttf | Bin 4292 -> 4292 bytes
+ ....retain-all-codepoint.wght=300.iup_optimize.ttf | Bin 3276 -> 3228 bytes
+ ...ubset.default.retain-all-codepoint.wght=300.ttf | Bin 3300 -> 3252 bytes
+ ...nt.wght=200-300-500,wdth=80-90.iup_optimize.ttf | Bin 8684 -> 8684 bytes
+ ...n-all-codepoint.wght=200-300-500,wdth=80-90.ttf | Bin 8708 -> 8708 bytes
+ ...codepoint.wght=300-600,wdth=85.iup_optimize.ttf | Bin 7592 -> 7592 bytes
+ ...t.retain-all-codepoint.wght=300-600,wdth=85.ttf | Bin 7592 -> 7592 bytes
+ ...ain-all-codepoint.wght=300-600.iup_optimize.ttf | Bin 303960 -> 303960 bytes
+ ...n.default.retain-all-codepoint.wght=300-600.ttf | Bin 305092 -> 305092 bytes
+ ...ain-all-codepoint.wght=500-800.iup_optimize.ttf | Bin 249808 -> 249808 bytes
+ ...n.default.retain-all-codepoint.wght=500-800.ttf | Bin 250164 -> 250164 bytes
+ test/subset/data/fonts/AnekBangla-subset.ttf       | Bin 5456 -> 5276 bytes
+ 41 files changed, 66 insertions(+), 13 deletions(-)
+
+commit 7145607149be79a548d5a2e25ccbeb1fc6dc3492
+Author: Garret Rieger <grieger@google.com>
+Date:   Mon Mar 25 21:41:16 2024 +0000
+
+    [subset] place the gdef var store at the end of the GDEF table.
+    
+    It appears that some font processors assume it is the last sub table.
+
+ src/OT/Layout/GDEF/GDEF.hh                         |  38 +++++++++++++--------
+ ...r-new.default.retain-all-codepoint.wght=700.ttf | Bin 131584 -> 131584 bytes
+ .../Foldit.default.retain-all-codepoint.ttf        | Bin 44324 -> 44324 bytes
+ ...drop-hints-retain-gids.retain-all-codepoint.ttf | Bin 44288 -> 44288 bytes
+ .../Foldit.drop-hints.retain-all-codepoint.ttf     | Bin 44288 -> 44288 bytes
+ .../Foldit.retain-gids.retain-all-codepoint.ttf    | Bin 44324 -> 44324 bytes
+ ...fault.retain-all-codepoint.wght=150,wdth=80.ttf | Bin 114196 -> 114196 bytes
+ ...fault.retain-all-codepoint.wght=300,wdth=90.ttf | Bin 114296 -> 114296 bytes
+ ...anges.retain-all-codepoint.wght=150,wdth=80.ttf | Bin 114196 -> 114196 bytes
+ ...anges.retain-all-codepoint.wght=300,wdth=90.ttf | Bin 114296 -> 114296 bytes
+ ...ayout-test-retain-gids.retain-all-codepoint.ttf | Bin 142456 -> 142456 bytes
+ ...wa-Regular.layout-test.retain-all-codepoint.ttf | Bin 142456 -> 142456 bytes
+ ...traLightItalic.default.retain-all-codepoint.ttf | Bin 134344 -> 134344 bytes
+ ...ightItalic.glyph-names.retain-all-codepoint.ttf | Bin 145620 -> 145620 bytes
+ ...tItalic.notdef-outline.retain-all-codepoint.ttf | Bin 134472 -> 134472 bytes
+ ...a-latin-subset.default.retain-all-codepoint.ttf | Bin 40128 -> 40128 bytes
+ .../Roboto-Regular.default.1E00,303.ttf            | Bin 2464 -> 2464 bytes
+ .../layout.gdef/Roboto-Regular.default.303.ttf     | Bin 2068 -> 2068 bytes
+ .../Roboto-Regular.default.309,20,30F.ttf          | Bin 2140 -> 2140 bytes
+ .../layout.gdef/Roboto-Regular.default.323.ttf     | Bin 1960 -> 1960 bytes
+ .../Roboto-Regular.drop-hints.1E00,303.ttf         | Bin 1320 -> 1320 bytes
+ .../layout.gdef/Roboto-Regular.drop-hints.303.ttf  | Bin 1064 -> 1064 bytes
+ .../Roboto-Regular.drop-hints.309,20,30F.ttf       | Bin 1100 -> 1100 bytes
+ .../layout.gdef/Roboto-Regular.drop-hints.323.ttf  | Bin 1008 -> 1008 bytes
+ .../Roboto-Regular.keep-gdef-gpos.1E00,303.ttf     | Bin 2464 -> 2464 bytes
+ .../Roboto-Regular.keep-gdef-gpos.303.ttf          | Bin 2068 -> 2068 bytes
+ .../Roboto-Regular.keep-gdef-gpos.309,20,30F.ttf   | Bin 2140 -> 2140 bytes
+ .../Roboto-Regular.keep-gdef-gpos.323.ttf          | Bin 1960 -> 1960 bytes
+ ...ular.default.627,644,623,62D,644,627,645,2E.ttf | Bin 17552 -> 17552 bytes
+ ...astaliqUrdu-Regular.default.627,644,62D,628.ttf | Bin 24520 -> 24520 bytes
+ .../NotoNastaliqUrdu-Regular.default.633,6D2.ttf   | Bin 14280 -> 14280 bytes
+ ...otoNastaliqUrdu-Regular.default.63A,64A,631.ttf | Bin 26116 -> 26116 bytes
+ ...iqUrdu-Regular.default.retain-all-codepoint.ttf | Bin 542328 -> 542328 bytes
+ ....retain-gids.627,644,623,62D,644,627,645,2E.ttf | Bin 24212 -> 24212 bytes
+ ...liqUrdu-Regular.retain-gids.627,644,62D,628.ttf | Bin 30420 -> 30420 bytes
+ ...otoNastaliqUrdu-Regular.retain-gids.633,6D2.ttf | Bin 20120 -> 20120 bytes
+ ...astaliqUrdu-Regular.retain-gids.63A,64A,631.ttf | Bin 31976 -> 31976 bytes
+ ...du-Regular.retain-gids.retain-all-codepoint.ttf | Bin 542360 -> 542360 bytes
+ 38 files changed, 23 insertions(+), 15 deletions(-)
+
+commit 990fb14d7883354db5e5fb1048019829cb2a7eb4
+Author: Garret Rieger <grieger@google.com>
+Date:   Thu Mar 28 22:32:55 2024 +0000
+
+    [subset] Disable fonttools comparison in a few tests where rounding diffs show up.
+    
+    Context: https://github.com/harfbuzz/harfbuzz/issues/4642
+
+ ...codepoint.wght=200-300,opsz=14.iup_optimize.ttf | Bin 9984 -> 9988 bytes
+ ...t.retain-all-codepoint.wght=200-300,opsz=14.ttf | Bin 10136 -> 10136 bytes
+ ...oint.wght=400,wdth=100,opsz=14.iup_optimize.ttf | Bin 6292 -> 6292 bytes
+ ...ain-all-codepoint.wght=400,wdth=100,opsz=14.ttf | Bin 6404 -> 6404 bytes
+ ...nt.wght=200-300-500,wdth=80-90.iup_optimize.ttf | Bin 8684 -> 8684 bytes
+ ...n-all-codepoint.wght=200-300-500,wdth=80-90.ttf | Bin 8708 -> 8708 bytes
+ ...codepoint.wght=300-600,wdth=85.iup_optimize.ttf | Bin 7592 -> 7592 bytes
+ ...t.retain-all-codepoint.wght=300-600,wdth=85.ttf | Bin 7592 -> 7592 bytes
+ ...nt.wght=200-300-500,wdth=80-90.iup_optimize.ttf | Bin 7516 -> 7516 bytes
+ ...n-all-codepoint.wght=200-300-500,wdth=80-90.ttf | Bin 7568 -> 7568 bytes
+ ...codepoint.wght=300-600,wdth=85.iup_optimize.ttf | Bin 6928 -> 6928 bytes
+ ...t.retain-all-codepoint.wght=300-600,wdth=85.ttf | Bin 6932 -> 6932 bytes
+ ...=200-600,wdth=80-90,CTGR=20-60.iup_optimize.ttf | Bin 4164 -> 4164 bytes
+ ...odepoint.wght=200-600,wdth=80-90,CTGR=20-60.ttf | Bin 4300 -> 4300 bytes
+ ...,YEXT=520,wght=100-400,slnt=18.iup_optimize.ttf | Bin 2184 -> 2184 bytes
+ ...point.SPED=25,YEXT=520,wght=100-400,slnt=18.ttf | Bin 2184 -> 2184 bytes
+ ...ain-all-codepoint.wght=300-600.iup_optimize.ttf | Bin 303960 -> 303960 bytes
+ ...n.default.retain-all-codepoint.wght=300-600.ttf | Bin 305092 -> 305092 bytes
+ ...ain-all-codepoint.wght=500-800.iup_optimize.ttf | Bin 249808 -> 249808 bytes
+ ...n.default.retain-all-codepoint.wght=500-800.ttf | Bin 250164 -> 250164 bytes
+ test/subset/data/fonts/RobotoFlex-Variable.ABC.ttf | Bin 27440 -> 27620 bytes
+ test/subset/data/tests/empty_region_vardata.tests  |   4 ++++
+ .../data/tests/glyf_partial_instancing.tests       |   4 ++++
+ test/subset/data/tests/mvar_partial_instance.tests |   4 ++++
+ test/subset/data/tests/update_def_wght.tests       |   4 ++++
+ 25 files changed, 16 insertions(+)
+
+commit 11f5dec75f8e24ed995fbbabdf4c2a6a0d9e592d
+Author: Garret Rieger <grieger@google.com>
+Date:   Wed Mar 27 19:34:51 2024 +0000
+
+    [subset] Move post apply mvar test intance position to avoid rounding diff.
+
+ ...ll-codepoint.wght=500,CASL=0,CRSV=0,MONO=0,slnt=0.ttf | Bin 0 -> 1892 bytes
+ test/subset/data/tests/post_apply_mvar_delta.tests       |   2 +-
+ 2 files changed, 1 insertion(+), 1 deletion(-)
+
+commit 975bd39b158e454a84b7b947d156561a21aaf24f
+Author: Garret Rieger <grieger@google.com>
+Date:   Wed Mar 27 19:28:53 2024 +0000
+
+    [subset] Match hb rounding to fonttools for avg char width.
+    
+    Update Muli and Roboto input test fonts to recalc class values. FontTools recalcs class values during instancing while harfbuzz does not (like the ft subsetter).
+
+ src/hb-ot-os2-table.hh                             |   2 +-
+ ...r-new.default.retain-all-codepoint.wght=300.ttf | Bin 131708 -> 131708 bytes
+ ...i-ABC.default.retain-all-codepoint.wght=300.ttf | Bin 5788 -> 5788 bytes
+ ...i-ABC.default.retain-all-codepoint.wght=700.ttf | Bin 5784 -> 5784 bytes
+ ...fault.retain-all-codepoint.wght=150,wdth=80.ttf | Bin 114196 -> 114196 bytes
+ ...anges.retain-all-codepoint.wght=150,wdth=80.ttf | Bin 114196 -> 114196 bytes
+ ...fault.retain-all-codepoint.wght=200,wdth=90.ttf | Bin 6736 -> 6736 bytes
+ ...fault.retain-all-codepoint.wght=650,wdth=85.ttf | Bin 6688 -> 6688 bytes
+ ...etain-all-codepoint.wght=150,wdth=80,CTGR=0.ttf | Bin 1396 -> 1396 bytes
+ ...etain-all-codepoint.wght=300,wdth=90,CTGR=0.ttf | Bin 1432 -> 1432 bytes
+ ...lt.retain-all-codepoint.wght=400,wdth=100.0.ttf | Bin 6780 -> 6780 bytes
+ ...ult.retain-all-codepoint.wght=drop,wdth=100.ttf | Bin 6780 -> 6780 bytes
+ test/subset/data/fonts/Muli-ABC.ttf                | Bin 6996 -> 6988 bytes
+ test/subset/data/fonts/Roboto-Variable.ABC.ttf     | Bin 13480 -> 13448 bytes
+ 14 files changed, 1 insertion(+), 1 deletion(-)
+
+commit 15a05b24325bc0c07700268e90693cada3cff871
+Author: Garret Rieger <grieger@google.com>
+Date:   Wed Mar 27 18:26:09 2024 +0000
+
+    [subset] Update generate-expected-outputs to drop BASE.
+    
+    This matches the behaviour of the test runner.
+
+ test/subset/generate-expected-outputs.py | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit ec46c4c2e6a1ee55ddbf2ad8a1241be6903890f9
+Author: Garret Rieger <grieger@google.com>
+Date:   Wed Mar 27 18:11:26 2024 +0000
+
+    [subset] Update subset test suite to match some changes made to fonttools.
+    
+    FontTools has added pruning functionality for code pages which we don't yet have in harfbuzz. Update our test runner to disable that for now. Also match fonttools and always recalc usFirst/LastCharIndex even if no prune unicode ranges is set.
+
+ src/hb-ot-os2-table.hh                                |   6 +++---
+ ...a-Regular-new.no-prune-unicode-ranges.61,62,63.ttf | Bin 7036 -> 7036 bytes
+ ...rtaa-Regular-new.no-prune-unicode-ranges.61,63.ttf | Bin 6668 -> 6668 bytes
+ ...mfortaa-Regular-new.no-prune-unicode-ranges.61.ttf | Bin 6300 -> 6300 bytes
+ ...mfortaa-Regular-new.no-prune-unicode-ranges.62.ttf | Bin 6172 -> 6172 bytes
+ ...mfortaa-Regular-new.no-prune-unicode-ranges.63.ttf | Bin 6228 -> 6228 bytes
+ ...egular-subset.no-prune-unicode-ranges.61,62,63.ttf | Bin 4128 -> 4128 bytes
+ ...o-Regular-subset.no-prune-unicode-ranges.61,63.ttf | Bin 3580 -> 3580 bytes
+ ...ngjo-Regular-subset.no-prune-unicode-ranges.61.ttf | Bin 3156 -> 3156 bytes
+ ...ngjo-Regular-subset.no-prune-unicode-ranges.62.ttf | Bin 3180 -> 3180 bytes
+ ...ngjo-Regular-subset.no-prune-unicode-ranges.63.ttf | Bin 3048 -> 3048 bytes
+ .../Roboto-Regular.abc.no-prune-unicode-ranges.61.ttf | Bin 1988 -> 1988 bytes
+ .../Roboto-Regular.abc.no-prune-unicode-ranges.62.ttf | Bin 1856 -> 1856 bytes
+ .../Roboto-Regular.abc.no-prune-unicode-ranges.63.ttf | Bin 1912 -> 1912 bytes
+ test/subset/generate-expected-outputs.py              |   2 ++
+ 15 files changed, 5 insertions(+), 3 deletions(-)
+
+commit c3fed775d7dbb7e5fdda7da915c8c51d7d21db75
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Thu Mar 28 12:25:03 2024 -0600
+
+    Update README.md
+
+ README.md | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+commit 31e2d12d438d584ed64128208e50a35b47484a02
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Mar 25 10:40:36 2024 +0000
+
+    Bump github/codeql-action from 3.24.7 to 3.24.9
+    
+    Bumps [github/codeql-action](https://github.com/github/codeql-action) from 3.24.7 to 3.24.9.
+    - [Release notes](https://github.com/github/codeql-action/releases)
+    - [Changelog](https://github.com/github/codeql-action/blob/main/CHANGELOG.md)
+    - [Commits](https://github.com/github/codeql-action/compare/3ab4101902695724f9365a384f86c1074d94e18c...1b1aada464948af03b950897e5eb522f92603cc2)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: github/codeql-action
+      dependency-type: direct:production
+      update-type: version-update:semver-patch
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .github/workflows/scorecard.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit cc67579c8ed2fe3305117d15d101682ffe0a84b7
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Fri Mar 22 12:35:29 2024 -0600
+
+    [wasm] Update to latest wasm-micro-runtime API
+
+ src/hb-wasm-shape.cc | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+commit 3d86b360549745113e5b76daae119b3ba2ce36e0
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Fri Mar 22 10:37:39 2024 -0600
+
+    [shape] Fix syntax error under some configs
+    
+    Fixes https://github.com/harfbuzz/harfbuzz/issues/4635
+
+ src/hb-ot-shape.cc | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+
+commit 3c8d448fa1174b743963fbc5061a585a255e880b
+Author: Khaled Hosny <khaled@aliftype.com>
+Date:   Sun Mar 17 12:32:14 2024 +0200
+
+    [meson] Check minimum dependency versions like with autotools
+
+ meson.build | 37 ++++++++++++++++++++++++-------------
+ 1 file changed, 24 insertions(+), 13 deletions(-)
+
+commit 1e5597bf853aba69c87c7486d74fcfe3fc6b61cc
+Author: Khaled Hosny <khaled@aliftype.com>
+Date:   Sun Mar 17 12:14:56 2024 +0200
+
+    [autotools] Check for minimum ICU version as well
+    
+    We use unorm2_* APIs introduced in 49.0.
+
+ configure.ac | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 957049066e81a46b5c6fc99544b7f4f11550ea48
+Author: Ozkan Sezer <sezeroz@gmail.com>
+Date:   Sun Mar 17 11:50:04 2024 +0300
+
+    configure.ac: bump minimum required versions for glib and cairo.
+    
+    glib2 >= 2.30 is needed for g_unicode_script_from_iso15924() and
+    g_unicode_script_to_iso15924()
+    
+    cairo >= 1.10 is needed for the new cairo_operator_t members like
+    CAIRO_OPERATOR_SCREEN
+    
+    Reference issue: https://github.com/harfbuzz/harfbuzz/issues/4577
+    Reference issue: https://github.com/harfbuzz/harfbuzz/issues/4624
+
+ configure.ac | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit dbecddb41c8d5780089bd683e9c7556717737976
+Author: Ozkan Sezer <sezeroz@gmail.com>
+Date:   Sun Mar 17 11:50:04 2024 +0300
+
+    tests, hb-test.h: define g_assert_false && g_assert_nonnull for old glib
+    
+    Reference issue: https://github.com/harfbuzz/harfbuzz/issues/4577
+    Reference issue: https://github.com/harfbuzz/harfbuzz/issues/4624
+
+ test/api/hb-test.h | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+commit 98747fdec86b58cf3ee508947744ff129d2d62e6
+Author: Ozkan Sezer <sezeroz@gmail.com>
+Date:   Thu Mar 21 08:51:02 2024 +0300
+
+    hb-common.h: restore including stdint.h for VS2010/2012.
+
+ src/hb-common.h | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+commit f1ac867deec0500fed94f965b6da25f9fcd434de
+Author: Behdad Esfahbod <behdad@behdad.org>
+Date:   Thu Mar 14 13:30:21 2024 -0600
+
+    [buffer] Add API for random state
+    
+    Fixes https://github.com/harfbuzz/harfbuzz/issues/4620
+    
+    New API:
+    +hb_buffer_set_random_state()
+    +hb_buffer_get_random_state()
+
+ docs/harfbuzz-sections.txt   |  2 ++
+ src/hb-buffer.cc             | 44 ++++++++++++++++++++++++++++++++++++++++++++
+ src/hb-buffer.h              |  6 ++++++
+ src/hb-buffer.hh             |  1 +
+ src/hb-ot-layout-gsubgpos.hh |  5 ++---
+ 5 files changed, 55 insertions(+), 3 deletions(-)
+
+commit 3d455998bf2d48b333522e3f2bd72e720b5d7d5c
+Author: 璀境石 <Kuanlan@outlook.com>
+Date:   Tue Mar 19 09:17:42 2024 +0800
+
+    fixed: hb-subset.cc -- compile error C1128: number of sections exceeded object file format limit
+
+ meson.build | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit 51b775d38d5ca4c46bf6672ed10b623b6e7ac2e1
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Mar 18 10:47:18 2024 +0000
+
+    Bump github/codeql-action from 3.24.6 to 3.24.7
+    
+    Bumps [github/codeql-action](https://github.com/github/codeql-action) from 3.24.6 to 3.24.7.
+    - [Release notes](https://github.com/github/codeql-action/releases)
+    - [Changelog](https://github.com/github/codeql-action/blob/main/CHANGELOG.md)
+    - [Commits](https://github.com/github/codeql-action/compare/8a470fddafa5cbb6266ee11b37ef4d8aae19c571...3ab4101902695724f9365a384f86c1074d94e18c)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: github/codeql-action
+      dependency-type: direct:production
+      update-type: version-update:semver-patch
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .github/workflows/scorecard.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 80208d3a2b604ab2fdb7119fd7bbeeb198842aa6
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Mar 18 10:47:28 2024 +0000
+
+    Bump actions/checkout from 4.1.1 to 4.1.2
+    
+    Bumps [actions/checkout](https://github.com/actions/checkout) from 4.1.1 to 4.1.2.
+    - [Release notes](https://github.com/actions/checkout/releases)
+    - [Changelog](https://github.com/actions/checkout/blob/main/CHANGELOG.md)
+    - [Commits](https://github.com/actions/checkout/compare/b4ffde65f46336ab88eb53be808477a3936bae11...9bb56186c3b09b4f86b1c65136769dd318469633)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: actions/checkout
+      dependency-type: direct:production
+      update-type: version-update:semver-patch
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .github/workflows/arm-ci.yml        | 2 +-
+ .github/workflows/configs-build.yml | 2 +-
+ .github/workflows/coverity-scan.yml | 2 +-
+ .github/workflows/linux-ci.yml      | 2 +-
+ .github/workflows/macos-ci.yml      | 2 +-
+ .github/workflows/msvc-ci.yml       | 2 +-
+ .github/workflows/msys2-ci.yml      | 2 +-
+ .github/workflows/scorecard.yml     | 2 +-
+ 8 files changed, 8 insertions(+), 8 deletions(-)
+
+commit a0154418eb13118dc6ee97055e5c3138ed7a73ee
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Mar 18 10:47:32 2024 +0000
+
+    Bump meson from 1.3.2 to 1.4.0 in /.ci
+    
+    Bumps [meson](https://github.com/mesonbuild/meson) from 1.3.2 to 1.4.0.
+    - [Release notes](https://github.com/mesonbuild/meson/releases)
+    - [Commits](https://github.com/mesonbuild/meson/compare/1.3.2...1.4.0)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: meson
+      dependency-type: direct:production
+      update-type: version-update:semver-minor
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .ci/requirements.in  | 2 +-
+ .ci/requirements.txt | 6 +++---
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+commit a91d2edc7a4346e914d09ed183ea303edcff26ea
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Mar 18 10:47:45 2024 +0000
+
+    Bump setuptools from 69.1.1 to 69.2.0 in /.ci
+    
+    Bumps [setuptools](https://github.com/pypa/setuptools) from 69.1.1 to 69.2.0.
+    - [Release notes](https://github.com/pypa/setuptools/releases)
+    - [Changelog](https://github.com/pypa/setuptools/blob/main/NEWS.rst)
+    - [Commits](https://github.com/pypa/setuptools/compare/v69.1.1...v69.2.0)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: setuptools
+      dependency-type: direct:production
+      update-type: version-update:semver-minor
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .ci/requirements.txt | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+commit ddc9b42684305287e20c644b40fa478abd077ef8
+Author: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
+Date:   Mon Mar 18 10:48:00 2024 +0000
+
+    Bump fonttools from 4.49.0 to 4.50.0 in /.ci
+    
+    Bumps [fonttools](https://github.com/fonttools/fonttools) from 4.49.0 to 4.50.0.
+    - [Release notes](https://github.com/fonttools/fonttools/releases)
+    - [Changelog](https://github.com/fonttools/fonttools/blob/main/NEWS.rst)
+    - [Commits](https://github.com/fonttools/fonttools/compare/4.49.0...4.50.0)
+    
+    ---
+    updated-dependencies:
+    - dependency-name: fonttools
+      dependency-type: direct:production
+      update-type: version-update:semver-minor
+    ...
+    
+    Signed-off-by: dependabot[bot] <support@github.com>
+
+ .ci/requirements-fonttools.txt | 86 +++++++++++++++++++++---------------------
+ .ci/requirements.txt           | 86 +++++++++++++++++++++---------------------
+ 2 files changed, 86 insertions(+), 86 deletions(-)
+
 commit 2b3631a866b3077d9d675caa4ec9010b342b5a7c
 Author: Khaled Hosny <khaled@aliftype.com>
 Date:   Sun Mar 17 07:44:19 2024 +0200

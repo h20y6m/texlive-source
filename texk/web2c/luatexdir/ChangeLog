@@ -1,3 +1,18 @@
+2024-05-11  Luigi Scarso <luigi.scarso@gmail.com>
+        * allow interactive deletion of \outer token, see https://tug.org/texmfbug/newbug.html#B142outer 
+
+
+2024-05-13  Luigi Scarso <luigi.scarso@gmail.com>
+	* Omitprocset and ptexprefix (force _ instead of . as separator) (H.Hagen)
+	* Bump to version 1.18.2
+
+2024-03-25  Luigi Scarso <luigi.scarso@gmail.com>
+	* Fixed synctex message on a math node with no zero glue
+
+2024-03-20  Luigi Scarso <luigi.scarso@gmail.com>
+	* Fixed wrong initialization of startup_filename (thanks to Wang Weixuan).
+
+
 2024-03-10  Karl Berry  <karl@tug.org>
 
 	* TL'24 release.
