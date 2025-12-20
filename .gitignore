@@ -2,3 +2,6 @@
 autom4te.cache/
 inst*/
 Work*/
+
+# Do not ignore .github/workflows when ignorecase=true
+!.github/workflows/
