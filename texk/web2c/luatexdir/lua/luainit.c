@@ -69,7 +69,7 @@ const_string LUATEX_IHELP[] = {
     "",
     "  The following regular options are understood: ",
     "",
-    "   --cnf-line =STRING            parse STRING as a configuration file line",
+    "   --cnf-line=STRING             parse STRING as a configuration file line",
     "   --credits                     display credits and exit",
     "   --debug-format                enable format debugging",
     "   --draftmode                   switch on draft mode (generates no output PDF)",
@@ -85,7 +85,7 @@ const_string LUATEX_IHELP[] = {
     "   --kpathsea-debug=NUMBER       set path searching debugging flags according to the bits of NUMBER",
     "   --lua=FILE                    load and execute a lua initialization script",
     "   --luadebug                    enable lua debug library",
-    "   --[no-]mktex=FMT              disable/enable mktexFMT generation (FMT=tex/tfm)",
+    "   --[no-]mktex=FMT              disable/enable mktexFMT generation (FMT=tex/tfm/fmt)",
     "   --nosocket                    disable the lua socket library",
     "   --no-socket                   disable the lua socket library",
     "   --socket                      enable the lua socket library",
@@ -491,7 +491,7 @@ static void parse_options(int ac, char **av)
                  "the terms of the GNU General Public License, version 2 or (at your option)\n"
                  "any later version. For more information about these matters, see the file\n"
                  "named COPYING and the LuaTeX source.\n\n"
-                 "LuaTeX is Copyright 2022 Taco Hoekwater and the LuaTeX Team.\n");
+                 "LuaTeX is Copyright 2025 Taco Hoekwater and the LuaTeX Team.\n");
             /* *INDENT-ON* */
             uexit(0);
         } else if (ARGUMENT_IS("credits")) {
@@ -733,6 +733,11 @@ static int luatex_kpse_clua_find(lua_State * L)
 {
     const char *filename;
     const char *name;
+    if (!clua_loader_function) {
+        /*tex library not found in this path */
+        lua_pushliteral(L, "\n\t[C searcher requires unrestricted shell escape]");
+        return 1;
+    }
     if (safer_option) {
         /*tex library not found in this path */
         lua_pushliteral(L, "\n\t[C searcher disabled in safer mode]");
@@ -1122,9 +1127,10 @@ void lua_initialize(int ac, char **av)
                 exit(1);
             }
             init_tex_table(Luas);
-            if (lua_pcall(Luas, 0, 0, 0)) {
+            lua_pushcfunction(Luas, lua_traceback);
+            lua_insert(Luas, -2);
+            if (lua_pcall(Luas, 0, 0, -2)) {
                 fprintf(stdout, "%s\n", lua_tostring(Luas, -1));
-                lua_traceback(Luas);
              /*tex lua_close(Luas); */
                 exit(1);
             } else {
@@ -1133,6 +1139,7 @@ void lua_initialize(int ac, char **av)
                 /*tex lua_close(Luas); */
                 exit(0);
             }
+            lua_remove(Luas, -1);
         }
         /*tex a normal tex run */
         init_tex_table(Luas);
@@ -1144,11 +1151,13 @@ void lua_initialize(int ac, char **av)
             fprintf(stdout, "%s\n", lua_tostring(Luas, -1));
             exit(1);
         }
-        if (lua_pcall(Luas, 0, 0, 0)) {
+        lua_pushcfunction(Luas, lua_traceback);
+        lua_insert(Luas, -2);
+        if (lua_pcall(Luas, 0, 0, -2)) {
             fprintf(stdout, "%s\n", lua_tostring(Luas, -1));
-            lua_traceback(Luas);
             exit(1);
         }
+        lua_remove(Luas, -1);
         if (!input_name) {
             get_lua_string("texconfig", "jobname", &input_name);
         }
@@ -1240,6 +1249,9 @@ void lua_initialize(int ac, char **av)
     /* the lua debug library is enabled if shell escape permits everything */
     if (shellenabledp && restrictedshell != 1) {
       luadebug_option = 1 ;      
+    } else {
+        luaL_unref(Luas, LUA_REGISTRYINDEX, clua_loader_function);
+        clua_loader_function = 0;
     }
     /*tex Here we load luatex-core.lua which takes care of some protection on demand. */
     if (load_luatex_core_lua(Luas)) {

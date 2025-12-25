@@ -787,6 +787,7 @@ if translate_filename then begin
 end;
 @z
 
+% Original report: https://tug.org/pipermail/tex-k/2021-July/003630.html
 @x [5.71] l.1713 - term_input: set limit when fatal_error
 if not input_ln(term_in,true) then fatal_error("End of file on the terminal!");
 @y
@@ -880,6 +881,15 @@ if (halt_on_error_p) then begin
    here; just give up in that case. If files are truncated, too bad.}
   if (halting_on_error_p) then do_final_end; {quit immediately}
   halting_on_error_p:=true;
+
+  {This module is executed at the end of the |error| procedure in
+   \.{tex.web}, but we'll never get there when |halt_on_error_p|, so the
+   error help shouldn't get duplicated. It's potentially useful to see,
+   especially if \.{\\errhelp} is being used. See thread at:
+   \.{https://tug.org/pipermail/tex-live/2024-July/050741.html}.}
+  @<Put help message on the transcript file@>;
+
+  {Proceed with normal exit.}
   history:=fatal_error_stop;
   jump_out;
 end;
@@ -946,16 +956,22 @@ noreturn procedure confusion(@!s:str_number);
 
 % [7.104] `remainder' is a library routine on some systems, so change
 % its name to avoid conflicts.
-@x [7.104] l.2248 - avoid name conflicts with lib routine remainder()
+@x [7.104] l.2248 - avoid conflict with libc remainder(), save_arith_error
 |remainder|, holds the remainder after a division.
 
 @<Glob...@>=
 @y
-|remainder|, holds the remainder after a division.
+|remainder|, holds the remainder after a division. For Web2C, we rename
+it to |tex_remainder| to avoid conflicts with a system library routine
+named |remainder|.
+
+Also, we define a new variable |save_arith_error| for when we want to
+save and restore |arith_error|, down below.
 
 @d remainder==tex_remainder
 
 @<Glob...@>=
+@!save_arith_error:boolean;
 @z
 
 @x [7.109] l.2373 - Define glue_ratio in C.
@@ -1501,13 +1517,24 @@ begin input_ptr:=0; max_in_stack:=0;
 source_filename_stack[0]:=0;full_source_filename_stack[0]:=0;
 @z
 
+% This one is a consequence of the limit:=0 fix.
+@x [23.331] l.7095 - initialize buffer[0]
+first:=buf_size; repeat buffer[first]:=0; decr(first); until first=0;
+@y
+first:=buf_size; repeat buffer[first]:=0; decr(first); until first=0;
+buffer[0]:=0;
+@z
+
 % Original report: https://tug.org/pipermail/tex-k/2024-March/004021.html
 % TeX bug entry:   https://tug.org/texmfbug/newbug.html#B142outer
-@x [24.336] l.7152 - allow interactive deletion of \outer token
-begin if scanner_status<>normal then
-@y
-begin if OK_to_interrupt and(scanner_status<>normal) then
-@z
+% -- but this has the problem that token deletion will now continue
+%    through an eof, which seems undesirable, and not a permissible
+%    change for "TeX". See tests/outerdel.tex.
+%@x [24.336] l.7152 - allow interactive deletion of \outer token
+%begin if scanner_status<>normal then
+%@y
+%begin if OK_to_interrupt and(scanner_status<>normal) then
+%@z
 
 @x [24.338] l.7191 - i18n fix
 print(" while scanning ");
@@ -1560,6 +1587,23 @@ if t>=cs_token_flag then
 if (t>=cs_token_flag)and(t<>end_write_token) then
 @z
 
+% Original report: https://tug.org/pipermail/tex-k/2025-January/004150.html
+% TeX bug entry: https://tug.org/texmfbug/newbug.html#B182muerror
+% Test file: tests/invalidmu.tex
+@x [26.449] l.8878 - recover better from \mkern <non-mu-dimen-or-skip>
+  @<Coerce glue to a dimension@>;
+  if cur_val_level=mu_val then goto attach_sign;
+  if cur_val_level<>int_val then mu_error;
+@y
+  if cur_val_level<>int_val then
+    begin
+    @<Coerce glue to a dimension@>;
+    if cur_val_level<>mu_val then mu_error;
+    goto attach_sign;
+    end;
+@z
+
+% See above change "term_input: set limit when fatal_error" for references.
 @x [27.484] l.9495 - set limit when fatal_error
 else fatal_error("*** (cannot \read from terminal in nonstop modes)")
 @y
@@ -2407,6 +2451,25 @@ pack_file_name(nom,aire,"");
 @y
 @d fget==tfm_temp:=getc(tfm_file)
 @d fbyte==tfm_temp
+@z
+
+% Too much font scaling can cause overflows and silently changing the
+% user's value. See tests/fonttoobig.tex for examples. Reports from
+% Igor Liferenko (https://tug.org/pipermail/tex-k/2021-June/003604.html)
+% and Tyge Tiessen (https://tug.org/pipermail/tex-k/2022-January/003752.html).
+% Original patch from Tyge.
+@x [30.568] l.11072 - Avoid scaling fonts to 2048pt or more.
+  else z:=xn_over_d(z,-s,1000);
+@y
+  else begin
+    save_arith_error:=arith_error;
+    sw:=z; z:=xn_over_d(z,-s,1000);
+    if arith_error or z>=@'1000000000 then begin
+       start_font_error_message; print(" scaled to 2048pt or higher");
+       help1("I will ignore the scaling factor."); error; z:=sw;
+       end;
+    arith_error:=save_arith_error;
+  end;
 @z
 
 @x [30.570] l.11100 - MLTeX: fix for bug while loading font
@@ -3398,6 +3461,17 @@ flushable_string:=str_ptr-1;
     if s>0 then
 @y
     begin if s>0 then
+@z
+
+@x [49.1260] l.23418 - Avoid scaling fonts to 2048pt or more (see above).
+    else if font_size[f]=xn_over_d(font_dsize[f],-s,1000) then
+      goto common_ending;
+@y
+    else begin arith_error:=false;
+      if font_size[f]=xn_over_d(font_dsize[f],-s,1000)
+      then if not arith_error
+        then goto common_ending;
+      end;
 @z
 
 @x [49.1265] l.23454 - if batchmode, mktex... scripts should be silent.

@@ -11,6 +11,12 @@
 % 01/16/90 (SR)  Version 3.2.
 % (more recent changes in the ChangeLog)
 
+@x [0] l.31
+\def\(#1){} % this is used to make section names sort themselves better
+@y
+\def\({} % this is used to make section names sort themselves better
+@z
+
 @x [0] l.34
 \def\title{PL\lowercase{to}TF}
 @y
@@ -45,7 +51,7 @@ procedure initialize; {this procedure gets things started properly}
   var @<Local variables for initialization@>@/
   begin print_ln(banner);@/
 @y
-@<Define |parse_arguments|@>
+@<Define \(|parse_arguments|@>
 procedure initialize; {this procedure gets things started properly}
   var @<Local variables for initialization@>@/
   begin kpse_set_program_name (argv[0], my_name);
@@ -157,7 +163,7 @@ if verbose then @<Print |c| in octal notation@>;
 % [117] Change the name of the variable `class', since AIX 3.1's <math.h>
 % defines a function by that name.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-@x
+@x [117]
 @d pending=4 {$f(x,y)$ is being evaluated}
 @y
 @d pending=4 {$f(x,y)$ is being evaluated}
@@ -168,7 +174,7 @@ if verbose then @<Print |c| in octal notation@>;
 % But let's do a fake definition of f here, so that it gets into web2c's
 % symbol table...
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-@x
+@x [123]
 @p function f(@!h,@!x,@!y:indx):indx; forward;@t\2@>
   {compute $f$ for arguments known to be in |hash[h]|}
 @y
@@ -179,9 +185,7 @@ function f(@!h,@!x,@!y:indx):indx; begin end;@t\2@>
 endif('notdef')
 @z
 
-% [124] ... and then really define it now.
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-@x
+@x [124] ... and then really define it now.
 @p function f;
 @y
 @p function f(@!h,@!x,@!y:indx):indx;
@@ -196,7 +200,7 @@ endif('notdef')
 % [130] web2c extends the range of 'lf' from 0..32767 into
 % short (-32768..32767), but the overflow here ends up in
 % Bad metric (TFM) file. So we add test here.
-@x
+@x [130]
 lf:=6+lh+(ec-bc+1)+memory[width]+memory[height]+memory[depth]+
 memory[italic]+nl+lk_offset+nk+ne+np;
 @y
@@ -263,7 +267,7 @@ Parse a Unix-style command line.
 
 @d argument_is (#) == (strcmp (long_options[option_index].name, #) = 0)
 
-@<Define |parse_arguments|@> =
+@<Define \(|parse_arguments|@> =
 procedure parse_arguments;
 const n_options = 3; {Pascal won't count array lengths for us.}
 var @!long_options: array[0..n_options] of getopt_struct;

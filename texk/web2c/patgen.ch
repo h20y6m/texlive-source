@@ -11,7 +11,7 @@
 \def\title{PATGEN changes for C}
 @z
 
-@x WEAVE: print changes only
+@x [0] WEAVE: print changes only
 \pageno=\contentspagenumber \advance\pageno by 1
 @y
 \pageno=\contentspagenumber \advance\pageno by 1
@@ -43,7 +43,7 @@
 @d end_of_PATGEN=9999
 @y
 @z
-@x
+@x [3]
 label end_of_PATGEN;
 @y
 @z
@@ -53,7 +53,7 @@ procedure initialize; {this procedure gets things started properly}
   var @<Local variables for initialization@>@/
   begin print_ln(banner);@/
 @y
-@<Define |parse_arguments|@>
+@<Define \(|parse_arguments|@>
 procedure initialize; {this procedure gets things started properly}
   var @<Local variables for initialization@>@/
 begin
@@ -76,7 +76,7 @@ the program.
 @y
 error message about what caused the error.
 @z
-@x Error handling
+@x [10] Error handling
 @d jump_out==goto end_of_PATGEN {terminates \.{PATGEN}}
 @#
 @d error(#)==begin print_ln(#); jump_out; end
@@ -97,11 +97,11 @@ error message about what caused the error.
 % machines, from Johannes Hielscher, 10 Jul 2019 00:00:03 (tex-live list),
 % and later from Mojca Miklavec, 23 Sep 2019 21:21:42.
 % It seems hopeless, so went back to the original values (10000000/500000).
-% 
+%
 % The real solution is to provide a way to allocate the arrays
 % dynamically, so that the large arrays can be used by those who need
 % them but other are not affected.
-% 
+%
 % If the values here are still too big, you can probably get it to work
 % by adding swap or zram; or write a patch to allocate the arrays dynamically.
 @x [27]
@@ -115,7 +115,7 @@ error message about what caused the error.
  |trie_size| and greater than the number of occurrences of any pattern in
  the dictionary}
 @z
-@x
+@x [27]
 @!max_buf_len=80; {maximum length of input lines, must be at least |max_len|}
 @y
 @!max_buf_len=3000; {maximum length of input lines, must be at least |max_len|}
@@ -206,12 +206,12 @@ repeat print('hyph_start, hyph_finish: '); get_input(n1,n2);@/
 @y
 repeat print('hyph_start, hyph_finish: '); input_2ints(n1,n2);@/
 @z
-@x
+@x [94]
   repeat print('pat_start, pat_finish: '); get_input(n1,n2);@/
 @y
   repeat print('pat_start, pat_finish: '); input_2ints(n1,n2);@/
 @z
-@x
+@x [94]
     get_input(n1,n2,n3);@/
 @y
     input_3ints(n1,n2,n3);@/
@@ -243,7 +243,7 @@ Parse a Unix-style command line.
 
 @d argument_is (#) == (strcmp (long_options[option_index].name, #) = 0)
 
-@<Define |parse_arguments|@> =
+@<Define \(|parse_arguments|@> =
 procedure parse_arguments;
 const n_options = 2; {Pascal won't count array lengths for us.}
 var @!long_options: array[0..n_options] of getopt_struct;

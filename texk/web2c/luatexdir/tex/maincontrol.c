@@ -706,32 +706,13 @@ static void run_normal (void) {
 /*tex
 
 This is experimental and not used for production, only for testing and writing
-macros (some options stay).
+macros (some options stay). It's now obsolete. We keep the cmd_code becuase it 
+looks like hard coded numbers are used in macro packages. 
 
 */
 
-#define mathoption_set_int(A) \
-    scan_int(); \
-    word_define(mathoption_int_base+A, cur_val);
-
 static void run_option(void) {
-    int a = 0 ;
-    switch (cur_chr) {
-        case math_option_code:
-            if (scan_keyword("old")) {
-                mathoption_set_int(c_mathoption_old_code);
-            /*
-            } else if (scan_keyword("umathcodemeaning")) {
-                mathoption_set_int(c_mathoption_umathcode_meaning_code);
-            */
-            } else {
-                normal_warning("mathoption","unknown key");
-            }
-            break;
-        default:
-            /* harmless */
-            break;
-    }
+    normal_error("mathoption", "obsolete command");
 }
 
 static void lua_function_call(void) {
@@ -999,7 +980,7 @@ static void init_main_control (void) {
     any_mode(xray_cmd, show_whatever);
     any_mode(normal_cmd, run_normal);
     any_mode(extension_cmd, run_extension);
-    any_mode(option_cmd, run_option);
+    any_mode(option_cmd, run_option); /* obsolete */
 
     any_mode(lua_function_call_cmd, lua_function_call);
     any_mode(lua_bytecode_call_cmd, lua_bytecode_call);
@@ -1704,7 +1685,7 @@ void normal_paragraph(void)
     if (inter_line_penalties_par_ptr != null)
         eq_define(inter_line_penalties_loc, shape_ref_cmd, null);
     if (shape_mode_par > 0)
-        eq_word_define(dimen_base + shape_mode_code, 0);
+        eq_word_define(int_base + shape_mode_code, 0);
 }
 
 /*tex
@@ -1964,7 +1945,7 @@ void end_graf(int line_break_context)
         if (head == tail) {
             pop_nest();
         } else if (only_dirs(vlink(head))) {
-            flush_node(vlink(head));
+            flush_node_list(vlink(head));
             pop_nest();
         } else {
             line_break(false, line_break_context);
@@ -2685,6 +2666,17 @@ halfword swap_parshape_indent(halfword indentation, halfword width, halfword sha
 
 */
 
+/*
+
+\def\foo{0} {\tracingcommands2 \tracingonline2 \globaldefs 1 \global\def \foo{1}} \foo 1 \par 
+\def\foo{0} {\tracingcommands2 \tracingonline2 \globaldefs 1        \def \foo{2}} \foo 2 \par % {\global enforced} 
+\def\foo{0} {\tracingcommands2 \tracingonline2 \globaldefs 0        \def \foo{4}} \foo 0 \par 
+\def\foo{0} {\tracingcommands2 \tracingonline2 \globaldefs 0        \gdef\foo{4}} \foo 4 \par 
+\def\foo{0} {\tracingcommands2 \tracingonline2 \globaldefs-1 \global\def \foo{3}} \foo 0 \par % {\global canceled} 
+\def\foo{0} {\tracingcommands2 \tracingonline2 \globaldefs-1        \gdef\foo{4}} \foo 0 \par % {\global canceled}
+
+*/
+
 void prefixed_command(void)
 {
     int a;                      /* accumulated prefix codes so far */
@@ -2743,13 +2735,35 @@ void prefixed_command(void)
     /*tex
         Adjust for the setting of \.{\\globaldefs}
     */
-    if (global_defs_par != 0) {
-        if (global_defs_par < 0) {
-            if (is_global(a))
-                a = a - 4;
-        } else {
-            if (!is_global(a))
-                a = a + 4;
+    /* if (global_defs_par != 0) { */
+    /*     if (global_defs_par < 0) { */
+    /*         if (is_global(a)) */
+    /*             a = a - 4; */
+    /*     } else { */
+    /*         if (!is_global(a)) */
+    /*             a = a + 4; */
+    /*     } */
+    /* } */
+    if (cur_cmd == def_cmd && odd(cur_chr) && ! is_global(a)) {
+        a += 4;
+    }
+    if (global_defs_par < 0) {
+        if (is_global(a)) {
+            a -= 4;
+            if (tracing_commands_par > 1) {
+                begin_diagnostic();
+                tprint_nl("{\\global canceled}");
+                end_diagnostic(false);
+            }
+        }
+    } else if (global_defs_par > 0) {
+        if (! is_global(a)) {
+            a += 4;
+            if (tracing_commands_par > 1) {
+                begin_diagnostic();
+                tprint_nl("{\\global enforced}");
+                end_diagnostic(false);
+            }
         }
     }
     switch (cur_cmd) {
@@ -2766,8 +2780,9 @@ void prefixed_command(void)
                 definition is supposed to be global, and |cur_chr>=2| if the
                 definition is supposed to be expanded.
             */
-            if (odd(cur_chr) && !is_global(a) && (global_defs_par >= 0))
-                a = a + 4;
+	  /* if (odd(cur_chr) && !is_global(a) && (global_defs_par >= 0)) { */
+	  /*    a = a + 4; */
+	  /* } */
             e = (cur_chr >= 2);
             get_r_token();
             p = cur_cs;
@@ -3566,6 +3581,59 @@ void assign_internal_value(int a, halfword p, int val)
                 word_define(p, val);
             }
             break;
+        /* */
+        case math_italics_mode_code:
+            if (permit_math_obsolete) {
+                if (math_italics_mode_par != val) {
+                    normal_warning("math", "\\mathitalicsmode is obsolete");
+                }
+                word_define(p, val);
+            }
+            break;
+        case math_nolimits_mode_code:
+            if (permit_math_obsolete) {
+                if (math_nolimits_mode_par != val) {
+                    normal_warning("math", "\\mathnolimitssmode is obsolete");
+                }
+                word_define(p, val);
+            }
+            break;
+        case math_script_char_mode_code:
+            if (permit_math_obsolete) {
+                if (math_script_char_mode_par != val) {
+                    normal_warning("math", "\\mathscriptcharmode is obsolete");
+                }
+                word_define(p, val);
+            }
+            break;
+        case math_script_box_mode_code:
+            if (permit_math_obsolete) {
+                if (math_script_box_mode_par != val) {
+                    normal_warning("math", "\\mathscriptboxmode is obsolete");
+                }
+                word_define(p, val);
+            }
+            break;
+        case math_flatten_mode_code:
+            word_define(p, val);
+            break;
+        case math_defaults_mode_code:
+            if (permit_math_obsolete) {
+                if (math_defaults_mode_par != val) {
+                    normal_warning("math", "\\mathdefaultsmode is obsolete");
+                }
+                word_define(p, val);
+            }
+            break;
+        case math_delimiters_mode_code:
+            if (permit_math_obsolete) {
+                if (math_delimiters_mode_par != val) {
+                    normal_warning("math", "\\mathdelimitersmode is obsolete");
+                }
+                word_define(p, val);
+            }
+            break;
+            /* */
         default:
             word_define(p, val);
             break;
@@ -4302,8 +4370,12 @@ void initialize(void)
         max_dead_cycles_par = 25;
         math_pre_display_gap_factor_par = 2000;
         pre_bin_op_penalty_par = inf_penalty;
-        math_script_box_mode_par = 1;
-        math_script_char_mode_par = 1;
+        /* obsolete but kept for old documents */
+        math_script_box_mode_par = 1;  
+        math_script_char_mode_par = 1; 
+        math_flatten_mode_par = 1; 
+        math_defaults_mode_par = 1; /* was 0 in TL 2025 but set by latex to 1 */
+        /* */
         pre_rel_penalty_par = inf_penalty;
         compound_hyphen_mode_par = 1;
         escape_char_par = '\\';
@@ -4332,7 +4404,6 @@ void initialize(void)
         font_bytes = 0;
         px_dimen_par = one_bp;
         math_eqno_gap_step_par = 1000 ;
-        math_flatten_mode_par = 1; /* ord */
         var_fam_par = -1;
         cs_text(frozen_protection) = maketexstring("inaccessible");
         format_ident = maketexstring(" (INITEX)");

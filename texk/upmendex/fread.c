@@ -77,7 +77,7 @@ LOOP:
 		}
 		indent=wflg=k=nest=esc=quo=0;
 
-/*   analize words   */
+/*   analyze words   */
 
 		for (;;j++,k++) {
 			if (buff[j]=='\n' || buff[j]=='\0') {
@@ -93,7 +93,9 @@ LOOP:
 				continue;
 			}
 
-			if (quo==0 && buff[j]==escape) {
+			if (esc==1 && buff[j]==escape) {
+				esc=0;
+			} else if (quo==0 && buff[j]==escape) {
 				esc=1;
 			}
 
@@ -111,7 +113,7 @@ LOOP:
 				if (nest==0) {
 					if (buff[j]==level) {
 						esc=0;
-						if (indent>=2) {
+						if (indent>=MAXDEPTH-1) {
 							fprintf(efp,"\nError: Extra `%c\' in %s, line %d.",level,filename,ind[i].lnum);
 							if (efp!=stderr) fprintf(stderr,"\nError: Extra `%c\' in %s, line %d.",level,filename,ind[i].lnum);
 							eflg++;
@@ -151,8 +153,8 @@ LOOP:
 							j++;
 							cc=getestr(&buff[j],estr);
 							if (cc<0) {
-								fprintf(efp,"\nBad encap string in %s, line %d.",filename,ind[i].lnum);
-								if (efp!=stderr) fprintf(stderr,"\nBad encap string in %s, line %d.",filename,ind[i].lnum);
+								fprintf(efp,"\nError: Bad encap string in %s, line %d.",filename,ind[i].lnum);
+								if (efp!=stderr) fprintf(stderr,"\nError: Bad encap string in %s, line %d.",filename,ind[i].lnum);
 								eflg++;
 								reject++;
 								n++;
@@ -207,6 +209,17 @@ LOOP:
 
 			if (buff[j]!=escape) esc=0;
 			copy_multibyte_char(buff, wbuff, &j, &k);
+		}
+		for (k=0; k<=indent; k++) {
+			if ((u_strlen(ind[i].idx[k])==0 && ind[i].org[k]==NULL) ||
+				 (ind[i].org[k] && u_strlen(ind[i].org[k])==0)) {
+				fprintf(efp,"\nError: Illegal null field in %s, line %d.",filename,ind[i].lnum);
+				if (efp!=stderr) fprintf(stderr,"\nError: Illegal null field in %s, line %d.",filename,ind[i].lnum);
+				eflg++;
+				reject++;
+				n++;
+				goto LOOP;
+			}
 		}
 		ind[i].words=indent+1;
 
@@ -411,28 +424,37 @@ LOOP:
 /*   pic up encap string   */
 static int getestr(char *buff, char *estr)
 {
-	int i,nest=0;
+	int i,j,nest=0,esc=0,quo=0;
 
-	for (i=0;i<strlen(buff);i++) {
-		if (buff[i]==encap) {
-			if (i>0) {
-				if ((unsigned char)buff[i-1]<0x80) {
-					estr[i]=buff[i];
-					i++;
-				}
+	for (i=0,j=0;i<strlen(buff);i++,j++) {
+		/* If a "quote" character is found, it is removed and the
+		   following character is not treated as a special character.
+		   If a "quote" character follows an odd number of
+		   consecutive "escape" characters, it is not treated as a
+		   special character and is left as is.
+		   Note that the "escape" characters are not removed.  */
+		esc=0; quo=0;
+		if (buff[i]==escape) {
+			estr[j]=buff[i];
+			i++; j++;
+			esc=1;
+		} else if (buff[i]==quote) {
+			i++;
+			quo=1;
+		}
+		if (quo==0) {
+			if (nest==0 && esc==0 && buff[i]==arg_close) {
+				estr[j]='\0';
+				return i;
 			}
-			else {
-				estr[i]=buff[i];
-				i++;
+			if (esc==0 && buff[i]==arg_open) nest++;
+			else if (esc==0 && buff[i]==arg_close) nest--;
+			else if (buff[i]==level || buff[i]==actual || buff[i]==encap) {
+				fprintf(efp, "\nError: Extra `%c\' at position %d in encap string.",buff[i],i);
+				return -1;
 			}
 		}
-		if (nest==0 && buff[i]==arg_close) {
-			estr[i]='\0';
-			return i;
-		}
-		if (buff[i]==arg_open) nest++;
-		else if (buff[i]==arg_close) nest--;
-		copy_multibyte_char(buff, estr, &i, NULL);
+		copy_multibyte_char(buff, estr, &i, &j);
 	}
 
 	return -1;
@@ -516,8 +538,7 @@ static void chkpageattr(struct page *p)
 		else {
 			cnt=0;
 			if (!((*page0>='0' && *page0<='9') || (*page0>='A' && *page0<='Z') || (*page0>='a' && *page0<='z'))) {
-				p->attr[cc]= -1;
-				if (cc<2) p->attr[++cc]= -1;
+				for (j=cc;j<PAGE_COMPOSIT_DEPTH;j++) p->attr[j]=-1;
 				return;
 			}
 			pcpos=strstr(page0,page_compositor);
@@ -603,5 +624,5 @@ ATTRLOOP:
 		}
 	}
 	p->attr[cc]=pattr[cc];
-	if (cc<2) p->attr[++cc]= -1;
+	for (j=cc+1;j<PAGE_COMPOSIT_DEPTH;j++) p->attr[j]=-1;
 }

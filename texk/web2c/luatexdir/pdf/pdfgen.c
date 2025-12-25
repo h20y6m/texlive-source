@@ -1033,10 +1033,10 @@ void ensure_output_state(PDF pdf, output_state s)
                 fix_o_mode();
                 break;
             case ST_OMODE_FIX:
-                backend_out_control[backend_control_open_file](pdf);
+	        backend_out_control[BACKEND_INDEX(backend_control_open_file)](pdf);
                 break;
             case ST_FILE_OPEN:
-                backend_out_control[backend_control_write_header](pdf);
+	        backend_out_control[BACKEND_INDEX(backend_control_write_header)](pdf);
                 break;
             case ST_HEADER_WRITTEN:
                 break;
@@ -1558,8 +1558,14 @@ void check_o_mode(PDF pdf, const char *s, int o_mode_bitpattern, boolean strict)
     output_mode o_mode;
     const char *m = NULL;
     if (lua_only) {
-        normal_error("lua only","no backend present, needed for what you asked for");
-        return ;
+        boolean texlua_img = false;
+        get_lua_boolean("texconfig", "texlua_img", &texlua_img);
+        if (texlua_img) {
+            /* Ok, lets hope that you know what you are doing! */
+        } else {
+            normal_error("lua only","no backend present, needed for what you asked for");
+            return ;
+        }
     }
     if (output_mode_used == OMODE_NONE)
         o_mode = get_o_mode();

@@ -1079,7 +1079,7 @@ kpathsea_find_file_generic (kpathsea kpse, const_string const_name,
   try_std_extension_first
     = kpathsea_var_value (kpse, "try_std_extension_first");
 
-  if (has_any_suffix && !KPSE_CNF_P (try_std_extension_first)) {
+  if (has_any_suffix && !kpse_cnf_p (try_std_extension_first)) {
     target_asis_name (kpse, &target, &count, format, name, use_fontmaps,
                       has_potential_suffix, has_any_suffix);
     target_suffixed_names (kpse, &target, &count, format, name, use_fontmaps,
@@ -1277,7 +1277,6 @@ kpathsea_name_ok (kpathsea kpse, const_string fname, const_string check_var,
       if ((q == fname || IS_DIR_SEP (*(q - 1))) /* start or / precedes dot? */
           && !IS_DIR_SEP (*(q + 1))             /* ok if /./                */
           && !(*(q + 1) == '.' && IS_DIR_SEP (*(q + 2))) /* ok if /../      */
-          && !STREQ (q, ".tex")                 /* specially allow .tex     */
           && !(extended && kpathsea_absolute_p (kpse, expanded_fname, false))
                /* Don't quit if EXTENDED and the input is absolute,
                   because we want to allow TEXMFVAR=~/.texliveYYYY.  This
@@ -1367,7 +1366,7 @@ kpathsea_name_ok (kpathsea kpse, const_string fname, const_string check_var,
 
  not_ok: /* Some test failed.  */
   if (!silent)
-    fprintf (stderr, "\n%s: Not %s %s (%s = %s; %s extended check).\n",
+    fprintf (stderr, "\n%s: Not %s %s (%s = %s; %sextended check).\n",
              kpse->invocation_name, ok_type_name[action], fname,
              check_var, open_choice, extended ? "" : "no ");
   if (expanded_fname) free ((void *) expanded_fname);

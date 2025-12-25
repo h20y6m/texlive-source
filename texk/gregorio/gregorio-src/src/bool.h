@@ -2,7 +2,7 @@
  * Gregorio is a program that translates gabc files to GregorioTeX
  * This header provides a minimum of C11-like bool functionality.
  *
- * Copyright (C) 2015-2021 The Gregorio Project (see CONTRIBUTORS.md)
+ * Copyright (C) 2015-2025 The Gregorio Project (see CONTRIBUTORS.md)
  * 
  * This file is part of Gregorio.
  *
@@ -23,7 +23,10 @@
 #ifndef BOOL_H
 #define BOOL_H
 
-typedef unsigned int bool;
+#include <stdbool.h>
+
+/* C23 makes a typedef bool into an error. */
+/* typedef unsigned int bool; */
 #define true 1
 #define false 0
 

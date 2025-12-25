@@ -1,8 +1,8 @@
 \input texinfo
 @setfilename tlbuild.info
 
-@set version 2024
-@set month-year April 2024
+@set version 2025
+@set month-year January 2025
 
 @set mytitle Building @TeX{} Live (@value{version})
 @settitle @value{mytitle}
@@ -15,7 +15,7 @@
 This file documents the @TL{} build system and more.
 
 @noindent
-Copyright @copyright{} 2016--2024 Karl Berry.@*
+Copyright @copyright{} 2016--2025 Karl Berry.@*
 Copyright @copyright{} 2013--2015 Karl Berry & Peter Breitenlohner.
 
 Permission is granted to make and distribute verbatim copies of this
@@ -309,8 +309,9 @@ Modification of any part of the build system (M4 macros,
 @file{configure.ac}, @file{Makefile.am}, or their fragments) requires
 GNU M4, GNU Autoconf, GNU Automake, and GNU Libtool to update the
 generated files.  Furthermore, to reliably reproduce the build files,
-the original GNU releases of these tools must be used, not any distro
-packaging of them.  @xref{Build system tools}, for more discussion.
+the latest original GNU releases of these tools must be used, not any
+distro packaging of them.  @xref{Build system tools}, for more
+discussion.
 
 @end itemize
 
@@ -621,7 +622,7 @@ make -C $ww check SUBDIRS=. TESTS='$(hitex_tests)'
 @end example
 
 @noindent where @code{$ww} is the web2c build directory, that is,
-@file{ww=/wherever/Build/source/Work/texk/web2c}.
+@file{ww=/.../Build/source/Work/texk/web2c}.
 
 It's also possible to run individual tests the same way, using the test
 name exactly as specified in the @file{.am} file:
@@ -643,9 +644,9 @@ directory} lines, you can add the (GNU) make option
 @code{--no-print-dir}.
 
 You may find it useful to put lengthy incantations like this into a
-trivial shell script with a short name (say, @code{hitst}).  Then you
-just run @code{hitst} and edit the file when necessary to change
-things around.
+trivial shell script with a short name (say, @code{hitch}).  Then you
+just run @code{hitch} and edit the file when necessary to change
+the options.
 
 @node Cross compilation
 @section Cross compilation
@@ -889,25 +890,31 @@ that end up in @file{./inst/} are ignored.
 
 @cindex linked scripts
 @cindex scripts, linked and not maintained
+@cindex symbolic links, used for scripts
 
 @cindex symlinks, used for scripts
 @cindex wrapper binary for scripts on Windows
 @cindex Windows, invoking scripts on
-Quite a few executables are architecture-independent shell, Perl, or
-other interpreted scripts, rather than compiled binaries.  A few are
-maintained as part of the TL source tree, but most are maintained
-elsewhere with copies under @file{texk/texlive/linked_scripts}.
+Quite a few of the executables in @TL{} are architecture-independent
+shell, Perl, or other interpreted scripts, rather than compiled
+binaries.  A few are maintained as part of the TL source tree, but
+most are maintained independently in their own packages, with copies
+under @file{texk/texlive/linked_scripts}.
 
 These so-called @dfn{linked scripts} are installed under
 @code{@var{datarootdir}/texmf-dist/scripts}; for Unix-like systems a
 symbolic link is made in @code{@var{bindir}}.  For example, a symlink
-points from @code{@var{bindir}/ps2eps} to
-@code{@var{datarootdir}/texmf-dist/scripts/ps2eps/ps2eps.pl}.  For
-Windows, a standard wrapper binary (copied to, e.g.,
-@code{@var{bindir}/ps2eps.exe}) serves the same purpose.  The source
-for the wrapper is in @file{texk/texlive/windows_wrapper}.
+points from @code{@var{bindir}/fmtutil} to
+@code{@var{datarootdir}/texmf-dist/scripts/texlive/fmtutil.pl}. The
+symlink is relative, so the installation root can be anywhere.
 
-One reason for this is to avoid having many copies of the same
+@cindex wrapper for scripts, on Windows
+For Windows, we cannot portably use symlinks, so a standard wrapper
+binary (copied to, e.g., @code{@var{bindir}/fmtutil.exe}) serves the
+same purpose (the source for the wrapper is in
+@file{texk/texlive/windows_wrapper}).
+
+One reason for all this is to avoid having many copies of the same
 script; a more important reason is that it guarantees the scripts will
 stay in sync across the different supported operating systems.
 
@@ -917,12 +924,38 @@ stay in sync across the different supported operating systems.
 @pindex xz
 @pindex wget
 Most important of all, we want the @code{@var{bindir}} resulting from
-the build to be as close as possible to what is in the TL
-distribution.  At present, there are a few exceptions---Asymptote,
-Biber, Xindy---and each one creates considerable extra work.  We don't
-want to add more.  (See @url{https://tug.org/texlive/build.html} for
-information about building those exceptions, as well as the @code{xz}
-and @code{wget} programs that are used in the TL infrastructure.)
+@code{make install} in the TL source tree to be as close as possible
+to what's in thej TL distribution.  At present, there are a few
+exceptions---Asymptote, Biber, Xindy---and each one creates
+considerable extra work.  We don't want to add more.  (See
+@url{https://tug.org/texlive/build.html} for information about
+building those exceptions, as well as the @code{xz} and @code{wget}
+programs that are used in the TL infrastructure.)
+
+@pindex scripts-targets.lst
+As part of the @code{make install} in the @file{linked_scripts}
+directory, a file @file{scripts-targets.lst} is created to record all
+the links that are created this way, so that distros and others can
+reproduce them. The file has one line per link. The first word is the
+target of the link (e.g.,
+@samp{texmf-dist/scripts/texlive/fmtutil.pl}), and the second word
+is the name of the link to be placed in the bindir (e.g.,
+@samp{fmtutil}). Determining the relative link target (how many
+@samp{../}s) is left to the users of this file, since it varies among
+distributions. It can be assumed there is no whitespace in these filenames.
+
+A few links are within bindir; in that case, the first word of the
+line is just a base name, e.g., the file @samp{fmtutil mktexfmt} means
+that doing the equivalent of @code{ln -s fmtutil mktexfmt} in the bindir.
+
+Be aware that although extensions are usually stripped (as with
+@code{fmtutil}), there are exceptions, such as
+@code{memoize-extract.pl} and @code{listings-ext.sh}.
+
+The @file{scripts-targets.lst} file started being created as of the
+@TL{} 2025 release. Historically, another file @file{scripts.lst} has
+been (and still is) created, containing only the link targets, and
+using a Bourne shell syntax.
 
 @node Distro builds
 @section Distro builds
@@ -1389,7 +1422,7 @@ is used on Windows instead of symlinks for the ``linked scripts''
 
 @defmac KPSE_WIN32_CALL
 @pindex callexe.c
-Call @code{KPSE_COND_WIN32} and check if the file
+Call @code{KPSE_COND_WIN32} and check whether the file
 @file{texk/texlive/windows_wrapper/callexe.c} exists; if it does, create a
 symlink in the build tree.  Compiling @file{callexe.c} with
 @code{-DEXEPROG='"@var{foo}.exe"'} and installing @file{callexe.exe}
@@ -1593,8 +1626,8 @@ modifications documented in @file{TLpatches/*}, and a wrapper
 @file{xindy-src}.
 
 The @code{xindy} build requires a @file{make} that supports a
-@code{VPATH} build, can handle all targets, and does not refer to
-@code{$@{top_srcdir@}} or @code{$@{top_builddir@}}.  The fragment
+@code{VPATH} build, can handle all needed targets, and does not refer
+to @code{$@{top_srcdir@}} or @code{$@{top_builddir@}}.  The fragment
 @code{xindy/ac/withenable.ac} contains
 
 @example
@@ -1664,13 +1697,27 @@ their support files.  See @url{https://tug.org/texlive/build.html#asymptote}.
 This section outlines the basic process for adding new packages to the
 TL build system.
 
-In any case, a new package directory @file{foo} should contain the
-original sources, modified only with changes necessary for TL, in
+A new package directory @file{foo} should be placed under
+@file{Build/source/texk/} if it uses Kpathsea (or another
+@TeX{}-specific library), or under @file{Build/source/utils} if it
+does not.
+
+The new directory should normally have the original sources, modified
+only with changes necessary for TL, in a subdirectory
 @file{foo/foo-src}. The changes should be documented in
 @file{foo/TLpatches/*}, and also be submitted upstream whenever
 reasonable.  In addition, @file{foo/} will need the usual Automake
 build-related files (@file{configure.ac}, @file{Makefile.am}, etc.
 Please maintain @file{foo/ChangeLog} for all TL changes.
+
+@cindex new package using Autoconf only
+@cindex Autoconf, new package using only
+It is also possible to add a package which is configured with Autoconf
+(or another @code{make}-based system) and not Automake.  The package
+must still support the standard @code{make} variables and targets, and
+@code{VPATH} builds (@pxref{VPATH Builds,,, automake, GNU Automake}).
+For Autoconf-only packages, it is probably not sensible to use a
+@code{foo-src} subdirectory.
 
 @menu
 * Adding a new program module::
@@ -1693,15 +1740,15 @@ included by adding its name @file{@var{prog}} to the M4 list
 
 @vindex kpse_utils_pkgs
 A generic program module in a subdirectory @file{utils/@var{prog}}
-must not use the @TeX{}-specific libraries and is included by adding
-its name @file{@var{prog}} to the M4 list @code{kpse_utils_pkgs} in
-@file{m4/kpse-pkgs.m4}.
+must not use the @TeX{}-specific libraries, notably Kpathsea, and is
+included by adding its name @file{@var{prog}} to the M4 list
+@code{kpse_utils_pkgs} in @file{m4/kpse-pkgs.m4}.
 
 @pindex withenable.ac@r{, for new modules}
 @findex KPSE_ENABLE_PROG
 In either case, the subdirectory @file{texk/@var{prog}} or
-@file{utils/@var{prog}} must provide a fragment
-@file{ac/withenable.ac} that contains the M4 macro
+@file{utils/@var{prog}} must include a file
+@file{ac/withenable.ac} which contains a call to the M4 macro
 @code{KPSE_ENABLE_PROG} defined in @file{m4/kpse-setup.m4} with
 @code{@var{prog}} as the mandatory first argument and three optional
 arguments:
@@ -2253,7 +2300,7 @@ terminals, @dots{}).
 @noindent @code{--enable-tex-synctex}, @code{--disable-etex-synctex},
 @dots{}@*Build the @TeX{} engines with or without @code{SyncTeX}
 support; ignored for a native @TL{} build.  Defaults are defined in
-@file{texk/web2c/ac/web2c.ac}.
+@file{texk/web2c/ac/web2c.ac} (@pxref{Autoconf macros}).
 
 @vindex --disable-synctex
 @cindex synctex

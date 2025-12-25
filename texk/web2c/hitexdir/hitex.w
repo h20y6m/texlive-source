@@ -82,11 +82,11 @@
 % A reward of $327.68 will be paid to the first finder of any remaining bug.
 
 % This is the 1.1 version of Prote, developed during August 2021,
-% and corrected during september/october 2021 and amended in august 2023
+% and corrected during September/October 2021 and amended in august 2023
 % for file primitives behavior matching input behavior.
 %
 % 1.0: adds primitives needed by LaTeX as listed in ltnews31.
-%    - 2022-07-21: tiddying formal fix: a spurious line was a left over
+%    - 2022-07-21: tidying formal fix: a spurious line was a left over
 %      of a removed paragraph (pointed by Martin Ruckert). Suppressed.
 %
 % 1.1: 2023-08-01: the new file primitives are used in LaTeX expecting
@@ -98,14 +98,14 @@
 %      - typos and style corrections provided by Martin Ruckert for
 %      clean translation in Pascal (forward declarations and underscores
 %      omitted);
-%      - adjustements against e-TeX 2.6 instead of 2.1 (T. Laronde).
+%      - adjustments against e-TeX 2.6 instead of 2.1 (T. Laronde).
 %    0.99.7:
 %      - \expanded was using an e-TeX procedure not doing def handling
 %        => using scan_toks() now. Reported by Martin Ruckert and
 %        test code narrowed down by Phelype Oleinik.
 %    0.99.8:
 %      - \expanded again: scan_toks() sets def_ref. But back_list()
-%        has to take not the refernce count, but the first token.
+%        has to take not the reference count, but the first token.
 %        Passing def_ref, a next invocation of scan_toks() was inserting
 %        a missing left brace and then reading pass the end of the token
 %        list to find a matching right one. def_ref => link(def_ref).
@@ -224,7 +224,6 @@
 @s alpha_file int
 @s byte_file int
 @s word_file int
-@s int8_t int
 @s uint8_t int
 @s int16_t int
 @s uint16_t int
@@ -249,10 +248,6 @@
 @s in TeX
 @s line normal
 @s to   do
-
-\def\contentspagenumber{0}
-\def\tocpages{3} % HiTeX has a long ToC
-\pageno=\contentspagenumber \advance \pageno by \tocpages
 
 @* Introduction.
 This is Hi\TeX, a program derived from \TeX, extending its capabilities
@@ -434,20 +429,22 @@ sections \gglob, \dots,'' also make it possible to look at the set of
 all global variables, if desired.  Similar remarks apply to the other
 portions of the program.
 
-The program starts with inserting header files and occassionaly a function
+The program starts with inserting header files and occasionally a function
 must be placed before declaring \TeX's macros, because the function
-uses identifiers that \TeX\ will declare as macros.
+uses identifiers that \TeX will declare as macros.
 
 @p @<Header files and function declarations@>@;
 @h
-enum {@+@<Constants in the outer block@>@+};
+enum {@<Constants in the outer block@>@;
+      @!empty_string=256 /*the empty string follows after 256 characters*/
+};
 @<Types in the outer block@>@;
 @<Forward declarations@>@;
 @<Global variables@>@;
 @#
 static void initialize(void) /*this procedure gets things started properly*/
   {@+@<Local variables for initialization@>@;
-  @<Initialize whatever \TeX\ might access@>@;
+  @<Initialize whatever \TeX\ might access@>;
   } @#
 @<Basic printing procedures@>@;
 @<Error handling procedures@>@;
@@ -562,7 +559,6 @@ in production versions of \TeX.
 @!file_name_size=1024, /*file names shouldn't be longer than this*/
 @!xchg_buffer_size=64, /*must be at least 64*/
    /*size of |eight_bits| buffer for exchange with system routines*/
-@!empty_string=256 /*the empty string follows after 256 characters*/
 
 @ Like the preceding parameters, the following quantities can be changed
 at compile time to extend or reduce \TeX's capacity. But if they are changed,
@@ -572,7 +568,7 @@ to generate new tables for the production \TeX\ program.
 One can't simply make helter-skelter changes to the following constants,
 since certain rather complex initialization
 numbers are computed from them. They are defined here using
-\.{WEB} macros, instead of being put into \PASCAL's |const| list, in order to
+\.{WEB} macros, instead of being put into the above |enum| list in order to
 emphasize this distinction.
 
 @d mem_bot 0 /*smallest index in the |mem| array dumped by \.{INITEX};
@@ -634,7 +630,7 @@ because some fussy \PASCAL\ compilers will complain about redundant labels.
 @d negate(A) A=-A /*change the sign of a variable*/
 @d loop @+while (true) @+ /*repeat over and over until a |goto| happens*/
 @f loop else
-   /*\.{WEB}'s |loop| acts like `\ignorespaces|while true do|\unskip'*/
+   /*\.{WEB}'s |else| acts like `\ignorespaces|while true do|\unskip'*/
 @d do_nothing  /*empty statement*/
 @d empty 0 /*symbolic name for a null constant*/
 
@@ -946,7 +942,6 @@ static bool b_open_in(byte_file *f);   /*open a binary file for input*/
 static bool w_open_in(word_file *f);   /*open a word file for input*/
 static FILE *open_out(const char *file_name, const char *file_mode);  /* \TeX\ Live*/
 static bool a_open_out(alpha_file *f);  /*open a text file for output*/
-static bool b_open_out(byte_file *f);  /*open a binary file for output*/
 #ifdef @!INIT
 static bool w_open_out(word_file *f);  /*open a word file for output*/
 #endif
@@ -1334,7 +1329,7 @@ while (j < str_start[s+1])
 result=true;
 not_found: return result;
 }
-@#@<Declare \Prote\ procedures for strings@>@;
+@t\4@>@<Declare \Prote\ procedures for strings@>@;
 
 @ The initial values of |str_pool|, |str_start|, |pool_ptr|,
 and |str_ptr| are computed by the \.{INITEX} program, based in part
@@ -1425,8 +1420,6 @@ declaration.
 @<Forward declarations@>=
 static int s_no(const char *str);
 
-@ (Empty section to keep numbering intact.)
-
 @* On-line and off-line printing.
 Messages that are sent to a user's terminal and to the transcript-log file
 are produced by several `|print|' procedures. These procedures will
@@ -1498,13 +1491,11 @@ for terminal output, and it is possible to adhere to those conventions
 by changing |wterm|, |wterm_ln|, and |wterm_cr| in this section.
 @^system dependencies@>
 
-@s sizeof x
-
 @<Basic printing procedures@>=
-#define @[put(F)@]    @[fwrite(&((F).d),sizeof((F).d),1,(F).f)@]
-#define @[get(F)@]    @[fread(&((F).d),sizeof((F).d),1,(F).f)@]
+#define @[put(F)@]    @[fwrite(&((F).d)@],@[sizeof((F).d),1,(F).f)@]@;
+#define @[get(F)@]    @[(void)fread(&((F).d),sizeof((F).d),1,(F).f)@]
 
-#define @[pascal_close(F)@]    @[fclose((F).f)@]
+#define @[pascal_close(F)@]    @[fclose((F).f),(F).f=NULL@]
 #define @[eof(F)@]    @[feof((F).f)@]
 #define @[eoln(F)@]    @[((F).d=='\n'||eof(F))@]
 #define @[erstat(F)@]   @[((F).f==NULL?-1:ferror((F).f))@]
@@ -1595,7 +1586,7 @@ pool_pointer j; /*current character code position*/
 int @!nl; /*new-line character to restore*/
 if (s >= str_ptr) {print("???"); return;}/*this can't happen*/
 @.???@>
-else if (s < 256)
+else if (s < 0x80)
   if (s < 0) { print("???");return; } /*can't happen*/
   else{@+if (selector > pseudo)
       {@+print_char(s);return; /*internal strings are not expanded*/
@@ -1625,10 +1616,14 @@ be printed using |print_char|. Therefore we use |slow_print| for them:
 @<Basic print...@>=
 static void slow_print(int @!s) /*prints string |s|*/
 {@+pool_pointer j; /*current character code position*/
-if ((s >= str_ptr)||(s < 256)) printn(s);
+if ((s >= str_ptr)||(s < 0x80)) printn(s);
 else{@+j=str_start[s];
   while (j < str_start[s+1])
-    {@+printn(so(str_pool[j]));incr(j);
+    {@+if (str_pool[j]<0x80)
+         printn(str_pool[j]);
+       else
+         print_char(str_pool[j]);
+       incr(j);
     }
   }
 }
@@ -1708,8 +1703,8 @@ if (n < 0)
       }
     }
   }
-do {dig[k]=n%10;n=n/10;incr(k);
-} while (!(n==0));
+@/do@+{dig[k]=n%10;n=n/10;incr(k);
+}@+ while (!(n==0));
 print_the_digs(k);
 }
 
@@ -1727,8 +1722,8 @@ print_char('0'+(n%10));
    /*prints a positive integer in hexadecimal form*/
 {@+int k; /*index to current digit; we assume that $0\le n<16^{22}$*/
 k=0;print_char('"');
-do {dig[k]=n%16;n=n/16;incr(k);
-} while (!(n==0));
+@/do@+{dig[k]=n%16;n=n/16;incr(k);
+}@+ while (!(n==0));
 print_the_digs(k);
 }
 
@@ -1804,7 +1799,7 @@ $$\vbox{\halign{#\hfil\cr
 |help3("This is the first line of my offer to help.")|\cr
 |("This is the second line. I'm trying to")|\cr
 |("explain the best way for you to proceed.");|\cr
-|error();|\cr}}$$
+|error;|\cr}}$$
 A two-line help message would be given using |help2|, etc.; these informal
 helps should use simple vocabulary that complements the words used in the
 official error message that was printed. (Outside the U.S.A., the help
@@ -1821,6 +1816,13 @@ message may be printed.
 @^system dependencies@>
 
 @<Error handling...@>=
+static void print_ignored_err(char *s)
+{@+if (interaction==error_stop_mode) wake_up_terminal;
+  if (filelineerrorstylep) print_file_line(); /* \TeX\ Live */
+  else  print_nl("");
+  print("ignored error: ");print(s);
+}
+
 static void print_err(char *s)
 {@+if (interaction==error_stop_mode) wake_up_terminal;
   if (filelineerrorstylep) print_file_line(); /* \TeX\ Live */
@@ -2010,6 +2012,7 @@ case '0': case '1': case '2': case '3':
   case '4': case '5': case '6': case '7':
   case '8': case '9': if (deletions_allowed)
   @<Delete \(c)|c-"0"| tokens and |goto resume|@>@;@+break;
+@t\4\4@>@;
 #ifdef @!DEBUG
 case 'D': {@+debug_help();goto resume;@+}
 #endif
@@ -2102,8 +2105,8 @@ show_context();goto resume;
 else{@+if (help_ptr==0)
     help2("Sorry, I don't know how to help in this situation.",@/
     @t\kern1em@>"Maybe you should try asking a human?");
-  do {decr(help_ptr);print(help_line[help_ptr]);print_ln();
-  } while (!(help_ptr==0));
+  @/do@+{decr(help_ptr);print(help_line[help_ptr]);print_ln();
+  }@+ while (!(help_ptr==0));
   }
 help4("Sorry, I already gave what help I could...",@/
   "Maybe you should try asking a human?",@/
@@ -2272,7 +2275,7 @@ positions from the right end of a binary computer word.
 
 @<Types...@>=
 typedef int scaled; /*this type is used for scaled integers*/
-typedef uint32_t nonnegative_integer; /*$0\le x<2^{31}$*/
+typedef int32_t nonnegative_integer; /*$0\le x<2^{31}$*/
 typedef int8_t small_number; /*this type is self-explanatory*/
 
 @ The following function is used to create a scaled integer from a given decimal
@@ -2310,9 +2313,9 @@ if (s < 0)
 print_int(s/unity); /*print the integer part*/
 print_char('.');
 s=10*(s%unity)+5;delta=10;
-do {if (delta > unity) s=s+0100000-50000; /*round the last digit*/
+@/do@+{if (delta > unity) s=s+0100000-50000; /*round the last digit*/
 print_char('0'+(s/unity));s=10*(s%unity);delta=delta*10;
-} while (!(s <= delta));
+}@+ while (!(s <= delta));
 }
 
 @ Physical sizes that a \TeX\ user specifies for portions of documents are
@@ -2429,7 +2432,7 @@ computing at most 1095 distinct values, but that is plenty.
 
 @d inf_bad 10000 /*infinitely bad value*/
 
-@p @<Declare \Prote\ arithmetic routines@>@;
+@p @<Declare \Prote\ arithmetic routines@>@/
 static halfword badness(scaled @!t, scaled @!s) /*compute badness, given |t >= 0|*/
 {@+int r; /*approximation to $\alpha t/s$, where $\alpha^3\approx
   100\cdot2^{18}$*/
@@ -2464,16 +2467,12 @@ routines cited there must be modified to allow negative glue ratios.)
 @d unfix(A) ((double)(A)) /*convert from |glue_ratio| to type |double|*/
 @d fix(A) ((glue_ratio)(A)) /*convert from |double| to type |glue_ratio|*/
 @d float_constant(A) ((double)(A)) /*convert |int| constant to |double|*/
-@#
-@d perror e@&r@&r@&o@&r /* this is a \.{CWEB} coding trick: */
-@f perror error /* `\&{perror}' will be equivalent to `\&{error}' */
-@f error x /* but `|error|' will not be treated as a reserved word */
 
 @<Types...@>=
 #if __SIZEOF_FLOAT__==4
 typedef float float32_t;
 #else
-#perror @=float type must have size 4@>
+#error  @=float type must have size 4@>
 #endif
 typedef float @!glue_ratio; /*one-word representation of a glue expansion factor*/
 
@@ -2526,7 +2525,7 @@ can be packed into a halfword, everything should work satisfactorily.
 
 It is usually most efficient to have |min_quarterword==min_halfword==0|,
 so one should try to achieve this unless it causes a severe problem.
-The values defined here are recommended for most 32-bit computers.
+The values defined here are recommended for most 64-bit computers.
 
 @d min_quarterword 0 /*smallest allowable value in a |quarterword|*/
 @d max_quarterword 65535 /*largest allowable value in a |quarterword|*/
@@ -2547,7 +2546,7 @@ if ((min_halfword > 0)||(max_halfword < 32767)) bad=12;
 if ((min_quarterword < min_halfword)||@|
   (max_quarterword > max_halfword)) bad=13;
 if ((mem_min < min_halfword)||(mem_max >= max_halfword)||@|
-  (mem_bot-mem_min > max_halfword+1)) bad=14;
+  (mem_bot-mem_min-1 > max_halfword)) bad=14;
 if ((font_base < min_quarterword)||(font_max > max_quarterword)) bad=15;
 if (font_max > font_base+256) bad=16;
 if ((save_size > max_halfword)||(max_strings > max_halfword)) bad=17;
@@ -2583,29 +2582,26 @@ typedef uint16_t quarterword; /*1/4 of a word*/
 typedef int32_t halfword; /*1/2 of a word*/
 typedef int8_t two_choices; /*used when there are two variants in a record*/
 typedef int8_t four_choices; /*used when there are four variants in a record*/
-@#
-typedef struct {
+typedef struct { @;@/
   halfword @!rh;
   union {
   halfword @!lh;
   struct { quarterword @!b0;quarterword @!b1;} ;
+  struct { unsigned int b8:8; unsigned int b24:24;} ;
   };} two_halves;
-@#
-typedef struct {
+typedef struct { @;@/
   quarterword @!b0;
   quarterword @!b1;
   quarterword @!b2;
   quarterword @!b3;
   } four_quarters;
-@#
-typedef struct {
+typedef struct { @;@/
   union {
   int @!i;
   glue_ratio @!gr;
   two_halves @!hh;
   four_quarters @!qqqq;
   };} memory_word;
-@#
 typedef struct {@+FILE *f;@+memory_word@,d;@+} word_file;
 
 @ When debugging, we may want to print a |memory_word| without knowing
@@ -2788,11 +2784,11 @@ one-word nodes that starts at position |p|.
 {@+pointer @!q, @!r; /*list traversers*/
 if (p!=null)
   {@+r=p;
-  do {q=r;r=link(r);
+  @/do@+{q=r;r=link(r);
 #ifdef @!STAT
 decr(dyn_used);
 #endif
-  } while (!(r==null)); /*now |q| is the last node on the list*/
+  }@+ while (!(r==null)); /*now |q| is the last node on the list*/
   link(q)=avail;avail=p;
   }
 }
@@ -2837,11 +2833,11 @@ pointer @!q; /*the node physically after node |p|*/
 int @!r; /*the newly allocated node, or a candidate for this honor*/
 int @!t; /*temporary register*/
 restart: p=rover; /*start at some free node in the ring*/
-do {@<Try to allocate within node |p| and its physical successors, and
+@/do@+{@<Try to allocate within node |p| and its physical successors, and
 |goto found| if allocation was possible@>;
 @^inner loop@>
 p=rlink(p); /*move to the next node in the ring*/
-} while (!(p==rover)); /*repeat until the whole list has been traversed*/
+}@+ while (!(p==rover)); /*repeat until the whole list has been traversed*/
 if (s==010000000000)
   {@+return max_halfword;
   }
@@ -3017,8 +3013,8 @@ Character nodes appear only in horizontal lists, never in vertical lists.
 
 @d is_char_node(A) (A >= hi_mem_min)
    /*does the argument point to a |char_node|?*/
-@d font(A) type(A) /*the font code in a |char_node|*/
-@d character(A) subtype(A) /*the character code in a |char_node|*/
+@d font(A) mem[A].hh.b8 /*the font code in a |char_node|*/
+@d character(A) mem[A].hh.b24 /*the character code in a |char_node|*/
 
 @ An |hlist_node| stands for a box that was made from a horizontal list.
 Each |hlist_node| is seven words long, and contains the following fields
@@ -3334,7 +3330,7 @@ current \.{\\lineskip}.
 pointer @!q; /*the glue specification*/
 p=get_node(small_node_size);type(p)=glue_node;subtype(p)=n+1;
 leader_ptr(p)=null;@/
-q=@[@<Current |mem| equivalent of glue parameter number |n|@>@];
+q=@<Current |mem| equivalent of glue parameter number |n|@>@t@>;
 glue_ptr(p)=q;incr(glue_ref_count(q));
 return p;
 }
@@ -3373,8 +3369,6 @@ kerns inserted from font information or math mode calculations) or |explicit|
 (for kerns inserted from \.{\\kern} and \.{\\/} commands) or |acc_kern|
 (for kerns inserted from non-math accents) or |mu_glue| (for kerns
 inserted from \.{\\mkern} specifications in math formulas).
-
-@s explicit true
 
 @d kern_node 11 /*|type| of a kern node*/
 @d explicit 1 /*|subtype| of kern nodes from \.{\\kern} and \.{\\/}*/
@@ -3591,7 +3585,7 @@ done1:
 
 @ @<Check variable-size...@>=
 p=rover;q=null;clobbered=false;
-do {if ((p >= lo_mem_max)||(p < mem_min)) clobbered=true;
+@/do@+{if ((p >= lo_mem_max)||(p < mem_min)) clobbered=true;
   else if ((rlink(p) >= lo_mem_max)||(rlink(p) < mem_min)) clobbered=true;
   else if (!(is_empty(p))||(node_size(p) < 2)||@|
    (p+node_size(p) > lo_mem_max)||@|(llink(rlink(p))!=p)) clobbered=true;
@@ -3608,7 +3602,7 @@ for (q=p; q<=p+node_size(p)-1; q++)  /*mark all locations free*/
   is_free[q]=true;
   }
 q=p;p=rlink(p);
-} while (!(p==rover));
+}@+ while (!(p==rover));
 done2:
 
 @ @<Check flags...@>=
@@ -3703,13 +3697,16 @@ while (p > mem_min)
         {@+if ((font(p) < font_base)||(font(p) > font_max))
           print_char('*');
 @.*\relax@>
-        else@<Print the font identifier for |font(p)|@>@;
+        else@<Print the font identifier for |font(p)|@>;
         print_char(' ');font_in_short_display=font(p);
         }
-      print_ASCII(qo(character(p)));
+      if (character(p)<0x80)
+        print_ASCII(character(p));
+      else
+        print_utf8(character(p));
       }
     }
-  else@<Print a short indication of the contents of node |p|@>@;
+  else@<Print a short indication of the contents of node |p|@>;
   p=link(p);
   }
 }
@@ -3742,7 +3739,7 @@ its reference count, and one to print a rule dimension.
 {@+if (p > mem_end) print_esc("CLOBBERED.");
 else{@+if ((font(p) < font_base)||(font(p) > font_max)) print_char('*');
 @.*\relax@>
-  else@<Print the font identifier for |font(p)|@>@;
+  else@<Print the font identifier for |font(p)|@>;
   print_char(' ');print_ASCII(qo(character(p)));
   }
 }
@@ -3882,7 +3879,7 @@ else switch (type(p)) {
   case disc_node: @<Display discretionary |p|@>@;@+break;
   case mark_node: @<Display mark |p|@>@;@+break;
   case adjust_node: @<Display adjustment |p|@>@;@+break;
-  @/@t\4@>@<Cases of |show_node_list| that arise in mlists only@>@;
+  @t\4@>@<Cases of |show_node_list| that arise in mlists only@>@;
   default:print("Unknown node type!");
   }
 
@@ -4081,7 +4078,7 @@ specification is being withdrawn.
   }
 
 @p static void delete_glue_ref(pointer @!p) /*|p| points to a glue specification*/
-fast_delete_glue_ref(p)@;
+fast_delete_glue_ref(p)
 static void delete_xdimen_ref(pointer @!p) /*|p| points to a xdimen specification*/
 {@+if (p==null) return;
   if (xdimen_ref_count(p)==null) free_node(p, xdimen_node_size);
@@ -4122,7 +4119,7 @@ while (p!=null)
       flush_node_list(post_break(p));
       } @+break;
     case adjust_node: flush_node_list(adjust_ptr(p));@+break;
-    @/@t\4@>@<Cases of |flush_node_list| that arise in mlists only@>@;
+    @t\4@>@<Cases of |flush_node_list| that arise in mlists only@>@;
     default:confusion("flushing");
 @:this can't happen flushing}{\quad flushing@>
     } @/
@@ -4960,13 +4957,23 @@ registers.
 @d box_base etex_pens /*table of 256 box registers*/
 @d cur_font_loc (box_base+256) /*internal font number outside math mode*/
 @d math_font_base (cur_font_loc+1) /*table of 48 math font numbers*/
-@d cat_code_base (math_font_base+48)
-   /*table of 256 command codes (the ``catcodes'')*/
-@d lc_code_base (cat_code_base+256) /*table of 256 lowercase mappings*/
-@d uc_code_base (lc_code_base+256) /*table of 256 uppercase mappings*/
-@d sf_code_base (uc_code_base+256) /*table of 256 spacefactor mappings*/
+@d cat_code_base (math_font_base+48) /*table of 256 command codes (the ``catcodes'')*/
+@d sf_code_base	(cat_code_base+256) /*table of 256 spacefactor mappings*/
 @d math_code_base (sf_code_base+256) /*table of 256 math mode mappings*/
 @d int_base (math_code_base+256) /*beginning of region 5*/
+@#
+@d utf_base_skip 0x200000 /*distance of utf bases, $\hbox{power of 2} > |0x10FFFF|$*/
+@d utf_cp_mask (utf_base_skip-1)
+@d utf_base_mask (~utf_cp_mask)
+@d utf_first_base ((eqtb_size+1+utf_cp_mask)&utf_base_mask) /*$\hbox{first multiple of |utf_base_skip|} > |eqtb_size|$*/
+@d utf_cat_code_base utf_first_base /*0x110000 command codes (the ``catcodes'')*/
+@d utf_sf_code_base (utf_cat_code_base+utf_base_skip) /*0x110000 spacefactor mappings*/
+@d utf_del_code_base (utf_sf_code_base+utf_base_skip) /*0x110000 delimiter mappings*/
+@d utf_math_code_base (utf_del_code_base+utf_base_skip) /*0x110000 mathcode mappings*/
+@d utf_math_codenum_base (utf_math_code_base+utf_base_skip) /*0x110000 mathcodenum mappings*/
+@d utf_lc_code_base (utf_math_codenum_base+utf_base_skip) /*0x110000 lowercase mappings*/
+@d utf_uc_code_base (utf_lc_code_base+utf_base_skip) /*0x110000 uppercase mappings*/
+@d utf_code_limit    (utf_uc_code_base+utf_base_skip) /*upper bound*/ 
 @#
 @d par_shape_ptr equiv(par_shape_loc)
 @d output_routine equiv(output_routine_loc)
@@ -4982,11 +4989,11 @@ registers.
 @d box(A) equiv(box_base+A)
 @d cur_font equiv(cur_font_loc)
 @d fam_fnt(A) equiv(math_font_base+A)
-@d cat_code(A) equiv(cat_code_base+A)
-@d lc_code(A) equiv(lc_code_base+A)
-@d uc_code(A) equiv(uc_code_base+A)
-@d sf_code(A) equiv(sf_code_base+A)
-@d math_code(A) equiv(math_code_base+A)
+@d cat_code(A) ((A)<0x100?equiv(cat_code_base+A):utf_catcode(A))
+@d lc_code(A) utf_lccode(A)
+@d uc_code(A) utf_uccode(A)
+@d sf_code(A)  ((A)<0x100?equiv(sf_code_base+A):utf_sfcode(A))
+@d math_code(A) ((A)<0x100?equiv(math_code_base+A):utf_mathcode(A))
    /*Note: |math_code(c)| is the true math code plus |min_halfword|*/
 
 @<Put each...@>=
@@ -5022,7 +5029,7 @@ else switch (chr_code) {
   case every_vbox_loc: print_esc("everyvbox");@+break;
   case every_job_loc: print_esc("everyjob");@+break;
   case every_cr_loc: print_esc("everycr");@+break;
-  @/@t\4@>@<Cases of |assign_toks| for |print_cmd_chr|@>@;
+  @/@<Cases of |assign_toks| for |print_cmd_chr|@>@/
   default:print_esc("errhelp");
   } @+break;
 
@@ -5037,7 +5044,7 @@ packages, not in \TeX\ itself, so that global interchange of formats is
 possible.
 
 @d null_font font_base
-@d var_code 070000 /*math code meaning ``use the current family''*/
+@d utf_var_code (7<<21) /*new utf math code meaning ``use the current family''*/
 
 @<Initialize table entries...@>=
 par_shape_ptr=null;eq_type(par_shape_loc)=shape_ref;
@@ -5055,20 +5062,24 @@ equiv(cat_code_base)=0;eq_type(cat_code_base)=data;
 eq_level(cat_code_base)=level_one;@/
 for (k=cat_code_base+1; k<=int_base-1; k++) eqtb[k]=eqtb[cat_code_base];
 for (k=0; k<=255; k++)
-  {@+cat_code(k)=other_char;math_code(k)=hi(k);sf_code(k)=1000;
+  {@+equiv(cat_code_base+k)=other_char;equiv(math_code_base+k)=hi(k);
+     equiv(sf_code_base+k)=1000;
   }
-cat_code(carriage_return)=car_ret;cat_code(' ')=spacer;
-cat_code('\\')=escape;cat_code('%')=comment;
-cat_code(invalid_code)=invalid_char;cat_code(null_code)=ignore;
-for (k='0'; k<='9'; k++) math_code(k)=hi(k+var_code);
+equiv(cat_code_base+carriage_return)=car_ret;equiv(cat_code_base+' ')=spacer;
+equiv(cat_code_base+'\\')=escape;equiv(cat_code_base+'%')=comment;
+equiv(cat_code_base+invalid_code)=invalid_char;equiv(cat_code_base+null_code)=ignore;
+for (k='0'; k<='9'; k++) equiv(math_code_base+k)=hi(k+utf_var_code);
 for (k='A'; k<='Z'; k++)
-  {@+cat_code(k)=letter;cat_code(k+'a'-'A')=letter;@/
-  math_code(k)=hi(k+var_code+0x100);
-  math_code(k+'a'-'A')=hi(k+'a'-'A'+var_code+0x100);@/
+  {@+equiv(cat_code_base+k)=letter;equiv(cat_code_base+k+'a'-'A')=letter;@/
+  equiv(math_code_base+k)=k+utf_var_code+(1<<24);
+  equiv(math_code_base+k+'a'-'A')=hi(k+'a'-'A'+utf_var_code+(1<<24));@/
+  equiv(sf_code_base+k)=999;
+#if 0
   lc_code(k)=k+'a'-'A';lc_code(k+'a'-'A')=k+'a'-'A';@/
   uc_code(k)=k;uc_code(k+'a'-'A')=k;@/
-  sf_code(k)=999;
+#endif
   }
+  @<Fix some character code assignments for UTF@>@;
 
 @ @<Show equivalent |n|, in region 4@>=
 if ((n==par_shape_loc)||((n >= etex_pen_base)&&(n < etex_pens)))
@@ -5115,18 +5126,13 @@ printn_esc(hash[font_id_base+equiv(n)].rh);
 
 @ @<Show the halfword code in |eqtb[n]|@>=
 if (n < math_code_base)
-  {@+if (n < lc_code_base)
+  {@+if (n < math_code_base)
     {@+print_esc("catcode");print_int(n-cat_code_base);
+       print_char('=');print_int(equiv(n));
     }
-  else if (n < uc_code_base)
-    {@+print_esc("lccode");print_int(n-lc_code_base);
+    else
+    {@+print("This information should be in the utf tables");
     }
-  else if (n < sf_code_base)
-    {@+print_esc("uccode");print_int(n-uc_code_base);
-    }
-  else{@+print_esc("sfcode");print_int(n-sf_code_base);
-    }
-  print_char('=');print_int(equiv(n));
   }
 else{@+print_esc("mathcode");print_int(n-math_code_base);
   print_char('=');print_int(ho(equiv(n)));
@@ -5198,7 +5204,8 @@ that will be defined later.
 @d holding_inserts_code 53 /*do not remove insertion nodes from \.{\\box255}*/
 @d error_context_lines_code 54 /*maximum intermediate line pairs shown*/
 @d tracing_stack_levels_code 55 /*tracing |input_stack| level if |tracingmacros| positive*/
-@d tex_int_pars 56 /*total number of \TeX's integer parameters*/
+@d tracing_fonts_code 56 /*tracing specification, finding, and loading of fonts*/
+@d tex_int_pars 57 /*total number of \TeX's integer parameters*/
 @#
 @d etex_int_base tex_int_pars /*base for \eTeX's integer parameters*/
 @d tracing_assigns_code etex_int_base /*show assignments*/
@@ -5209,7 +5216,8 @@ that will be defined later.
 @d saving_vdiscards_code (etex_int_base+5) /*save items discarded from vlists*/
 @d saving_hyph_codes_code (etex_int_base+6) /*save hyphenation codes for languages*/
 @d expand_depth_code (etex_int_base+7) /*maximum depth for expansion---\eTeX*/
-@d eTeX_state_code (etex_int_base+8) /*\eTeX\ state variables*/
+@d ignore_primitive_error_code (etex_int_base+8) /*ignore some primitive/engine errors*/
+@d eTeX_state_code (etex_int_base+9) /*\eTeX\ state variables*/
 @d etex_int_pars (eTeX_state_code+eTeX_states) /*total number of \eTeX's integer parameters*/
 @#
 @d int_pars etex_int_pars /*total number of integer parameters*/
@@ -5217,7 +5225,7 @@ that will be defined later.
 @d del_code_base (count_base+256) /*256 delimiter code mappings*/
 @d dimen_base (del_code_base+256) /*beginning of region 6*/
 @#
-@d del_code(A) eqtb[del_code_base+A].i
+@d del_code(A) ((A)<0x100?eqtb[del_code_base+A].i:utf_delcode(A))
 @d count(A) eqtb[count_base+A].i
 @d int_par(A) eqtb[int_base+A].i /*an integer parameter*/
 @d pretolerance int_par(pretolerance_code)
@@ -5276,6 +5284,7 @@ that will be defined later.
 @d holding_inserts int_par(holding_inserts_code)
 @d error_context_lines int_par(error_context_lines_code)
 @d tracing_stack_levels int_par(tracing_stack_levels_code)
+@d tracing_fonts int_par(tracing_fonts_code)
 @#
 @d tracing_assigns int_par(tracing_assigns_code)
 @d tracing_groups int_par(tracing_groups_code)
@@ -5285,6 +5294,8 @@ that will be defined later.
 @d saving_vdiscards int_par(saving_vdiscards_code)
 @d saving_hyph_codes int_par(saving_hyph_codes_code)
 @d expand_depth int_par(expand_depth_code)
+@d ignore_primitive_error int_par(ignore_primitive_error_code)
+@d ignore_infinite_glue_shrinkage_bit 1
 
 @<Assign the values |depth_threshold:=show_box_depth|...@>=
 depth_threshold=show_box_depth;
@@ -5350,7 +5361,8 @@ case right_hyphen_min_code: print_esc("righthyphenmin");@+break;
 case holding_inserts_code: print_esc("holdinginserts");@+break;
 case error_context_lines_code: print_esc("errorcontextlines");@+break;
 case tracing_stack_levels_code: print_esc("tracingstacklevels");@+break;
-@/@t\4@>@<Cases for |print_param|@>@;
+case tracing_fonts_code: print_esc("tracingfonts");@+break;
+@/@<Cases for |print_param|@>@/
 default:print("[unknown integer parameter!]");
 }
 }
@@ -5473,6 +5485,8 @@ primitive("errorcontextlines", assign_int, int_base+error_context_lines_code);@/
 @!@:error\_context\_lines\_}{\.{\\errorcontextlines} primitive@>
 primitive("tracingstacklevels", assign_int, int_base+tracing_stack_levels_code);@/
 @!@:tracing\_stack\_levels_}{\.{\\tracingstacklevels} primitive@>
+primitive("tracingfonts", assign_int, int_base+tracing_fonts_code);@/
+@!@:tracing\_fonts_}{\.{\\tracingfonts} primitive@>
 
 @ @<Cases of |print_cmd_chr|...@>=
 case assign_int: if (chr_code < count_base) print_param(chr_code-int_base);
@@ -5488,8 +5502,8 @@ complete failure.
 for (k=int_base; k<=del_code_base-1; k++) eqtb[k].i=0;
 mag=1000;tolerance=10000;hang_after=1;max_dead_cycles=25;
 escape_char='\\';end_line_char=carriage_return;
-for (k=0; k<=255; k++) del_code(k)=-1;
-del_code('.')=0; /*this null delimiter is used in error recovery*/
+for (k=0; k<=255; k++)   equiv(del_code_base+k)=-1;
+equiv(del_code_base+'.')=0; /*this null delimiter is used in error recovery*/
 
 @ The following procedure, which is called just before \TeX\ initializes its
 input and output, establishes the initial values of the date and time.
@@ -5503,7 +5517,6 @@ defined by |SOURCE_DATE_EPOCH|.
 @^reference time@>
 @^system dependencies@>
 \TeX\ Live calls |tl_now| to obtain the current time as a |tm| structure.
-@s tm int
 @p static void fix_date_and_time(void)
 {@+ struct tm *t=tl_now();
   time=sys_time= t->tm_hour*60+t->tm_min;/*minutes since midnight*/
@@ -5707,9 +5720,8 @@ print_char('=');print_scaled(eqtb[n].sc);print("pt");
 @ Here is a procedure that displays the contents of |eqtb[n]|
 symbolically.
 
-@p @<Declare the procedure called |print_cmd_chr|@>@;
+@p @t\4@>@<Declare the procedure called |print_cmd_chr|@>@;@/
 #ifdef @!STAT
-@+@t}\6\4\4{@>
 static void show_eqtb(pointer @!n)
 {@+if (n < active_base) print_char('?'); /*this can't happen*/
 else if (n < glue_base) @<Show equivalent |n|, in region 1 or 2@>@;
@@ -5717,6 +5729,7 @@ else if (n < local_base) @<Show equivalent |n|, in region 3@>@;
 else if (n < int_base) @<Show equivalent |n|, in region 4@>@;
 else if (n < dimen_base) @<Show equivalent |n|, in region 5@>@;
 else if (n <= eqtb_size) @<Show equivalent |n|, in region 6@>@;
+else if (n <= utf_code_limit)  @<Show equivalent |n|, in the utf tables@>@;
 else print_char('?'); /*this can't happen either*/
 }
 #endif
@@ -5834,10 +5847,10 @@ found: return p;
 
 @ @<Insert a new control...@>=
 {@+if (text(p) > 0)
-  {@+do {if (hash_is_full) overflow("hash size", hash_size);
+  {@+@/do@+{if (hash_is_full) overflow("hash size", hash_size);
 @:TeX capacity exceeded hash size}{\quad hash size@>
   decr(hash_used);
-  } while (!(text(hash_used)==0)); /*search for an empty location in |hash|*/
+  }@+ while (!(text(hash_used)==0)); /*search for an empty location in |hash|*/
   next(p)=hash_used;p=hash_used;
   }
 str_room(l);d=cur_length;
@@ -5882,7 +5895,7 @@ static void print_cs(int @!p) /*prints a purported control sequence*/
       {@+print_esc("csname");print_esc("endcsname");print_char(' ');
       }
     else{@+printn_esc(p-single_base);
-      if (cat_code(p-single_base)==letter) print_char(' ');
+      if (equiv(cat_code_base+p-single_base)==letter) print_char(' ');
       }
   else if (p < active_base) print_esc("IMPOSSIBLE.");
 @.IMPOSSIBLE@>
@@ -6055,7 +6068,7 @@ case end_group: print_esc("endgroup");@+break;
 case ex_space: print_esc(" ");@+break;
 case expand_after: switch (chr_code) {
 case 0: print_esc("expandafter");@+break;
-@/@t\4@>@<Cases of |expandafter| for |print_cmd_chr|@>@;
+@/@<Cases of |expandafter| for |print_cmd_chr|@>@/
 } @+break; /*there are no other cases*/
 case halign: print_esc("halign");@+break;
 case hrule: print_esc("hrule");@+break;
@@ -6075,17 +6088,17 @@ case no_expand: print_esc("noexpand");@+break;
 case non_script: print_esc("nonscript");@+break;
 case omit: print_esc("omit");@+break;
 case radical: print_esc("radical");@+break;
-case read_to_cs: if (chr_code==0) print_esc("read");
-  else @<Cases of |read| for |print_cmd_chr|@>;@+break;
+case read_to_cs: if (chr_code==0) print_esc("read")
+  @<Cases of |read| for |print_cmd_chr|@>;@+break;
 case relax: print_esc("relax");@+break;
 case set_box: print_esc("setbox");@+break;
 case set_prev_graf: print_esc("prevgraf");@+break;
 case set_shape: switch (chr_code) {
   case par_shape_loc: print_esc("parshape");@+break;
-  @/@t\4@>@<Cases of |set_shape| for |print_cmd_chr|@>@;
+  @<Cases of |set_shape| for |print_cmd_chr|@>@;@/
   } @+break; /*there are no other cases*/
-case the: if (chr_code==0) print_esc("the");
-  else @<Cases of |the| for |print_cmd_chr|@>;@+break;
+case the: if (chr_code==0) print_esc("the")
+  @<Cases of |the| for |print_cmd_chr|@>;@+break;
 case toks_register: @<Cases of |toks_register| for |print_cmd_chr|@>@;@+break;
 case vadjust: print_esc("vadjust");@+break;
 case valign: print_esc("valign");@+break;
@@ -6106,7 +6119,7 @@ Meanwhile, this is a convenient place to catch up on something we were unable
 to do before the hash table was defined:
 
 @<Print the font identifier for |font(p)|@>=
-printn_esc(font_id_text(font(p)));
+printn_esc(font_id_text(font(p)))
 
 @* Saving and restoring equivalents.
 The nested structure provided by `$\.{\char'173}\ldots\.{\char'175}$' groups
@@ -6291,7 +6304,7 @@ case shape_ref: {@+q=equiv_field(w); /*we need to free a \.{\\parshape} block*/
   if (q!=null) free_node(q, info(q)+info(q)+1);
   } @+break; /*such a block is |2 n+1| words long, where |n==info(q)|*/
 case box_ref: flush_node_list(equiv_field(w));@+break;
-@/@t\4@>@<Cases for |eq_destroy|@>@;
+@/@<Cases for |eq_destroy|@>@/
 default:do_nothing;
 }
 }
@@ -6329,7 +6342,7 @@ the call, since |eq_save| makes the necessary test.
 #ifdef @!STAT
 #define  assign_trace(A, B) if (tracing_assigns > 0) restore_trace(A, B);
 #else
-#define  assign_trace(A, B) @[@]
+#define  assign_trace(A, B)
 #endif
 
 static void eq_define(pointer @!p, quarterword @!t, halfword @!e)
@@ -6446,12 +6459,14 @@ loop@+{@+decr(save_ptr);
   else if (save_type(save_ptr)==restore_sa)
     {@+sa_restore();sa_chain=p;sa_level=save_level(save_ptr);
     }
+  else if (save_type(save_ptr)==restore_utf_none) 
+  { utf_unsave_list=save_level(save_ptr); decr(save_ptr); }
+  else if (save_type(save_ptr)==restore_utf) utf_unsave(p); 
   else{@+if (save_type(save_ptr)==restore_old_value)
       {@+l=save_level(save_ptr);decr(save_ptr);
       }
     else save_stack[save_ptr]=eqtb[undefined_control_sequence];
-    @<Store \(s)|save_stack[save_ptr]| in |eqtb[p]|, unless |eqtb[p]| holds
-a global value@>;
+    @<Store \(s)|save_stack[save_ptr]| in |eqtb[p]|, unless |eqtb[p]| holds a global value@>;
     }
   }
 done:
@@ -6570,12 +6585,14 @@ mag_set=mag;
 @* Token lists.
 A \TeX\ token is either a character or a control sequence, and it is
 @^token@>
-represented internally in one of two ways: (1)~A character whose ASCII
+@^UTF@>
+represented internally in one of two ways: 
+(1)~A character whose utf
 code number is |c| and whose command code is |m| is represented as the
-number $2^8m+c$; the command code is in the range |1 <= m <= 14|. (2)~A control
-sequence whose |eqtb| address is |p| is represented as the number
-|cs_token_flag+p|. Here |cs_token_flag==@t$2^{12}-1$@>| is larger than
-$2^8m+c$, yet it is small enough that |cs_token_flag+p < max_halfword|;
+number $2^{24}m+c$; the command code is in the range |1 <= m <= 14|. 
+(2)~A control sequence whose |eqtb| address is |p| is represented as the number
+|cs_token_flag+p|. Here |cs_token_flag==@t$2^{28}-1$@>| is larger than
+$2^{24}m+c$, yet it is small enough that |cs_token_flag+p < max_halfword|;
 thus, a token fits comfortably in a halfword.
 
 A token |t| represents a |left_brace| command if and only if
@@ -6585,21 +6602,23 @@ we have |left_brace_limit <= t < right_brace_limit|; and it represents a |match|
 The following definitions take care of these token-oriented constants
 and a few others.
 
-@d cs_token_flag 07777 /*amount added to the |eqtb| location in a
+@d cs_token_flag ((1<<28)-1) /*amount added to the |eqtb| location in a
   token that stands for a control sequence; is a multiple of~256, less~1*/
-@d left_brace_token 00400 /*$2^8\cdot|left_brace|$*/
-@d left_brace_limit 01000 /*$2^8\cdot(|left_brace|+1)$*/
-@d right_brace_token 01000 /*$2^8\cdot|right_brace|$*/
-@d right_brace_limit 01400 /*$2^8\cdot(|right_brace|+1)$*/
-@d math_shift_token 01400 /*$2^8\cdot|math_shift|$*/
-@d tab_token 02000 /*$2^8\cdot|tab_mark|$*/
-@d out_param_token 02400 /*$2^8\cdot|out_param|$*/
-@d space_token 05040 /*$2^8\cdot|spacer|+|' '|$*/
-@d letter_token 05400 /*$2^8\cdot|letter|$*/
-@d other_token 06000 /*$2^8\cdot|other_char|$*/
-@d match_token 06400 /*$2^8\cdot|match|$*/
-@d end_match_token 07000 /*$2^8\cdot|end_match|$*/
-@d protected_token 07001 /*$2^8\cdot|end_match|+1$*/
+@d cmd_factor (1<<24)
+@d cmd_token(A) ((A)<<24) /*$8^{24}\cdot|A|$*/
+@d left_brace_token (left_brace<<24) /*$2^{24}\cdot|left_brace|$*/
+@d left_brace_limit ((left_brace+1)<<24)  /*$2^{24}\cdot(|left_brace|+1)$*/
+@d right_brace_token (right_brace<<24) /*$2^{24}\cdot|right_brace|$*/
+@d right_brace_limit ((right_brace+1)<<24)  /*$2^{24}\cdot(|right_brace|+1)$*/
+@d math_shift_token (math_shift<<24)  /*$2^{24}\cdot|math_shift|$*/
+@d tab_token (tab_mark<<24) /*$2^{24}\cdot|tab_mark|$*/
+@d out_param_token (out_param<<24) /*$2^{24}\cdot|out_param|$*/
+@d space_token ((spacer<<24)+' ') /*$2^{24}\cdot|spacer|+|' '|$*/
+@d letter_token (letter<<24)/*$2^{24}\cdot|letter|$*/
+@d other_token (other_char<<24) /*$2^{24}\cdot|other_char|$*/
+@d match_token (match<<24) /*$2^{24}\cdot|match|$*/
+@d end_match_token (end_match<<24) /*$2^{24}\cdot|end_match|$*/
+@d protected_token (end_match<<24)+1 /*$2^{24}\cdot|end_match|+1$*/
 
 @ @<Check the ``constant''...@>=
 if (cs_token_flag+undefined_control_sequence > max_halfword) bad=21;
@@ -6700,7 +6719,7 @@ if ((p < hi_mem_min)||(p > mem_end))
 @.CLOBBERED@>
   }
 if (info(p) >= cs_token_flag) print_cs(info(p)-cs_token_flag);
-else{@+m=info(p)/0400;c=info(p)%0400;
+else{@+m=info(p)/cmd_factor;c=info(p)%cmd_factor;
   if (info(p) < 0) print_esc("BAD.");
 @.BAD@>
   else@<Display the token $(|m|,|c|)$@>;
@@ -6715,7 +6734,8 @@ switch (m) {
 case left_brace: case right_brace: case math_shift:
   case tab_mark: case sup_mark: case sub_mark:
   case spacer:
-  case letter: case other_char: printn(c);@+break;
+  case letter: case other_char: 
+    if (c<0x80) printn(c); else print_utf8(c); @+break;
 case mac_param: {@+printn(c);printn(c);
   } @+break;
 case out_param: {@+printn(match_chr);
@@ -6834,7 +6854,7 @@ case endv: print("end of alignment template");@+break;
 case spacer: chr_cmd("blank space ")@;@+break;
 case letter: chr_cmd("the letter ")@;@+break;
 case other_char: chr_cmd("the character ")@;@+break;
-@/@t\4@>@<Cases of |print_cmd_chr| for symbolic printing of primitives@>@;
+@t\4@>@<Cases of |print_cmd_chr| for symbolic printing of primitives@>@/
 default:print("[unknown command code!]");
 }
 }
@@ -7572,7 +7592,7 @@ actions.
 in_open=0;open_parens=0;max_buf_stack=0;
 grp_stack[0]=0;if_stack[0]=null;
 param_ptr=0;max_param_stack=0;
-first=buf_size;do {buffer[first]=0;decr(first);} while (!(first==0));
+first=buf_size;@/do@+{buffer[first]=0;decr(first);}@+ while (!(first==0));
 scanner_status=normal;warning_index=null;first=1;
 state=new_line;start=1;index=0;line=0;name=0;
 force_eof=false;
@@ -7726,7 +7746,7 @@ this routine are executed more often than any other instructions of \TeX.
    /*go here when the next input token has been got*/
 int k; /*an index into |buffer|*/
 halfword @!t; /*a token*/
-int @!cat; /*|cat_code(cur_chr)|, usually*/
+int @!cat; /*|equiv(cat_code_base+cur_chr)|, usually*/
 ASCII_code @!c, @!cc; /*constituents of a possible expanded code*/
 int @!d; /*number of excess characters in an expanded code*/
 restart: cur_cs=0;
@@ -7750,7 +7770,7 @@ if (cur_cmd <= car_ret) if (cur_cmd >= tab_mark) if (align_state==0)
 @ @<Input from external file, |goto restart| if no input found@>=
 @^inner loop@>
 {@+get_cur_chr: if (loc <= limit)  /*current line not yet finished*/
-  {@+cur_chr=buffer[loc];incr(loc);
+  {@+loc=utf8_get_cur_chr(buffer,loc,limit);
   reswitch: cur_cmd=cat_code(cur_chr);
   @<Change state if necessary, and |goto switch| if the current character
 should be ignored, or |goto reswitch| if the current character changes to
@@ -7783,7 +7803,7 @@ and set |state:=mid_line|@>@;@+break;
 any_state_plus(sup_mark): @<If this |sup_mark| starts an expanded character
 like~\.{\^\^A} or~\.{\^\^df}, then |goto reswitch|, otherwise set |state:=mid_line|@>@;@+break;
 any_state_plus(invalid_char): @<Decry the invalid character and |goto restart|@>@;
-@/@t\4@>@<Handle situations involving spaces, braces, changes of state@>@;
+@t\4@>@<Handle situations involving spaces, braces, changes of state@>@;
 default:do_nothing;
 }
 
@@ -7897,8 +7917,8 @@ buffer and the process is repeated, slowly but surely.
 
 @<Scan a control...@>=
 {@+if (loc > limit) cur_cs=null_cs; /*|state| is irrelevant in this case*/
-else{@+start_cs: k=loc;cur_chr=buffer[k];cat=cat_code(cur_chr);
-  incr(k);
+else{@+start_cs: k=loc;k=utf8_get_cur_chr(buffer, k, limit);
+  cat=cat_code(cur_chr);
   if (cat==letter) state=skip_blanks;
   else if (cat==spacer) state=skip_blanks;
   else state=mid_line;
@@ -7907,7 +7927,14 @@ else{@+start_cs: k=loc;cur_chr=buffer[k];cat=cat_code(cur_chr);
 is encountered, reduce it and |goto start_cs|; otherwise if a multiletter
 control sequence is found, adjust |cur_cs| and |loc|, and |goto found|@>@;
   else@<If an expanded code is present, reduce it and |goto start_cs|@>;
-  cur_cs=single_base+buffer[loc];incr(loc);
+  loc=utf8_get_cur_chr(buffer, loc, limit);
+  if (cur_chr<0x100)
+    cur_cs=single_base+cur_chr;
+  else
+    fatal_error("single character control sequence above 0xff not implemented");
+    /* The simple case that we got here while scanning an alphabetic character code
+       could be handled by setting |cur_cmd| and |cur_chr| directly. 
+    */
   }
 found: cur_cmd=eq_type(cur_cs);cur_chr=equiv(cur_cs);
 if (cur_cmd >= outer_call) check_outer_validity();
@@ -7917,18 +7944,22 @@ if (cur_cmd >= outer_call) check_outer_validity();
 |cur_chr==buffer[k-1]| and |k <= limit+1| and |cat==cat_code(cur_chr)|. If an
 expanded code like \.{\^\^A} or \.{\^\^df} appears in |buffer[(k-1)dotdot(k+1)]|
 or |buffer[(k-1)dotdot(k+2)]|, we
-will store the corresponding code in |buffer[k-1]| and shift the rest of
-the buffer left two or three places.
+will store the corresponding UTF8 code in |buffer[(k-1)dotdot(k+2)]| and shift the rest of
+the buffer left to close the gap.
 
 @<If an expanded...@>=
 {@+if (buffer[k]==cur_chr) @+if (cat==sup_mark) @+if (k < limit)
   {@+c=buffer[k+1];@+if (c < 0200)  /*yes, one is indeed present*/
     {@+d=2;
     if (is_hex(c)) @+if (k+2 <= limit)
-      {@+cc=buffer[k+2];@+if (is_hex(cc)) incr(d);
+      {@+cc=buffer[k+2];@+if (is_hex(cc)) incr(d); 
       }
     if (d > 2)
-      {@+hex_to_cur_chr;buffer[k-1]=cur_chr;
+      {@+hex_to_cur_chr;
+         if (cur_chr<0x80) buffer[k-1]=cur_chr;
+         else 
+         { buffer[k-1]=0xC0|(cur_chr>>6); buffer[k]=0x80|(cur_chr&0x3F);decr(d); incr(k);
+         }
       }
     else if (c < 0100) buffer[k-1]=c+0100;
     else buffer[k-1]=c-0100;
@@ -7942,10 +7973,12 @@ the buffer left two or three places.
 }
 
 @ @<Scan ahead in the buffer...@>=
-{@+do {cur_chr=buffer[k];cat=cat_code(cur_chr);incr(k);
-} while (!((cat!=letter)||(k > limit)));
+{@+int j; 
+@/do@+{j=k; k=utf8_get_cur_chr(buffer,k,limit);
+cat=cat_code(cur_chr);
+}@+ while (!((cat!=letter)||(k > limit)));
 @<If an expanded...@>;
-if (cat!=letter) decr(k);
+if (cat!=letter) k=j;
    /*now |k| points to first nonletter*/
 if (k > loc+1)  /*multiletter control sequence has been scanned*/
   {@+cur_cs=id_lookup(loc, k-loc);loc=k;goto found;
@@ -7967,7 +8000,7 @@ if (loc!=null)  /*list not exhausted*/
         @<Get the next token, suppressing expansion@>@;
       else check_outer_validity();
     }
-  else{@+cur_cmd=t/0400;cur_chr=t%0400;
+  else{@+cur_cmd=t/cmd_factor;cur_chr=t%cmd_factor;
     switch (cur_cmd) {
     case left_brace: incr(align_state);@+break;
     case right_brace: decr(align_state);@+break;
@@ -8129,7 +8162,7 @@ In fact, these three procedures account for almost every use of |get_next|.
 @p static void get_token(void) /*sets |cur_cmd|, |cur_chr|, |cur_tok|*/
 {@+no_new_control_sequence=false;get_next();no_new_control_sequence=true;
 @^inner loop@>
-if (cur_cs==0) cur_tok=(cur_cmd*0400)+cur_chr;
+if (cur_cs==0) cur_tok=cmd_token(cur_cmd)+cur_chr;
 else cur_tok=cs_token_flag+cur_cs;
 }
 
@@ -8188,7 +8221,7 @@ case top_bot_mark: @<Insert the \(a)appropriate mark text into the scanner@>@;@+
 case expand_after: switch (cur_chr) {
 case 0: @<Expand the token after the next token@>@;@+break;
 case 1: @<Negate a boolean conditional and |goto reswitch|@>@;@+break;
-@/@t\4@>@<Cases for |expandafter|@>@;
+@/@<Cases for |expandafter|@>@/
 } @+break; /*there are no other cases*/
 case no_expand: @<Suppress expansion of the next token@>@;@+break;
 case cs_name: @<Manufacture a control sequence name@>@;@+break;
@@ -8252,9 +8285,9 @@ the variables |p| and |q| are reserved for token-list building.
 @ @<Manufacture a control...@>=
 {@+r=get_avail();p=r; /*head of the list of characters*/
 incr(incsname_state);
-do {get_x_token();
+@/do@+{get_x_token();
 if (cur_cs==0) store_new_token(cur_tok);
-} while (!(cur_cs!=0));
+}@+ while (!(cur_cs!=0));
 if (cur_cmd!=end_cs_name) @<Complain about missing \.{\\endcsname}@>;
 decr(incsname_state);
 @<Look up the characters of list |r| in the hash table, and set |cur_cs|@>;
@@ -8282,7 +8315,7 @@ while (p!=null)
       overflow("buffer size", buf_size);
 @:TeX capacity exceeded buffer size}{\quad buffer size@>
     }
-  buffer[j]=info(p)%0400;incr(j);p=link(p);
+  buffer[j]=info(p)%cmd_factor;incr(j);p=link(p);
   }
 if (j==first) cur_cs=null_cs; /*the list is empty*/
 else if (j > first+1)
@@ -8312,15 +8345,15 @@ primitive("endinput", input, 1);@/
 @!@:end\_input\_}{\.{\\endinput} primitive@>
 
 @ @<Cases of |print_cmd_chr|...@>=
-case input: if (chr_code==0) print_esc("input");
-  else @<Cases of |input| for |print_cmd_chr|@>@;
+case input: if (chr_code==0) print_esc("input")
+  @/@<Cases of |input| for |print_cmd_chr|@>;@/
   else print_esc("endinput");@+break;
 
 @ @<Initiate or terminate input...@>=
-if (cur_chr==1) force_eof=true;
-else @<Cases for |input|@>@;
+if (cur_chr==1) force_eof=true
+@/@<Cases for |input|@>;@/
 else if (name_in_progress) insert_relax();
-else start_input();
+else start_input()
 
 @ Sometimes the expansion looks too far ahead, so we want to insert
 a harmless \.{\\relax} into the user's input.
@@ -8348,7 +8381,7 @@ if (cur_cmd >= call)
     }
 else expand();
 goto restart;
-done: if (cur_cs==0) cur_tok=(cur_cmd*0400)+cur_chr;
+done: if (cur_cs==0) cur_tok=cmd_token(cur_cmd)+cur_chr;
 else cur_tok=cs_token_flag+cur_cs;
 }
 
@@ -8360,7 +8393,7 @@ procedure calls: |get_next;x_token|.
   {@+expand();
   get_next();
   }
-if (cur_cs==0) cur_tok=(cur_cmd*0400)+cur_chr;
+if (cur_cs==0) cur_tok=cmd_token(cur_cmd)+cur_chr;
 else cur_tok=cs_token_flag+cur_cs;
 }
 
@@ -8530,7 +8563,7 @@ a string that will delimit the next parameter.
 {@+scanner_status=matching;unbalance=0;
 long_state=eq_type(cur_cs);
 if (long_state >= outer_call) long_state=long_state-2;
-do {link(temp_head)=null;
+@/do@+{link(temp_head)=null;
 if ((info(r) > match_token+255)||(info(r) < match_token)) s=null;
 else{@+match_chr=info(r)-match_token;s=link(r);r=s;
   p=temp_head;m=0;
@@ -8538,7 +8571,7 @@ else{@+match_chr=info(r)-match_token;s=link(r);r=s;
 @<Scan a parameter until its delimiter string has been found; or, if |s=null|,
 simply scan the delimiter string@>;@/
  /*now |info(r)| is a token whose command code is either |match| or |end_match|*/
-} while (!(info(r)==end_match_token));
+}@+ while (!(info(r)==end_match_token));
 }
 
 @ If |info(r)| is a |match| or |end_match| command, it cannot be equal to
@@ -8638,7 +8671,7 @@ the rules.
 if (s!=r)
   if (s==null) @<Report an improper use of the macro and abort@>@;
   else{@+t=s;
-    do {store_new_token(info(t));incr(m);u=link(t);v=s;
+    @/do@+{store_new_token(info(t));incr(m);u=link(t);v=s;
     loop@+{@+if (u==r)
         if (cur_tok!=info(v)) goto done;
         else{@+r=link(v);goto resume;
@@ -8647,7 +8680,7 @@ if (s!=r)
       u=link(u);v=link(v);
       }
     done: t=link(t);
-    } while (!(t==r));
+    }@+ while (!(t==r));
     r=s; /*at this point, no tokens are recently matched*/
     }
 
@@ -8739,7 +8772,8 @@ if (cur_cmd!=left_brace)
 }
 
 @ @<Get the next non-blank non-relax non-call token@>=
-do get_x_token(); while (!((cur_cmd!=spacer)&&(cur_cmd!=relax)))
+@/do@+{get_x_token();
+}@+ while (!((cur_cmd!=spacer)&&(cur_cmd!=relax)))
 
 @ The |scan_optional_equals| routine looks for an optional `\.=' sign preceded
 by optional spaces; `\.{\\relax}' is not ignored here.
@@ -8750,7 +8784,8 @@ if (cur_tok!=other_token+'=') back_input();
 }
 
 @ @<Get the next non-blank non-call token@>=
-do get_x_token(); while (!(cur_cmd!=spacer))
+@/do@+{get_x_token();
+}@+ while (!(cur_cmd!=spacer))
 
 @ In case you are getting bored, here is a slightly less trivial routine:
 Given a string of lowercase letters, like `\.{pt}' or `\.{plus}' or
@@ -8809,9 +8844,9 @@ have to declare |scan_int| as a |forward| procedure. A few other
 procedures are also declared at this point.
 
 @p static void scan_int(void); /*scans an integer value*/
-@#@<Declare procedures that scan restricted classes of integers@>@;
-@<Declare \eTeX\ procedures for scanning@>@;
-@<Declare procedures that scan font-related stuff@>@;
+@t\4\4@>@<Declare procedures that scan restricted classes of integers@>@;
+@t\4\4@>@<Declare \eTeX\ procedures for scanning@>@;
+@t\4\4@>@<Declare procedures that scan font-related stuff@>@;
 
 @ \TeX\ doesn't know exactly what to expect when |scan_something_internal|
 begins.  For example, an integer or dimension or glue value could occur
@@ -8884,9 +8919,8 @@ the internal quantity to be scanned; an error will be signalled if
    /*fetch an internal parameter*/
 {@+
 halfword m; /*|chr_code| part of the operand token*/
-pointer @!q, @!r; /*general purpose indices*/
+pointer @!q; /*general purpose indices*/
 pointer @!tx; /*effective tail node*/
-four_quarters @!i; /*character info*/
 int @!p; /*index into |nest|*/
 m=cur_chr;
 switch (cur_cmd) {
@@ -8912,7 +8946,8 @@ case set_page_int: @<Fetch the |dead_cycles| or the |insert_penalties|@>@;@+brea
 case set_page_dimen: @<Fetch something on the |page_so_far|@>@;@+break;
 case set_shape: @<Fetch the |par_shape| size@>@;@+break;
 case set_box_dimen: @<Fetch a box dimension@>@;@+break;
-case char_given: case math_given: scanned_result(cur_chr, int_val)@;@+break;
+case char_given: scanned_result(cur_chr, int_val)@;@+break;
+case math_given: Umath_to_math(cur_chr); scanned_result(cur_chr, int_val)@;@+break;
 case assign_font_dimen: @<Fetch a font dimension@>@;@+break;
 case assign_font_int: @<Fetch a font integer@>@;@+break;
 case internal_register: @<Fetch a register@>@;@+break;
@@ -8925,7 +8960,9 @@ while (cur_val_level > level) @<Convert \(c)|cur_val| to a lower level@>;
 
 @ @<Fetch a character code from some table@>=
 {@+scan_char_num();
-if (m==math_code_base) scanned_result(ho(math_code(cur_val)), int_val)@;
+if (m>=utf_first_base && cur_val<0x100) m=utf_adjust_base(m);
+if (m>=utf_first_base) scanned_result(utf_lookup(m,cur_val), int_val)@;
+else if (m==math_code_base) scanned_result(ho(math_code(cur_val)), int_val)@;
 else if (m < math_code_base) scanned_result(equiv(m+cur_val), int_val)@;
 else scanned_result(eqtb[m+cur_val].i, int_val);
 }
@@ -8951,7 +8988,10 @@ else if (cur_cmd <= assign_toks)
         }
       }
     else cur_val=sa_ptr(m);
-  else cur_val=equiv(m);
+  else 
+  { if (m<utf_first_base) cur_val=equiv(m);
+    else cur_val=utf_lookup(m&utf_base_mask,m&utf_cp_mask);
+  }
   cur_val_level=tok_val;
   }
 else{@+back_input();scan_font_ident();
@@ -9009,9 +9049,9 @@ primitive("badness", last_item, badness_code);
 @ @<Cases of |print_cmd_chr|...@>=
 case set_aux: if (chr_code==vmode) print_esc("prevdepth");
 @+else print_esc("spacefactor");@+break;
-case set_page_int: if (chr_code==0) print_esc("deadcycles");
-else @<Cases of |set_page_int| for |print_cmd_chr|@>@;
-else print_esc("insertpenalties");@+break;
+case set_page_int: if (chr_code==0) print_esc("deadcycles")
+@/@<Cases of |set_page_int| for |print_cmd_chr|@>;@/
+@+else print_esc("insertpenalties");@+break;
 case set_box_dimen: if (chr_code==width_offset) print_esc("wd");
 else if (chr_code==height_offset) print_esc("ht");
 else print_esc("dp");@+break;
@@ -9020,7 +9060,7 @@ case last_item: switch (chr_code) {
   case dimen_val: print_esc("lastkern");@+break;
   case glue_val: print_esc("lastskip");@+break;
   case input_line_no_code: print_esc("inputlineno");@+break;
-  @/@t\4@>@<Cases of |last_item| for |print_cmd_chr|@>@;
+  @/@<Cases of |last_item| for |print_cmd_chr|@>@/
   default:print_esc("badness");
   } @+break;
 
@@ -9042,8 +9082,8 @@ else if (m==vmode)
 else scanned_result(space_factor, int_val)
 
 @ @<Fetch the |dead_cycles| or the |insert_penalties|@>=
-{@+if (m==0) cur_val=dead_cycles;
-else @<Cases for `Fetch the |dead_cycles| or the |insert_penalties|'@>@;
+{@+if (m==0) cur_val=dead_cycles
+@/@<Cases for `Fetch the |dead_cycles| or the |insert_penalties|'@>;@/
 else cur_val=insert_penalties;
 cur_val_level=int_val;
 }
@@ -9094,14 +9134,14 @@ else if (m >= input_line_no_code)
  if (m >= eTeX_glue) @<Process an expression and |return|@>@;
  else if (m >= eTeX_dim)
   {@+switch (m) {
-  @/@t\4@>@<Cases for fetching a dimension value@>@;
+  @/@<Cases for fetching a dimension value@>@/
   }  /*there are no other cases*/
   cur_val_level=dimen_val;
   }
  else{@+switch (m) {
   case input_line_no_code: cur_val=line;@+break;
   case badness_code: cur_val=last_badness;@+break;
-  @/@t\4@>@<Cases for fetching an integer value@>@;
+  @/@<Cases for fetching an integer value@>@/
   }  /*there are no other cases*/
   cur_val_level=int_val;
   }
@@ -9232,7 +9272,7 @@ if ((cur_val < 0)||(cur_val > 255))
 @ @<Declare procedures that scan restricted classes of integers@>=
 static void scan_char_num(void)
 {@+scan_int();
-if ((cur_val < 0)||(cur_val > 255))
+if ((cur_val < 0)||(cur_val > 0x10ffff))
   {@+print_err("Bad character code");
 @.Bad character code@>
   help2("A character number must be between 0 and 255.",@/
@@ -9326,11 +9366,11 @@ if (negative) negate(cur_val);
 
 @ @<Get the next non-blank non-sign token...@>=
 negative=false;
-do {@<Get the next non-blank non-call token@>;
+@/do@+{@<Get the next non-blank non-call token@>;
 if (cur_tok==other_token+'-')
   {@+negative=!negative;cur_tok=other_token+'+';
   }
-} while (!(cur_tok!=other_token+'+'));
+}@+ while (!(cur_tok!=other_token+'+'))
 
 @ A space is ignored after an alphabetic character constant, so that
 such constants behave like numeric ones.
@@ -9346,7 +9386,7 @@ if (cur_tok < cs_token_flag)
 else if (cur_tok < cs_token_flag+single_base)
   cur_val=cur_tok-cs_token_flag-active_base;
 else cur_val=cur_tok-cs_token_flag-single_base;
-if (cur_val > 255)
+if (cur_val > 0x10ffff)
   {@+print_err("Improper alphabetic constant");
 @.Improper alphabetic constant@>
   help2("A one-character control sequence belongs after a ` mark.",@/
@@ -9451,7 +9491,7 @@ int @!f; /*numerator of a fraction whose denominator is $2^{16}$*/
 f=0;arith_error=false;cur_order=normal;negative=false;
 cur_hfactor=cur_vfactor=0;
 if (!shortcut)
-  {@+@<Get the next non-blank non-sign...@>@;
+  {@+@<Get the next non-blank non-sign...@>;
   if ((cur_cmd >= min_internal)&&(cur_cmd <= max_internal))
     @<Fetch an internal dimension and |goto attach_sign|, or fetch an internal
 integer@>@;
@@ -9690,7 +9730,7 @@ most of the work has already been done.
 bool negative; /*should the answer be negated?*/
 pointer @!q; /*new glue specification*/
 bool @!mu; /*does |level==mu_val|?*/
-mu=(level==mu_val);@<Get the next non-blank non-sign...@>@;
+mu=(level==mu_val);@<Get the next non-blank non-sign...@>;
 if ((cur_cmd >= min_internal)&&(cur_cmd <= max_internal))
   {@+scan_something_internal(level, negative);
   if (cur_val_level >= glue_val)
@@ -9870,7 +9910,7 @@ case convert: switch (chr_code) {
   case font_name_code: print_esc("fontname");@+break;
   case job_name_code: print_esc("jobname");@+break;
   case eTeX_revision_code: print_esc("eTeXrevision");@+break;
-  @/@t\4@>@<Cases of |convert| for |print_cmd_chr|@>@;
+  @/@<Cases of |convert| for |print_cmd_chr|@>@/
   } @+break;
 
 @ The procedure |conv_toks| uses |str_toks| to insert the token list
@@ -9901,7 +9941,7 @@ case string_code: case meaning_code: {@+save_scanner_status=scanner_status;
 case font_name_code: scan_font_ident();@+break;
 case job_name_code: if (job_name==0) open_log_file();@+break;
 case eTeX_revision_code: do_nothing;@+break;
-@/@t\4@>@<Cases of `Scan the argument for command |c|'@>@;
+@/@<Cases of `Scan the argument for command |c|'@>@/
 }  /*there are no other cases*/
 
 @ @<Print the result of command |c|@>=
@@ -9919,7 +9959,7 @@ case font_name_code: {@+printn(font_name[cur_val]);
   } @+break;
 case eTeX_revision_code: print(eTeX_revision);@+break;
 case job_name_code: printn(job_name);@+break;
-@/@t\4@>@<Cases of `Print the result of command |c|'@>@;
+@/@<Cases of `Print the result of command |c|'@>@/
 }  /*there are no other cases*/
 
 @ Now we can't postpone the difficulties any longer; we must bravely tackle
@@ -10095,13 +10135,13 @@ p=def_ref; /*the reference count*/
 store_new_token(end_match_token);
 if ((n < 0)||(n > 15)) m=16;@+else m=n;
 s=align_state;align_state=1000000; /*disable tab marks, etc.*/
-do @<Input and store tokens from the next line of the file@>@;
-while (!(align_state==1000000));
+@/do@+{@<Input and store tokens from the next line of the file@>;
+}@+ while (!(align_state==1000000));
 cur_val=def_ref;scanner_status=normal;align_state=s;
 }
 
 @ @<Input and store tokens from the next line of the file@>=
-{begin_file_reading();name=m+1;
+begin_file_reading();name=m+1;
 if (read_open[m]==closed) @<Input for \.{\\read} from the terminal@>;
 else if (read_open[m]==just_open) @<Input the first line of |read_file[m]|@>@;
 else@<Input the next line of |read_file[m]|@>;
@@ -10114,12 +10154,12 @@ loop@+{@+get_token();
   if (cur_tok==0) goto done;
      /*|cur_cmd==cur_chr==0| will occur at the end of the line*/
   if (align_state < 1000000)  /*unmatched `\.\}' aborts the line*/
-    {@+do get_token(); while (!(cur_tok==0));
+    {@+@/do@+{get_token();}@+ while (!(cur_tok==0));
     align_state=1000000;goto done;
     }
   store_new_token(cur_tok);
   }
-done: end_file_reading();}
+done: end_file_reading()
 
 @ Here we input on-line into the |buffer| array, prompting the user explicitly
 if |n >= 0|.  The value of |n| is set negative so that additional prompts
@@ -10237,7 +10277,7 @@ switch (chr_code%unless_code) {
   case if_true_code: print_esc("iftrue");@+break;
   case if_false_code: print_esc("iffalse");@+break;
   case if_case_code: print_esc("ifcase");@+break;
-  @/@t\4@>@<Cases of |if_test| for |print_cmd_chr|@>@;
+  @/@<Cases of |if_test| for |print_cmd_chr|@>@/
   default:print_esc("if");
   }
 } @+break;
@@ -10418,7 +10458,7 @@ case if_eof_code: {@+scan_four_bit_int();b=(read_open[cur_val]==closed);
   } @+break;
 case if_true_code: b=true;@+break;
 case if_false_code: b=false;@+break;
-@/@t\4@>@<Cases for |conditional|@>@;
+@/@<Cases for |conditional|@>@/
 case if_case_code: @<Select the appropriate case and |return| or |goto common_ending|@>;
 }  /*there are no other cases*/
 
@@ -10664,9 +10704,9 @@ to place.
 @ Here now is the first of the system-dependent routines for file name scanning.
 @^system dependencies@>
 
-@p static bool quoted_filename;
+@p static bool quoted_filename,inside_quote;
 static void begin_name(void)
-{@+area_delimiter=0;ext_delimiter=0; quoted_filename=false;
+{@+area_delimiter=0;ext_delimiter=0; quoted_filename=inside_quote=false;
 }
 
 @ And here's the second. The string pool might change as the file name is
@@ -10676,8 +10716,9 @@ string, instead of assigning an absolute address like |pool_ptr| to them.
 @^system dependencies@>
 
 @p static bool more_name(ASCII_code @!c)
-{@+if (c==' ' && !quoted_filename) return false;
-else if (c=='"') {@+quoted_filename=!quoted_filename; return true; }
+{@+if (c==' ' && !inside_quote) return false;
+else if (c=='"') {@+ if (cur_length==0) quoted_filename=true;
+  inside_quote=!inside_quote; return true; }
 else {@+str_room(1);append_char(c); /*contribute |c| to the current string*/
   if (IS_DIR_SEP(c)) {@+area_delimiter=cur_length;ext_delimiter=0; }
   else if (c=='.') ext_delimiter=cur_length;
@@ -10791,11 +10832,8 @@ else{@+for (k=1; k<=name_length; k++) append_char(xord[name_of_file[k]]);
 static str_number a_make_name_string(alpha_file *f)
 {@+return make_name_string();
 }
-static str_number b_make_name_string(byte_file *f)
-{@+return make_name_string();
-}
+
 #ifdef @!INIT
-@+@t}\6\4\4{@>
 static str_number w_make_name_string(word_file *f)
 {@+return make_name_string();
 }
@@ -11388,10 +11426,10 @@ static str_number @!font_name0[font_max-font_base+1],
   *const @!font_name = @!font_name0-font_base; /*name of the font*/
 static str_number @!font_area0[font_max-font_base+1],
   *const @!font_area = @!font_area0-font_base; /*area of the font*/
-static eight_bits @!font_bc0[font_max-font_base+1],
+static int @!font_bc0[font_max-font_base+1],
   *const @!font_bc = @!font_bc0-font_base;
    /*beginning (smallest) character code*/
-static eight_bits @!font_ec0[font_max-font_base+1],
+static int @!font_ec0[font_max-font_base+1],
   *const @!font_ec = @!font_ec0-font_base;
    /*ending (largest) character code*/
 static pointer @!font_glue0[font_max-font_base+1],
@@ -11512,13 +11550,13 @@ as fast as possible under the circumstances.
 @^inner loop@>
 
 @d char_info(A, B) font_info[char_base[A]+B].qqqq
-@d char_width(A, B) font_info[width_base[A]+B.b0].sc
-@d char_exists(A) (A.b0 > min_quarterword)
-@d char_italic(A, B) font_info[italic_base[A]+(qo(B.b2))/4].sc
+@d char_width(A, B) (IS_X_FONT(A)? x_char_width(A,B):font_info[width_base[A]+char_info(A,B).b0].sc)
+@d char_exists(A,B)  (IS_X_FONT(A)?x_char_exists(A,B): char_info(A,B).b0 > min_quarterword)
+@d char_italic(A, B) (IS_X_FONT(A)? x_char_italic(A,B):font_info[italic_base[A]+(char_info(A,B).b2)/4].sc)
 @d height_depth(A) qo(A.b1)
-@d char_height(A, B) font_info[height_base[A]+(B)/16].sc
-@d char_depth(A, B) font_info[depth_base[A]+(B)%16].sc
-@d char_tag(A) ((qo(A.b2))%4)
+@d char_height(A, B) (IS_X_FONT(A)? x_char_height(A,B):font_info[height_base[A]+(char_info(A,B).b1)/16].sc)
+@d char_depth(A, B) (IS_X_FONT(A)? x_char_depth(A,B):font_info[depth_base[A]+(char_info(A,B).b1)%16].sc)
+@d char_tag(A,B) (IS_X_FONT(A)? no_tag:((qo(B.b2))%4)) /*we need extended font |A|*/
 
 @ The global variable |null_character| is set up to be a word of
 |char_info| for a character that doesn't exist. Such a word provides a
@@ -11549,8 +11587,8 @@ that do not do local optimization.
 
 @ Font parameters are referred to as |slant(f)|, |space(f)|, etc.
 
-@d param_end(A) @[param_base[A]].sc@]
-@d param(A) @[font_info[A+param_end@]
+@d param_end(A) param_base[A]].sc
+@d param(A) font_info[A+param_end
 @d slant param(slant_code) /*slant to the right, per unit distance upward*/
 @d space param(space_code) /*normal space between words*/
 @d space_stretch param(space_stretch_code) /*stretch between words*/
@@ -11582,10 +11620,10 @@ information is stored; |null_font| is returned in this case.
 @d abort goto bad_tfm /*do this when the \.{TFM} data is wrong*/
 
 @p static internal_font_number read_font_info(pointer @!u, str_number @!nom, str_number @!aire,
-  scaled @!s) /*input a \.{TFM} file*/
+  scaled @!s) /*input a font file*/
 {@+
 int k; /*index into |font_info|*/
-bool @!file_opened; /*was |tfm_file| successfully opened?*/
+bool @!file_opened; /*was the file successfully opened?*/
 halfword @!lf, @!lh, @!bc, @!ec, @!nw, @!nh, @!nd, @!ni, @!nl, @!nk, @!ne, @!np;
    /*sizes of subfiles*/
 internal_font_number @!f; /*the new font's number*/
@@ -11595,14 +11633,16 @@ four_quarters @!qw;scaled @!sw; /*accumulators*/
 int @!bch_label; /*left boundary start location, or infinity*/
 int @!bchar; /*boundary character, or 256*/
 scaled @!z; /*the design size or the ``at'' size*/
-int @!alpha;int @!beta;
-   /*auxiliary quantities used in fixed-point multiplication*/
+int @!alpha;int @!beta;  /*auxiliary quantities used in fixed-point multiplication*/
+char* path = NULL; /*the path of the new font file*/
 g=null_font;@/
-@<Read and check the font data; |abort| if the \.{TFM} file is malformed;
+file_opened=false;
+@<Read and check the font data; |abort| if the font file is malformed;
 if there's no room for this font, say so and |goto done|; otherwise |incr(font_ptr)|
 and |goto done|@>;
 bad_tfm: @<Report that the font won't be loaded@>;
-done: if (file_opened) b_close(&tfm_file);
+done: if (tfm_file.f!=NULL) b_close(&tfm_file);
+@<Trace the new font@>@;
 return g;
 }
 
@@ -11625,9 +11665,9 @@ precise details about why it rejects a particular \.{TFM} file.
 @<Report that the font won't be loaded@>=
 start_font_error_message;
 @.Font x=xx not loadable...@>
-if (file_opened) print(" not loadable: Bad metric (TFM) file");
-else print(" not loadable: Metric (TFM) file not found");
-help5("I wasn't able to read the size data for this font,",@/
+if (file_opened) print(" not loadable: Bad font file");
+else print(" not loadable: font file not found");
+help5("I wasn't able to read the data for this font,",@/
 "so I will ignore the font specification.",@/
 "[Wizards can fix TFM files using TFtoPL/PLtoTF.]",@/
 "You might try inserting a different font spec;",@/
@@ -11636,6 +11676,7 @@ error()
 
 @ @<Read and check...@>=
 @<Open |tfm_file| for input@>;
+if (file_opened) {
 @<Read the {\.{TFM}} size fields@>;
 @<Use size fields to allocate font information@>;
 @<Read the {\.{TFM}} header@>;
@@ -11645,12 +11686,14 @@ error()
 @<Read extensible character recipes@>;
 @<Read font parameters@>;
 @<Make final adjustments and |goto done|@>@;
+}
+else
+@<Open an extended font file for input@>@;
 
 @ @<Open |tfm_file| for input@>=
-file_opened=false;
 pack_file_name(nom, empty_string,empty_string,".tfm"); /* \TeX\ Live */
-if (!b_open_in(&tfm_file)) abort;
-file_opened=true
+path=kpse_find_file((char*)name_of_file+1, kpse_tfm_format, 0);
+if (path!=NULL && b_open_in(&tfm_file)) file_opened=true;
 
 @ Note: A malformed \.{TFM} file might be shorter than it claims to be;
 thus |eof(tfm_file)| might be true when |read_font_info| refers to
@@ -11771,7 +11814,7 @@ the largest character code in the cycle.
 while (d < current_character_being_worked_on)
   {@+qw=char_info(f, d);
    /*N.B.: not |qi(d)|, since |char_base[f]| hasn't been adjusted yet*/
-  if (char_tag(qw)!=list_tag) goto not_found;
+  if (char_tag(f,qw)!=list_tag) goto not_found;
   d=qo(rem_byte(qw)); /*next character on the list*/
   }
 if (d==current_character_being_worked_on) abort; /*yes, there's a cycle*/
@@ -11822,7 +11865,7 @@ beta=256/alpha;alpha=alpha*z;
 @ @d check_existence(A) @t@>@;@/
   {@+check_byte_range(A);
   qw=char_info(f, A); /*N.B.: not |qi(A)|*/
-  if (!char_exists(qw)) abort;
+  if (!char_exists(f,A)) abort;
   }
 
 @<Read ligature/kern program@>=
@@ -11886,7 +11929,7 @@ font_bchar[f]=qi(bchar);
 font_false_bchar[f]=qi(bchar);
 if (bchar <= ec) if (bchar >= bc)
   {@+qw=char_info(f, bchar); /*N.B.: not |qi(bchar)|*/
-  if (char_exists(qw)) font_false_bchar[f]=non_char;
+  if (char_exists(f,bchar)) font_false_bchar[f]=non_char;
   }
 font_name[f]=nom;
 font_area[f]=aire;
@@ -11894,7 +11937,7 @@ font_bc[f]=bc;font_ec[f]=ec;font_glue[f]=null;
 adjust(char_base);adjust(width_base);adjust(lig_kern_base);
 adjust(kern_base);adjust(exten_base);
 decr(param_base[f]);
-fmem_ptr=fmem_ptr+lf;font_ptr=f;g=f;goto done
+fmem_ptr=fmem_ptr+lf;font_ptr=f;g=f;goto done;
 
 @ Before we forget about the format of these tables, let's deal with two
 of \TeX's basic scanning routines related to font information.
@@ -11954,11 +11997,11 @@ if (cur_val==fmem_ptr)
   }
 
 @ @<Increase the number of parameters...@>=
-{@+do {if (fmem_ptr==font_mem_size)
+{@+@/do@+{if (fmem_ptr==font_mem_size)
   overflow("font memory", font_mem_size);
 @:TeX capacity exceeded font memory}{\quad font memory@>
 font_info[fmem_ptr].sc=0;incr(fmem_ptr);incr(font_params[f]);
-} while (!(n==font_params[f]));
+}@+ while (!(n==font_params[f]));
 cur_val=fmem_ptr-1; /*this equals |param_base[f]+font_params[f]|*/
 }
 
@@ -11990,7 +12033,7 @@ given character in a given font. If that character doesn't exist,
 {@+
 pointer p; /*newly allocated node*/
 if (font_bc[f] <= c) if (font_ec[f] >= c)
-  if (char_exists(char_info(f, qi(c))))
+  if (char_exists(f, qi(c)))
     {@+p=get_avail();font(p)=f;character(p)=qi(c);
     return p;
     }
@@ -12618,12 +12661,6 @@ else{@+write_dvi(half_buf, dvi_buf_size-1);dvi_limit=dvi_buf_size;
 dvi_gone=dvi_gone+half_buf;
 }
 
-@ Here is how we clean out the buffer when \TeX\ is all through; |dvi_ptr|
-will be a multiple of~4.
-
-@<Empty the last bytes out of |dvi_buf|@>=
-if (dvi_limit==half_buf) write_dvi(half_buf, dvi_buf_size-1);
-if (dvi_ptr > 0) write_dvi(0, dvi_ptr-1)
 
 @ The |dvi_four| procedure outputs four bytes in two's complement notation,
 without risking arithmetic overflow.
@@ -12966,24 +13003,6 @@ static scaled @!cur_h, @!cur_v; /*\TeX\ thinks we are here*/
 static internal_font_number @!dvi_f; /*the current font*/
 static int @!cur_s; /*current depth of output box nesting, initially $-1$*/
 
-@ @<Initialize variables as |ship_out| begins@>=
-dvi_h=0;dvi_v=0;cur_h=h_offset;dvi_f=null_font;
-ensure_dvi_open;
-if (total_pages==0)
-  {@+dvi_out(pre);dvi_out(id_byte); /*output the preamble*/
-@^preamble of \.{DVI} file@>
-  dvi_four(25400000);dvi_four(473628672); /*conversion ratio for sp*/
-  prepare_mag();dvi_four(mag); /*magnification factor is frozen*/
-  old_setting=selector;selector=new_string;
-  print(" TeX output ");print_int(year);print_char('.');
-  print_two(month);print_char('.');print_two(day);
-  print_char(':');print_two(time/60);
-  print_two(time%60);
-  selector=old_setting;dvi_out(cur_length);
-  for (s=str_start[str_ptr]; s<=pool_ptr-1; s++) dvi_out(so(str_pool[s]));
-  pool_ptr=str_start[str_ptr]; /*flush the current string*/
-  }
-
 @ When |hlist_out| is called, its duty is to output the box represented
 by the |hlist_node| pointed to by |temp_ptr|. The reference point of that
 box has coordinates |(cur_h, cur_v)|.
@@ -13002,7 +13021,7 @@ entering a new level of recursion.  In effect, the values of |save_h| and
 |save_v| on \TeX's run-time stack correspond to the values of |h| and |v|
 that a \.{DVI}-reading program will push onto its coordinate stack.
 
-@p @<Declare procedures needed in |hlist_out|, |vlist_out|@>@t@>@;
+@p @t\4@>@<Declare procedures needed in |hlist_out|, |vlist_out|@>@t@>@/
 static void hlist_out(void) /*output an |hlist_node| box*/
 {@+
 scaled base_line; /*the baseline coordinate for this box*/
@@ -13044,13 +13063,13 @@ reaching a non-|char_node|. The program uses the fact that |set_char_0==0|.
 @<Output node |p| for |hlist_out|...@>=
 reswitch: if (is_char_node(p))
   {@+synch_h;synch_v;
-  do {f=font(p);c=character(p);
+  @/do@+{f=font(p);c=character(p);
   if (f!=dvi_f) @<Change font |dvi_f| to |f|@>;
   if (c >= qi(128)) dvi_out(set1);
   dvi_out(qo(c));@/
-  cur_h=cur_h+char_width(f, char_info(f, c));
+  cur_h=cur_h+char_width(f, c);
   p=link(p);
-  } while (!(!is_char_node(p)));
+  }@+ while (!(!is_char_node(p)));
   dvi_h=cur_h;
   }
 else@<Output the non-|char_node| |p| for |hlist_out| and move to the next
@@ -13355,109 +13374,9 @@ ready for the |ship_out| routine that gets them started in the first place.
 @p static void ship_out(pointer @!p) /*output the box |p|*/
 {@+
 execute_output(p);
-@<Flush the box from memory...@>@;
+flush_node_list(p);
 }
 
-@ @<Flush the box from memory, showing statistics if requested@>=
-#ifdef @!STAT
-if (tracing_stats > 1)
-  {@+print_nl("Memory usage before: ");
-@.Memory usage...@>
-  print_int(var_used);print_char('&');
-  print_int(dyn_used);print_char(';');
-  }
-#endif
-flush_node_list(p);
-#ifdef @!STAT
-if (tracing_stats > 1)
-  {@+print(" after: ");
-  print_int(var_used);print_char('&');
-  print_int(dyn_used);print("; still untouched: ");
-  print_int(hi_mem_min-lo_mem_max-1);print_ln();
-  }
-#endif
-
-@ @<Ship box |p| out@>=
-@<Update the values of |max_h| and |max_v|; but if the page is too large,
-|goto done|@>;
-@<Initialize variables as |ship_out| begins@>;
-page_loc=dvi_offset+dvi_ptr;
-dvi_out(bop);
-for (k=0; k<=9; k++) dvi_four(count(k));
-dvi_four(last_bop);last_bop=page_loc;
-cur_v=height(p)+v_offset;temp_ptr=p;
-if (type(p)==vlist_node) vlist_out();@+else hlist_out();
-dvi_out(eop);incr(total_pages);cur_s=-1;
-done:
-
-@ Sometimes the user will generate a huge page because other error messages
-are being ignored. Such pages are not output to the \.{dvi} file, since they
-may confuse the printing software.
-
-@<Update the values of |max_h| and |max_v|; but if the page is too large...@>=
-if ((height(p) > max_dimen)||@|(depth(p) > max_dimen)||@|
-   (height(p)+depth(p)+v_offset > max_dimen)||@|
-   (width(p)+h_offset > max_dimen))
-  {@+print_err("Huge page cannot be shipped out");
-@.Huge page...@>
-  help2("The page just created is more than 18 feet tall or",@/
-   "more than 18 feet wide, so I suspect something went wrong.");
-  error();
-  if (tracing_output <= 0)
-    {@+begin_diagnostic();
-    print_nl("The following box has been deleted:");
-@.The following...deleted@>
-    show_box(p);
-    end_diagnostic(true);
-    }
-  goto done;
-  }
-if (height(p)+depth(p)+v_offset > max_v) max_v=height(p)+depth(p)+v_offset;
-if (width(p)+h_offset > max_h) max_h=width(p)+h_offset
-
-@ At the end of the program, we must finish things off by writing the
-post\-amble. If |total_pages==0|, the \.{DVI} file was never opened.
-If |total_pages >= 65536|, the \.{DVI} file will lie. And if
-|max_push >= 65536|, the user deserves whatever chaos might ensue.
-
-An integer variable |k| will be declared for use by this routine.
-
-@<Finish the \.{DVI} file@>=
-while (cur_s > -1)
-  {@+if (cur_s > 0) dvi_out(pop)@;
-  else{@+dvi_out(eop);incr(total_pages);
-    }
-  decr(cur_s);
-  }
-if (total_pages==0) print_nl("No pages of output.");
-@.No pages of output@>
-else{@+dvi_out(post); /*beginning of the postamble*/
-  dvi_four(last_bop);last_bop=dvi_offset+dvi_ptr-5; /*|post| location*/
-  dvi_four(25400000);dvi_four(473628672); /*conversion ratio for sp*/
-  prepare_mag();dvi_four(mag); /*magnification factor*/
-  dvi_four(max_v);dvi_four(max_h);@/
-  dvi_out(max_push/256);dvi_out(max_push%256);@/
-  dvi_out((total_pages/256)%256);dvi_out(total_pages%256);@/
-  @<Output the font definitions for all fonts that were used@>;
-  dvi_out(post_post);dvi_four(last_bop);dvi_out(id_byte);@/
-  k=4+((dvi_buf_size-dvi_ptr)%4); /*the number of 223's*/
-  while (k > 0)
-    {@+dvi_out(223);decr(k);
-    }
-  @<Empty the last bytes out of |dvi_buf|@>;
-  print_nl("Output written on ");slow_print(output_file_name);
-@.Output written on x@>
-  print(" (");print_int(total_pages);print(" page");
-  if (total_pages!=1) print_char('s');
-  print(", ");print_int(dvi_offset+dvi_ptr);print(" bytes).");
-  b_close(&dvi_file);
-  }
-
-@ @<Output the font definitions...@>=
-while (font_ptr > font_base)
-  {@+if (font_used[font_ptr]) dvi_font_def(font_ptr);
-  decr(font_ptr);
-  }
 
 @* Packaging.
 We're essentially done with the parts of \TeX\ that are concerned with
@@ -13489,7 +13408,7 @@ a height instead of a width; the parameter |m| is interpreted as in |hpack|.
 
 @d exactly 0 /*a box dimension is pre-specified*/
 @d additional 1 /*a box dimension is increased from the natural one*/
-@d natural 0, 0, 0, additional /*shorthand for parameters to |hpack| and |vpack|*/
+@d natural 0, 0, 0, additional, false /*shorthand for parameters to |hpack| and |vpack|*/
 
 @ The parameters to |hpack| and |vpack| correspond to \TeX's primitives
 like `\.{\\hbox} \.{to} \.{300pt}', `\.{\\hbox} \.{spread} \.{10pt}'; note
@@ -13565,7 +13484,7 @@ static pointer @!adjust_tail; /*tail of adjustment list*/
 
 @ Here now is |hpack|, which contains few if any surprises.
 
-@p static pointer hpack(pointer p, scaled w, scaled hf, scaled vf, small_number m);
+@p static pointer hpack(pointer p, scaled w, scaled hf, scaled vf, small_number m, bool keep_cs);
 
 @ @<Clear dimensions to zero@>=
 d=0;x=0;
@@ -13573,29 +13492,6 @@ total_stretch[normal]=0;total_shrink[normal]=0;
 total_stretch[fil]=0;total_shrink[fil]=0;
 total_stretch[fill]=0;total_shrink[fill]=0;
 total_stretch[filll]=0;total_shrink[filll]=0
-
-@ @<Examine node |p| in the hlist, taking account of its effect...@>=
-@^inner loop@>
-{@+reswitch: while (is_char_node(p))
-  @<Incorporate character dimensions into the dimensions of the hbox that
-will contain~it, then move to the next node@>;
-if (p!=null)
-  {@+switch (type(p)) {
-  case hlist_node: case vlist_node: case rule_node:
-  case unset_node: case unset_set_node: case unset_pack_node:
-    @<Incorporate box dimensions into the dimensions of the hbox that will
-contain~it@>@;@+break;
-  case ins_node: case mark_node: case adjust_node: if (adjust_tail!=null)
-    @<Transfer node |p| to the adjustment list@>@;@+break;
-  case whatsit_node: @<Incorporate a whatsit node into an hbox@>;@+break;
-  case glue_node: @<Incorporate glue into the horizontal totals@>@;@+break;
-  case kern_node: case math_node: x=x+width(p);@+break;
-  case ligature_node: @<Make node |p| look like a |char_node| and |goto reswitch|@>@;
-  default:do_nothing;
-  } @/
-  p=link(p);
-  }
-}
 
 
 @ @<Make node |p| look like a |char_node| and |goto reswitch|@>=
@@ -13620,10 +13516,22 @@ to be exercised one more time.
 @^inner loop@>
 
 @<Incorporate character dimensions into the dimensions of the hbox...@>=
-{@+f=font(p);i=char_info(f, character(p));hd=height_depth(i);
-x=x+char_width(f, i);@/
-s=char_height(f, hd);@+if (s > h) h=s;
-s=char_depth(f, hd);@+if (s > d) d=s;
+{@+f=font(p);
+if (IS_X_FONT(f))
+{ hb_codepoint_t glyph;
+  if (x_glyph(f,character(p),&glyph))
+  { scaled ph, pd;
+    x+=x_glyph_width(f,glyph);
+    x_glyph_height_depth(f,glyph,&ph,&pd);
+    if (ph>h) h=ph;
+    if (pd>d) d=pd;
+  } 
+}
+else
+{ x=x+char_width(f, character(p));@/
+  s=char_height(f, character(p));@+if (s > h) h=s;
+  s=char_depth(f, character(p));@+if (s > d) d=s;
+}
 p=link(p);
 }
 
@@ -13717,21 +13625,6 @@ static int @!pack_begin_line; /*source file line where the current paragraph
 @ @<Set init...@>=
 pack_begin_line=0;
 
-@ @<Finish issuing a diagnostic message for an overfull or underfull hbox@>=
-if (output_active) print(") has occurred while \\output is active");
-else{@+if (pack_begin_line!=0)
-    {@+if (pack_begin_line > 0) print(") in paragraph at lines ");
-    else print(") in alignment at lines ");
-    print_int(abs(pack_begin_line));
-    print("--");
-    }
-  else print(") detected at line ");
-  print_int(line);
-  }
-print_ln();@/
-font_in_short_display=null_font;short_display(list_ptr(r));print_ln();@/
-begin_diagnostic();show_box(r);end_diagnostic(true)
-
 @ @<Determine horizontal glue shrink setting...@>=
 {@+@<Determine the shrink order@>;
 glue_order(r)=o;glue_sign(r)=shrinking;
@@ -13790,151 +13683,26 @@ point is simply moved down until the limiting depth is attained.
 
 @p
 #define vpack(...) @[vpackage(__VA_ARGS__, max_dimen)@] /*special case of unconstrained depth*/
-static pointer vpackage(pointer p, scaled h, scaled hf, scaled vf, small_number m, scaled l);
-
-@ @<Examine node |p| in the vlist, taking account of its effect...@>=
-{@+if (is_char_node(p)) confusion("vpack");
-@:this can't happen vpack}{\quad vpack@>
-else switch (type(p)) {
-  case hlist_node: case vlist_node: case rule_node:
-  case unset_node: case unset_set_node: case unset_pack_node:
-    @<Incorporate box dimensions into the dimensions of the vbox that will
-contain~it@>@;@+break;
-  case whatsit_node: @<Incorporate a whatsit node into a vbox@>;@+break;
-  case glue_node: @<Incorporate glue into the vertical totals@>@;@+break;
-  case kern_node: {@+x=x+d+width(p);d=0;
-    } @+break;
-  default:do_nothing;
-  }
-p=link(p);
-}
-
-@ @<Incorporate box dimensions into the dimensions of the vbox...@>=
-{@+x=x+d+height(p);d=depth(p);
-if (type(p) >= rule_node) s=0;@+else s=shift_amount(p);
-if (width(p)+s > w) w=width(p)+s;
-}
-
-@ @<Incorporate glue into the vertical totals@>=
-{@+x=x+d;d=0;@/
-g=glue_ptr(p);x=x+width(g);@/
-o=stretch_order(g);total_stretch[o]=total_stretch[o]+stretch(g);
-o=shrink_order(g);total_shrink[o]=total_shrink[o]+shrink(g);
-if (subtype(p) >= a_leaders)
-  {@+g=leader_ptr(p);
-  if (width(g) > w) w=width(g);
-  }
-}
-
-@ When we get to the present part of the program, |x| is the natural height
-of the box being packaged.
-
-@<Determine the value of |height(r)| and the appropriate glue setting...@>=
-if (m==additional) h=x+h;
-height(r)=h;x=h-x; /*now |x| is the excess to be made up*/
-if (x==0)
-  {@+glue_sign(r)=normal;glue_order(r)=normal;
-  set_glue_ratio_zero(glue_set(r));
-  goto end;
-  }
-else if (x > 0) @<Determine vertical glue stretch setting, then |return| or
-\hbox{|goto common_ending|}@>@;
-else@<Determine vertical glue shrink setting, then |return| or \hbox{|goto
-common_ending|}@>@;
-
-@ @<Determine vertical glue stretch setting...@>=
-{@+@<Determine the stretch order@>;
-glue_order(r)=o;glue_sign(r)=stretching;
-if (total_stretch[o]!=0) glue_set(r)=fix(x/(double)total_stretch[o]);
-@^real division@>
-else{@+glue_sign(r)=normal;
-  set_glue_ratio_zero(glue_set(r)); /*there's nothing to stretch*/
-  }
-if (o==normal) if (list_ptr(r)!=null)
-  @<Report an underfull vbox and |goto common_ending|, if this box is sufficiently
-bad@>;
-goto end;
-}
-
-@ @<Report an underfull vbox and |goto common_ending|, if...@>=
-{@+last_badness=badness(x, total_stretch[normal]);
-if (last_badness > vbadness)
-  {@+print_ln();
-  if (last_badness > 100) print_nl("Underfull");@+else print_nl("Loose");
-  print(" \\vbox (badness ");print_int(last_badness);
-@.Underfull \\vbox...@>
-@.Loose \\vbox...@>
-  goto common_ending;
-  }
-}
-
-@ @<Finish issuing a diagnostic message for an overfull or underfull vbox@>=
-if (output_active) print(") has occurred while \\output is active");
-else{@+if (pack_begin_line!=0)  /*it's actually negative*/
-    {@+print(") in alignment at lines ");
-    print_int(abs(pack_begin_line));
-    print("--");
-    }
-  else print(") detected at line ");
-  print_int(line);
-  print_ln();@/
-  }
-begin_diagnostic();show_box(r);end_diagnostic(true)
-
-@ @<Determine vertical glue shrink setting...@>=
-{@+@<Determine the shrink order@>;
-glue_order(r)=o;glue_sign(r)=shrinking;
-if (total_shrink[o]!=0) glue_set(r)=fix((-x)/(double)total_shrink[o]);
-@^real division@>
-else{@+glue_sign(r)=normal;
-  set_glue_ratio_zero(glue_set(r)); /*there's nothing to shrink*/
-  }
-if ((total_shrink[o] < -x)&&(o==normal)&&(list_ptr(r)!=null))
-  {@+last_badness=1000000;
-  set_glue_ratio_one(glue_set(r)); /*use the maximum shrinkage*/
-  @<Report an overfull vbox and |goto common_ending|, if this box is sufficiently
-bad@>;
-  }
-else if (o==normal) if (list_ptr(r)!=null)
-  @<Report a tight vbox and |goto common_ending|, if this box is sufficiently
-bad@>;
-goto end;
-}
-
-@ @<Report an overfull vbox and |goto common_ending|, if...@>=
-if ((-x-total_shrink[normal] > vfuzz)||(vbadness < 100))
-  {@+print_ln();print_nl("Overfull \\vbox (");
-@.Overfull \\vbox...@>
-  print_scaled(-x-total_shrink[normal]);print("pt too high");
-  goto common_ending;
-  }
-
-@ @<Report a tight vbox and |goto common_ending|, if...@>=
-{@+last_badness=badness(-x, total_shrink[normal]);
-if (last_badness > vbadness)
-  {@+print_ln();print_nl("Tight \\vbox (badness ");print_int(last_badness);
-@.Tight \\vbox...@>
-  goto common_ending;
-  }
-}
+static pointer vpackage(pointer p, scaled h, scaled hf, scaled vf, small_number m, bool keep_cs, scaled l);
 
 @ When a box is being appended to the current vertical list, the
 baselineskip calculation is handled by the |append_to_vlist| routine.
 
-@p static void append_to_vlist(pointer @!b)
-{ @+bool height_known;
+@p static void append_to_vlist(pointer @!b)@t\2\2@>@/
+{ bool height_known;@t\1@>@/
   height_known=(type(b)==hlist_node || type(b)==vlist_node ||@|
 	   (type(b)==whatsit_node && subtype(b)==hset_node));@/
   if (prev_depth > ignore_depth && height_known)@/
-  {@+scaled d; /*deficiency of space between baselines*/
+  {@+scaled d;@t\1@> /*deficiency of space between baselines*/
     pointer @!p; /*a new glue node*/
-  d=width(baseline_skip)-prev_depth-height(b);
+  {@+d=width(baseline_skip)-prev_depth-height(b);
   if (d < line_skip_limit) p=new_param_glue(line_skip_code);
   else{@+p=new_skip_param(baseline_skip_code);
     width(temp_ptr)=d; /*|temp_ptr==glue_ptr(p)|*/
     }
   link(tail)=p;tail=p;
-} @+  else @+if (prev_depth<=unknown_depth || prev_depth>ignore_depth ) @/
+  }@+
+} @+  else @+if (prev_depth<=unknown_depth || prev_depth>ignore_depth )@t\2@>@/
   {@+pointer p;
 	p=new_baseline_node(baseline_skip, line_skip, line_skip_limit);
     link(tail)= p;tail= p;
@@ -14549,7 +14317,6 @@ int @!m, @!n; /*the number of extensible pieces*/
 scaled @!u; /*height-plus-depth of a tentative character*/
 scaled @!w; /*largest height-plus-depth so far*/
 four_quarters @!q; /*character info*/
-eight_bits @!hd; /*height-depth byte*/
 four_quarters @!r; /*extensible pieces*/
 small_number @!z; /*runs through font family members*/
 bool @!large_attempt; /*are we trying the ``large'' variant?*/
@@ -14576,29 +14343,28 @@ be probed in increasing order of height.
 @<Look at the variants of |(z,x)|; set |f| and |c|...@>=
 if ((z!=0)||(x!=min_quarterword))
   {@+z=z+s+16;
-  do {z=z-16;g=fam_fnt(z);
+  @/do@+{z=z-16;g=fam_fnt(z);
   if (g!=null_font)
     @<Look at the list of characters starting with |x| in font |g|; set |f|
 and |c| whenever a better character is found; |goto found| as soon as a large
 enough variant is encountered@>;
-  } while (!(z < 16));
+  }@+ while (!(z < 16));
   }
 
 @ @<Look at the list of characters starting with |x|...@>=
 {@+y=x;
 if ((qo(y) >= font_bc[g])&&(qo(y) <= font_ec[g]))
   {@+resume: q=char_info(g, y);
-  if (char_exists(q))
-    {@+if (char_tag(q)==ext_tag)
+  if (char_exists(g,y))
+    {@+if (char_tag(g,q)==ext_tag)
       {@+f=g;c=y;goto found;
       }
-    hd=height_depth(q);
-    u=char_height(g, hd)+char_depth(g, hd);
+    u= height_plus_depth(g,y);  
     if (u > w)
       {@+f=g;c=y;w=u;
       if (u >= v) goto found;
       }
-    if (char_tag(q)==list_tag)
+    if (char_tag(g,q)==list_tag)
       {@+y=rem_byte(q);goto resume;
       }
     }
@@ -14613,20 +14379,32 @@ may deliver a slightly different result than |hpack| would produce.
 
 @<Declare subprocedures for |var_delimiter|@>=
 static pointer char_box(internal_font_number @!f, quarterword @!c)
-{@+four_quarters q;
-eight_bits @!hd; /*|height_depth| byte*/
-pointer @!b, @!p; /*the new box and its character node*/
-q=char_info(f, c);hd=height_depth(q);
-b=new_null_box();width(b)=char_width(f, q)+char_italic(f, q);
-height(b)=char_height(f, hd);depth(b)=char_depth(f, hd);
+{@+pointer @!b, @!p; /*the new box and its character node*/
+b=new_null_box();
+if (IS_X_FONT(f))
+{ hb_codepoint_t glyph;
+  if (x_glyph(f,character(p),&glyph))
+  { scaled ph, pd;
+    width(b)=x_glyph_width(f,glyph)+x_glyph_italic(f,glyph);
+    x_glyph_height_depth(f,glyph,&ph,&pd);
+    height(b)=ph;
+    depth(b)=pd;
+  }
+  else 
+    width(b)=height(b)=depth(b)=0;
+} 
+else
+{ width(b)=char_width(f, c)+char_italic(f, c);
+  height(b)=char_height(f, c);depth(b)=char_depth(f, c);
+}
 p=get_avail();character(p)=c;font(p)=f;list_ptr(b)=p;return b;
 }
 
-@ When the following code is executed, |char_tag(q)| will be equal to
+@ When the following code is executed, |char_tag(f,q)| will be equal to
 |ext_tag| if and only if a built-up symbol is supposed to be returned.
 
 @<Make variable |b| point to a box for |(f,c)|@>=
-if (char_tag(q)==ext_tag)
+if (char_tag(f,q)==ext_tag)
   @<Construct an extensible character in a new box |b|, using recipe |rem_byte(q)|
 and font |f|@>@;
 else b=char_box(f, c)
@@ -14648,10 +14426,13 @@ a given character:
 
 @<Declare subprocedures for |var_delimiter|@>=
 static scaled height_plus_depth(internal_font_number @!f, quarterword @!c)
-{@+four_quarters q;
-eight_bits @!hd; /*|height_depth| byte*/
-q=char_info(f, c);hd=height_depth(q);
-return char_height(f, hd)+char_depth(f, hd);
+{ if (IS_X_FONT(f))
+  { scaled hc,dc;
+    x_char_height_depth(f, c,&hc, &dc);
+    return hc+dc;
+  }
+  else
+    return char_height(f, c)+char_depth(f, c);
 }
 
 @ @<Construct an extensible...@>=
@@ -14681,7 +14462,7 @@ we don't use any copies of it, otherwise we use as few as possible
 
 @<Compute the minimum suitable height, |w|, and...@>=
 c=ext_rep(r);u=height_plus_depth(f, c);
-w=0;q=char_info(f, c);width(b)=char_width(f, q)+char_italic(f, q);@/
+w=0;q=char_info(f, c);width(b)=char_width(f, c)+char_italic(f, c);@/
 c=ext_bot(r);@+if (c!=min_quarterword) w=w+height_plus_depth(f, c);
 c=ext_mid(r);@+if (c!=min_quarterword) w=w+height_plus_depth(f, c);
 c=ext_top(r);@+if (c!=min_quarterword) w=w+height_plus_depth(f, c);
@@ -14712,14 +14493,14 @@ if ((width(b)!=w)&&(list_ptr(b)!=null))
   {@+if (type(b)==vlist_node) b=hpack(b, natural);
   p=list_ptr(b);
   if ((is_char_node(p))&&(link(p)==null))
-    {@+f=font(p);v=char_width(f, char_info(f, character(p)));
+    {@+f=font(p);v=char_width(f, character(p));
     if (v!=width(b)) link(p)=new_kern(width(b)-v);
     }
   list_ptr(b)=null; flush_node_list(b);
   b=new_glue(ss_glue);link(b)=p;
   while (link(p)!=null) p=link(p);
   link(p)=new_glue(ss_glue);
-  return hpack(b, w, 0, 0, exactly);
+  return hpack(b, w, 0, 0, exactly, false);
   }
 else{@+width(b)=w;return b;
   }
@@ -14858,7 +14639,7 @@ if (cur_f==null_font)
 else{@+if ((qo(cur_c) >= font_bc[cur_f])&&(qo(cur_c) <= font_ec[cur_f]))
     cur_i=char_info(cur_f, cur_c);
   else cur_i=null_character;
-  if (!(char_exists(cur_i)))
+  if (!(char_exists(cur_f,cur_c)))
     {@+char_warning(cur_f, qo(cur_c));
     math_type(a)=empty;cur_i=null_character;
     }
@@ -14971,8 +14752,8 @@ case rel_noad: case close_noad: case punct_noad:
   @<Convert \(a)a final |bin_noad| to an |ord_noad|@>;
   if (type(q)==right_noad) goto done_with_noad;
   } @+break;
-@/@t\4@>@<Cases for noads that can follow a |bin_noad|@>@;
-@/@t\4@>@<Cases for nodes that can appear in an mlist, after which we |goto
+@t\4@>@<Cases for noads that can follow a |bin_noad|@>@;
+@t\4@>@<Cases for nodes that can appear in an mlist, after which we |goto
 done_with_node|@>@;
 default:confusion("mlist1");
 @:this can't happen mlist1}{\quad mlist1@>
@@ -15144,7 +14925,7 @@ scaled @!h; /*height of character being accented*/
 scaled @!delta; /*space to remove between accent and accentee*/
 scaled @!w; /*width of the accentee, not including sub/superscripts*/
 fetch(accent_chr(q));
-if (char_exists(cur_i))
+if (char_exists(cur_f,cur_c))
   {@+i=cur_i;c=cur_c;f=cur_f;@/
   @<Compute the amount of skew@>;
   x=clean_box(nucleus(q), cramped_style(cur_style));w=width(x);h=height(x);
@@ -15169,11 +14950,11 @@ height(y)=h;
 }
 
 @ @<Switch to a larger accent if available and appropriate@>=
-loop@+{@+if (char_tag(i)!=list_tag) goto done;
+loop@+{@+if (char_tag(f,i)!=list_tag) goto done;
   y=rem_byte(i);
   i=char_info(f, y);
-  if (!char_exists(i)) goto done;
-  if (char_width(f, i) > w) goto done;
+  if (!char_exists(f,y)) goto done;
+  if (char_width(f, y) > w) goto done;
   c=y;
   }
 done:
@@ -15182,7 +14963,7 @@ done:
 s=0;
 if (math_type(nucleus(q))==math_char)
   {@+fetch(nucleus(q));
-  if (char_tag(cur_i)==lig_tag)
+  if (char_tag(cur_f, cur_i)==lig_tag)
     {@+a=lig_kern_start(cur_f, cur_i);
     cur_i=font_info[a].qqqq;
     if (skip_byte(cur_i) > stop_flag)
@@ -15321,13 +15102,13 @@ if ((subtype(q)==normal)&&(cur_style < text_style))
   subtype(q)=limits;
 if (math_type(nucleus(q))==math_char)
   {@+fetch(nucleus(q));
-  if ((cur_style < text_style)&&(char_tag(cur_i)==list_tag))  /*make it larger*/
+  if ((cur_style < text_style)&&(char_tag(cur_f, cur_i)==list_tag))  /*make it larger*/
     {@+c=rem_byte(cur_i);i=char_info(cur_f, c);
-    if (char_exists(i))
+    if (char_exists(cur_f,c))
       {@+cur_c=c;cur_i=i;character(nucleus(q))=c;
       }
     }
-  delta=char_italic(cur_f, cur_i);x=clean_box(nucleus(q), cur_style);
+  delta=char_italic(cur_f, cur_c);x=clean_box(nucleus(q), cur_style);
   if ((math_type(subscr(q))!=empty)&&(subtype(q)!=limits))
     width(x)=width(x)-delta; /*remove italic correction*/
   shift_amount(x)=half(height(x)-depth(x))-axis_height(cur_size);
@@ -15406,7 +15187,7 @@ if (math_type(subscr(q))==empty) if (math_type(supscr(q))==empty)
     if (fam(nucleus(p))==fam(nucleus(q)))
       {@+math_type(nucleus(q))=math_text_char;
       fetch(nucleus(q));
-      if (char_tag(cur_i)==lig_tag)
+      if (char_tag(cur_f, cur_i)==lig_tag)
         {@+a=lig_kern_start(cur_f, cur_i);
         cur_c=character(nucleus(p));
         cur_i=font_info[a].qqqq;
@@ -15498,8 +15279,8 @@ make_scripts(q, delta)
 
 @ @<Create a character node |p| for |nucleus(q)|...@>=
 {@+fetch(nucleus(q));
-if (char_exists(cur_i))
-  {@+delta=char_italic(cur_f, cur_i);p=new_character(cur_f, qo(cur_c));
+if (char_exists(cur_f,cur_c))
+  {@+delta=char_italic(cur_f, cur_c);p=new_character(cur_f, qo(cur_c));
   if ((math_type(nucleus(q))==math_text_char)&&(space(cur_f)!=0))
     delta=0; /*no italic correction in mid-word of text font*/
   if ((math_type(subscr(q))==empty)&&(delta!=0))
@@ -15732,7 +15513,8 @@ is not a penalty node or a |rel_noad| or absent entirely.
 @<Append any |new_hlist| entries for |q|, and any appropriate penalties@>=
 if (new_hlist(q)!=null)
   {@+link(p)=new_hlist(q);
-  do p=link(p); while (!(link(p)==null));
+  @/do@+{p=link(p);
+  }@+ while (!(link(p)==null));
   }
 if (penalties) if (link(q)!=null) if (pen < inf_penalty)
   {@+r_type=type(link(q));
@@ -15957,7 +15739,7 @@ good start. This mostly involves scanning the preamble and putting its
 information into the preamble list.
 @^preamble@>
 
-@p @<Declare the procedure called |get_preamble_token|@>@;
+@p @t\4@>@<Declare the procedure called |get_preamble_token|@>@t@>@/
 static void align_peek(void);@/
 static void normal_paragraph(void);@/
 static void init_align(void)
@@ -16145,7 +15927,8 @@ started, or finishes off the alignment.
 static void align_peek(void)
 {@+
 restart: align_state=1000000;
-do get_x_or_protected(); while (!(cur_cmd!=spacer));
+@/do@+{get_x_or_protected();
+}@+ while (!(cur_cmd!=spacer));
 if (cur_cmd==no_align)
   {@+scan_left_brace();new_save_level(no_align_group);
   if (mode==-vmode) normal_paragraph();
@@ -16164,7 +15947,7 @@ from internal vertical mode to restricted horizontal mode or vice versa.
 The |space_factor| and |prev_depth| are not used on this semantic level,
 but we clear them to zero just to be tidy.
 
-@p @<Declare the procedure called |init_span|@>@;
+@p @t\4@>@<Declare the procedure called |init_span|@>@t@>@/
 static void init_row(void)
 {@+push_nest();mode=(-hmode-vmode)-mode;
 if (mode==-hmode) space_factor=0;@+else prev_depth=0;
@@ -16257,7 +16040,8 @@ if (extra_info(cur_align)!=span_code)
   init_span(p);
   }
 align_state=1000000;
-do get_x_or_protected(); while (!(cur_cmd!=spacer));
+@/do@+{get_x_or_protected();
+}@+ while (!(cur_cmd!=spacer));
 cur_align=p;
 init_col();return false;
 }
@@ -16351,8 +16135,8 @@ link(end_span)=max_quarterword+1;info(end_span)=null;
 
 @ @<Update width entry for spanned columns@>=
 {@+q=cur_span;
-do {incr(n);q=link(link(q));
-} while (!(q==cur_align));
+@/do@+{incr(n);q=link(link(q));
+}@+ while (!(q==cur_align));
 if (n > max_quarterword) confusion("256 spans"); /*this can happen, but won't*/
 @^system dependencies@>
 @:this can't happen 256 spans}{\quad 256 spans@>
@@ -16409,9 +16193,21 @@ unsave(); /*that |align_group| was for the whole alignment*/
 if (nest[nest_ptr-1].mode_field==mmode) o=display_indent;
   else o=0;
 @<Go through the preamble list, determining the column widths and changing
-the alignrecords to dummy unset boxes@>@;
+the alignrecords to dummy unset boxes@>;
 if (x)
-{ /*Handle an alignment that depends on |hsize| or |vsize|*/
+{ @<Handle an alignment that depends on |hsize| or |vsize|@>@;
+  pop_alignment();
+}
+else
+{ @<Package the preamble list, to determine the actual tabskip glue amounts,
+  and let |p| point to this prototype box@>;
+  @<Set the glue in all the unset boxes of the current list@>;
+  flush_node_list(p);pop_alignment();
+}
+@<Insert the \(c)current list into its environment@>;
+} @/
+@t\4@>@<Declare the procedure called |align_peek|@>@;
+@ @<Handle an alignment that depends on |hsize| or |vsize|@>=
  pointer r=get_node(align_node_size);
  save_ptr=save_ptr-2;pack_begin_line=-mode_line;
 
@@ -16423,18 +16219,6 @@ if (x)
  align_v(r)= (mode!=-vmode);
  link(head)=r; tail=r;
  pack_begin_line=0;
-  pop_alignment();
-}
-else
-{ @<Package the preamble list, to determine the actual tabskip glue amounts,
-  and let |p| point to this prototype box@>;
-  @<Set the glue in all the unset boxes of the current list@>;
-  flush_node_list(p);pop_alignment();
-}
-@<Insert the \(c)current list into its environment@>;
-}
-@#
-@t\4@>@<Declare the procedure called |align_peek|@>@;
 
 @ It's time now to dismantle the preamble list and to compute the column
 widths. Let $w_{ij}$ be the maximum of the natural widths of all entries
@@ -16461,7 +16245,7 @@ value is changed to zero and so is the next tabskip.
 
 @<Go through the preamble list,...@>=
 q=link(preamble);
-do {flush_list(u_part(q));flush_list(v_part(q));
+@/do@+{flush_list(u_part(q));flush_list(v_part(q));
 p=link(link(q));
 if (width(q)==null_flag)
   @<Nullify |width(q)| and the tabskip glue following this column@>;
@@ -16475,7 +16259,7 @@ glue_stretch(q)=0;glue_shrink(q)=0;
 if (width(q)>max_dimen) x=true;
 #endif
 q=p;
-} while (!(q==null));
+}@+ while (!(q==null))
 
 @ @<Nullify |width(q)| and the tabskip glue following this column@>=
 {@+width(q)=0;r=link(q);s=glue_ptr(r);
@@ -16487,7 +16271,7 @@ if (s!=zero_glue)
 
 @ Merging of two span-node lists is a typical exercise in the manipulation of
 linearly linked data structures. The essential invariant in the following
-|do {| loop is that we want to dispense with node |r|, in |q|'s list,
+|@/do@+{| loop is that we want to dispense with node |r|, in |q|'s list,
 and |u| is its successor; all nodes of |p|'s list up to and including |s|
 have been processed, and the successor of |s| matches |r| or precedes |r|
 or follows |r|, according as |link(r)==n| or |link(r) > n| or |link(r) < n|.
@@ -16495,7 +16279,7 @@ or follows |r|, according as |link(r)==n| or |link(r) > n| or |link(r) < n|.
 @<Merge the widths...@>=
 {@+t=width(q)+width(glue_ptr(link(q)));
 r=info(q);s=end_span;info(s)=p;n=min_quarterword+1;
-do {width(r)=width(r)-t;u=info(r);
+@/do@+{width(r)=width(r)-t;u=info(r);
 while (link(r) > n)
   {@+s=info(s);n=link(info(s))+1;
   }
@@ -16506,7 +16290,7 @@ else{@+if (width(r) > width(info(s))) width(info(s))=width(r);
   free_node(r, span_node_size);
   }
 r=u;
-} while (!(r==end_span));
+}@+ while (!(r==end_span));
 }
 
 @ Now the preamble list has been converted to a list of alternating unset
@@ -16520,15 +16304,15 @@ save_ptr=save_ptr-2;pack_begin_line=-mode_line;
 if (mode==-vmode)
   {@+rule_save=overfull_rule;
   overfull_rule=0; /*prevent rule from being packaged*/
-  p=hpack(preamble, saved(1), saved_hfactor(1), saved_vfactor(1), saved(0));overfull_rule=rule_save;
+  p=hpack(preamble, saved(1), saved_hfactor(1), saved_vfactor(1), saved(0), false);overfull_rule=rule_save;
   }
 else{@+q=link(preamble);
-  do {height(q)=width(q);width(q)=0;q=link(link(q));
-  } while (!(q==null));
-  p=vpack(preamble, saved(1), saved_hfactor(1), saved_vfactor(1), saved(0));
+  @/do@+{height(q)=width(q);width(q)=0;q=link(link(q));
+  }@+ while (!(q==null));
+  p=vpack(preamble, saved(1), saved_hfactor(1), saved_vfactor(1), saved(0), false);
   q=link(preamble);
-  do {width(q)=height(q);height(q)=0;q=link(link(q));
-  } while (!(q==null));
+  @/do@+{width(q)=height(q);height(q)=0;q=link(link(q));
+  }@+ while (!(q==null));
   }
 pack_begin_line=0
 
@@ -16566,9 +16350,9 @@ else{@+type(q)=vlist_node;height(q)=height(p);
 glue_order(q)=glue_order(p);glue_sign(q)=glue_sign(p);
 glue_set(q)=glue_set(p);shift_amount(q)=o;
 r=link(list_ptr(q));s=link(list_ptr(p));
-do {@<Set the glue in node |r| and change it from an unset node@>;
+@/do@+{@<Set the glue in node |r| and change it from an unset node@>;
 r=link(link(r));s=link(link(s));
-} while (!(r==null));
+}@+ while (!(r==null));
 }
 
 @ A box made from spanned columns will be followed by tabskip glue nodes and
@@ -16900,7 +16684,7 @@ k=1 to 6 do cur_active_width[k]=cur_active_width[k]+mem[q+k].sc|};$$ and we
 want to do this without the overhead of |for| loops. The |do_all_six|
 macro makes such six-tuples convenient.
 
-@d do_all_six(A) A(1);A(2);A(3);A(4);A(5);A(6)@;
+@d do_all_six(A) A(1);A(2);A(3);A(4);A(5);A(6)
 
 @<Glob...@>=
 static scaled @!active_width0[6], *const @!active_width = @!active_width0-1;
@@ -17058,7 +16842,7 @@ loop@+{@+resume: r=link(prev_r);
   @<If node |r| is of type |delta_node|, update |cur_active_width|, set |prev_r|
 and |prev_prev_r|, then |goto resume|@>;
   @<If a line number class has ended, create new active nodes for the best
-feasible breaks in that class; then |return| if |r==last_active|, otherwise
+feasible breaks in that class; then |return| if |r=last_active|, otherwise
 compute the new |line_width|@>;
   @<Consider the demerits for a line from |r| to |cur_p|; deactivate node
 |r| if it should no longer be active; then |goto resume| if a line from
@@ -17266,12 +17050,12 @@ only character nodes, kern nodes, ligature nodes, and box or rule nodes.
 @<Subtract the width of node |v|...@>=
 if (is_char_node(v))
   {@+f=font(v);
-  break_width[1]=break_width[1]-char_width(f, char_info(f, character(v)));
+  break_width[1]=break_width[1]-char_width(f, character(v));
   }
 else switch (type(v)) {
   case ligature_node: {@+f=font(lig_char(v));@/
     break_width[1]=@|break_width[1]-
-      char_width(f, char_info(f, character(lig_char(v))));
+      char_width(f, character(lig_char(v)));
     } @+break;
   case hlist_node: case vlist_node: case rule_node:
   case kern_node:
@@ -17283,12 +17067,12 @@ else switch (type(v)) {
 @ @<Add the width of node |s| to |b...@>=
 if (is_char_node(s))
   {@+f=font(s);
-  break_width[1]=@|break_width[1]+char_width(f, char_info(f, character(s)));
+  break_width[1]=@|break_width[1]+char_width(f, character(s));
   }
 else switch (type(s)) {
   case ligature_node: {@+f=font(lig_char(s));
     break_width[1]=break_width[1]+
-      char_width(f, char_info(f, character(lig_char(s))));
+      char_width(f, character(lig_char(s)));
     } @+break;
   case hlist_node: case vlist_node: case rule_node:
   case kern_node:
@@ -17672,7 +17456,7 @@ used in special calculations.
 @<Local variables for line breaking@>=
 bool @!auto_breaking; /*is node |cur_p| outside a formula?*/
 pointer @!prev_p; /*helps to determine when glue nodes are breakpoints*/
-pointer @!q, @!r, @!s, @!prev_s; /*miscellaneous nodes of temporary interest*/
+pointer @!q, @!r, @!s; /*miscellaneous nodes of temporary interest*/
 internal_font_number @!f; /*used when calculating character widths*/
 
 @ The `\ignorespaces|loop|\unskip' in the following code is performed at most
@@ -17788,7 +17572,7 @@ then update the active widths by including the glue in |glue_ptr(cur_p)|@>;
 case kern_node: if (subtype(cur_p)==explicit) kern_break@;
   else act_width=act_width+width(cur_p);@+break;
 case ligature_node: {@+f=font(lig_char(cur_p));
-  act_width=act_width+char_width(f, char_info(f, character(lig_char(cur_p))));
+  act_width=act_width+char_width(f, character(lig_char(cur_p)));
   } @+break;
 case disc_node: @<Try to break after a discretionary fragment, then |goto
 done5|@>@;
@@ -17811,10 +17595,10 @@ character node.
 
 @<Advance \(c)|cur_p| to the node following the present string...@>=
 {@+prev_p=cur_p;
-do {f=font(cur_p);
-act_width=act_width+char_width(f, char_info(f, character(cur_p)));
+@/do@+{f=font(cur_p);
+act_width=act_width+char_width(f, character(cur_p));
 cur_p=link(cur_p);
-} while (!(!is_char_node(cur_p)));
+}@+ while (!(!is_char_node(cur_p)));
 }
 
 @ When node |cur_p| is a glue node, we look at |prev_p| to see whether or not
@@ -17839,9 +17623,9 @@ only character nodes, kern nodes, box nodes, rule nodes, and ligature nodes.
 @<Try to break after a discretionary fragment...@>=
 {@+s=pre_break(cur_p);disc_width=0;
 if (s==null) try_break(ex_hyphen_penalty, hyphenated);
-else{@+do {@<Add the width of node |s| to |disc_width|@>;
+else{@+@/do@+{@<Add the width of node |s| to |disc_width|@>;
     s=link(s);
-  } while (!(s==null));
+  }@+ while (!(s==null));
   act_width=act_width+disc_width;
   try_break(hyphen_penalty, hyphenated);
   act_width=act_width-disc_width;
@@ -17857,12 +17641,12 @@ prev_p=cur_p;cur_p=s;goto done5;
 @ @<Add the width of node |s| to |disc_width|@>=
 if (is_char_node(s))
   {@+f=font(s);
-  disc_width=disc_width+char_width(f, char_info(f, character(s)));
+  disc_width=disc_width+char_width(f, character(s));
   }
 else switch (type(s)) {
   case ligature_node: {@+f=font(lig_char(s));
     disc_width=disc_width+
-      char_width(f, char_info(f, character(lig_char(s))));
+      char_width(f, character(lig_char(s)));
     } @+break;
   case hlist_node: case vlist_node: case rule_node:
   case kern_node:
@@ -17874,12 +17658,12 @@ else switch (type(s)) {
 @ @<Add the width of node |s| to |act_width|@>=
 if (is_char_node(s))
   {@+f=font(s);
-  act_width=act_width+char_width(f, char_info(f, character(s)));
+  act_width=act_width+char_width(f, character(s));
   }
 else switch (type(s)) {
   case ligature_node: {@+f=font(lig_char(s));
     act_width=act_width+
-      char_width(f, char_info(f, character(lig_char(s))));
+      char_width(f, character(lig_char(s)));
     } @+break;
   case hlist_node: case vlist_node: case rule_node:
   case kern_node:
@@ -17919,11 +17703,11 @@ if (link(active)!=last_active)
 
 @ @<Find an active node...@>=
 r=link(active);fewest_demerits=awful_bad;
-do {if (type(r)!=delta_node) if (total_demerits(r) < fewest_demerits)
+@/do@+{if (type(r)!=delta_node) if (total_demerits(r) < fewest_demerits)
   {@+fewest_demerits=total_demerits(r);best_bet=r;
   }
 r=link(r);
-} while (!(r==last_active));
+}@+ while (!(r==last_active));
 best_line=line_number(best_bet)
 
 @ The adjustment for a desired looseness is a slightly more complicated
@@ -17933,7 +17717,7 @@ looseness calculation, independently of the other segments.
 
 @<Find the best active node...@>=
 {@+r=link(active);actual_looseness=0;
-do {if (type(r)!=delta_node)
+@/do@+{if (type(r)!=delta_node)
   {@+line_diff=line_number(r)-best_line;
   if (((line_diff < actual_looseness)&&(looseness <= line_diff))||@|
   ((line_diff > actual_looseness)&&(looseness >= line_diff)))
@@ -17946,7 +17730,7 @@ do {if (type(r)!=delta_node)
     }
   }
 r=link(r);
-}  while (!(r==last_active));
+}@+ while (!(r==last_active));
 best_line=line_number(best_bet);
 }
 
@@ -17981,14 +17765,15 @@ quarterword @!t; /*used for replacement counts in discretionary nodes*/
 int @!pen; /*use when calculating penalties between lines*/
 halfword @!cur_line; /*the current line number being justified*/
 @<Reverse the links of the relevant passive nodes, setting |cur_p| to the
-first breakpoint@>@;
+first breakpoint@>;
 cur_line=prev_graf+1;
-do {@<Justify the line ending at breakpoint |cur_p|, and append it to the
+@<initialize the color stack@>@;
+@/do@+{@<Justify the line ending at breakpoint |cur_p|, and append it to the
 current vertical list, together with associated penalties and other insertions@>;
 incr(cur_line);cur_p=next_break(cur_p);
 if (cur_p!=null) if (!post_disc_break)
   @<Prune unwanted nodes at the beginning of the next line@>;
-} while (!(cur_p==null));
+}@+ while (!(cur_p==null));
 if ((cur_line!=best_line)||(link(temp_head)!=null))
   confusion("line breaking");
 @:this can't happen line breaking}{\quad line breaking@>
@@ -18003,8 +17788,8 @@ Node |r| is the passive node being moved from stack to stack.
 
 @<Reverse the links of the relevant passive nodes...@>=
 q=break_node(best_bet);cur_p=null;
-do {r=q;q=prev_break(q);next_break(r)=cur_p;cur_p=r;
-} while (!(q==null));
+@/do@+{r=q;q=prev_break(q);next_break(r)=cur_p;cur_p=r;
+}@+ while (!(q==null))
 
 @ Glue and penalty and kern and math nodes are deleted at the beginning of
 a line, except in the anomalous case that the node to be deleted is actually
@@ -18143,7 +17928,27 @@ else if (par_shape_ptr==null)
 else{@+cur_width=mem[par_shape_ptr+2*cur_line].sc;
   cur_indent=mem[par_shape_ptr+2*cur_line-1].sc;
   }
-adjust_tail=adjust_head;just_box=hpack(q, cur_width, 0, 0, exactly);
+{ pointer before_color_tos=color_tos;
+  pointer before_link_tos=link_tos;
+  adjust_tail=adjust_head;just_box=hpack(q, cur_width, 0, 0, exactly, true);
+  if (before_link_tos!=before_color_tos)
+  { pointer r;
+    r=new_color_node(color_ref(before_color_tos));
+    link(r) = list_ptr(just_box);
+    list_ptr(just_box)=r;
+  }
+  if (before_link_tos!=null) /* an unfinished link was in the previous line */
+  { pointer r;
+    int words;
+    r=get_node(link_node_size);
+    for (words=0;words<link_node_size; words++)
+      mem[r+words]= mem[before_link_tos+words];
+    if (label_has_name(as_label(r)))
+      add_token_ref(label_ptr(as_label(r)));
+    link(r) = list_ptr(just_box);
+    list_ptr(just_box)=r;
+  }
+}
 shift_amount(just_box)=cur_indent
 
 @ Penalties between the lines of a paragraph come from club and widow lines,
@@ -18247,18 +18052,13 @@ static ASCII_code @!cur_lang, @!init_cur_lang; /*current hyphenation table of in
 static int @!l_hyf, @!r_hyf, @!init_l_hyf, @!init_r_hyf; /*limits on fragment sizes*/
 static halfword @!hyf_bchar; /*boundary character after $c_n$*/
 
-@ Hyphenation routines need a few more local variables.
-
-@<Local variables for line...@>=
-small_number @!j; /*an index into |hc| or |hu|*/
-int @!c; /*character being considered for hyphenation*/
 
 @ When the following code is activated, the |line_break| procedure is in its
 second pass, and |cur_p| points to a glue node.
 
 @p
-static void hyphenate_word(void)
-{ @+pointer @!q, @!s, @!prev_s; /*miscellaneous nodes of temporary interest*/
+static void hyphenate_word(void)@t\2\2@>@/
+{ pointer @!q, @!s, @!prev_s;@t\1@> /*miscellaneous nodes of temporary interest*/
   small_number @!j; /*an index into |hc| or |hu|*/
   uint8_t @!c; /*character being considered for hyphenation*/
 
@@ -18581,7 +18381,7 @@ if (cur_l==non_char)
   if (k==non_address) goto done;@+else q=font_info[k].qqqq;
   }
 else{@+q=char_info(hf, cur_l);
-  if (char_tag(q)!=lig_tag) goto done;
+  if (char_tag(hf,q)!=lig_tag) goto done;
   k=lig_kern_start(hf, q);q=font_info[k].qqqq;
   if (skip_byte(q) > stop_flag)
     {@+k=lig_kern_restart(hf, q);q=font_info[k].qqqq;
@@ -18692,7 +18492,7 @@ pointer @!hyf_node; /*the hyphen, if it exists*/
 @ When the following code is performed, |hyf[0]| and |hyf[hn]| will be zero.
 
 @<Reconstitute nodes for the hyphenated word...@>=
-do {l=j;j=reconstitute(j, hn, bchar, qi(hyf_char))+1;
+@/do@+{l=j;j=reconstitute(j, hn, bchar, qi(hyf_char))+1;
 if (hyphen_passed==0)
   {@+link(s)=link(hold_head);
   while (link(s) > null) s=link(s);
@@ -18702,8 +18502,8 @@ if (hyphen_passed==0)
   }
 if (hyphen_passed > 0)
   @<Create and append a discretionary node as an alternative to the unhyphenated
-word, and continue to develop both branches until they become equivalent@>@;
-} while (!(j > hn));
+word, and continue to develop both branches until they become equivalent@>;
+}@+ while (!(j > hn));
 link(s)=q
 
 @ In this repeat loop we will insert another discretionary if |hyf[j-1]| is
@@ -18717,7 +18517,7 @@ point. (Consider the word `difficult', where the letter `c' is in position |j|.)
     }
 
 @<Create and append a discretionary node as an alternative...@>=
-do {r=get_node(small_node_size);
+@/do@+{r=get_node(small_node_size);
 link(r)=link(hold_head);type(r)=disc_node;
 major_tail=r;r_count=0;
 while (link(major_tail) > null) advance_major_tail;
@@ -18728,7 +18528,7 @@ list and to |major_tail| until synchronization has been achieved@>;
 @<Move pointer |s| to the end of the current list, and set |replace_count(r)|
 appropriately@>;
 hyphen_passed=j-1;link(hold_head)=null;
-} while (!(!odd(hyf[j-1])));
+}@+ while (!(!odd(hyf[j-1])))
 
 @ The new hyphen might combine with the previous character via ligature
 or kern. At this point we have |l-1 <= i < j| and |i < hn|.
@@ -18760,7 +18560,7 @@ if (bchar_label[hf]!=non_address)  /*put left boundary at beginning of new line*
   {@+decr(l);c=hu[l];c_loc=l;hu[l]=256;
   }
 while (l < j)
-  {@+do {l=reconstitute(l, hn, bchar, non_char)+1;
+  {@+@/do@+{l=reconstitute(l, hn, bchar, non_char)+1;
   if (c_loc > 0)
     {@+hu[c_loc]=c;c_loc=0;
     }
@@ -18770,7 +18570,7 @@ while (l < j)
     minor_tail=link(hold_head);
     while (link(minor_tail) > null) minor_tail=link(minor_tail);
     }
-  } while (!(l >= j));
+  }@+ while (!(l >= j));
   while (l > j)
     @<Append characters of |hu[j..]| to |major_tail|, advancing~|j|@>;
   }
@@ -18888,10 +18688,10 @@ for (j=0; j<=r_hyf-1; j++) hyf[hn-j]=0
 
 @ @<Store \(m)maximum values in the |hyf| table@>=
 {@+v=trie_op(z);
-do {v=v+op_start[cur_lang];i=l-hyf_distance[v];
+@/do@+{v=v+op_start[cur_lang];i=l-hyf_distance[v];
 if (hyf_num[v] > hyf[i]) hyf[i]=hyf_num[v];
 v=hyf_next[v];
-} while (!(v==min_quarterword));
+}@+ while (!(v==min_quarterword));
 }
 
 @ The exception table that is built by \TeX's \.{\\hyphenation} primitive is
@@ -18956,10 +18756,10 @@ k=hyph_word[h];if (k==0) goto not_found;
 if (length(k) < hn) goto not_found;
 if (length(k)==hn)
   {@+j=1;u=str_start[k];
-  do {if (so(str_pool[u]) < hc[j]) goto not_found;
+  @/do@+{if (so(str_pool[u]) < hc[j]) goto not_found;
   if (so(str_pool[u]) > hc[j]) goto done;
   incr(j);incr(u);
-  } while (!(j > hn));
+  }@+ while (!(j > hn));
   @<Insert hyphens as specified in |hyph_list[h]|@>;
   decr(hn);goto found;
   }
@@ -19085,10 +18885,10 @@ k=hyph_word[h];
 if (length(k) < length(s)) goto found;
 if (length(k) > length(s)) goto not_found;
 u=str_start[k];v=str_start[s];
-do {if (str_pool[u] < str_pool[v]) goto found;
+@/do@+{if (str_pool[u] < str_pool[v]) goto found;
 if (str_pool[u] > str_pool[v]) goto not_found;
 incr(u);incr(v);
-} while (!(u==str_start[k+1]));
+}@+ while (!(u==str_start[k+1]));
 found: q=hyph_list[h];hyph_list[h]=p;p=q;@/
 t=hyph_word[h];hyph_word[h]=s;s=t;
 not_found:
@@ -19376,7 +19176,7 @@ loop@+{@+h=z-c;@/
 otherwise |goto not_found|@>;
   not_found: z=trie_link(z); /*move to the next hole*/
   }
-found: @<Pack the family into |trie| relative to |h|@>@;
+found: @<Pack the family into |trie| relative to |h|@>;
 }
 
 @ By making sure that |trie_max| is at least |h+256|, we can be sure that
@@ -19387,9 +19187,9 @@ never be occupied in |trie|, and we will have |trie_max >= trie_link(z)|.
 if (trie_max < h+256)
   {@+if (trie_size <= h+256) overflow("pattern memory", trie_size);
 @:TeX capacity exceeded pattern memory}{\quad pattern memory@>
-  do {incr(trie_max);trie_taken[trie_max]=false;
+  @/do@+{incr(trie_max);trie_taken[trie_max]=false;
   trie_link(trie_max)=trie_max+1;trie_back(trie_max)=trie_max-1;
-  } while (!(trie_max==h+256));
+  }@+ while (!(trie_max==h+256));
   }
 
 @ @<If all characters of the family fit relative to |h|...@>=
@@ -19402,15 +19202,15 @@ goto found
 
 @ @<Pack the family into |trie| relative to |h|@>=
 trie_taken[h]=true;trie_ref[p]=h;q=p;
-do {z=h+so(trie_c[q]);l=trie_back(z);r=trie_link(z);
+@/do@+{z=h+so(trie_c[q]);l=trie_back(z);r=trie_link(z);
 trie_back(r)=l;trie_link(l)=r;trie_link(z)=0;
 if (l < 256)
   {@+if (z < 256) ll=z;@+else ll=256;
-  do {trie_min[l]=r;incr(l);
-  } while (!(l==ll));
+  @/do@+{trie_min[l]=r;incr(l);
+  }@+ while (!(l==ll));
   }
 q=trie_r[q];
-} while (!(q==0));
+}@+ while (!(q==0))
 
 @ To pack the entire linked trie, we use the following recursive procedure.
 @^recursion@>
@@ -19418,12 +19218,12 @@ q=trie_r[q];
 @<Declare procedures for preprocessing hyph...@>=
 static void trie_pack(trie_pointer @!p) /*pack subtries of a family*/
 {@+trie_pointer q; /*a local variable that need not be saved on recursive calls*/
-do {q=trie_l[p];
+@/do@+{q=trie_l[p];
 if ((q > 0)&&(trie_ref[q]==0))
   {@+first_fit(q);trie_pack(q);
   }
 p=trie_r[p];
-} while (!(p==0));
+}@+ while (!(p==0));
 }
 
 @ When the whole trie has been allocated into the sequential table, we
@@ -19441,8 +19241,8 @@ if (trie_max==0)  /*no patterns were given*/
 else{@+if (hyph_root > 0) trie_fix(hyph_root);
   if (trie_root > 0) trie_fix(trie_root); /*this fixes the non-holes in |trie|*/
   r=0; /*now we will zero out all the holes*/
-  do {s=trie_link(r);trie[r]=h;r=s;
-  } while (!(r > trie_max));
+  @/do@+{s=trie_link(r);trie[r]=h;r=s;
+  }@+ while (!(r > trie_max));
   }
 trie_char(0)=qi('?'); /*make |trie_char(c)!=c| for all |c|*/
 
@@ -19458,11 +19258,11 @@ static void trie_fix(trie_pointer @!p) /*moves |p| and its siblings into |trie|*
 ASCII_code @!c; /*another one that need not be saved*/
 trie_pointer @!z; /*|trie| reference; this local variable must be saved*/
 z=trie_ref[p];
-do {q=trie_l[p];c=so(trie_c[p]);
+@/do@+{q=trie_l[p];c=so(trie_c[p]);
 trie_link(z+c)=trie_ref[q];trie_char(z+c)=qi(c);trie_op(z+c)=trie_o[p];
 if (q > 0) trie_fix(q);
 p=trie_r[p];
-} while (!(p==0));
+}@+ while (!(p==0));
 }
 
 @ Now let's go back to the easier problem, of building the linked
@@ -19770,13 +19570,18 @@ else{@+q=glue_ptr(p);
   active_height[6]=active_height[6]+shrink(q);
   if ((shrink_order(q)!=normal)&&(shrink(q)!=0))
     {@+@t@>@;@/
-    print_err("Infinite glue shrinkage found in box being split");@/
+    if (ignore_primitive_error & ignore_infinite_glue_shrinkage_bit)
+      print_ignored_err("Infinite glue shrinkage found in box being split");@/
+    else{@+
+      print_err("Infinite glue shrinkage found in box being split");@/
 @.Infinite glue shrinkage...@>
     help4("The box you are \\vsplitting contains some infinitely",@/
       "shrinkable glue, e.g., `\\vss' or `\\vskip 0pt minus 1fil'.",@/
       "Such glue doesn't belong there; but you can safely proceed,",@/
       "since the offensive shrinkability has been made finite.");
-    error();r=new_spec(q);shrink_order(r)=normal;delete_glue_ref(q);
+      error();
+    }
+    r=new_spec(q);shrink_order(r)=normal;delete_glue_ref(q);
     glue_ptr(p)=r;q=r;
     }
   }
@@ -19818,9 +19623,17 @@ q=vert_break(list_ptr(v), h, split_max_depth);
 to |null| at the break@>;
 q=prune_page_top(q, saving_vdiscards > 0);
 p=list_ptr(v);list_ptr(v)=null;flush_node_list(v);
-if (q!=null) q=vpack(q, natural);
+p=vpackage(p, h, 0, 0, exactly, false, split_max_depth);
+if (q!=null)
+{ if (color_tos!=null)
+  { pointer r = new_color_node(color_ref(color_tos));
+    color_tos=color_link(color_tos);
+    link(r)=q; q=r;
+  }
+  q=vpack(q, natural);
+}
 change_box(q); /*the |eq_level| of the box stays the same*/
-return vpackage(p, h, 0, 0, exactly, split_max_depth);
+return p;
 }
 
 @ @<Dispense with trivial cases of void or bad boxes@>=
@@ -19909,9 +19722,7 @@ stored in |best_size|.
 static pointer @!page_tail; /*the final node on the current page*/
 static int @!page_contents; /*what is on the current page so far?*/
 static scaled @!page_max_depth; /*maximum box depth on page being built*/
-static pointer @!best_page_break; /*break here to get the best page known so far*/
 static int @!least_page_cost; /*the score for this currently best page*/
-static scaled @!best_size; /*its |page_goal|*/
 
 @ The page builder has another data structure to keep track of insertions.
 This is a list of four-word nodes, starting and ending at |page_ins_head|.
@@ -20061,9 +19872,9 @@ if (page_head!=page_tail)
       print_scaled(t);
       if (type(r)==split_up)
         {@+q=page_head;t=0;
-        do {q=link(q);
+        @/do@+{q=link(q);
         if ((type(q)==ins_node)&&(subtype(q)==subtype(r))) incr(t);
-        } while (!(q==broken_ins(r)));
+        }@+ while (!(q==broken_ins(r)));
         print(", #");print_int(t);print(" might split");
         }
       r=link(r);
@@ -20152,22 +19963,6 @@ show_box(box(n));end_diagnostic(true);
 flush_node_list(box(n));box(n)=null;
 }
 
-@ The following procedure guarantees that a given box register
-does not contain an \.{\\hbox}.
-
-@p static void ensure_vbox(eight_bits @!n)
-{@+pointer p; /*the box register contents*/
-p=box(n);
-if (p!=null) if (type(p)==hlist_node)
-  {@+print_err("Insertions can only be added to a vbox");
-@.Insertions can only...@>
-  help3("Tut tut: You're trying to \\insert into a",@/
-    "\\box register that now contains an \\hbox.",@/
-    "Proceed, and I'll discard its present contents.");
-  box_error(n);
-  }
-}
-
 @ \TeX\ is not always in vertical mode at the time |build_page|
 is called; the current mode reflects what \TeX\ should return to, after
 the contribution list has been emptied. A call on |build_page| should
@@ -20197,502 +19992,6 @@ else{@+last_glue=max_halfword;
   else if (type(p)==kern_node) last_kern=width(p);
   }
 
-@ The code here is an example of a many-way switch into routines that
-merge together in different places. Some people call this unstructured
-programming, but the author doesn't see much wrong with it, as long as
-@^Knuth, Donald Ervin@>
-the various labels have a well-understood meaning.
-
-@<Move node |p| to the current page;...@>=
-@<If the current page is empty and node |p| is to be deleted, |goto done1|;
-otherwise use node |p| to update the state of the current page; if this node
-is an insertion, |goto contribute|; otherwise if this node is not a legal
-breakpoint, |goto contribute| or |update_heights|; otherwise set |pi| to the
-penalty associated with this breakpoint@>;
-@<Check if node |p| is a new champion breakpoint; then \(if)if it is time
-for a page break, prepare for output, and either fire up the user's output
-routine and |return| or ship out the page and |goto done|@>;
-if ((type(p) < glue_node)||(type(p) > kern_node)) goto contribute;
-update_heights: @<Update the current page measurements with respect to the
-glue or kern specified by node~|p|@>;
-contribute: @<Make sure that |page_max_depth| is not exceeded@>;
-@<Link node |p| into the current page and |goto done|@>;
-done1: @<Recycle node |p|@>;
-done:
-
-@ @<Link node |p| into the current page and |goto done|@>=
-link(page_tail)=p;page_tail=p;
-link(contrib_head)=link(p);link(p)=null;goto done
-
-@ @<Recycle node |p|@>=
-link(contrib_head)=link(p);link(p)=null;
-if (saving_vdiscards > 0)
-  {@+if (page_disc==null) page_disc=p;@+else link(tail_page_disc)=p;
-  tail_page_disc=p;
-  }
-else flush_node_list(p)
-
-@ The title of this section is already so long, it seems best to avoid
-making it more accurate but still longer, by mentioning the fact that a
-kern node at the end of the contribution list will not be contributed until
-we know its successor.
-
-@<If the current page is empty...@>=
-switch (type(p)) {
-case hlist_node: case vlist_node: case rule_node: if (page_contents < box_there)
-    @<Initialize the current page, insert the \.{\\topskip} glue ahead of
-|p|, and |goto resume|@>@;
-  else@<Prepare to move a box or rule node to the current page, then |goto
-contribute|@>@;@+break;
-case whatsit_node: @<Prepare to move whatsit |p| to the current page, then
-|goto contribute|@>;
-case glue_node: if (page_contents < box_there) goto done1;
-  else if (precedes_break(page_tail)) pi=0;
-  else goto update_heights;@+break;
-case kern_node: if (page_contents < box_there) goto done1;
-  else if (link(p)==null) return;
-  else if (type(link(p))==glue_node) pi=0;
-  else goto update_heights;@+break;
-case penalty_node: if (page_contents < box_there) goto done1;@+else pi=penalty(p);@+break;
-case mark_node: goto contribute;
-case ins_node: @<Append an insertion to the current page and |goto contribute|@>@;
-default:confusion("page");
-@:this can't happen page}{\quad page@>
-}
-
-@ @<Initialize the current page, insert the \.{\\topskip} glue...@>=
-{@+if (page_contents==empty) freeze_page_specs(box_there);
-else page_contents=box_there;
-q=new_skip_param(top_skip_code); /*now |temp_ptr==glue_ptr(q)|*/
-if (width(temp_ptr) > height(p)) width(temp_ptr)=width(temp_ptr)-height(p);
-else width(temp_ptr)=0;
-link(q)=p;link(contrib_head)=q;goto resume;
-}
-
-@ @<Prepare to move a box or rule node to the current page...@>=
-{@+page_total=page_total+page_depth+height(p);
-page_depth=depth(p);
-goto contribute;
-}
-
-@ @<Make sure that |page_max_depth| is not exceeded@>=
-if (page_depth > page_max_depth)
-  {@+page_total=@|
-    page_total+page_depth-page_max_depth;@/
-  page_depth=page_max_depth;
-  }
-
-@ @<Update the current page measurements with respect to the glue...@>=
-if (type(p)==kern_node) q=p;
-else{@+q=glue_ptr(p);
-  page_so_far[2+stretch_order(q)]=@|
-    page_so_far[2+stretch_order(q)]+stretch(q);@/
-  page_shrink=page_shrink+shrink(q);
-  if ((shrink_order(q)!=normal)&&(shrink(q)!=0))
-    {@+@t@>@;@/
-    print_err("Infinite glue shrinkage found on current page");@/
-@.Infinite glue shrinkage...@>
-    help4("The page about to be output contains some infinitely",@/
-      "shrinkable glue, e.g., `\\vss' or `\\vskip 0pt minus 1fil'.",@/
-      "Such glue doesn't belong there; but you can safely proceed,",@/
-      "since the offensive shrinkability has been made finite.");
-    error();
-    r=new_spec(q);shrink_order(r)=normal;delete_glue_ref(q);
-    glue_ptr(p)=r;q=r;
-    }
-  }
-page_total=page_total+page_depth+width(q);page_depth=0
-
-@ @<Check if node |p| is a new champion breakpoint; then \(if)...@>=
-if (pi < inf_penalty)
-  {@+@<Compute the badness, |b|, of the current page, using |awful_bad| if
-the box is too full@>;
-  if (b < awful_bad)
-    if (pi <= eject_penalty) c=pi;
-    else if (b < inf_bad) c=b+pi+insert_penalties;
-      else c=deplorable;
-  else c=b;
-  if (insert_penalties >= 10000) c=awful_bad;
-#ifdef @!STAT
-  if (tracing_pages > 0) @<Display the page break cost@>;
-#endif
-@;@/
-  if (c <= least_page_cost)
-    {@+best_page_break=p;best_size=page_goal;
-    least_page_cost=c;
-    r=link(page_ins_head);
-    while (r!=page_ins_head)
-      {@+best_ins_ptr(r)=last_ins_ptr(r);
-      r=link(r);
-      }
-    }
-  if ((c==awful_bad)||(pi <= eject_penalty))
-    {@+fire_up(p); /*output the current page at the best place*/
-    if (output_active) return; /*user's output routine will act*/
-    goto done; /*the page has been shipped out by default output routine*/
-    }
-  }
-
-@ @<Display the page break cost@>=
-{@+begin_diagnostic();print_nl("%");
-print(" t=");print_totals();@/
-print(" g=");print_scaled(page_goal);@/
-print(" b=");
-if (b==awful_bad) print_char('*');@+else print_int(b);
-@.*\relax@>
-print(" p=");print_int(pi);
-print(" c=");
-if (c==awful_bad) print_char('*');@+else print_int(c);
-if (c <= least_page_cost) print_char('#');
-end_diagnostic(false);
-}
-
-@ @<Compute the badness, |b|, of the current page...@>=
-if (page_total < page_goal)
-  if ((page_so_far[3]!=0)||(page_so_far[4]!=0)||@|
-    (page_so_far[5]!=0)) b=0;
-  else b=badness(page_goal-page_total, page_so_far[2]);
-else if (page_total-page_goal > page_shrink) b=awful_bad;
-else b=badness(page_total-page_goal, page_shrink)
-
-@ @<Append an insertion to the current page and |goto contribute|@>=
-{@+if (page_contents==empty) freeze_page_specs(inserts_only);
-n=subtype(p);r=page_ins_head;
-while (n >= subtype(link(r))) r=link(r);
-n=qo(n);
-if (subtype(r)!=qi(n))
-  @<Create a page insertion node with |subtype(r)=qi(n)|, and include the
-glue correction for box |n| in the current page state@>;
-if (type(r)==split_up) insert_penalties=insert_penalties+float_cost(p);
-else{@+last_ins_ptr(r)=p;
-  delta=page_goal-page_total-page_depth+page_shrink;
-     /*this much room is left if we shrink the maximum*/
-  if (count(n)==1000) h=height(p);
-  else h=x_over_n(height(p), 1000)*count(n); /*this much room is needed*/
-  if (((h <= 0)||(h <= delta))&&(height(p)+height(r) <= dimen(n)))
-    {@+page_goal=page_goal-h;height(r)=height(r)+height(p);
-    }
-  else@<Find the best way to split the insertion, and change |type(r)| to
-|split_up|@>;
-  }
-goto contribute;
-}
-
-@ We take note of the value of \.{\\skip} |n| and the height plus depth
-of \.{\\box}~|n| only when the first \.{\\insert}~|n| node is
-encountered for a new page. A user who changes the contents of \.{\\box}~|n|
-after that first \.{\\insert}~|n| had better be either extremely careful
-or extremely lucky, or both.
-
-@<Create a page insertion node...@>=
-{@+q=get_node(page_ins_node_size);link(q)=link(r);link(r)=q;r=q;
-subtype(r)=qi(n);type(r)=inserting;ensure_vbox(n);
-if (box(n)==null) height(r)=0;
-else height(r)=height(box(n))+depth(box(n));
-best_ins_ptr(r)=null;@/
-q=skip(n);
-if (count(n)==1000) h=height(r);
-else h=x_over_n(height(r), 1000)*count(n);
-page_goal=page_goal-h-width(q);@/
-page_so_far[2+stretch_order(q)]=@|page_so_far[2+stretch_order(q)]+stretch(q);@/
-page_shrink=page_shrink+shrink(q);
-if ((shrink_order(q)!=normal)&&(shrink(q)!=0))
-  {@+print_err("Infinite glue shrinkage inserted from ");print_esc("skip");
-@.Infinite glue shrinkage...@>
-  print_int(n);
-  help3("The correction glue for page breaking with insertions",@/
-    "must have finite shrinkability. But you may proceed,",@/
-    "since the offensive shrinkability has been made finite.");
-  error();
-  }
-}
-
-@ Here is the code that will split a long footnote between pages, in an
-emergency. The current situation deserves to be recapitulated: Node |p|
-is an insertion into box |n|; the insertion will not fit, in its entirety,
-either because it would make the total contents of box |n| greater than
-\.{\\dimen} |n|, or because it would make the incremental amount of growth
-|h| greater than the available space |delta|, or both. (This amount |h| has
-been weighted by the insertion scaling factor, i.e., by \.{\\count} |n|
-over 1000.) Now we will choose the best way to break the vlist of the
-insertion, using the same criteria as in the \.{\\vsplit} operation.
-
-@<Find the best way to split the insertion...@>=
-{@+if (count(n) <= 0) w=max_dimen;
-else{@+w=page_goal-page_total-page_depth;
-  if (count(n)!=1000) w=x_over_n(w, count(n))*1000;
-  }
-if (w > dimen(n)-height(r)) w=dimen(n)-height(r);
-q=vert_break(ins_ptr(p), w, depth(p));
-height(r)=height(r)+best_height_plus_depth;
-#ifdef @!STAT
-if (tracing_pages > 0) @<Display the insertion split cost@>;
-#endif
-@;@/
-if (count(n)!=1000)
-  best_height_plus_depth=x_over_n(best_height_plus_depth, 1000)*count(n);
-page_goal=page_goal-best_height_plus_depth;
-type(r)=split_up;broken_ptr(r)=q;broken_ins(r)=p;
-if (q==null) insert_penalties=insert_penalties+eject_penalty;
-else if (type(q)==penalty_node) insert_penalties=insert_penalties+penalty(q);
-}
-
-@ @<Display the insertion split cost@>=
-{@+begin_diagnostic();print_nl("% split");print_int(n);
-@.split@>
-print(" to ");print_scaled(w);
-print_char(',');print_scaled(best_height_plus_depth);@/
-print(" p=");
-if (q==null) print_int(eject_penalty);
-else if (type(q)==penalty_node) print_int(penalty(q));
-else print_char('0');
-end_diagnostic(false);
-}
-
-@ When the page builder has looked at as much material as could appear before
-the next page break, it makes its decision. The break that gave minimum
-badness will be used to put a completed ``page'' into box 255, with insertions
-appended to their other boxes.
-
-We also set the values of |top_mark|, |first_mark|, and |bot_mark|. The
-program uses the fact that |bot_mark!=null| implies |first_mark!=null|;
-it also knows that |bot_mark==null| implies |top_mark==first_mark==null|.
-
-The |fire_up| subroutine prepares to output the current page at the best
-place; then it fires up the user's output routine, if there is one,
-or it simply ships out the page. There is one parameter, |c|, which represents
-the node that was being contributed to the page when the decision to
-force an output was made.
-
-@<Declare the procedure called |fire_up|@>=
-static void fire_up(pointer @!c)
-{@+
-pointer p, @!q, @!r, @!s; /*nodes being examined and/or changed*/
-pointer @!prev_p; /*predecessor of |p|*/
-int @!n; /*insertion box number*/
-bool @!wait; /*should the present insertion be held over?*/
-int @!save_vbadness; /*saved value of |vbadness|*/
-scaled @!save_vfuzz; /*saved value of |vfuzz|*/
-pointer @!save_split_top_skip; /*saved value of |split_top_skip|*/
-@<Set the value of |output_penalty|@>;
-if (sa_mark!=null)
-  if (do_marks(fire_up_init, 0, sa_mark)) sa_mark=null;
-if (bot_mark!=null)
-  {@+if (top_mark!=null) delete_token_ref(top_mark);
-  top_mark=bot_mark;add_token_ref(top_mark);
-  delete_token_ref(first_mark);first_mark=null;
-  }
-@<Put the \(o)optimal current page into box 255, update |first_mark| and |bot_mark|,
-append insertions to their boxes, and put the remaining nodes back on the
-contribution list@>;
-if (sa_mark!=null)
-  if (do_marks(fire_up_done, 0, sa_mark)) sa_mark=null;
-if ((top_mark!=null)&&(first_mark==null))
-  {@+first_mark=top_mark;add_token_ref(top_mark);
-  }
-if (output_routine!=null)
-  if (dead_cycles >= max_dead_cycles)
-    @<Explain that too many dead cycles have occurred in a row@>@;
-  else@<Fire up the user's output routine and |return|@>;
-@<Perform the default output routine@>;
-}
-
-@ @<Set the value of |output_penalty|@>=
-if (type(best_page_break)==penalty_node)
-  {@+geq_word_define(int_base+output_penalty_code, penalty(best_page_break));
-  penalty(best_page_break)=inf_penalty;
-  }
-else geq_word_define(int_base+output_penalty_code, inf_penalty)
-
-@ As the page is finally being prepared for output,
-pointer |p| runs through the vlist, with |prev_p| trailing behind;
-pointer |q| is the tail of a list of insertions that
-are being held over for a subsequent page.
-
-@<Put the \(o)optimal current page into box 255...@>=
-if (c==best_page_break) best_page_break=null; /*|c| not yet linked in*/
-@<Ensure that box 255 is empty before output@>;
-insert_penalties=0; /*this will count the number of insertions held over*/
-save_split_top_skip=split_top_skip;
-if (holding_inserts <= 0)
-  @<Prepare all the boxes involved in insertions to act as queues@>;
-q=hold_head;link(q)=null;prev_p=page_head;p=link(prev_p);
-while (p!=best_page_break)
-  {@+if (type(p)==ins_node)
-    {@+if (holding_inserts <= 0)
-       @<Either insert the material specified by node |p| into the appropriate
-box, or hold it for the next page; also delete node |p| from the current page@>;
-    }
-  else if (type(p)==mark_node)
-    if (mark_class(p)!=0) @<Update the current marks for |fire_up|@>@;
-    else@<Update the values of |first_mark| and |bot_mark|@>;
-  prev_p=p;p=link(prev_p);
-  }
-split_top_skip=save_split_top_skip;
-@<Break the current page at node |p|, put it in box~255, and put the remaining
-nodes on the contribution list@>;
-@<Delete \(t)the page-insertion nodes@>@;
-
-@ @<Ensure that box 255 is empty before output@>=
-if (box(255)!=null)
-  {@+print_err("");print_esc("box");print("255 is not void");
-@:box255}{\.{\\box255 is not void}@>
-  help2("You shouldn't use \\box255 except in \\output routines.",@/
-    "Proceed, and I'll discard its present contents.");
-  box_error(255);
-  }
-
-@ @<Update the values of |first_mark| and |bot_mark|@>=
-{@+if (first_mark==null)
-  {@+first_mark=mark_ptr(p);
-  add_token_ref(first_mark);
-  }
-if (bot_mark!=null) delete_token_ref(bot_mark);
-bot_mark=mark_ptr(p);add_token_ref(bot_mark);
-}
-
-@ When the following code is executed, the current page runs from node
-|link(page_head)| to node |prev_p|, and the nodes from |p| to |page_tail|
-are to be placed back at the front of the contribution list. Furthermore
-the heldover insertions appear in a list from |link(hold_head)| to |q|; we
-will put them into the current page list for safekeeping while the user's
-output routine is active.  We might have |q==hold_head|; and |p==null| if
-and only if |prev_p==page_tail|. Error messages are suppressed within
-|vpackage|, since the box might appear to be overfull or underfull simply
-because the stretch and shrink from the \.{\\skip} registers for inserts
-are not actually present in the box.
-
-@<Break the current page at node |p|, put it...@>=
-if (p!=null)
-  {@+if (link(contrib_head)==null)
-    if (nest_ptr==0) tail=page_tail;
-    else contrib_tail=page_tail;
-  link(page_tail)=link(contrib_head);
-  link(contrib_head)=p;
-  link(prev_p)=null;
-  }
-save_vbadness=vbadness;vbadness=inf_bad;
-save_vfuzz=vfuzz;vfuzz=max_dimen; /*inhibit error messages*/
-box(255)=vpackage(link(page_head), best_size, 0, 0, exactly, page_max_depth);
-vbadness=save_vbadness;vfuzz=save_vfuzz;
-if (last_glue!=max_halfword) delete_glue_ref(last_glue);
-@<Start a new current page@>; /*this sets |last_glue=max_halfword|*/
-if (q!=hold_head)
-  {@+link(page_head)=link(hold_head);page_tail=q;
-  }
-
-@ If many insertions are supposed to go into the same box, we want to know
-the position of the last node in that box, so that we don't need to waste time
-when linking further information into it. The |last_ins_ptr| fields of the
-page insertion nodes are therefore used for this purpose during the
-packaging phase.
-
-@<Prepare all the boxes involved in insertions to act as queues@>=
-{@+r=link(page_ins_head);
-while (r!=page_ins_head)
-  {@+if (best_ins_ptr(r)!=null)
-    {@+n=qo(subtype(r));ensure_vbox(n);
-    if (box(n)==null) box(n)=new_null_box();
-    p=box(n)+list_offset;
-    while (link(p)!=null) p=link(p);
-    last_ins_ptr(r)=p;
-    }
-  r=link(r);
-  }
-}
-
-@ @<Delete \(t)the page-insertion nodes@>=
-r=link(page_ins_head);
-while (r!=page_ins_head)
-  {@+q=link(r);free_node(r, page_ins_node_size);r=q;
-  }
-link(page_ins_head)=page_ins_head
-
-@ We will set |best_ins_ptr=null| and package the box corresponding to
-insertion node~|r|, just after making the final insertion into that box.
-If this final insertion is `|split_up|', the remainder after splitting
-and pruning (if any) will be carried over to the next page.
-
-@<Either insert the material specified by node |p| into...@>=
-{@+r=link(page_ins_head);
-while (subtype(r)!=subtype(p)) r=link(r);
-if (best_ins_ptr(r)==null) wait=true;
-else{@+wait=false;s=last_ins_ptr(r);link(s)=ins_ptr(p);
-  if (best_ins_ptr(r)==p)
-    @<Wrap up the box specified by node |r|, splitting node |p| if called
-for; set |wait:=true| if node |p| holds a remainder after splitting@>@;
-  else{@+while (link(s)!=null) s=link(s);
-    last_ins_ptr(r)=s;
-    }
-  }
-@<Either append the insertion node |p| after node |q|, and remove it from
-the current page, or delete |node(p)|@>;
-}
-
-@ @<Wrap up the box specified by node |r|, splitting node |p| if...@>=
-{@+if (type(r)==split_up)
-  if ((broken_ins(r)==p)&&(broken_ptr(r)!=null))
-    {@+while (link(s)!=broken_ptr(r)) s=link(s);
-    link(s)=null;
-    split_top_skip=split_top_ptr(p);
-    ins_ptr(p)=prune_page_top(broken_ptr(r), false);
-    if (ins_ptr(p)!=null)
-      {@+temp_ptr=vpack(ins_ptr(p), natural);
-      height(p)=height(temp_ptr)+depth(temp_ptr);
-      list_ptr(temp_ptr)=null;flush_node_list(temp_ptr);wait=true;
-      }
-    }
-best_ins_ptr(r)=null;
-n=qo(subtype(r));
-temp_ptr=list_ptr(box(n));
-list_ptr(box(n))=null;flush_node_list(box(n));
-box(n)=vpack(temp_ptr, natural);
-}
-
-@ @<Either append the insertion node |p|...@>=
-link(prev_p)=link(p);link(p)=null;
-if (wait)
-  {@+link(q)=p;q=p;incr(insert_penalties);
-  }
-else{@+delete_glue_ref(split_top_ptr(p));
-  free_node(p, ins_node_size);
-  }
-p=prev_p
-
-@ The list of heldover insertions, running from |link(page_head)| to
-|page_tail|, must be moved to the contribution list when the user has
-specified no output routine.
-
-@<Perform the default output routine@>=
-{@+if (link(page_head)!=null)
-  {@+if (link(contrib_head)==null)
-    if (nest_ptr==0) tail=page_tail;@+else contrib_tail=page_tail;
-  else link(page_tail)=link(contrib_head);
-  link(contrib_head)=link(page_head);
-  link(page_head)=null;page_tail=page_head;
-  }
-flush_node_list(page_disc);page_disc=null;
-ship_out(box(255));box(255)=null;
-}
-
-@ @<Explain that too many dead cycles have occurred in a row@>=
-{@+print_err("Output loop---");print_int(dead_cycles);
-@.Output loop...@>
-print(" consecutive dead cycles");
-help3("I've concluded that your \\output is awry; it never does a",@/
-"\\shipout, so I'm shipping \\box255 out myself. Next time",@/
-"increase \\maxdeadcycles if you want me to be more patient!");error();
-}
-
-@ @<Fire up the user's output routine and |return|@>=
-{@+output_active=true;
-incr(dead_cycles);
-push_nest();mode=-vmode;prev_depth=ignore_depth;mode_line=-line;
-begin_token_list(output_routine, output_text);
-new_save_level(output_group);normal_paragraph();
-scan_left_brace();
-return;
-}
 
 @ When the user's output routine finishes, it has constructed a vlist
 in internal vertical mode, and \TeX\ will do the following:
@@ -20723,7 +20022,8 @@ pop_nest();build_page();
 @.Unbalanced output routine@>
 help2("Your sneaky output routine has problematic {'s and/or }'s.",@/
 "I can't handle that very well; good luck.");error();
-do get_token(); while (!(loc==null));
+@/do@+{get_token();
+}@+ while (!(loc==null));
 }  /*loops forever if reading from a file, since |null==min_halfword <= 0|*/
 
 @ @<Ensure that box 255 is empty after output@>=
@@ -20807,7 +20107,7 @@ case hmode+no_boundary: {@+get_x_token();
 case hmode+spacer: if (space_factor==1000) goto append_normal_space;
   else app_space();@+break;
 case hmode+ex_space: case mmode+ex_space: goto append_normal_space;
-@/@t\4@>@<Cases of |main_control| that are not part of the inner loop@>@;
+@t\4@>@<Cases of |main_control| that are not part of the inner loop@>@;
 }  /*of the big |case| statement*/
 goto big_switch;
 main_loop: @<Append character |cur_chr| and the following characters (if~any)
@@ -20956,7 +20256,7 @@ main_loop_move2: if ((cur_chr < font_bc[main_f])||(cur_chr > font_ec[main_f]))
   {@+char_warning(main_f, cur_chr);free_avail(lig_stack);goto big_switch;
   }
 main_i=char_info(main_f, cur_l);
-if (!char_exists(main_i))
+if (!char_exists(main_f,cur_l))
   {@+char_warning(main_f, cur_chr);free_avail(lig_stack);goto big_switch;
   }
 link(tail)=lig_stack;tail=lig_stack /*|main_loop_lookahead| is next*/
@@ -21009,7 +20309,7 @@ lig/kern commands were investigated for every such character.
 At the beginning of this code we have |main_i==char_info(main_f, cur_l)|.
 
 @<If there's a ligature/kern command...@>=
-if (char_tag(main_i)!=lig_tag) goto main_loop_wrapup;
+if (char_tag(main_f, main_i)!=lig_tag) goto main_loop_wrapup;
 if (cur_r==non_char) goto main_loop_wrapup;
 main_k=lig_kern_start(main_f, main_i);main_j=font_info[main_k].qqqq;
 if (skip_byte(main_j) <= stop_flag) goto main_lig_loop2;
@@ -21106,7 +20406,7 @@ use of \.{\\fontdimen}, the |find_font_dimen| procedure deallocates the
 if (main_p==null)
   {@+main_p=new_spec(zero_glue);main_k=param_base[cur_font]+space_code;
   width(main_p)=font_info[main_k].sc; /*that's |space(cur_font)|*/
-  stretch(main_p)=font_info[main_k+1].sc; /*and |space_stretch(cur_font)|*/
+  stretch(main_p)=font_info[main_k+1].sc; /*and |space_cur_font)|*/
   shrink(main_p)=font_info[main_k+2].sc; /*and |space_shrink(cur_font)|*/
   font_glue[cur_font]=main_p;
   }
@@ -21120,7 +20420,7 @@ if ((space_factor >= 2000)&&(xspace_skip!=zero_glue))
 else{@+if (space_skip!=zero_glue) main_p=space_skip;
   else@<Find the glue specification...@>;
   main_p=new_spec(main_p);
-  @<Modify the glue specification in |main_p| according to the space factor@>@;
+  @<Modify the glue specification in |main_p| according to the space factor@>;
   q=new_glue(main_p);glue_ref_count(main_p)=null;
   }
 link(tail)=q;tail=q;
@@ -21129,7 +20429,7 @@ link(tail)=q;tail=q;
 @ @<Modify the glue specification in |main_p| according to the space factor@>=
 if (space_factor >= 2000) width(main_p)=width(main_p)+extra_space(cur_font);
 stretch(main_p)=xn_over_d(stretch(main_p), space_factor, 1000);
-shrink(main_p)=xn_over_d(shrink(main_p), 1000, space_factor);
+shrink(main_p)=xn_over_d(shrink(main_p), 1000, space_factor)
 
 @ Whew---that covers the main loop. We can now proceed at a leisurely
 pace through the other combinations of possibilities.
@@ -21139,12 +20439,12 @@ pace through the other combinations of possibilities.
 
 @<Cases of |main_control| that are not part of the inner loop@>=
 any_mode(relax): case vmode+spacer: case mmode+spacer:
-  case mmode+no_boundary: do_nothing;
+  case mmode+no_boundary: do_nothing;@+break;
 any_mode(ignore_spaces): {@+@<Get the next non-blank non-call...@>;
   goto reswitch;
   }
 case vmode+stop: if (its_all_over()) return;@+break; /*this is the only way out*/
-@<Forbidden cases detected in |main_control|@>@+@, any_mode(mac_param):
+@t\4@>@<Forbidden cases detected in |main_control|@>@+@, any_mode(mac_param):
   report_illegal_case();@+break;
 @<Math-only cases in non-math modes, or vice versa@>: insert_dollar_sign();@+break;
 @t\4@>@<Cases of |main_control| that build boxes and lists@>@;
@@ -21497,7 +20797,7 @@ case bottom_level: {@+print_err("Too many }'s");
   } @+break;
 case semi_simple_group: case math_shift_group:
   case math_left_group: extra_right_brace();@+break;
-@/@t\4@>@<Cases of |handle_right_brace| where a |right_brace| triggers a delayed
+@t\4@>@<Cases of |handle_right_brace| where a |right_brace| triggers a delayed
 action@>@;
 default:confusion("rightbrace");
 @:this can't happen rightbrace}{\quad rightbrace@>
@@ -21693,7 +20993,7 @@ current vertical list.
   }
 else{@+cur_val=box_context-global_box_flag;a=4;
   }
-if (cur_val < 256) @[g_define(box_base+cur_val, box_ref, cur_box)@];
+if (cur_val < 256) define(box_base+cur_val, box_ref, cur_box);
 else sa_def_box;
 }
 
@@ -21761,13 +21061,13 @@ else{@+if (!is_char_node(tail))
 
 @ @<Remove the last box...@>=
 {@+q=head;
-do {p=q;
+@/do@+{p=q;
 if (!is_char_node(q)) if (type(q)==disc_node)
   {@+for (m=1; m<=replace_count(q); m++) p=link(p);
   if (p==tail) goto done;
   }
 q=link(p);
-} while (!(q==tail));
+}@+ while (!(q==tail));
 cur_box=tail;shift_amount(cur_box)=0;
 tail=p;link(p)=null;
 done: ;}
@@ -21848,8 +21148,8 @@ static void package(small_number @!c)
 pointer @!p; /*first node in a box*/
 scaled @!d; /*max depth*/
 d=box_max_depth;unsave();save_ptr=save_ptr-3;
-if (mode==-hmode) cur_box=hpack(link(head), saved(2), saved_hfactor(2), saved_vfactor(2),  saved(1));
-else{@+cur_box=vpackage(link(head), saved(2), saved_hfactor(2), saved_vfactor(2), saved(1), d);
+if (mode==-hmode) cur_box=hpack(link(head), saved(2), saved_hfactor(2), saved_vfactor(2),  saved(1), false);
+else{@+cur_box=vpackage(link(head), saved(2), saved_hfactor(2), saved_vfactor(2), saved(1), false, d);
   if (c==vtop_code) @<Readjust the height and depth of |cur_box|, for \.{\\vtop}@>;
   }
 pop_nest();box_end(saved(0));
@@ -22078,13 +21378,13 @@ if ((mode==vmode)&&(tail==head))
 non-glue@>@;
 else{@+if (!is_char_node(tail)) if (type(tail)==cur_chr)
     {@+q=head;
-    do {p=q;
+    @/do@+{p=q;
     if (!is_char_node(q)) if (type(q)==disc_node)
       {@+for (m=1; m<=replace_count(q); m++) p=link(p);
       if (p==tail) return;
       }
     q=link(p);
-    } while (!(q==tail));
+    }@+ while (!(q==tail));
     link(p)=null;flush_node_list(tail);tail=p;
     }
   }
@@ -22125,8 +21425,8 @@ case remove_item: if (chr_code==glue_node) print_esc("unskip");
   else print_esc("unpenalty");@+break;
 case un_hbox: if (chr_code==copy_code) print_esc("unhcopy");
   else print_esc("unhbox");@+break;
-case un_vbox: if (chr_code==copy_code) print_esc("unvcopy");
-  else @<Cases of |un_vbox| for |print_cmd_chr|@>@;
+case un_vbox: if (chr_code==copy_code) print_esc("unvcopy")
+  @<Cases of |un_vbox| for |print_cmd_chr|@>;@/
   else print_esc("unvbox");@+break;
 
 @ The |un_hbox| and |un_vbox| commands unwrap one of the 256 current boxes.
@@ -22185,7 +21485,7 @@ if (tail!=head)
   else if (type(tail)==ligature_node) p=lig_char(tail);
   else return;
   f=font(p);
-  tail_append(new_kern(char_italic(f, char_info(f, character(p)))));
+  tail_append(new_kern(char_italic(f, character(p))));
   subtype(tail)=explicit;
   }
 }
@@ -22311,12 +21611,11 @@ static void make_accent(void)
 pointer @!p, @!q, @!r; /*character, box, and kern nodes*/
 internal_font_number @!f; /*relevant font*/
 scaled @!a, @!h, @!x, @!w, @!delta; /*heights and widths, as explained above*/
-four_quarters @!i; /*character information*/
 scan_char_num();f=cur_font;p=new_character(f, cur_val);
 if (p!=null)
   {@+x=x_height(f);s=slant(f)/float_constant(65536);
 @^real division@>
-  a=char_width(f, char_info(f, character(p)));@/
+  a=char_width(f, character(p));@/
   do_assignments();@/
   @<Create a character node |q| for the next character, but set |q:=null|
 if problems arise@>;
@@ -22344,8 +21643,18 @@ because the user cannot remove these nodes nor access them via \.{\\lastkern}.
 @<Append the accent with appropriate kerns...@>=
 {@+t=slant(f)/float_constant(65536);
 @^real division@>
-i=char_info(f, character(q));
-w=char_width(f, i);h=char_height(f, height_depth(i));
+if (IS_X_FONT(f))
+{ hb_codepoint_t glyph;
+  if (x_glyph(g,c,&glyph))
+  { scaled dummy;
+    w=x_glyph_width(f,glyph);
+    x_glyph_height_depth(f,glyph,&h,&dummy);
+  }
+  else
+    w=h=0;
+}
+else
+{  w=char_width(f, character(q));h=char_height(f,  character(q));}
 if (h!=x)  /*the accent must be shifted up or down*/
   {@+p=hpack(p, natural);shift_amount(p)=x-h;
   }
@@ -22517,11 +21826,7 @@ scaled w; /*new or partial |pre_display_size|*/
 scaled @!l; /*new |display_width|*/
 scaled @!s; /*new |display_indent|*/
 pointer @!p; /*current node when calculating |pre_display_size|*/
-pointer @!q; /*glue specification when calculating |pre_display_size|*/
-internal_font_number @!f; /*font in current |char_node|*/
 int @!n; /*scope of paragraph shape specification*/
-scaled @!v; /*|w| plus possible glue amount*/
-scaled @!d; /*increment to |v|*/
 get_token(); /*|get_x_token| would fail on \.{\\ifmmode}\thinspace!*/
 if ((cur_cmd==math_shift)&&(mode > 0)) @<Go into display math mode@>@;
 else{@+back_input();@<Go into ordinary math mode@>;
@@ -22587,60 +21892,6 @@ eq_word_define(dimen_base+display_indent_code, s);
 if (every_display!=null) begin_token_list(every_display, every_display_text);
 }
 
-@ @<Calculate the natural width, |w|, by which...@>=
-v=shift_amount(just_box)+2*quad(cur_font);w=-max_dimen;
-p=list_ptr(just_box);
-while (p!=null)
-  {@+@<Let |d| be the natural width of node |p|; if the node is ``visible,''
-|goto found|; if the node is glue that stretches or shrinks, set |v:=max_dimen|@>;
-  if (v < max_dimen) v=v+d;
-  goto not_found;
-  found: if (v < max_dimen)
-    {@+v=v+d;w=v;
-    }
-  else{@+w=max_dimen;goto done;
-    }
-  not_found: p=link(p);
-  }
-done:
-
-@ @<Let |d| be the natural width of node |p|...@>=
-reswitch: if (is_char_node(p))
-  {@+f=font(p);d=char_width(f, char_info(f, character(p)));
-  goto found;
-  }
-switch (type(p)) {
-case hlist_node: case vlist_node: case rule_node: {@+d=width(p);goto found;
-  }
-case ligature_node: @<Make node |p| look like a |char_node|...@>@;
-case kern_node: case math_node: d=width(p);@+break;
-case glue_node: @<Let |d| be the natural width of this glue; if stretching
-or shrinking, set |v:=max_dimen|; |goto found| in the case of leaders@>@;@+break;
-case whatsit_node: @<Let |d| be the width of the whatsit |p|@>;@+break;
-default:d=0;
-}
-
-@ We need to be careful that |w|, |v|, and |d| do not depend on any |glue_set|
-values, since such values are subject to system-dependent rounding.
-System-dependent numbers are not allowed to infiltrate parameters like
-|pre_display_size|, since \TeX82 is supposed to make the same decisions on all
-machines.
-
-@<Let |d| be the natural width of this glue...@>=
-{@+q=glue_ptr(p);d=width(q);
-if (glue_sign(just_box)==stretching)
-  {@+if ((glue_order(just_box)==stretch_order(q))&&@|
-     (stretch(q)!=0))
-    v=max_dimen;
-  }
-else if (glue_sign(just_box)==shrinking)
-  {@+if ((glue_order(just_box)==shrink_order(q))&&@|
-     (shrink(q)!=0))
-    v=max_dimen;
-  }
-if (subtype(p) >= a_leaders) goto found;
-}
-
 @ A displayed equation is considered to be three lines long, so we
 calculate the length and offset of line number |prev_graf+2|.
 
@@ -22695,7 +21946,7 @@ int c; /*math character code*/
 restart: @<Get the next non-blank non-relax...@>;
 reswitch: switch (cur_cmd) {
 case letter: case other_char: case char_given: {@+c=ho(math_code(cur_chr));
-    if (c==0100000)
+    if (c==active_math_character_code)
       {@+@<Treat |cur_chr| as an active character@>;
       goto restart;
       }
@@ -22703,16 +21954,16 @@ case letter: case other_char: case char_given: {@+c=ho(math_code(cur_chr));
 case char_num: {@+scan_char_num();cur_chr=cur_val;cur_cmd=char_given;
   goto reswitch;
   }
-case math_char_num: {@+scan_fifteen_bit_int();c=cur_val;
+case math_char_num: {@+scan_fifteen_bit_int(); math_to_Umath(cur_val); c=cur_val;
   } @+break;
 case math_given: c=cur_chr;@+break;
-case delim_num: {@+scan_twenty_seven_bit_int();c=cur_val/010000;
+case delim_num: {@+scan_twenty_seven_bit_int();c=cur_val/010000; math_to_Umath(c);
   } @+break;
 default:@<Scan a subformula enclosed in braces and |return|@>@;
 } @/
-math_type(p)=math_char;character(p)=qi(c%256);
-if ((c >= var_code)&&fam_in_range) fam(p)=cur_fam;
-else fam(p)=(c/256)%16;
+math_type(p)=math_char;character(p)=math_code_char(c);
+if ((math_code_class(c) >= 7)&&fam_in_range) fam(p)=cur_fam;
+else fam(p)=math_code_fam(c);
 }
 
 @ An active character that is an |outer_call| is allowed here.
@@ -22745,11 +21996,11 @@ case mmode+letter: case mmode+other_char:
 case mmode+char_num: {@+scan_char_num();cur_chr=cur_val;
   set_math_char(ho(math_code(cur_chr)));
   } @+break;
-case mmode+math_char_num: {@+scan_fifteen_bit_int();set_math_char(cur_val);
+case mmode+math_char_num: {@+scan_fifteen_bit_int(); math_to_Umath(cur_val); set_math_char(cur_val);
   } @+break;
 case mmode+math_given: set_math_char(cur_chr);@+break;
-case mmode+delim_num: {@+scan_twenty_seven_bit_int();
-  set_math_char(cur_val/010000);
+case mmode+delim_num: {@+scan_twenty_seven_bit_int();  cur_val=cur_val/010000; math_to_Umath(cur_val);
+  set_math_char(cur_val);
   } @+break;
 
 @ The |set_math_char| procedure creates a new noad appropriate to a given
@@ -22760,16 +22011,16 @@ nothing is appended.
 @<Declare act...@>=
 static void set_math_char(int @!c)
 {@+pointer p; /*the new noad*/
-if (c >= 0100000)
+if (c == active_math_character_code)
   @<Treat |cur_chr|...@>@;
 else{@+p=new_noad();math_type(nucleus(p))=math_char;
-  character(nucleus(p))=qi(c%256);
-  fam(nucleus(p))=(c/256)%16;
-  if (c >= var_code)
+  character(nucleus(p))=math_code_char(c);
+  fam(nucleus(p))=math_code_fam(c);
+  if (math_code_class(c) >= 7)
     {@+if (fam_in_range) fam(nucleus(p))=cur_fam;
     type(p)=ord_noad;
     }
-  else type(p)=ord_noad+(c/010000);
+  else type(p)=ord_noad+math_code_class(c);
   link(tail)=p;tail=p;
   }
 }
@@ -22902,9 +22153,9 @@ mem[subscr(tail)].hh=empty_field;
 mem[supscr(tail)].hh=empty_field;
 math_type(accent_chr(tail))=math_char;
 scan_fifteen_bit_int();
-character(accent_chr(tail))=qi(cur_val%256);
-if ((cur_val >= var_code)&&fam_in_range) fam(accent_chr(tail))=cur_fam;
-else fam(accent_chr(tail))=(cur_val/256)%16;
+character(accent_chr(tail))=cur_val&0xFF;
+if ((cur_val >= 0x7000)&&fam_in_range) fam(accent_chr(tail))=cur_fam;
+else fam(accent_chr(tail))=(cur_val>>8)&0xF;
 scan_math(nucleus(tail));
 }
 
@@ -22925,7 +22176,7 @@ case mmode+vcenter: {@+scan_spec(vcenter_group, false);normal_paragraph();
 
 @ @<Cases of |handle...@>=
 case vcenter_group: {@+end_graf();unsave();save_ptr=save_ptr-2;
-  p=vpack(link(head), saved(1), saved_hfactor(1), saved_vfactor(1), saved(0));pop_nest();
+  p=vpack(link(head), saved(1), saved_hfactor(1), saved_vfactor(1), saved(0), false);pop_nest();
   tail_append(new_noad());type(tail)=vcenter_noad;
   math_type(nucleus(tail))=sub_box;info(nucleus(tail))=p;
   } @+break;
@@ -23167,8 +22418,8 @@ primitive("right", left_right, right_noad);
 text(frozen_right)=text(cur_val);eqtb[frozen_right]=eqtb[cur_val];
 
 @ @<Cases of |print_cmd_chr|...@>=
-case left_right: if (chr_code==left_noad) print_esc("left");
-else @<Cases of |left_right| for |print_cmd_chr|@>@;
+case left_right: if (chr_code==left_noad) print_esc("left")
+@/@<Cases of |left_right| for |print_cmd_chr|@>;@/
 else print_esc("right");@+break;
 
 @ @<Cases of |main_control| that build...@>=
@@ -23305,21 +22556,6 @@ if (cur_cmd!=math_shift)
   }
 }
 
-@ We have saved the worst for last: The fussiest part of math mode processing
-occurs when a displayed formula is being centered and placed with an optional
-equation number.
-
-@<Local variables for finishing...@>=
-pointer @!b; /*box containing the equation*/
-scaled @!w; /*width of the equation*/
-scaled @!z; /*width of the line*/
-scaled @!e; /*width of equation number*/
-scaled @!q; /*width of equation number plus space to separate from equation*/
-scaled @!d; /*displacement of equation in the line*/
-scaled @!s; /*move the line right this much*/
-small_number @!g1, @!g2; /*glue parameter codes for before and after*/
-pointer @!r; /*kern node used to position the display*/
-pointer @!t; /*tail of adjustment list*/
 
 @ At this time |p| points to the mlist for the formula; |a| is either
 |null| or it points to a box containing the equation number; and we are in
@@ -23332,6 +22568,9 @@ mlist_to_hlist();p=link(temp_head); link(temp_head)=null;@/
    q=new_disp_node();
    if (!danger) { display_formula(q)=p; display_eqno(q)=a; display_left(q)=l; }
   /* adding parameter nodes */
+  /* these are paragraph parameters
+     needed for the baseline skip before the above display skip
+  */
   if (hang_indent!=0)
   { new_param_node(dimen_type,hang_indent_code,hang_indent);
     if (hang_after!=1)
@@ -23340,6 +22579,18 @@ mlist_to_hlist();p=link(temp_head); link(temp_head)=null;@/
   new_param_node(dimen_type,line_skip_limit_code,line_skip_limit);
   new_param_node(glue_type,line_skip_code,line_skip);
   new_param_node(glue_type,baseline_skip_code,baseline_skip);
+
+#if 0 /* unsure */ 
+   new_param_node(dimen_type,math_quad_no ...)
+#endif
+
+  new_param_node(int_type,pre_display_penalty_code,pre_display_penalty);
+  new_param_node(int_type,post_display_penalty_code,post_display_penalty);
+  new_param_node(glue_type,above_display_skip_code,above_display_skip);
+  new_param_node(glue_type,below_display_skip_code,below_display_skip);
+  new_param_node(glue_type,above_display_short_skip_code,above_display_short_skip);
+  new_param_node(glue_type,below_display_short_skip_code,below_display_short_skip);
+  
   display_params(q)=link(temp_head); link(temp_head)=null;
   display_no_bs(q)= prev_depth <= ignore_depth;
   tail_append(q);
@@ -23356,85 +22607,6 @@ prev_graf=(norm_min(left_hyphen_min)*0100+norm_min(right_hyphen_min))
              *0200000+cur_lang;
 @<Scan an optional space@>;
 }
-
-@ The user can force the equation number to go on a separate line
-by causing its width to be zero.
-
-@<Squeeze the equation as much as possible...@>=
-{@+if ((e!=0)&&((w-total_shrink[normal]+q <= z)||@|
-   (total_shrink[fil]!=0)||(total_shrink[fill]!=0)||
-   (total_shrink[filll]!=0)))
-  {@+list_ptr(b)=null;flush_node_list(b);
-  b=hpack(p, z-q, 0, 0, exactly);
-  }
-else{@+e=0;
-  if (w > z)
-    {@+list_ptr(b)=null;flush_node_list(b);
-    b=hpack(p, z, 0, 0, exactly);
-    }
-  }
-w=width(b);
-}
-
-@ We try first to center the display without regard to the existence of
-the equation number. If that would make it too close (where ``too close''
-means that the space between display and equation number is less than the
-width of the equation number), we either center it in the remaining space
-or move it as far from the equation number as possible. The latter alternative
-is taken only if the display begins with glue, since we assume that the
-user put glue there to control the spacing precisely.
-
-@<Determine the displacement, |d|, of the left edge of the equation...@>=
-d=half(z-w);
-if ((e > 0)&&(d < 2*e))  /*too close*/
-  {@+d=half(z-w-e);
-  if (p!=null) if (!is_char_node(p)) if (type(p)==glue_node) d=0;
-  }
-
-@ If the equation number is set on a line by itself, either before or
-after the formula, we append an infinite penalty so that no page break will
-separate the display from its number; and we use the same size and
-displacement for all three potential lines of the display, even though
-`\.{\\parshape}' may specify them differently.
-
-@<Append the glue or equation number preceding the display@>=
-tail_append(new_penalty(pre_display_penalty));@/
-if ((d+s <= pre_display_size)||l)  /*not enough clearance*/
-  {@+g1=above_display_skip_code;g2=below_display_skip_code;
-  }
-else{@+g1=above_display_short_skip_code;
-  g2=below_display_short_skip_code;
-  }
-if (l&&(e==0))  /*it follows that |type(a)==hlist_node|*/
-  {@+shift_amount(a)=s;append_to_vlist(a);
-  tail_append(new_penalty(inf_penalty));
-  }
-else tail_append(new_param_glue(g1))
-
-@ @<Append the display and perhaps also the equation number@>=
-if (e!=0)
-  {@+r=new_kern(z-w-e-d);
-  if (l)
-    {@+link(a)=r;link(r)=b;b=a;d=0;
-    }
-  else{@+link(b)=r;link(r)=a;
-    }
-  b=hpack(b, natural);
-  }
-shift_amount(b)=s+d;append_to_vlist(b)
-
-@ @<Append the glue or equation number following the display@>=
-if ((a!=null)&&(e==0)&&!l)
-  {@+tail_append(new_penalty(inf_penalty));
-  shift_amount(a)=s+z-width(a);
-  append_to_vlist(a);
-  g2=0;
-  }
-if (t!=adjust_head)  /*migrating material comes after equation number*/
-  {@+link(tail)=link(adjust_head);tail=t;
-  }
-tail_append(new_penalty(post_display_penalty));
-if (g2 > 0) tail_append(new_param_glue(g2))
 
 @ When \.{\\halign} appears in a display, the alignment routines operate
 essentially as they do in vertical mode. Then the following program is
@@ -23505,8 +22677,8 @@ primitive("xdef", def, 3);
 
 @ @<Cases of |print_cmd_chr|...@>=
 case prefix: if (chr_code==1) print_esc("long");
-  else if (chr_code==2) print_esc("outer");
-  else @<Cases of |prefix| for |print_cmd_chr|@>@;
+  else if (chr_code==2) print_esc("outer")
+  @/@<Cases of |prefix| for |print_cmd_chr|@>;@/
   else print_esc("global");@+break;
 case def: if (chr_code==0) print_esc("def");
   else if (chr_code==1) print_esc("gdef");
@@ -23616,7 +22788,7 @@ if ((cur_cmd!=def)&&((a%4!=0)||(j!=0)))
 since the following routines test for the \.{\\global} prefix as follows.
 
 @d global (a >= 4)
-@d g_define(A, B, C) if (global) geq_define(A, B, C);@+else eq_define(A, B, C)
+@d define(A, B, C) if (global) geq_define(A, B, C);@+else eq_define(A, B, C)
 @d word_define(A, B) if (global) geq_word_define(A, B);@+else eq_word_define(A, B)
 
 @<Adjust \(f)for the setting of \.{\\globaldefs}@>=
@@ -23634,7 +22806,8 @@ control sequence for a token that is not redefinable.
 @<Declare subprocedures for |prefixed_command|@>=
 static void get_r_token(void)
 {@+
-restart: do get_token(); while (!(cur_tok!=space_token));
+restart: @/do@+{get_token();
+}@+ while (!(cur_tok!=space_token));
 if ((cur_cs==0)||(cur_cs > frozen_control_sequence))
   {@+print_err("Missing control sequence inserted");
 @.Missing control...@>
@@ -23657,7 +22830,7 @@ text(frozen_protection)=s_no("inaccessible");
 (Unfortunately, they aren't all as simple as this.)
 
 @<Assignments@>=
-case set_font: g_define(cur_font_loc, data, cur_chr);@+break;
+case set_font: define(cur_font_loc, data, cur_chr);@+break;
 
 @ When a |def| command has been scanned,
 |cur_chr| is odd if the definition is supposed to be global, and
@@ -23671,7 +22844,7 @@ case def: {@+if (odd(cur_chr)&&!global&&(global_defs >= 0)) a=a+4;
     {@+q=get_avail();info(q)=j;link(q)=link(def_ref);
     link(def_ref)=q;
     }
-  g_define(p, call+(a%4), def_ref);
+  define(p, call+(a%4), def_ref);
   } @+break;
 
 @ Both \.{\\let} and \.{\\futurelet} share the command code |let|.
@@ -23689,7 +22862,8 @@ case let: if (chr_code!=normal) print_esc("futurelet");@+else print_esc("let");@
 case let: {@+n=cur_chr;
   get_r_token();p=cur_cs;
   if (n==normal)
-    {@+do get_token(); while (!(cur_cmd!=spacer));
+    {@+@/do@+{get_token();
+    }@+ while (!(cur_cmd!=spacer));
     if (cur_tok==other_token+'=')
       {@+get_token();
       if (cur_cmd==spacer) get_token();
@@ -23702,7 +22876,7 @@ case let: {@+n=cur_chr;
   else if ((cur_cmd==internal_register)||(cur_cmd==toks_register))
     if ((cur_chr < mem_bot)||(cur_chr > lo_mem_stat_max))
       add_sa_ref(cur_chr);
-  g_define(p, cur_cmd, cur_chr);
+  define(p, cur_cmd, cur_chr);
   } @+break;
 
 @ A \.{\\chardef} creates a control sequence whose |cmd| is |char_given|;
@@ -23748,7 +22922,7 @@ case shorthand_def: switch (chr_code) {
   } @+break;
 case char_given: {@+print_esc("char");print_hex(chr_code);
   } @+break;
-case math_given: {@+print_esc("mathchar");print_hex(chr_code);
+case math_given: {@+print_esc("mathchar"); Umath_to_math(chr_code); print_hex(chr_code);
   } @+break;
 
 @ We temporarily define |p| to be |relax|, so that an occurrence of |p|
@@ -23757,12 +22931,12 @@ producing an ``undefined control sequence'' error or expanding the
 previous meaning.  This allows, for instance, `\.{\\chardef\\foo=123\\foo}'.
 
 @<Assignments@>=
-case shorthand_def: {@+n=cur_chr;get_r_token();p=cur_cs;g_define(p, relax, 256);
+case shorthand_def: {@+n=cur_chr;get_r_token();p=cur_cs;define(p, relax, 256);
   scan_optional_equals();
   switch (n) {
-  case char_def_code: {@+scan_char_num();g_define(p, char_given, cur_val);
+  case char_def_code: {@+scan_char_num();define(p, char_given, cur_val);
     } @+break;
-  case math_char_def_code: {@+scan_fifteen_bit_int();g_define(p, math_given, cur_val);
+  case math_char_def_code: {@+scan_fifteen_bit_int(); math_to_Umath(cur_val); define(p, math_given, cur_val);
     } @+break;
   default:{@+scan_register_num();
     if (cur_val > 255)
@@ -23770,15 +22944,15 @@ case shorthand_def: {@+n=cur_chr;get_r_token();p=cur_cs;g_define(p, relax, 256);
       if (j > mu_val) j=tok_val; /*|int_val dotdot mu_val| or |tok_val|*/
       find_sa_element(j, cur_val, true);add_sa_ref(cur_ptr);
       if (j==tok_val) j=toks_register;@+else j=internal_register;
-      g_define(p, j, cur_ptr);
+      define(p, j, cur_ptr);
       }
     else
     switch (n) {
-    case count_def_code: g_define(p, assign_int, count_base+cur_val);@+break;
-    case dimen_def_code: g_define(p, assign_dimen, scaled_base+cur_val);@+break;
-    case skip_def_code: g_define(p, assign_glue, skip_base+cur_val);@+break;
-    case mu_skip_def_code: g_define(p, assign_mu_glue, mu_skip_base+cur_val);@+break;
-    case toks_def_code: g_define(p, assign_toks, toks_base+cur_val);
+    case count_def_code: define(p, assign_int, count_base+cur_val);@+break;
+    case dimen_def_code: define(p, assign_dimen, scaled_base+cur_val);@+break;
+    case skip_def_code: define(p, assign_glue, skip_base+cur_val);@+break;
+    case mu_skip_def_code: define(p, assign_mu_glue, mu_skip_base+cur_val);@+break;
+    case toks_def_code: define(p, assign_toks, toks_base+cur_val);
     }  /*there are no other cases*/
     }
   }
@@ -23794,7 +22968,7 @@ case read_to_cs: {@+j=cur_chr;scan_int();n=cur_val;
     "I'm going to look for the \\cs now.");error();
     }
   get_r_token();
-  p=cur_cs;read_toks(n, p, j);g_define(p, call, cur_val);
+  p=cur_cs;read_toks(n, p, j);define(p, call, cur_val);
   } @+break;
 
 @ The token-list parameters, \.{\\output} and \.{\\everypar}, etc., receive
@@ -23864,7 +23038,7 @@ case assign_dimen: {@+p=cur_chr;scan_optional_equals();
 case assign_glue: case assign_mu_glue: {@+p=cur_chr;n=cur_cmd;scan_optional_equals();
   if (n==assign_mu_glue) scan_glue(mu_val);@+else scan_glue(glue_val);
   trap_zero_glue();
-  g_define(p, glue_ref, cur_val);
+  define(p, glue_ref, cur_val);
   } @+break;
 
 @ When a glue register or parameter becomes zero, it will always point to
@@ -23883,17 +23057,21 @@ static void trap_zero_glue(void)
 and the font families are declared by |def_family|.
 
 @<Put each...@>=
-primitive("catcode", def_code, cat_code_base);
+primitive("catcode", def_code, utf_cat_code_base);
 @!@:cat\_code\_}{\.{\\catcode} primitive@>
 primitive("mathcode", def_code, math_code_base);
 @!@:math\_code\_}{\.{\\mathcode} primitive@>
-primitive("lccode", def_code, lc_code_base);
+primitive("Umathcode", def_code, utf_math_code_base);
+@!@:Umath\_code\_}{\.{\\Umathcode} primitive@>
+primitive("Umathcodenum", def_code, utf_math_codenum_base);
+@!@:Umath\_code\_num}{\.{\\Umathcodenum} primitive@>
+primitive("lccode", def_code, utf_lc_code_base);
 @!@:lc\_code\_}{\.{\\lccode} primitive@>
-primitive("uccode", def_code, uc_code_base);
+primitive("uccode", def_code, utf_uc_code_base);
 @!@:uc\_code\_}{\.{\\uccode} primitive@>
-primitive("sfcode", def_code, sf_code_base);
+primitive("sfcode", def_code, utf_sf_code_base);
 @!@:sf\_code\_}{\.{\\sfcode} primitive@>
-primitive("delcode", def_code, del_code_base);
+primitive("delcode", def_code, utf_del_code_base);
 @!@:del\_code\_}{\.{\\delcode} primitive@>
 primitive("textfont", def_family, math_font_base);
 @!@:text\_font\_}{\.{\\textfont} primitive@>
@@ -23903,11 +23081,12 @@ primitive("scriptscriptfont", def_family, math_font_base+script_script_size);
 @!@:script\_script\_font\_}{\.{\\scriptscriptfont} primitive@>
 
 @ @<Cases of |print_cmd_chr|...@>=
-case def_code: if (chr_code==cat_code_base) print_esc("catcode");
-  else if (chr_code==math_code_base) print_esc("mathcode");
-  else if (chr_code==lc_code_base) print_esc("lccode");
-  else if (chr_code==uc_code_base) print_esc("uccode");
-  else if (chr_code==sf_code_base) print_esc("sfcode");
+case def_code: if (chr_code==utf_cat_code_base) print_esc("catcode");
+  else if (chr_code==utf_math_code_base) print_esc("Umathcode");
+  else if (chr_code==utf_math_codenum_base) print_esc("Umathcodenum");
+  else if (chr_code==utf_lc_code_base) print_esc("lccode");
+  else if (chr_code==utf_uc_code_base) print_esc("uccode");
+  else if (chr_code==utf_sf_code_base) print_esc("sfcode");
   else print_esc("delcode");@+break;
 case def_family: print_size(chr_code-math_font_base);@+break;
 
@@ -23915,9 +23094,19 @@ case def_family: print_size(chr_code-math_font_base);@+break;
 following program is careful to check each case properly.
 
 @<Assignments@>=
-case def_code: {@+@<Let |n| be the largest legal code value, based on |cur_chr|@>;
-  p=cur_chr;scan_char_num();p=p+cur_val;scan_optional_equals();
-  scan_int();
+case def_code: {@+int cp;
+  @<Let |n| be the largest legal code value, based on |cur_chr|@>;
+  p=cur_chr;scan_char_num();cp=cur_val;scan_optional_equals();
+  if (p==utf_math_code_base)
+  {  @<Read the arguments of \.{\\Umathcode}@>@;
+     p=utf_math_codenum_base;
+  }
+  else
+    scan_int();
+  if (p==math_code_base)
+  {  math_to_Umath(cur_val); p=utf_math_codenum_base;
+  }
+  if (p>=utf_first_base && cp<0x100) p=utf_adjust_base(p);
   if (((cur_val < 0)&&(p < del_code_base))||(cur_val > n))
     {@+print_err("Invalid code (");print_int(cur_val);
 @.Invalid code@>
@@ -23927,21 +23116,26 @@ case def_code: {@+@<Let |n| be the largest legal code value, based on |cur_chr|@
     help1("I'm going to use 0 instead of that illegal code value.");@/
     error();cur_val=0;
     }
-  if (p < math_code_base) g_define(p, data, cur_val);
-  else if (p < del_code_base) g_define(p, data, hi(cur_val));
-  else word_define(p, cur_val);
+  if (p>=utf_first_base) utf_define(p,cp,cur_val,global); 
+  else if (p < math_code_base) define(p+cp, data, cur_val);
+  else if (p < del_code_base) define(p+cp, data, hi(cur_val));
+  else word_define(p+cp, cur_val);
   } @+break;
 
 @ @<Let |n| be the largest...@>=
-if (cur_chr==cat_code_base) n=max_char_code;
-else if (cur_chr==math_code_base) n=0100000;
-else if (cur_chr==sf_code_base) n=077777;
-else if (cur_chr==del_code_base) n=077777777;
+if (cur_chr==math_code_base) n=0x7FFFFFFF;
+else if (cur_chr==utf_cat_code_base) n=max_char_code;
+else if (cur_chr==utf_math_code_base) n=0x7FFFFFFF;
+else if (cur_chr==utf_math_codenum_base) n=0x7FFFFFFF;
+else if (cur_chr==utf_sf_code_base) n=077777;
+else if (cur_chr==utf_lc_code_base) n=0x10FFFF;
+else if (cur_chr==utf_uc_code_base) n=0x10FFFF;
+else if (cur_chr==utf_del_code_base) n=077777777;
 else n=255
 
 @ @<Assignments@>=
 case def_family: {@+p=cur_chr;scan_four_bit_int();p=p+cur_val;
-  scan_optional_equals();scan_font_ident();g_define(p, data, cur_val);
+  scan_optional_equals();scan_font_ident();define(p, data, cur_val);
   } @+break;
 
 @ Next we consider changes to \TeX's numeric registers.
@@ -24149,8 +23343,8 @@ static void alter_integer(void)
 {@+small_number c;
    /*0 for \.{\\deadcycles}, 1 for \.{\\insertpenalties}, etc.*/
 c=cur_chr;scan_optional_equals();scan_int();
-if (c==0) dead_cycles=cur_val;
-else @<Cases for |alter_integer|@>@;
+if (c==0) dead_cycles=cur_val
+@/@<Cases for |alter_integer|@>@;@/
 else insert_penalties=cur_val;
 }
 
@@ -24188,7 +23382,7 @@ case set_shape: {@+q=cur_chr;scan_optional_equals();scan_int();n=cur_val;
       }
     cur_hfactor=fh; cur_vfactor=fv;
     }
-  g_define(q, shape_ref, p);
+  define(q, shape_ref, p);
   } @+break;
 
 @ Here's something that isn't quite so obvious. It guarantees that
@@ -24219,7 +23413,7 @@ new_patterns();goto done;@;
     print_err("Patterns can be loaded only by INITEX");
 @.Patterns can be...@>
     help0;error();
-    do get_token(); while (!(cur_cmd==right_brace)); /*flush the patterns*/
+    @/do@+{get_token();}@+ while (!(cur_cmd==right_brace)); /*flush the patterns*/
     return;
     }
   else{@+new_hyph_exceptions();goto done;
@@ -24273,12 +23467,14 @@ else{@+old_setting=selector;selector=new_string;
 @.FONTx@>
   str_room(1);t=make_string();
   }
-g_define(u, set_font, null_font);scan_optional_equals();scan_file_name();
+define(u, set_font, null_font);scan_optional_equals();scan_file_name();
 @<Scan the font size specification@>;
+@<Trace the font specification@>@;
 @<If this font has already been loaded, set |f| to the internal font number
 and |goto common_ending|@>;
 f=read_font_info(u, cur_name, cur_area, s);
-common_ending: g_define(u, set_font, f);eqtb[font_id_base+f]=eqtb[u];font_id_text(f)=t;
+common_ending:
+define(u, set_font, f);eqtb[font_id_base+f]=eqtb[u];font_id_text(f)=t;
 }
 
 @ @<Scan the font size specification@>=
@@ -24504,13 +23700,13 @@ building a token list and then changing the cases of the letters in it.
 any_mode(case_shift): shift_case();@+break;
 
 @ @<Put each...@>=
-primitive("lowercase", case_shift, lc_code_base);
+primitive("lowercase", case_shift, utf_lc_code_base);
 @!@:lowercase\_}{\.{\\lowercase} primitive@>
-primitive("uppercase", case_shift, uc_code_base);
+primitive("uppercase", case_shift, utf_uc_code_base);
 @!@:uppercase\_}{\.{\\uppercase} primitive@>
 
 @ @<Cases of |print_cmd_chr|...@>=
-case case_shift: if (chr_code==lc_code_base) print_esc("lowercase");
+case case_shift: if (chr_code==utf_lc_code_base) print_esc("lowercase");
   else print_esc("uppercase");@+break;
 
 @ @<Declare act...@>=
@@ -24518,7 +23714,7 @@ static void shift_case(void)
 {@+pointer b; /*|lc_code_base| or |uc_code_base|*/
 pointer @!p; /*runs through the token list*/
 halfword @!t; /*token*/
-eight_bits @!c; /*character code*/
+int @!c; /*character code*/
 b=cur_chr;p=scan_toks(false, false);p=link(def_ref);
 while (p!=null)
   {@+@<Change the case of the token in |p|, if a change is appropriate@>;
@@ -24535,9 +23731,16 @@ We also change active characters, using the fact that
 @<Change the case of the token in |p|, if a change is appropriate@>=
 t=info(p);
 if (t < cs_token_flag+single_base)
-  {@+c=t%256;
-  if (equiv(b+c)!=0) info(p)=t-c+equiv(b+c);
+{@+c=t%cmd_factor;
+  if (b==utf_lc_code_base)
+  { int d = utf_lccode(c);
+    if (d!=0) info(p)=t-c+d;
   }
+  else if (b==utf_uc_code_base)
+  { int d = utf_uccode(c);
+    if (d!=0) info(p)=t-c+d;
+  }
+}
 
 @ We come finally to the last pieces missing from |main_control|, namely the
 `\.{\\show}' commands that are useful when debugging.
@@ -24663,7 +23866,7 @@ so that the inverse relation between them is clear.
 The global variable |format_ident| is a string that is printed right
 after the |banner| line when \TeX\ is ready to start. For \.{INITEX} this
 string says simply `\.{ (INITEX)}'; for other versions of \TeX\ it says,
-for example, `\.{(preloaded format=plain 1982.11.19)}', showing the year,
+for example, `\.{ (preloaded format=plain 1982.11.19)}', showing the year,
 month, and day that the format file was created. We have |format_ident==0|
 before \TeX's tables are loaded.
 
@@ -24853,10 +24056,10 @@ sort_avail();var_used=0;
 dump_int(lo_mem_max);dump_int(rover);
 if (eTeX_ex) for (k=int_val; k<=tok_val; k++) dump_int(sa_root[k]);
 p=mem_bot;q=rover;x=0;
-do {for (k=p; k<=q+1; k++) dump_wd(mem[k]);
+@/do@+{for (k=p; k<=q+1; k++) dump_wd(mem[k]);
 x=x+q+2-p;var_used=var_used+q-p;
 p=q+node_size(q);q=rlink(q);
-} while (!(q==rover));
+}@+ while (!(q==rover));
 var_used=var_used+lo_mem_max-p;dyn_used=mem_end+1-hi_mem_min;@/
 for (k=p; k<=lo_mem_max; k++) dump_wd(mem[k]);
 x=x+lo_mem_max+1-p;
@@ -24878,11 +24081,11 @@ undump(lo_mem_stat_max+1, lo_mem_max, rover);
 if (eTeX_ex) for (k=int_val; k<=tok_val; k++)
   undump(null, lo_mem_max, sa_root[k]);
 p=mem_bot;q=rover;
-do {for (k=p; k<=q+1; k++) undump_wd(mem[k]);
+@/do@+{for (k=p; k<=q+1; k++) undump_wd(mem[k]);
 p=q+node_size(q);
 if ((p > lo_mem_max)||((q >= rlink(q))&&(rlink(q)!=rover))) goto bad_fmt;
 q=rlink(q);
-} while (!(q==rover));
+}@+ while (!(q==rover));
 for (k=p; k<=lo_mem_max; k++) undump_wd(mem[k]);
 if (mem_min < mem_bot-2)  /*make more low memory available*/
   {@+p=llink(rover);q=mem_min+1;
@@ -24897,14 +24100,14 @@ for (k=hi_mem_min; k<=mem_end; k++) undump_wd(mem[k]);
 undump_int(var_used);undump_int(dyn_used)
 
 @ @<Dump the table of equivalents@>=
-@<Dump regions 1 to 4 of |eqtb|@>@;
-@<Dump regions 5 and 6 of |eqtb|@>@;
+@<Dump regions 1 to 4 of |eqtb|@>;
+@<Dump regions 5 and 6 of |eqtb|@>;
 dump_int(par_loc);dump_int(write_loc);@/
 dump_int(input_loc);@/
 @<Dump the hash table@>@;
 
 @ @<Undump the table of equivalents@>=
-@<Undump regions 1 to 6 of |eqtb|@>@;
+@<Undump regions 1 to 6 of |eqtb|@>;
 undump(hash_base, frozen_control_sequence, par_loc);
 par_token=cs_token_flag+par_loc;@/
 undump(hash_base, frozen_control_sequence, write_loc);@/
@@ -24919,7 +24122,7 @@ copies of $x_n$, namely $(x_1,\ldots,x_n,x_n,\ldots,x_n)$.
 
 @<Dump regions 1 to 4 of |eqtb|@>=
 k=active_base;
-do {j=k;
+@/do@+{j=k;
 while (j < int_base-1)
   {@+if ((equiv(j)==equiv(j+1))&&(eq_type(j)==eq_type(j+1))&&@|
     (eq_level(j)==eq_level(j+1))) goto found1;
@@ -24937,10 +24140,10 @@ while (k < l)
   {@+dump_wd(eqtb[k]);incr(k);
   }
 k=j+1;dump_int(k-l);
-} while (!(k==int_base));
+}@+ while (!(k==int_base))
 
 @ @<Dump regions 5 and 6 of |eqtb|@>=
-do {j=k;
+@/do@+{j=k;
 while (j < eqtb_size)
   {@+if (eqtb[j].i==eqtb[j+1].i) goto found2;
   incr(j);
@@ -24956,11 +24159,11 @@ while (k < l)
   {@+dump_wd(eqtb[k]);incr(k);
   }
 k=j+1;dump_int(k-l);
-} while (!(k > eqtb_size));
+}@+ while (!(k > eqtb_size))
 
 @ @<Undump regions 1 to 6 of |eqtb|@>=
 k=active_base;
-do {undump_int(x);
+@/do@+{undump_int(x);
 if ((x < 1)||(k+x > eqtb_size+1)) goto bad_fmt;
 for (j=k; j<=k+x-1; j++) undump_wd(eqtb[j]);
 k=k+x;
@@ -24968,7 +24171,7 @@ undump_int(x);
 if ((x < 0)||(k+x > eqtb_size+1)) goto bad_fmt;
 for (j=k; j<=k+x-1; j++) eqtb[j]=eqtb[k-1];
 k=k+x;
-} while (!(k > eqtb_size));
+}@+ while (!(k > eqtb_size))
 
 @ A different scheme is used to compress the hash table, since its lower
 region is usually sparse. When |text(p)!=0| for |p <= hash_used|, we output
@@ -24986,8 +24189,8 @@ print_ln();print_int(cs_count);print(" multiletter control sequences")
 
 @ @<Undump the hash table@>=
 undump(hash_base, frozen_control_sequence, hash_used);p=hash_base-1;
-do {undump(p+1, hash_used, p);undump_hh(hash[p]);
-} while (!(p==hash_used));
+@/do@+{undump(p+1, hash_used, p);undump_hh(hash[p]);
+}@+ while (!(p==hash_used));
 for (p=hash_used+1; p<=undefined_control_sequence-1; p++) undump_hh(hash[p]);
 undump_int(cs_count)
 
@@ -24996,7 +24199,9 @@ dump_int(fmem_ptr);
 for (k=0; k<=fmem_ptr-1; k++) dump_wd(font_info[k]);
 dump_int(font_ptr);
 for (k=null_font; k<=font_ptr; k++)
+{ if (IS_X_FONT(k)) fatal_error("I can't dump extended fonts. Sorry!");
   @<Dump the array info for internal font number |k|@>;
+}
 print_ln();print_int(fmem_ptr-7);print(" words of font info for ");
 print_int(font_ptr-font_base);print(" preloaded font");
 if (font_ptr!=font_base+1) print_char('s')
@@ -25326,6 +24531,8 @@ if (log_opened)
     param_size,
     buf_size,
     save_size );
+  wlog_ln(" %d/%d utf block/info records out of %d/%d",
+    utf_b_used, utf_i_used, 0x100, 0x100);
   }
 
 @ We get to the |final_cleanup| routine when \.{\\end} or \.{\\dump} has
@@ -25673,21 +24880,31 @@ to hold the string numbers for name, area, and extension.
 @d ignore_info(A)    type(A+1)
 @d ignore_list(A)    link(A+1)
 
-@d label_node hitex_ext+17 /* represents a link to a another location */
+@d color_node hitex_ext+17 /* represent a color node */
+@d end_color_node hitex_ext+18 /* represent an end color node */
+@d default_color_node hitex_ext+19 /* set default colors*/
+@d link_color_node hitex_ext+20 /* set link colors */
+@d default_link_color_node hitex_ext+21 /* set default link colors */
+@d no_color_node  hitex_ext+22 /* a deleted end color node */
+@d color_node_size small_node_size
+@d color_ref(A)  type(A+1) /* reference to the color set */
+@d color_link(A)     link(A+1) /* pointer down the color stack */
+
+@d label_node hitex_ext+23 /* represents a link to a another location */
 @d label_node_size 2
 @d label_has_name(A)  type(A+1) /* 1 for a name , 0 for a number */
 @d label_where(A)  subtype(A+1) /* 1 for top, 2 for bot, 3 for mid */
-@d label_ptr(A) link(A+1) /* for a name the token list or the number */
-@d label_ref(A) link(A+1) /*alternatively the label number */
+@d label_ptr(A) link(A+1) /* hitex: a name (token list) or a number */
 
-@d start_link_node hitex_ext+18 /* represents a link to a another location */
-@d end_link_node hitex_ext+19 /* represents a link to a another location */
-@d link_node_size 2 /* second word like a |label_node| */
+@d start_link_node hitex_ext+24 /* represents a link to another location */
+@d end_link_node hitex_ext+25 /* represents a link to another location */
+@d link_node_size 3 /* second word like a |color_node| */
+@d as_label(A) ((A)+1) /* third word like a |label_node| */
 
-@d outline_node hitex_ext+20 /* represents an outline item */
-@d outline_node_size 4 /* second word like a |label_node| */
+@d outline_node hitex_ext+26 /* represents an outline item */
+@d outline_node_size 3 /* second word like a |label_node| */
 @d outline_ptr(A)   link(A+2) /* text to be displayed */
-@d outline_depth(A) mem[A+3].i /* depth of sub items */
+@d outline_depth(A) info(A+2) /* depth of sub items */
 
 
 @ The sixteen possible \.{\\write} streams are represented by the |write_file|
@@ -25724,46 +24941,8 @@ primitive("special", extension, special_node);@/
 @!@:special\_}{\.{\\special} primitive@>
 primitive("immediate", extension, immediate_code);@/
 @!@:immediate\_}{\.{\\immediate} primitive@>
-
 primitive("setlanguage", extension, set_language_code);@/
 @!@:set\_language\_}{\.{\\setlanguage} primitive@>
-
-primitive("HINTversion", last_item, HINT_version_code);
-@!@:HINT\_version\_}{\.{\\HINTversion} primitive@>
-
-primitive("HINTminorversion", last_item, HINT_minor_version_code);
-@!@:HINT\_minor\_version\_}{\.{\\HINTminorversion} primitive@>
-
-primitive("HINTdest", extension, label_node);@/
-@!@:HINTdest\_}{\.{\\HINTdest} primitive@>
-
-primitive("HINTstartlink", extension, start_link_node);@/
-@!@:startlink\_}{\.{\\HINTstartlink} primitive@>
-
-primitive("HINTendlink", extension, end_link_node);@/
-@!@:HINTendlink\_}{\.{\\HINTendlink} primitive@>
-
-primitive("HINToutline", extension, outline_node);@/
-@!@:HINToutline\_}{\.{\\HINToutline} primitive@>
-
-primitive("HINTimage", extension, image_node);@/
-@!@:image\_}{\.{\\image} primitive@>
-
-primitive("HINTsetpage", extension, setpage_node);@/
-@!@:setpage\_}{\.{\\setpage} primitive@>
-
-primitive("HINTstream", extension, stream_node);@/
-@!@:stream\_}{\.{\\stream} primitive@>
-
-primitive("HINTsetstream", extension, setstream_node);@/
-@!@:setstream\_}{\.{\\setstream} primitive@>
-
-primitive("HINTbefore", extension, stream_before_node);@/
-@!@:before\_}{\.{\\before} primitive@>
-
-primitive("HINTafter", extension, stream_after_node);@/
-@!@:after\_}{\.{\\after} primitive@>
-
 
 @ The variable |write_loc| just introduced is used to provide an
 appropriate error message in case of ``runaway'' write texts.
@@ -25778,6 +24957,12 @@ case extension: switch (chr_code) {
   case close_node: print_esc("closeout");@+break;
   case special_node: print_esc("special");@+break;
   case image_node: print_esc("HINTimage");@+break;
+  case color_node: print_esc("HINTcolor");@+break;
+  case end_color_node: print_esc("HINTendcolor");@+break;
+  case no_color_node: print_esc("HINTendcolor ignored");@+break;
+  case default_color_node: print_esc("HINTdefaultcolor");@+break;
+  case link_color_node: print_esc("HINTlinkcolor");@+break;
+  case default_link_color_node: print_esc("HINTdefaultlinkcolor");@+break;
   case start_link_node: print_esc("HINTstartlink");@+break;
   case end_link_node: print_esc("HINTendlink");@+break;
   case label_node: print_esc("HINTdest");@+break;
@@ -25800,7 +24985,7 @@ case extension: switch (chr_code) {
   case ignore_node: print("[HINT internal: ignore]");@+break;
   case immediate_code: print_esc("immediate");@+break;
   case set_language_code: print_esc("setlanguage");@+break;
-  @/@t\4@>@<Cases of |extension| for |print_cmd_chr|@>@;
+  @/@<Cases of |extension| for |print_cmd_chr|@>@/
   default:print("[unknown extension!]");
   } @+break;
 
@@ -25831,21 +25016,27 @@ case vset_node:
 case align_node: @+break;@#
 case image_node:@/
 {@+ pointer p;
+  scaled iw=0,ih=0;
+  double ia=0.0;
   scan_optional_equals();
   scan_file_name();
   p=new_image_node(cur_name,cur_area,cur_ext);
   loop {
     if (scan_keyword("width"))
-    {@+scan_normal_dimen; image_xwidth(p)=new_xdimen(cur_val,cur_hfactor,cur_vfactor); }
+    {@+scan_normal_dimen; image_xwidth(p)=new_xdimen(cur_val,cur_hfactor,cur_vfactor);
+     if (cur_hfactor==0 && cur_vfactor==0) iw=cur_val;
+    }
     else if (scan_keyword("height"))
-    {@+scan_normal_dimen; image_xheight(p)=new_xdimen(cur_val,cur_hfactor,cur_vfactor); }
+    {@+scan_normal_dimen; image_xheight(p)=new_xdimen(cur_val,cur_hfactor,cur_vfactor);
+      if (cur_hfactor==0 && cur_vfactor==0) ih=cur_val;
+    }
     else
       break;
   }
-  { scaled iw,ih;
-    double ia;
+  {
     pointer r,q;
-    hextract_image_dimens(image_no(p),&ia,&iw,&ih);
+    if (ih!=0 && iw!=0 ) ia=(double)iw/ih;
+    else hextract_image_dimens(image_no(p),&ia,&iw,&ih);
     image_aspect(p)=round(ia*ONE);
     r=image_xwidth(p);
     q=image_xheight(p);
@@ -25857,8 +25048,8 @@ case image_node:@/
       else if (iw<0)
       { MESSAGE("Unable to determine size of image %s; using 72dpi.\n",
 		dir[image_no(p)].file_name);
-	image_xwidth(p)=r=new_xdimen(-iw*ONE,0,0);
-        image_xheight(p)=q=new_xdimen(-ih*ONE,0,0);
+	image_xwidth(p)=r=new_xdimen(-iw,0,0);
+        image_xheight(p)=q=new_xdimen(-ih,0,0);
       }
       else
       { MESSAGE("Unable to determine size of image %s; using 100pt x 100pt\n",
@@ -25883,19 +25074,66 @@ case image_node:@/
     tail_append(p);
   break;
 }
+case color_node:
+    { ColorSet c;
+      new_whatsit(color_node,color_node_size);
+      scan_color_spec(c,0);
+      color_ref(tail)=next_colorset(c);
+      color_link(tail)=null;
+      default_color_frozen=true;
+    }
+    break;
+case no_color_node: break;
+case end_color_node:
+    { new_whatsit(end_color_node,color_node_size);
+      color_ref(tail)=0xFF;
+      color_link(tail)=null;
+    }
+    break;
+case default_color_node:
+    if (default_color_frozen)
+    { print_err("You can not use \\HINTdefaultcolor after \\HINTcolor");
+      error();
+    }
+    else
+    { ColorSet c;
+      scan_color_spec(c,0);
+      colorset_copy(colors[0],c);
+    }
+    break;
+case link_color_node:
+    { ColorSet c;
+      scan_color_spec(c,1);
+      cur_link_color=next_colorset(c);
+      default_link_color_frozen=true;
+    }
+    break;
+case default_link_color_node:
+    if (default_link_color_frozen)
+    {@+print_err("You can not use \\HINTdefaultlinkcolor after \\HINTlinkcolor");      error();
+    }
+    else
+    { ColorSet c;
+      scan_color_spec(c,1);
+      colorset_copy(colors[1],c);
+    }
+    break;
 case start_link_node:
   if (abs(mode) == vmode)
     fatal_error("HINTstartlink cannot be used in vertical mode");
   else
   { new_whatsit(start_link_node,link_node_size);
-    scan_label(tail);
+    scan_label(as_label(tail));
+    color_ref(tail)=cur_link_color;
   }
   break;
 case end_link_node:
   if (abs(mode) == vmode)
     fatal_error("HINTendlink cannot be used in vertical mode");
   else
-    new_whatsit(end_link_node,link_node_size);
+  { new_whatsit(end_link_node,link_node_size);
+    color_ref(tail)=0xFF;
+  }
   break;
 case label_node:
   new_whatsit(label_node,label_node_size);
@@ -25991,7 +25229,7 @@ case xdimen_node:
 case ignore_node: @+break;
 case immediate_code: @<Implement \.{\\immediate}@>@;@+break;
 case set_language_code: @<Implement \.{\\setlanguage}@>@;@+break;
-@/@t\4@>@<Cases for |do_extension|@>@;
+@/@<Cases for |do_extension|@>@/
 default:confusion("ext1");
 @:this can't happen ext1}{\quad ext1@>
 }
@@ -26122,7 +25360,7 @@ case language_node: {@+print_esc("setlanguage");
   print_int(what_lhm(p));print_char(',');
   print_int(what_rhm(p));print_char(')');
   } @+break;
-@/@t\4@>@<Cases for displaying the |whatsit| node@>@;
+@/@<Cases for displaying the |whatsit| node@>@/
 case param_node: print_esc("parameter ");
   print_int(param_type(p));print_char(',');print_int(param_no(p));
   print_char(':');print_int(param_value(p).i);
@@ -26180,6 +25418,15 @@ case image_node:
   print("), section ");print_int(image_no(p));
   if (image_name(p)!=0) {print(", "); printn(image_name(p));}
   break;
+case color_node:
+  print_esc("HINTcolor ");print_int(color_ref(p));
+  break;
+case no_color_node:
+  print_esc("HINTendcolor ignored");
+  break;
+case end_color_node:
+  print_esc("HINTendcolor ");
+  break;
 case align_node:
   print_esc("align(");
   print(align_m(p)==exactly?"exactly ":"additional ");
@@ -26223,10 +25470,12 @@ case ignore_node:
   break;
 case start_link_node:
   print_esc("HINTstartlink ");
-  print_label(p);
+  print_label(as_label(p));
+  if (color_ref(p)!=1) { print("color "); print_int(color_ref(p)); }
   break;
 case end_link_node:
   print_esc("HINTendlink ");
+  if (color_ref(p)!=0xFF) { print("color "); print_int(color_ref(p)); }
   break;
 case label_node:
   print_esc("HINTdest ");
@@ -26263,7 +25512,7 @@ case write_node: case special_node: case latespecial_node: {@+r=get_node(write_n
 case close_node: case language_node: {@+r=get_node(small_node_size);
   words=small_node_size;
   } @+break;
-@/@t\4@>@<Cases for making a partial copy of the whatsit node@>@;
+@/@<Cases for making a partial copy of the whatsit node@>@/
 case param_node:
 {@+r=get_node(param_node_size);
   if (param_type(p)==glue_type) add_glue_ref(param_value(p).i);
@@ -26309,6 +25558,12 @@ case image_node:
     image_alt(r)=copy_node_list(image_alt(p));
     words=image_node_size-1;
     break;
+case color_node:
+case no_color_node:
+case end_color_node:
+    r=get_node(color_node_size);
+    words=color_node_size;
+    break;
 case align_node:
   {@+r=get_node(align_node_size);
      align_preamble(r)=copy_node_list(align_preamble(p));
@@ -26343,7 +25598,7 @@ case ignore_node:
   break;
 case start_link_node:
     r=get_node(link_node_size);
-    if (label_has_name(p)) add_token_ref(label_ptr(p));
+    if (label_has_name(as_label(p))) add_token_ref(label_ptr(as_label(p)));
     words=link_node_size;
     break;
 case end_link_node:
@@ -26359,6 +25614,7 @@ case outline_node:
     r=get_node(outline_node_size);
     if (label_has_name(p)) add_token_ref(label_ptr(p));
     outline_ptr(r)=copy_node_list(outline_ptr(p));
+    outline_depth(r)=outline_depth(p);
     words=outline_node_size-1;
     break;
 case stream_node:
@@ -26407,6 +25663,10 @@ case image_node:
   delete_xdimen_ref(image_xwidth(p)); delete_xdimen_ref(image_xheight(p));
   flush_node_list(image_alt(p));
   free_node(p,image_node_size);@+break;
+case color_node:
+case no_color_node:
+case end_color_node:
+  free_node(p,color_node_size);@+break;
 case align_node:
   delete_xdimen_ref(align_extent(p));
   flush_node_list(align_preamble(p));
@@ -26431,7 +25691,7 @@ case ignore_node:
   flush_node_list(ignore_list(p));
   free_node(p,ignore_node_size); @+break;
 case start_link_node:
-  if (label_has_name(p)) delete_token_ref(label_ptr(p));
+  if (label_has_name(as_label(p))) delete_token_ref(label_ptr(as_label(p)));
   free_node(p,link_node_size);@+break;
 case end_link_node:
   free_node(p,link_node_size);@+break;
@@ -26446,20 +25706,14 @@ case stream_node:
   free_node(p,stream_node_size); @+break;
 case xdimen_node:
   free_node(p,xdimen_node_size);
-@/@t\4@>@<Cases for wiping out the whatsit node@>@;
+@/@<Cases for wiping out the whatsit node@>@/
 default:confusion("ext3");
 @:this can't happen ext3}{\quad ext3@>
 } @/
 goto done;
 }
 
-@ @<Incorporate a whatsit node into a vbox@>=do_nothing
-
-@ @<Incorporate a whatsit node into an hbox@>=do_nothing
-
-@ @<Let |d| be the width of the whatsit |p|@>=d=0
-
-@ @d adv_past(A) if (subtype(A)==language_node)
+@ @d adv_past(A) @+if (subtype(A)==language_node)
     {@+cur_lang=what_lang(A);l_hyf=what_lhm(A);r_hyf=what_rhm(A);
     set_hyph_index;
     }
@@ -26470,8 +25724,6 @@ adv_past(cur_p)
 @ @<Advance \(p)past a whatsit node in the \(p)pre-hyphenation loop@>=@+
 adv_past(s)
 
-@ @<Prepare to move whatsit |p| to the current page, then |goto contribute|@>=
-goto contribute
 
 @ @<Process whatsit |p| in |vert_break| loop, |goto not_found|@>=
 goto not_found
@@ -26558,14 +25810,15 @@ end_token_list() /*conserve stack space*/
 @.Unbalanced write...@>
 help2("On this page there's a \\write with fewer real {'s than }'s.",@/
 "I can't handle that very well; good luck.");error();
-do get_token(); while (!(cur_tok==end_write_token));
+@/do@+{get_token();
+}@+ while (!(cur_tok==end_write_token));
 }
 
 @ The |out_what| procedure takes care of outputting whatsit nodes for
 |vlist_out| and |hlist_out|\kern-.3pt.
 
 @<Declare procedures needed in |hlist_out|, |vlist_out|@>=
-@t\4@>@<Declare procedures needed in |out_what|@>@;
+
 static void out_what(pointer @!p)
 {@+small_number j; /*write stream number*/
 switch (subtype(p)) {
@@ -26738,20 +25991,6 @@ if (eTeX_ex)
 else{@+@<Initialize variables for \eTeX\ compatibility mode@>;
   }
 
-@ The |eTeX_enabled| function simply returns its first argument as
-result.  This argument is |true| if an optional \eTeX\ feature is
-currently enabled; otherwise, if the argument is |false|, the function
-gives an error message.
-
-@<Declare \eTeX\ procedures for use...@>=
-static bool eTeX_enabled(bool @!b, quarterword @!j, halfword @!k)
-{@+if (!b)
-  {@+print_err("Improper ");print_cmd_chr(j, k);
-  help1("Sorry, this optional e-TeX feature has been disabled.");error();
-  }
-return b;
-}
-
 @ First we implement the additional \eTeX\ parameters in the table of
 equivalents.
 
@@ -26772,6 +26011,8 @@ primitive("savingvdiscards", assign_int, int_base+saving_vdiscards_code);@/
 @!@:saving\_vdiscards\_}{\.{\\savingvdiscards} primitive@>
 primitive("savinghyphcodes", assign_int, int_base+saving_hyph_codes_code);@/
 @!@:saving\_hyph\_codes\_}{\.{\\savinghyphcodes} primitive@>
+primitive("ignoreprimitiveerror", assign_int, int_base+ignore_primitive_error_code);@/
+@!@:ignore\_primitive\_error\_}{\.{\\ignoreprimitiveerror} primitive@>
 
 @ @d every_eof equiv(every_eof_loc)
 
@@ -26786,6 +26027,7 @@ case tracing_scan_tokens_code: print_esc("tracingscantokens");@+break;
 case tracing_nesting_code: print_esc("tracingnesting");@+break;
 case saving_vdiscards_code: print_esc("savingvdiscards");@+break;
 case saving_hyph_codes_code: print_esc("savinghyphcodes");@+break;
+case ignore_primitive_error_code: print_esc("ignoreprimitiveerror");@+break;
 
 @ In order to handle \.{\\everyeof} we need an array |eof_seen| of
 boolean variables.
@@ -26936,12 +26178,12 @@ case font_char_ht_code:
 case font_char_dp_code:
 case font_char_ic_code: {@+scan_font_ident();q=cur_val;scan_char_num();
   if ((font_bc[q] <= cur_val)&&(font_ec[q] >= cur_val))
-    {@+i=char_info(q, qi(cur_val));
+    {@+
     switch (m) {
-    case font_char_wd_code: cur_val=char_width(q, i);@+break;
-    case font_char_ht_code: cur_val=char_height(q, height_depth(i));@+break;
-    case font_char_dp_code: cur_val=char_depth(q, height_depth(i));@+break;
-    case font_char_ic_code: cur_val=char_italic(q, i);
+    case font_char_wd_code: cur_val=char_width(q, qi(cur_val));@+break;
+    case font_char_ht_code: cur_val=char_height(q,  qi(cur_val));@+break;
+    case font_char_dp_code: cur_val=char_depth(q,  qi(cur_val));@+break;
+    case font_char_ic_code: cur_val=char_italic(q, qi(cur_val));
     }  /*there are no other cases*/
     }
   else cur_val=0;
@@ -27029,9 +26271,9 @@ a=1;
 print_nl("");print_ln();
 loop@+{@+print_nl("### ");print_group(true);
   if (cur_group==bottom_level) goto done;
-  do {m=nest[p].mode_field;
+  @/do@+{m=nest[p].mode_field;
   if (p > 0) decr(p);else m=vmode;
-  } while (!(m!=hmode));
+  }@+ while (!(m!=hmode));
   print(" (");
   switch (cur_group) {
     case simple_group: {@+incr(p);goto found2;
@@ -27156,7 +26398,7 @@ scanner_status=s;warning_index=w;def_ref=d;
 
 @ The \.{\\showtokens} command displays a token list.
 
-@d show_tokens 5 /* \.{\\showtokens}, must be odd! */
+@d show_tokens 5 /* \.{\\showtokens} , must be odd! */
 
 @<Generate all \eTeX...@>=
 primitive("showtokens", xray, show_tokens);
@@ -27179,9 +26421,9 @@ primitive("unexpanded", the, 1);@/
 primitive("detokenize", the, show_tokens);@/
 @!@:detokenize\_}{\.{\\detokenize} primitive@>
 
-@ @<Cases of |the| for |print_cmd_chr|@>=
-if (chr_code==1) print_esc("unexpanded");
-else print_esc("detokenize");
+@ @<Cases of |the| for |print_cmd_chr|@>=;
+else if (chr_code==1) print_esc("unexpanded");
+else print_esc("detokenize")
 
 @ @<Handle \.{\\unexpanded} or \.{\\detokenize} and |return|@>=
 if (odd(cur_chr))
@@ -27216,14 +26458,14 @@ case show_ifs: {@+begin_diagnostic();print_nl("");print_ln();
     {@+print_nl("### ");print("no active conditionals");
     }
   else{@+p=cond_ptr;n=0;
-    do {incr(n);p=link(p);@+} while (!(p==null));
+    @/do@+{incr(n);p=link(p);@+}@+ while (!(p==null));
     p=cond_ptr;t=cur_if;l=if_line;m=if_limit;
-    do {print_nl("### level ");print_int(n);print(": ");
+    @/do@+{print_nl("### level ");print_int(n);print(": ");
     print_cmd_chr(if_test, t);
     if (m==fi_code) print_esc("else");
     print_if_line(l);
     decr(n);t=subtype(p);l=if_line_field(p);m=type(p);p=link(p);
-    } while (!(p==null));
+    }@+ while (!(p==null));
     }
   } @+break;
 
@@ -27234,17 +26476,17 @@ interaction mode.
 primitive("interactionmode", set_page_int, 2);
 @!@:interaction\_mode\_}{\.{\\interactionmode} primitive@>
 
-@ @<Cases of |set_page_int| for |print_cmd_chr|@>=
-if (chr_code==2) print_esc("interactionmode");
+@ @<Cases of |set_page_int| for |print_cmd_chr|@>=;
+else if (chr_code==2) print_esc("interactionmode")
 
-@ @<Cases for `Fetch the |dead_cycles| or the |insert_penalties|'@>=
-if (m==2) cur_val=interaction;
+@ @<Cases for `Fetch the |dead_cycles| or the |insert_penalties|'@>=;
+else if (m==2) cur_val=interaction
 
 @ @<Declare \eTeX\ procedures for use...@>=
 static void new_interaction(void);
 
-@ @<Cases for |alter_integer|@>=
-if (c==2)
+@ @<Cases for |alter_integer|@>=;
+else if (c==2)
   {@+if ((cur_val < batch_mode)||(cur_val > error_stop_mode))
     {@+print_err("Bad interaction mode");
 @.Bad interaction mode@>
@@ -27263,8 +26505,8 @@ delimiters to appear between \.{\\left} and \.{\\right}.
 primitive("middle", left_right, middle_noad);
 @!@:middle\_}{\.{\\middle} primitive@>
 
-@ @<Cases of |left_right| for |print_cmd_chr|@>=
-if (chr_code==middle_noad) print_esc("middle");
+@ @<Cases of |left_right| for |print_cmd_chr|@>=;
+else if (chr_code==middle_noad) print_esc("middle")
 
 @ The |scan_tokens| feature of \eTeX\ defines the \.{\\scantokens}
 primitive.
@@ -27273,11 +26515,11 @@ primitive.
 primitive("scantokens", input, 2);
 @!@:scan\_tokens\_}{\.{\\scantokens} primitive@>
 
-@ @<Cases of |input| for |print_cmd_chr|@>=
-if (chr_code==2) print_esc("scantokens");
+@ @<Cases of |input| for |print_cmd_chr|@>=;
+else if (chr_code==2) print_esc("scantokens")
 
-@ @<Cases for |input|@>=
-if (cur_chr==2) pseudo_start();
+@ @<Cases for |input|@>=;
+else if (cur_chr==2) pseudo_start()
 
 @ The global variable |pseudo_files| is used to maintain a stack of
 pseudo files.  The |info| field of each pseudo file points to a linked
@@ -27403,8 +26645,8 @@ while (pseudo_files!=null) pseudo_close(); /*flush pseudo files*/
 primitive("readline", read_to_cs, 1);@/
 @!@:read\_line\_}{\.{\\readline} primitive@>
 
-@ @<Cases of |read| for |print_cmd_chr|@>=
-print_esc("readline");
+@ @<Cases of |read| for |print_cmd_chr|@>=;
+else print_esc("readline")
 
 @ @<Handle \.{\\readline} and |goto done|@>=
 if (j==1)
@@ -27479,9 +26721,9 @@ preceding the mandatory \.{\\endcsname} have been expanded).
 
 @<Cases for |conditional|@>=
 case if_cs_code: {@+n=get_avail();p=n; /*head of the list of characters*/
-  do {get_x_token();
+  @/do@+{get_x_token();
   if (cur_cs==0) store_new_token(cur_tok);
-  } while (!(cur_cs!=0));
+  }@+ while (!(cur_cs!=0));
   if (cur_cmd!=end_cs_name) @<Complain about missing \.{\\endcsname}@>;
   @<Look up the characters of list |n| in the hash table, and set |cur_cs|@>;
   flush_list(n);
@@ -27497,7 +26739,7 @@ while (p!=null)
       overflow("buffer size", buf_size);
 @:TeX capacity exceeded buffer size}{\quad buffer size@>
     }
-  buffer[m]=info(p)%0400;incr(m);p=link(p);
+  buffer[m]=info(p)%cmd_factor;incr(m);p=link(p); /* this is to be checked */
   }
 if (m==first) cur_cs=null_cs; /*the list is empty*/
 else if (m > first+1)
@@ -27510,7 +26752,7 @@ a font.
 @<Cases for |conditional|@>=
 case if_font_char_code: {@+scan_font_ident();n=cur_val;scan_char_num();
   if ((font_bc[n] <= cur_val)&&(font_ec[n] >= cur_val))
-    b=char_exists(char_info(n, qi(cur_val)));
+    b=char_exists(n, qi(cur_val));
   else b=false;
   } @+break;
 
@@ -27523,8 +26765,8 @@ or during \.{\\write}.
 primitive("protected", prefix, 8);
 @!@:protected\_}{\.{\\protected} primitive@>
 
-@ @<Cases of |prefix| for |print_cmd_chr|@>=
-if (chr_code==8) print_esc("protected");
+@ @<Cases of |prefix| for |print_cmd_chr|@>=;
+else if (chr_code==8) print_esc("protected")
 
 @ The |get_x_or_protected| procedure is like |get_x_token| except that
 protected macros are not expanded.
@@ -27762,7 +27004,7 @@ resume: if (s==expr_none) o=l;@+else o=int_val;
 found: @<Scan the next operator and set |o|@>;
 arith_error=b;
 @<Make sure that |f| is in the proper range@>;
-switch (s) {@t\4@>@<Cases for evaluation of the current term@>@;
+switch (s) {@<Cases for evaluation of the current term@>@;
 }  /*there are no other cases*/
 if (o > expr_sub) s=o;@+else@<Evaluate the current expression@>;
 b=arith_error;
@@ -27817,7 +27059,7 @@ static void scan_mu_glue(void)
 @ Parenthesized subexpressions can be inside expressions, and this
 nesting has a stack.  Seven local variables represent the top of the
 expression stack:  |p| points to pushed-down entries, if any; |l|
-specifies the type of expression currently beeing evaluated; |e| is the
+specifies the type of expression currently being evaluated; |e| is the
 expression so far and |r| is the state of its evaluation; |t| is the
 term so far and |s| is the state of its evaluation; finally |n| is the
 numerator for a combined multiplication and division, if any.
@@ -28357,7 +27599,7 @@ words contain the five types of current marks
 @d word_node_size 3 /*size of an element with a word value*/
 @d sa_num(A) sa_ptr(A) /*the register number*/
 @d sa_int(A) mem[A+2].i /*an integer*/
-@d sa_dim(A) mem[A+2].sc /*a dimension (a somewhat esotheric distinction)*/
+@d sa_dim(A) mem[A+2].sc /*a dimension (a somewhat esoteric distinction)*/
 @#
 @d mark_class_node_size 4 /*size of an element for a mark class*/
 @#
@@ -28423,12 +27665,12 @@ else{@+if (sa_index(q) < mu_val_limit)
   else if (sa_ptr(q)!=null) return;
   s=pointer_node_size;
   }
-do {i=hex_dig4(sa_index(q));p=q;q=link(p);free_node(p, s);
+@/do@+{i=hex_dig4(sa_index(q));p=q;q=link(p);free_node(p, s);
 if (q==null)  /*the whole tree has been freed*/
   {@+sa_root[i]=null;return;
   }
 delete_sa_ptr;s=index_node_size; /*node |q| is an index node*/
-} while (!(sa_used(q) > 0));
+}@+ while (!(sa_used(q) > 0));
 }
 
 @ The |print_sa_num| procedure prints the register number corresponding
@@ -28531,7 +27773,7 @@ if (l < 4)  /*|q| is an index node*/
   }
 else /*|q| is the node for a mark class*/
   {@+switch (a) {
-  @t\4@>@<Cases for |do_marks|@>@;
+  @<Cases for |do_marks|@>@;
   }  /*there are no other cases*/
   if (sa_bot_mark(q)==null) if (sa_split_bot_mark(q)==null)
     {@+free_node(q, mark_class_node_size);q=null;
@@ -28586,18 +27828,8 @@ case fire_up_done: if ((sa_top_mark(q)!=null)&&(sa_first_mark(q)==null))
   {@+sa_first_mark(q)=sa_top_mark(q);add_token_ref(sa_top_mark(q));
   } @+break;
 
-@ @<Update the current marks for |fire_up|@>=
-{@+find_sa_element(mark_val, mark_class(p), true);
-if (sa_first_mark(cur_ptr)==null)
-  {@+sa_first_mark(cur_ptr)=mark_ptr(p);
-  add_token_ref(mark_ptr(p));
-  }
-if (sa_bot_mark(cur_ptr)!=null) delete_token_ref(sa_bot_mark(cur_ptr));
-sa_bot_mark(cur_ptr)=mark_ptr(p);add_token_ref(mark_ptr(p));
-}
-
 @ Here we use the fact that the five current mark pointers in a mark
-class node occupy the same locations as the the first five pointers of
+class node occupy the same locations as the first five pointers of
 an index node.  For systems using a run-time switch to distinguish
 between \.{VIRTEX} and \.{INITEX}, the codewords `$|@t\#\&{ifdef} \.{INIT}@>|\ldots|@t\#\&{endif}@>|$'
 surrounding the following piece of code should be removed.
@@ -28651,7 +27883,7 @@ case toks_register: case internal_register:
 essentially the same when the register is realized as sparse array
 element or entry in |eqtb|.  The global variable |sa_chain| is the head
 of a linked list of entries saved at the topmost level |sa_level|; the
-lists for lowel levels are kept in special save stack entries.
+lists for lower levels are kept in special save stack entries.
 
 @<Glob...@>=
 static pointer @!sa_chain; /*chain of saved sparse array entries*/
@@ -28808,7 +28040,7 @@ at by |sa_chain|
 @<Declare \eTeX\ procedures for tr...@>=
 static void sa_restore(void)
 {@+pointer p; /*sparse array element*/
-do {p=sa_loc(sa_chain);
+@/do@+{p=sa_loc(sa_chain);
 if (sa_lev(p)==level_one)
   {@+if (sa_index(p) >= dimen_val_limit) sa_destroy(sa_chain);
 #ifdef @!STAT
@@ -28831,7 +28063,7 @@ delete_sa_ref(p);
 p=sa_chain;sa_chain=link(p);
 if (sa_index(p) < dimen_val_limit) free_node(p, word_node_size);
 else free_node(p, pointer_node_size);
-} while (!(sa_chain==null));
+}@+ while (!(sa_chain==null));
 }
 
 @ When reading \.{\\patterns} while \.{\\savinghyphcodes} is positive
@@ -28852,8 +28084,8 @@ hyph_root=0;hyph_start=0;
 
 @ @<Store hyphenation codes for current language@>=
 {@+c=cur_lang;first_child=false;p=0;
-do {q=p;p=trie_r[q];
-} while (!((p==0)||(c <= so(trie_c[p]))));
+@/do@+{q=p;p=trie_r[q];
+}@+ while (!((p==0)||(c <= so(trie_c[p]))));
 if ((p==0)||(c < so(trie_c[p])))
   @<Insert a new trie node between |q| and |p|, and make |p| point to it@>;
 q=p; /*now node |q| represents |cur_lang|*/
@@ -28931,9 +28163,9 @@ primitive("pagediscards", un_vbox, last_box_code);@/
 primitive("splitdiscards", un_vbox, vsplit_code);@/
 @!@:split\_discards\_}{\.{\\splitdiscards} primitive@>
 
-@ @<Cases of |un_vbox| for |print_cmd_chr|@>=
-if (chr_code==last_box_code) print_esc("pagediscards");
-else if (chr_code==vsplit_code) print_esc("splitdiscards");
+@ @<Cases of |un_vbox| for |print_cmd_chr|@>=;
+else if (chr_code==last_box_code) print_esc("pagediscards");
+else if (chr_code==vsplit_code) print_esc("splitdiscards")
 
 @ @<Handle saved items and |goto done|@>=
 {@+link(tail)=disc_ptr[cur_chr];disc_ptr[cur_chr]=null;
@@ -28971,7 +28203,7 @@ else{@+if (cur_val > penalty(equiv(m))) cur_val=penalty(equiv(m));
 
 @ |expand_depth| and |expand_depth_count| are used in the \eTeX\ code
 above, but not defined. So we correct this in the following modules,
-|expand_depth| having been defined by us as an integer paramater (hence
+|expand_depth| having been defined by us as an integer parameter (hence
 there is a new primitive to create in \eTeX\ mode), and
 |expand_depth_count| needing to be a global. Both have to be defined to
 some sensible value.
@@ -29137,7 +28369,7 @@ case Prote_revision_code: print(Prote_revision);@+break;
 @*1 \Prote\ added token lists routines.
 
 We will, more than once, convert a general normally expanded text
-to a string. Due to the unfelicity of \PASCAL\ about forward
+to a string. Due to the infelicity of \PASCAL\ about forward
 declarations of functions, we declare procedures that do their task
 by defining global variables. In this case, |garbage| is used.
 
@@ -29189,7 +28421,7 @@ exceeds the size of the name buffer and doesn't use |cur_area| and
 |cur_ext|, but |name_length| is set to the real name length (without
 truncating) so a test about |k <= file_name_size| allows to detect the
 impossibility of opening the file without having to call external code.
-The string is not flushed: it is the responsability of the code calling
+The string is not flushed: it is the responsibility of the code calling
 the procedure to flush it if wanted.
 
 @<Declare \Prote\ procedures for strings@>=
@@ -29288,7 +28520,7 @@ hash since |no_new_control_sequence| is |true|), but since it has the
 for a control sequence entered but never defined.
 
 @ @<Cases for |conditional|@>=
-case if_primitive_code: {@+do get_token(); while (!(cur_tok!=space_token));
+case if_primitive_code: {@+@/do@+{get_token();}@+ while (!(cur_tok!=space_token));
 if ((cur_cs!=0)&&(cur_cmd!=undefined_cs)&&(cur_cmd < call)) b=true;else b=false;
 } @+break;
 
@@ -29310,7 +28542,7 @@ Since we need to redefine the token and hence give a valid control
 sequence in the |eqtb|, we have defined |frozen_primitive|. This
 ``frozen'' is, actually, not quite frozen by itself since we will
 redefine its values according to the primitive definition we have
-to restablish momentarily.  But it is indeed ``permanent'' since
+to reestablish momentarily.  But it is indeed ``permanent'' since
 it only refers to the permanently defined meanings. Hence, the
 initialization of the |frozen_primitive| address is just to document
 the code: these values will be overwritten on each actual call.
@@ -29350,7 +28582,7 @@ order to re-use the macro definitions set for the table of equivalents.
 The one character primitives are added by direct addressing relative to
 |single_base|. The multiletter primitives are added starting at
 |frozen_control_sequence-1|, downwards; but there are only, at the
-moment, $322$ multileter primitives defined by \TeX, $78$ such
+moment, $322$ multiletter primitives defined by \TeX, $78$ such
 primitives defined by \eTeX, and we are adding $24$ more. It is clear
 that, looking at primitives, region 2 of |eqtb| is really a sparse array
 and that, when |hash_size| is increased for format needs, there will be
@@ -29433,7 +28665,7 @@ back_input();
 
 @ The next primitive changes the expansion of its argument that is like
 a general text expanded, except that protected macros (an \eTeX\
-extension) are not extanded.
+extension) are not extended.
 
 @ @<Generate all \Prote\ primitives@>=
 primitive("expanded", expand_after, expanded_code);@/
@@ -29475,7 +28707,7 @@ characters are converted according to the |xord| array. Thus it is
 an |ASCII_code|---in the \TeX\ sense explained at the very beginning
 of the web file, part 2---comparison and the result is the same,
 as long as relative characters are mapped to the same value, whatever
-the system. Nul strings are valid.
+the system. Null strings are valid.
 
 @<Cases of `Scan the argument for command |c|'@>=
 case strcmp_code: {@+scan_general_x_text();toks_to_str();
@@ -29575,7 +28807,7 @@ case elapsed_time_code: cur_val=get_elapsed_time;@+break;
 
 @ The reference moment can be reset by a call to the primitive
 \.{\\resettimer}. It simply resets the reference moment to the moment
-the primitive was called. The counter is not regularily incremented.
+the primitive was called. The counter is not regularly incremented.
 When asked about the time elapsed what is returned is the difference, in
 scaled seconds, from the moment of the call to the moment of reference.
 So there is no persistent variable neither a kind of clock implemented.
@@ -29650,7 +28882,7 @@ dependent. The information shall be set in |xchg_buffer|.
 @^system dependencies@>
 
 In this basic implementation, we set the string to the empty one by
-simply setting |xchg_buffer_length| to~$0$.
+simply setting |xchg_buffer_length| to $0$.
 
 @d get_file_mtime xchg_buffer_length=0
 
@@ -29687,7 +28919,7 @@ case file_dump_code: print_esc("filedump");@+break;
 
 Since ``offset'' and ``length'' may be given in that order, we assign
 the variables \.{k} and \.{l}, in alphabetical order. These have to be
-positive or nul values.
+positive or null values.
 
 Contrary to other blocks, and for optimization purposes (in order not to
 clobber the string pool with data that we can read, when necessary, one
@@ -29727,10 +28959,10 @@ case file_dump_code:
   { FILE *f=fopen((char*)name_of_file0,"rb");
     if (f!=NULL) {@+
       fseek(f,k,SEEK_SET);
-      do {i=fgetc(f); if (i==EOF) break;
+      do@+{i=fgetc(f); if (i==EOF) break;
            dig[0]=i%16;dig[1]=i/16;
            print_the_digs(2);decr(l);
-       } while (!(feof(f)||(l==0)));
+       }@+ while (!(feof(f)||(l==0)));
       fclose(f);
     }
   } @+break;
@@ -29777,83 +29009,6 @@ representation of this hash.
 case mdfive_sum_code: for (k=0; k<l; k++)
 {@+dig[0]=md5_digest[k]%16;@+dig[1]=md5_digest[k]/16;print_the_digs(2);
 } @+break;
-
-@ This is something that we will be doing several times. We have scanned
-a general text. The result is a token list that we will interpret as a
-file name. We must then put this name in |name_of_file| and try to open
-it, as a binary file.
-
-|cur_area| and |cur_ext| are not set: we use the string as is.
-
-@<Generate the MD5 hash for a file@>=
-{@+str_to_name(s);
-xchg_buffer_length=0; /*empty if file not opened*/
-if ((name_length <= file_name_size)&&(b_open_in(&data_in))) {@+
-  mdfive_init;
-  r=false; /*reset it to indicate eof*/
-  while (!r)
-    {@+if (xchg_buffer_length==64) mdfive_update; /*resets length*/
-    if (!eof(data_in))
-      {@+pascal_read(data_in, i);xchg_buffer[xchg_buffer_length+1]=i;
-      incr(xchg_buffer_length);
-      }
-    else r=true;
-    }
-  if (xchg_buffer_length!=0) mdfive_update; /*treats remaining*/
-  b_close(&data_in);
-  mdfive_final; /*may yield the empty file/nul string hash if nothing input*/
-  }
-}
-
-@ For a string, the procedure is very similar. It is not an error for
-the string to be the null one.
-
-@<Generate the MD5 hash for a string@>=
-{@+mdfive_init;xchg_buffer_length=0; /*proceed by 64 chunks*/
-for (k=str_start[s]; k<=str_start[s+1]-1; k++)
-  {@+if (xchg_buffer_length==64) mdfive_update; /*resets length*/
-  xchg_buffer[xchg_buffer_length+1]=xchr[so(str_pool[k])];
-  incr(xchg_buffer_length);
-  }
-if (xchg_buffer_length!=0) mdfive_update; /*treats remaining*/
-mdfive_final;
-}
-
-@ A MD5 hash signature can be requested for a stream of bytes, this
-being a string directly passed or a file.
-
-Since the MD5 algorithm does a lot of bitwise operations, a standard
-Pascal implementation has not been attempted. But since we aim to
-limitate and to segregate the calls to external routines so that they do
-not tamper with the internals of \TeX, we have to find a way to
-communicate with the routines.
-
-@ To obtain the MD5 hash signature of a file will need an external
-implementation, since the algorithm requires bitwise operation that
-standard \PASCAL\ does not provide. So we do not bother to try. The
-present implementation returns nothing.
-@^system dependencies@>
-
-@ |mdfive_init| shall reinit the state to compute the hash value.
-Nothing is taken from |xchg_buffer| and |xchg_buffer_length| is
-unchanged.
-
-@d mdfive_init do_nothing
-
-@ |mdfive_update| takes |xchg_buffer_length| bytes to contribute to the
-hash. The bytes being consumed, |xchg_buffer_length| shall be reset to
-$0$.
-
-@d mdfive_update xchg_buffer_length=0
-
-@ |md5_final| puts the binary $16$ bytes long hash into |xchg_buffer|
-and sets |xchg_buffer_length| to $16$.
-
-Here, by default, we do nothing except carefully set
-|xchg_buffer_length| to $0$ in order to state that we have consumed
-the data.
-
-@d mdfive_final xchg_buffer_length=0
 
 @*1 Pseudo-random number generation.
 
@@ -29950,7 +29105,7 @@ help2("Since I don't take logs of non-positive numbers,",@/
 error();return 0;
 }
 
-@ Here is introduced the special 28bits significand |mpfract|.
+@ Here is introduced the special 28bits significant |mpfract|.
 
 @d el_gordo 017777777777 /*$2^{31}-1$, the largest value that \TeX\ likes*/
 @d mpfract_half 01000000000 /*$2^{27}$, represents 0.50000000*/
@@ -30015,7 +29170,7 @@ else{@+n=(n-1)*mpfract_one;
   }
 }
 
-@ The |do {| loop here preserves the following invariant relations
+@ The |@/do@+{| loop here preserves the following invariant relations
 between |f|, |p|, and~|q|:
 (i)~|0 <= p < q|; (ii)~$fq+p=2^k(q+p_0)$, where $k$ is an integer and
 $p_0$ is the original value of~$p$.
@@ -30030,11 +29185,11 @@ in a register, not store it in memory.
 
 @<Compute $f=\lfloor 2^{28}(1+p/q)+{1\over2}\rfloor$@>=
 f=1;
-do {be_careful=p-q;p=be_careful+p;
+@/do@+{be_careful=p-q;p=be_careful+p;
 if (p >= 0) f=f+f+1;
 else{@+double(f);p=p+q;
   }
-} while (!(f >= mpfract_one));
+}@+ while (!(f >= mpfract_one));
 be_careful=p-q;
 if (be_careful+p >= 0) incr(f)
 
@@ -30057,7 +29212,7 @@ else{@+n=f/mpfract_one;f=f%mpfract_one;
     }
   }
 f=f+mpfract_one;
-@<Compute $p=\lfloor qf/2^{28}+{1\over2}\rfloor-q$@>@;
+@<Compute $p=\lfloor qf/2^{28}+{1\over2}\rfloor-q$@>;
 be_careful=n-el_gordo;
 if (be_careful+p > 0)
   {@+arith_error=true;n=el_gordo-p;
@@ -30082,12 +29237,12 @@ $f_0$ is the original value of~$f$; (ii)~$2^k\L f<2^{k+1}$.
 @<Compute $p=\lfloor qf/2^{28}+{1\over2}\rfloor-q$@>=
 p=mpfract_half; /*that's $2^{27}$; the invariants hold now with $k=28$*/
 if (q < mpfract_four)
-  do {if (odd(f)) p=halfp(p+q);@+else p=halfp(p);
+  @/do@+{if (odd(f)) p=halfp(p+q);@+else p=halfp(p);
   f=halfp(f);
-  } while (!(f==1));
-else do {if (odd(f)) p=p+halfp(q-p);@+else p=halfp(p);
+  }@+ while (!(f==1));
+else@/do@+{if (odd(f)) p=p+halfp(q-p);@+else p=halfp(p);
   f=halfp(f);
-  } while (!(f==1));
+  }@+ while (!(f==1))
 
 @ There's an auxiliary array |randoms| that contains 55 pseudo-random
 fractions. Using the recurrence $x_n=(x_{n-55}-x_{n-31})\bmod 2^{28}$,
@@ -30275,15 +29430,15 @@ can readily be obtained with the ratio method (Algorithm 3.4.1R in
 static scaled norm_rand(void)
 {@+int @!x, @!u, @!l; /*what the book would call $2^{16}X$, $2^{28}U$,
   and $-2^{24}\ln U$*/
-do {
-  do {next_random;
+@/do@+{
+  @/do@+{next_random;
   x=take_mpfract(112429, randoms[j_random]-mpfract_half);
      /*$2^{16}\sqrt{8/e}\approx 112428.82793$*/
   next_random;u=randoms[j_random];
-  } while (!(abs(x) < u));
+  }@+ while (!(abs(x) < u));
 x=make_mpfract(x, u);
 l=139548960-m_log(u); /*$2^{24}\cdot12\ln2\approx139548959.6165$*/
-} while (!(ab_vs_cd(1024, l, x, x) >= 0));
+}@+ while (!(ab_vs_cd(1024, l, x, x) >= 0));
 return x;
 }
 
@@ -30354,10 +29509,6 @@ static scaled @!last_saved_xpos, last_saved_ypos; /*last (x,y) DVI pos saved*/
 @ @<\Prote\ initializations@>=
 last_saved_xpos=0;last_saved_ypos=0;
 
-@ @<Set |last_saved_xpos| and |last_saved_ypos| with transformed coordinates@>=
-last_saved_xpos=cur_h+DVI_std_x_offset;
-last_saved_ypos=page_height-(cur_v+DVI_std_y_offset);
-
 @ @<Generate all \Prote\ primitives@>=
 primitive("lastxpos", last_item, last_xpos_code);@/
 @!@:lastxpos\_}{\.{\\lastxpos} primitive@>
@@ -30373,7 +29524,7 @@ case last_xpos_code: cur_val=last_saved_xpos;@+break;
 case last_ypos_code: cur_val=last_saved_ypos;
 
 @ |last_saved_xpos| and |last_saved_ypos| are only defined when
-instructed to by the call the the \.{\\savepos} primitive. Since the
+instructed to by the call to the \.{\\savepos} primitive. Since the
 real work has to be done at \.{shipout} time, it is a case to be treated
 like the \.{\\special} primitive, that is it belongs to the
 \.{extension} class.
@@ -30419,40 +29570,6 @@ case save_pos_code: {@+r=get_node(small_node_size);
 @ @<Cases for wiping out the whatsit node@>=
 case save_pos_code: free_node(p, small_node_size);@+break;
 
-@ So, after these trivial initializations, what will we effectively do?
-When the following procedure will be called, we define |last_saved_xpos|,
-|last_saved_ypos|, increment |last_save_pos_number|, and a |warning|
-followed by three
-|key==value| space separated definitions as a \.{\\special}, the first
-being prefixed by the string |__PROTE_| (shall be considered a reserved
-prefix) and the string |SAVEPOS_|, equal to the index of the call, and
-the |XPOS| and |YPOS| definitions.
-
-This is obviously, from the previous description, a variation around
-|special_out|.
-
-@<Declare procedures needed in |out_what|@>=
-static void save_pos_out(pointer @!p)
-{@+int old_setting; /*holds print |selector|*/
-int @!k; /*index into |str_pool|*/
-synch_h;synch_v;incr(last_save_pos_number);
-@<Set |last_saved_xpos| and |last_saved_ypos|...@>@;
-old_setting=selector;selector=new_string;
-print("warning __PROTE_");print("SAVEPOS");print_char('=');
-print_int(last_save_pos_number);print_char(' ');
-print("XPOS");print("=");print_int(last_saved_xpos);print_char(' ');
-print("YPOS");print("=");print_int(last_saved_ypos);
-selector=old_setting;
-str_room(1); /*abort if probably overflowed and truncated*/
-dvi_out(xxx1);dvi_out(cur_length); /*it's less than 256*/
-for (k=str_start[str_ptr]; k<=pool_ptr-1; k++) dvi_out(so(str_pool[k]));
-pool_ptr=str_start[str_ptr]; /*forget the not commited tentative string*/
-}
-
-@ @<Cases for |out_what|@>=
-case save_pos_code: save_pos_out(p);@+break;
-
-
 @* Hi\TeX.
 In the following we present macros, variables, and routines that
 implement the various features that have been used above to replace
@@ -30467,6 +29584,13 @@ format that this program will generate.
 
 @d HINT_version_code (eTeX_last_last_item_cmd_mod+7) /* \.{\\HINTversion} */
 @d HINT_minor_version_code (eTeX_last_last_item_cmd_mod+8) /* \.{\\HINTminorversion} */
+
+@<Put each...@>=
+primitive("HINTversion", last_item, HINT_version_code);
+@!@:HINT\_version\_}{\.{\\HINTversion} primitive@>
+primitive("HINTminorversion", last_item, HINT_minor_version_code);
+@!@:HINT\_minor\_version\_}{\.{\\HINTminorversion} primitive@>
+
 
 @ Now this new primitive needs its implementation.
 
@@ -30595,7 +29719,6 @@ static pointer new_image_node( str_number n, str_number a, str_number e)
 { pointer p;
   int i;
   char *fn;
-  int l;
 
   p=get_node(image_node_size);type(p)=whatsit_node;subtype(p)=image_node;
   image_name(p)=n;
@@ -30683,12 +29806,15 @@ static void hline_break(int final_widow_penalty)
   pointer pp;
   scaled par_max_depth=0;
   bool par_shape_fix=false;
+  @<initialize the color stack@>@,
+#if DEBUG
   if (DBGTEX&debugflags)
   { print_ln();print("Before hline_break:\n");
     breadth_max=200;
     depth_threshold=200;
     show_node_list(link(head));print_ln();
   }
+#endif
   if (dimen_par_hfactor(hsize_code)==0 && dimen_par_vfactor(hsize_code)==0)
   { line_break(final_widow_penalty); /* the easy case */
     return;
@@ -30749,7 +29875,7 @@ static void hline_break(int final_widow_penalty)
     if (is_char_node(cur_p))
 	{ /* Advance |cur_p| to the node following the present string...*/
       do { int f=font(cur_p);
-           scaled d = char_depth(f,height_depth(char_info(f,character(cur_p))));
+           scaled d = char_depth(f,character(cur_p));
            if (d>par_max_depth) par_max_depth=d;
            cur_p=link(cur_p);
       } while (is_char_node(cur_p));
@@ -30757,8 +29883,13 @@ static void hline_break(int final_widow_penalty)
     }
     switch (type(cur_p))
 	{ case whatsit_node:
-	    adv_past(cur_p);
-		break;
+          { pointer p=cur_p; /* reusing code written for |p| */
+	    switch (subtype(cur_p))
+	    { @<cases that flatten the color stack@>
+             default: adv_past(cur_p); break;
+            }
+            break;
+	  }
 	  case glue_node:
      	if (auto_breaking) /* Try to hyphenate the following word*/
 		  hyphenate_word();
@@ -30857,9 +29988,534 @@ of the normal {\tt \BS hsize} and the given length.
   par_shape_fix=true;
 }
 
+@*1 Colors.
+Hi\TeX\ adds these primitives to handle colors:
+
+@<Put each...@>=
+primitive("HINTcolor", extension, color_node);@/
+@!@:HINTcolor\_}{\.{\\HINTcolor} primitive@>
+primitive("HINTendcolor", extension, end_color_node);@/
+@!@:HINTendcolor\_}{\.{\\HINTendcolor} primitive@>
+primitive("HINTdefaultcolor", extension, default_color_node);@/
+@!@:HINTdefaultcolor\_}{\.{\\HINTdefaultcolor} primitive@>
+primitive("HINTlinkcolor", extension, link_color_node);@/
+@!@:HINTlinkcolor\_}{\.{\\HINTlinkcolor} primitive@>
+primitive("HINTdefaultlinkcolor", extension, default_link_color_node);@/
+@!@:HINTdefaultlinkcolor\_}{\.{\\HINTdefaultlinkcolor} primitive@>
+
+@ To begin with the implementation,
+we need the function |scan_scaled| which is a simpler version of |scan_dimen|.
+It will just scan a pure number without any units.
+We need this function to scan colors.
+
+@<Declare procedures needed in |do_extension|@>=
+static void scan_scaled(void)
+{@+
+  bool negative=false; /*should the answer be negated?*/
+  int @!f; /*numerator of a fraction whose denominator is $2^{16}$*/
+  int @!k, @!kk; /*number of digits in a decimal fraction*/
+  pointer @!p, @!q; /*top of decimal digit stack*/
+  f=0;arith_error=false;cur_order=normal;negative=false;
+  @<Get the next non-blank non-call token@>;
+  if (cur_tok==other_token+'-') negative=true;
+  else if (cur_tok==other_token+'+') negative=false;
+  else back_input();
+  if (cur_tok==continental_point_token) cur_tok=point_token;
+  if (cur_tok!=point_token) scan_int();
+  else {@+radix=10;cur_val=0; }
+  if (cur_tok==continental_point_token) cur_tok=point_token;
+  if ((radix==10)&&(cur_tok==point_token)) @<Scan decimal fraction@>;
+  if (cur_val < 0)  /*in this case |f==0|*/
+    {@+negative=!negative;negate(cur_val);}
+  if (cur_val >= 040000) arith_error=true;
+  else cur_val=cur_val*unity+f;
+  @<Scan an optional space@>;
+  if (arith_error||(abs(cur_val) >= 010000000000))
+    @<Report that this dimension is out of range@>;
+  if (negative)  negate(cur_val);
+}
+
+@ A color specification starting with ``FG'' or ``BG'' expects
+integers in the range 0 to |0xFF|;
+a color specification starting with ``fg'' or ``bg'' expects
+real numbers in the range 0 to 1.
+ The last component for the alpha value is optional and its default value is |0xFF| respectively 1.0.
+The color components are enclosed in braces.
+After the initial brace the keyword \.{rgb} specifies color values encoded with red/green/blue/alpha values;
+the keyword \.{cmyk} specifies color values encoded with cyan/magenta/yellow/black/alpha values.
+Giving no keyword is equivalent to giving the keyword \.{rgb}.
+
+@<Declare procedures needed in |do_extension|@>=
+static uint8_t scan_rgb_component(bool expect_reals)
+{ if (expect_reals)
+  { scan_scaled(); cur_val=(cur_val*0xFF+0x1000)>>16; }
+  else
+    scan_int();
+  if (cur_val>0xFF) return 0xFF;
+  else if (cur_val<0) return 0x00;
+  else return cur_val;
+}
+
+static uint32_t scan_rgb_color(bool expect_reals)
+{ uint8_t r,g,b,a;
+  r=scan_rgb_component(expect_reals);
+  g=scan_rgb_component(expect_reals);
+  b=scan_rgb_component(expect_reals);
+  a=0xFF;
+  @<Get the next non-blank non-relax...@>;
+  if (cur_cmd!=right_brace)
+  { back_input();
+    a=scan_rgb_component(expect_reals);
+    @<Get the next non-blank non-call token@>;
+    if (cur_cmd!=right_brace)
+    { back_input();
+      print_err("Missing right brace after color definition");
+    }
+  }
+  return (r<<24)|(g<<16)|(b<<8)|a;
+}
+
+static double scan_cmyk_component(bool expect_reals)
+{ double c;
+  if (expect_reals)
+  { scan_scaled(); c=cur_val/(double)ONE;
+  }
+  else
+  { scan_int(); c=cur_val/255.0;
+  }
+  if (c>1.0) return 1.0;
+  else if (c<0.0) return 0.0;
+  else return c;
+}
+
+
+static uint32_t scan_cmyk_color(bool expect_reals)
+{ uint8_t r,g,b,a;
+  double c,m,y,k;
+  c=scan_cmyk_component(expect_reals);
+  m=scan_cmyk_component(expect_reals);
+  y=scan_cmyk_component(expect_reals);
+  k=scan_cmyk_component(expect_reals);
+  a=0xFF;
+  @<Get the next non-blank non-relax...@>;
+    if (cur_cmd!=right_brace)
+  { back_input();
+    a=scan_cmyk_component(expect_reals)*0xFF+0.5;
+    @<Get the next non-blank non-call token@>;
+    if (cur_cmd!=right_brace)
+    { back_input();
+      print_err("Missing right brace after color definition");
+    }
+  }
+  r=(1-c)*(1-k)*255+0.5;
+  g=(1-m)*(1-k)*255+0.5;
+  b=(1-y)*(1-k)*255+0.5;
+  return (r<<24)|(g<<16)|(b<<8)|a;
+}
+
+static uint32_t scan_color(bool expect_reals)
+{ scan_left_brace();
+  if (scan_keyword("cmyk"))
+     return scan_cmyk_color(expect_reals);
+  else if (scan_keyword("rgb"))
+     return scan_rgb_color(expect_reals);
+  else
+    return scan_rgb_color(expect_reals);
+}
+
+@ Colors are specified in pairs of a foreground color, prefixed
+by ``FG'' or ``fg'', followed by an optional background color
+prefixed by ``BG'' or ``bg''.
+Up to three color pairs, for normal text, highlighted text, and focus text
+make up a color set. A color specification can contain two
+color sets the first one for ``day mode'' the second, prefixed
+by the keyword ``dark'' for ``night mode''.
+
+@<Declare procedures needed in |do_extension|@>=
+static void colorset_copy(ColorSet to, ColorSet from)
+{ int i;
+  for (i=0;i<sizeof(ColorSet)/sizeof(uint32_t);i++)
+    to[i]=from[i];
+}
+
+static bool scan_color_pair(ColorSet c, int m, int s)
+{ if (scan_keyword("FG")) c[m*6+s*2+0] =scan_color(false);
+  else if (scan_keyword("fg")) c[6*m+2*s+0]=scan_color(true);
+  else return false;
+  if (scan_keyword("BG")) c[m*6+s*2+1]=scan_color(false);
+  else if (scan_keyword("bg")) c[m*6+s*2+1]=scan_color(true);
+  return true;
+}
+
+static void scan_color_triple(ColorSet c, int m)
+{ if (!scan_color_pair(c,m,0))
+  { print_err("Missing color specification");
+    return;
+  }
+  if (scan_color_pair(c,m,1)) scan_color_pair(c,m,2);
+}
+
+static void scan_color_spec(ColorSet c, int i)
+{ colorset_copy(c,colors[i]); /* initialize with defaults */
+  scan_left_brace();
+  scan_color_triple(c,0);
+  if (scan_keyword("dark")) scan_color_triple(c,1);
+  @<Get the next non-blank non-relax non-call token@>;
+  if (cur_cmd!=right_brace)
+  {@+print_err("A color specification must end with }");
+    back_error();
+  }
+}
+
+@ We store color sets in a dynamic array
+
+@<Forward declarations@>=
+static ColorSet *colors=NULL;
+static int max_color=-1, colors_allocated=0;
+static bool default_color_frozen=false, default_link_color_frozen=false;
+static int cur_link_color=1;
+static int next_colorset(ColorSet c);
+
+@ @<Hi\TeX\ auxiliary routines@>=
+static bool colorset_equal(ColorSet old, ColorSet new)
+{ int i;
+  for (i=0;i<sizeof(ColorSet)/sizeof(uint32_t);i++)
+    if (old[i]!=new[i]) return false;
+  return true;
+}
+
+
+static int next_colorset(ColorSet c)
+{ int i;
+  for (i=0; i<=max_color; i++)
+    if (colorset_equal(colors[i],c)) return i;
+  if (max_color<0xFF) max_ref[color_kind]=++max_color;
+  else overflow("colors",0xFF);
+  if (max_color>=colors_allocated)
+    RESIZE(colors,colors_allocated,ColorSet);
+  colorset_copy(colors[max_color],c);
+#if DEBUG
+  if (debugflags&DBGDEF)
+  { print_nl("HINT Defining new color "); print_int(max_color);print(": ");
+    print_color_spec(max_color); }
+#endif
+  return max_color;
+}
+
+@ @<Initialize definitions for colors@>=
+colors_allocated=8;
+ALLOCATE(colors,colors_allocated,ColorSet);
+max_ref[color_kind]=max_color=MAX_COLOR_DEFAULT;
+memcpy(colors,color_defaults,sizeof(ColorSet)*(max_color+1));
+
+
+@ Next we implement a procedure to print a color specification.
+
+@ @<Hi\TeX\ auxiliary routines@>=
+
+static bool is_default_color_pair(ColorSet c, int m, int s)
+{ return c[6*m+2*s] == colors[0][6*m+2*s]
+      && c[6*m+2*s+1] == colors[0][6*m+2*s+1];
+}
+
+static void print_color(uint32_t c)
+{ print_char('{');
+  print_hex((c>>24)&0xFF);print_char(' ');
+  print_hex((c>>16)&0xFF);print_char(' ');
+  print_hex((c>>8)&0xFF);print_char(' ');
+  if ((c&0xFF)!=0xFF) print_hex(c&0xFF);
+  print_char('}');
+}
+
+static void print_color_pair(ColorSet c, int m, int s)
+{ print("FG"); print_color(c[6*m+2*s+0]);
+  print(" BG"); print_color(c[6*m+2*s+1]);
+}
+
+static void print_color_triple(ColorSet c, int m)
+{ bool diff_high, diff_focus;
+  print_color_pair(c,m,0);
+  diff_high= is_default_color_pair(c,m,1);
+  diff_focus= is_default_color_pair(c,m,2);
+  if (diff_high || diff_focus)
+  { print_char(' '); print_color_pair(c,m,1); }
+  if (diff_focus)
+  { print_char(' '); print_color_pair(c,m,2); }
+}
+
+static void print_color_spec(int i)
+{ if (i>max_color) {print("undefined color "); print_int(i);}
+  else if (i<0 || i>0xFF) { print("illegal color "); print_int(i);}
+  else
+  { print_color_triple(colors[i],0);
+    if (is_default_color_pair(colors[i],1,0) &&
+        is_default_color_pair(colors[i],1,1) &&
+	is_default_color_pair(colors[i],1,2))
+	return;
+    print(" dark "); print_color_triple(colors[i],1);
+  }
+}
+
+@ @<Forward declarations@>=
+static void print_color_spec(int i);
+
+@ To create a color node you can use the following function:
+@<Hi\TeX\ auxiliary routines@>=
+static pointer new_color_node(uint8_t c)
+{ pointer r = get_node(color_node_size);
+  type(r)=whatsit_node;subtype(r)=color_node;
+  color_ref(r)=c; color_link(r)=null;
+  return r;
+}
+
+@ @<Forward declarations@>=
+static void print_color_spec(int i);
+static pointer new_color_node(uint8_t c);
+
+@ Writing a color node to the output is simple.
+When we come to the output routine, every |end_color_node|
+should have been replaced by a |color_node|.
+To switch back to the color of the enclosing box,
+a |color_node| uses the color reference |0xFF|.
+An |end_color_node| is converted to a |color_node|
+when flattening the color stack.
+If an |end_color_node| does not have
+a matching |color_node| it is converted
+into a |no_color_node| which is silently ignored.
+If an |end_color_node| remains, it is ignored as well.
+
+@<cases to output whatsit content nodes@>=
+case color_node:
+  HPUT8(color_ref(p));
+  tag=TAG(color_kind,b000);
+  break;
+case no_color_node:
+case end_color_node:
+  hpos--;
+  return;
+
+@ For the top level color nodes we provide a function to output colors
+without the need to construct (and destroy) a color node.
+
+@<Hi\TeX\ auxiliary routines@>=
+static void hout_color_ref(uint8_t c)
+{ uint8_t tag=TAG(color_kind,b000);
+  HPUTNODE;
+  HPUT8(tag);
+  HPUT8(c);
+  HPUT8(tag);
+}
+
+@ The output of color definitions is more complex:
+
+@<Output color definitions@>=
+  DBG(DBGDEF,"Defining %d color references\n",max_ref[color_kind]);
+  HPUTX((1+1+1+sizeof(ColorSet)+1)*(max_ref[color_kind]+1));
+  for (i=max_fixed[color_kind]+1;i<=max_default[color_kind]; i++)
+    { if (!colorset_equal(colors[i],color_defaults[i]))
+        HPUTDEF(hout_color_def(colors[i]),i);
+    }
+  for (;i<=max_ref[color_kind]; i++)
+           HPUTDEF(hout_color_def(colors[i]),i);
+
+@ @<Hi\TeX\ auxiliary routines@>=
+static Tag hout_color_def(ColorSet c)
+{ int i;
+//  HPUTX(3+12*4);
+  HPUT8(6);
+  for (i=0;i<sizeof(ColorSet)/sizeof(uint32_t);i++)
+    HPUT32(c[i]);
+  return TAG(color_kind,b000);
+}
+
+@ Hi\TeX\ treats colors different than \HINT\ files:
+Hi\TeX\ maintains a color stack inside a box while \HINT\
+files implement only a flat sequence of colors inside a box.
+As a consequence an |end_color_node| must be converted to a
+plain |color_node|. An |end_color_node| without a matching
+|color_node| is converted to a |no_color_node|, so that after
+flattening a node list no |end_color_node| remains.
+It will make flattening a list idempotent.
+Since link nodes are part of the color change
+mechanism they are part of the color stack.
+The color stack is a linked stack using the |color_link| field
+of color and link nodes. A pointer to the top node on this stack
+is in the variable |color_tos|. A pointer to the top link node
+on this stack (if any) is in the variable |link_tos|.
+Note that links are not nested, hence the |link_tos| variable
+is not strictly necessary but it avoids searching the color
+stack for a link node.
+
+@<Global variables@>=
+static  pointer color_tos=null;
+static  pointer link_tos=null;
+
+@ @<initialize the color stack@>=
+color_tos=null;
+link_tos=null;
+
+@ @<Incorporate a |color_node| into the box@>=
+color_link(p)=color_tos;
+color_tos=p;
+
+@ @<Incorporate an |end_color_node| into the box@>=
+if (color_tos==link_tos)
+  subtype(p)=no_color_node;
+else if (color_tos!=null)
+{ color_tos=color_link(color_tos);
+  subtype(p)=color_node;
+  if (color_tos!=null)
+    color_ref(p)=color_ref(color_tos);
+  else
+    color_ref(p)=0xFF;
+}
+else
+  subtype(p)=no_color_node;
+
+@ In contrast, link nodes must not be nested, and an |end_link_node|
+  is mandatory. So a link stack is not necessary. Hi\TeX\ just maintains
+  a pointer to current |start_link_node| to be able to restore the color stack.
+
+@<Incorporate a |start_link_node| into the box@>=
+if (link_tos!=null)
+{@+begin_diagnostic();
+  print_err("This link is preceded by a \\HINTlink without \\HINTendlink:");
+  end_diagnostic(true);
+}
+@<Incorporate a |color_node| into the box@>@;
+link_tos= color_tos;
+
+@ @<Incorporate an |end_link_node| into the box@>=
+if (link_tos==null)
+{@+begin_diagnostic();
+  print_err("\\HINTendlink without matching \\HINTlink:");
+  end_diagnostic(true);
+}
+else
+{ color_tos=color_link(link_tos);
+  link_tos=null;
+  if (color_tos!=null)
+    color_ref(p)=color_ref(color_tos);
+  else
+    color_ref(p)=0xFF;
+}
+
+@ Together these routines flatten the color stack.
+ @<cases that flatten the color stack@>=
+case color_node:
+  @<Incorporate a |color_node| into the box@>@; break;
+case end_color_node:
+  @<Incorporate an |end_color_node| into the box@>@; break;
+case start_link_node:
+  @<Incorporate a |start_link_node| into the box@>@; break;
+case end_link_node:
+  @<Incorporate an |end_link_node| into the box@>@; break;
+case no_color_node: break;
+
+@ Special care is needed for color changes in the top level vertical
+list. Because this list can grow quite large, nodes are deallocated
+right after being written to the output file. Therefore maintaining
+the color stack in the color nodes contained in the vertical list
+is not quite possible. Further page breaks can occur at many different
+places and to switch to the correct color, we might need to insert color
+nodes at all points where a new page might start.
+
+Page breaks are possible
+at glue nodes if the preceding node was discardable
+(a node is discardable if its type is less than |math_node|),
+at kern nodes if they precede a glue node
+and at penalty nodes. It is inconvenient to test whether a kern node is
+followed by glue node; but because the kern node will disappear
+in the page break, it is sufficient to postpone the color information
+and insert it after the following glue node. If there are several
+glue or kern nodes in a row, it is sufficient to insert the color
+information only once at the beginning.
+
+We keep track of the possible breaks
+and the color stack using four static variables.
+
+@<Define the top level color stack@>=
+#define MAX_COLOR_STACK 256  /* a power of two */
+#define COLOR_STACK_MASK (MAX_COLOR_STACK-1)
+static uint8_t color_stack[MAX_COLOR_STACK];
+static int color_sp=0, color_stack_depth=0;
+static bool possible_break=true;
+
+
+@ Penalties and glue nodes but also baseline skips are possible page breaks.
+
+@<|p| might be a page break@>=
+( type(p)==penalty_node ||
+  type(p)==glue_node ||
+  (type(p)==whatsit_node && subtype(p)==baseline_node))
+
+@ After a possible page break, we need to output the current color
+if a non discardable node shows up. Of course no such output is needed
+if that node is a color change itself.
+
+@<Output the current color if needed@>=
+if (non_discardable(p))
+{ if (color_stack_depth>0 && possible_break)
+  { if (!(type(p)==whatsit_node &&
+            (subtype(p)==color_node || subtype(p)==end_color_node)))
+       hout_color_ref(color_stack[color_sp]);
+  }
+  possible_break=false;
+}
+
+
+@ It remains to organize the color stack.
+There are two possible cases to consider: A \TeX\ file might use
+nested colors on the top level with color nodes and matching end
+color nodes; or alternatively, a \TeX\ file might use color nodes without
+matching |end_color| nodes. Of course a \TeX\ file might also mix both approaches.
+In the first case, a limited nesting level can be assumed and a small
+color stack should suffice. In the second case, even a very large
+color stack will overflow sooner or later. To be as flexible as
+possible, we implement the color stack as a circular buffer.
+It is able to restore colors up to a limited nesting depth, but
+an overflow will not cause big problems.
+
+@<Record the current top level color@>=
+if (type(p)==whatsit_node)
+{ if (subtype(p)==color_node)
+  {  color_stack_depth++;
+     color_sp = (color_sp+1)&COLOR_STACK_MASK;
+     if (color_stack_depth>=MAX_COLOR_STACK)
+     { static bool stackoverflow_printed=false;
+       if (!stackoverflow_printed)
+       { print_err("Overflow of top level color stack");
+	 stackoverflow_printed=true;
+       }
+     }
+     color_stack[color_sp]=color_ref(p);
+  }
+  else if (subtype(p)==end_color_node)
+  { if (color_stack_depth>0)
+    { color_stack_depth--;
+      color_sp = (color_sp-1)&COLOR_STACK_MASK;
+      subtype(p)=color_node;
+      color_ref(p)=color_stack[color_sp];
+    }
+  }
+}
+if (@<|p| might be a page break@>) possible_break=true;
+
+
 @*1 Links, Labels, and Outlines.
 The \HINT\ format knows about labels, links, and outlines.
-When generating a short format \HINT\ file, links are part of
+
+@<Put each...@>=
+primitive("HINTdest", extension, label_node);@/
+@!@:HINTdest\_}{\.{\\HINTdest} primitive@>
+primitive("HINTstartlink", extension, start_link_node);@/
+@!@:HINTstartlink\_}{\.{\\HINTstartlink} primitive@>
+primitive("HINTendlink", extension, end_link_node);@/
+@!@:HINTendlink\_}{\.{\\HINTendlink} primitive@>
+primitive("HINToutline", extension, outline_node);@/
+@!@:HINToutline\_}{\.{\\HINToutline} primitive@>
+
+@ When generating a short format \HINT\ file, links are part of
 the content section, where as labels and outlines are found in
 the definition section. Because labels are defined while
 writing the content section, the writing of labels and outlines
@@ -30922,9 +30578,9 @@ static int insert_hash(int h, int num, char *nom)
   e->next= label_hash[h];
   label_hash[h]=e;
   if (e->nom!=NULL)
-    DBG(DBGLABEL,"Creating new label *%d: name='%s'\n",e->n,e->nom);
+    DBG(DBGLABEL,"Creating new label hash *%d: name='%s'\n",e->n,e->nom);
   else
-    DBG(DBGLABEL,"Creating new label *%d: num=%d\n",e->n,e->num);
+    DBG(DBGLABEL,"Creating new label hash *%d: num=%d\n",e->n,e->num);
   return e->n;
 }
 @ There are two cases: finding a label by name or by number.
@@ -30935,6 +30591,7 @@ The process is straight forward:
 static int find_label_by_number(int p)
 { unsigned int h=(unsigned int)p%LABEL_HASH;
   HashEntry *e= label_hash[h];
+  DBG(DBGLABEL,"Looking up label num %d\n",(unsigned int)p);
   while (e!=NULL)
     if (e->nom==NULL && e->num==p) return e->n;
     else e=e->next;
@@ -30957,8 +30614,8 @@ static char *tokens_to_name(pointer p)
   int i=0;
   bool skip_space=0;
   while (i<255 && p!=0)@/
-  { int m = info(p)/0400;@+
-    int c = info(p)%0400;
+  { int m = info(p)/cmd_factor;@+
+    int c = info(p)%cmd_factor;
     if (m==spacer && ! skip_space) @/
     { s[i++]=' '; skip_space=true;@+}
     else if ((m==letter || m==other_char) && ' '< c && c < 0x7F)@/
@@ -30980,6 +30637,7 @@ static int find_label_by_name(pointer p)
 { char *s=tokens_to_name(link(p));
   unsigned int h=name_hash(s)%LABEL_HASH;
   HashEntry *e= label_hash[h];
+  DBG(DBGLABEL,"Looking up label name %s\n", s);
   while (e!=NULL)
     if (e->nom!=NULL && strcmp(e->nom,s)==0) return e->n;
     else e=e->next;
@@ -31004,7 +30662,9 @@ moving lists.
 
 @<Hi\TeX\ auxiliary routines@>=
 static void new_label(pointer p)
-{ int n=find_label(p);
+{ int n;
+  DBG(DBGLABEL,"Label at pos=0x%x\n",(unsigned int)(hpos-hstart));
+  n=find_label(p);
   if (n!=zero_label_no && labels[n].where!=LABEL_UNDEF)
   { MESSAGE("WARNING: Ignoring duplicate definition of label ");
     if (label_has_name(p)) MESSAGE("name %s\n",tokens_to_name(link(label_ptr(p))));
@@ -31025,7 +30685,7 @@ that start links and end links properly match.
 @<Hi\TeX\ auxiliary routines@>=
 static int last_link=-1;
 static int new_start_link(pointer p)
-{ int n=find_label(p);
+{ int n=find_label(as_label(p));
   if (last_link>=0)
     fatal_error("Missing end link before start link");
   labels[n].used=true;
@@ -31075,7 +30735,7 @@ Here is the new |build_page| routine of Hi\TeX:
 
 @<Hi\TeX\ routines@>=
 static void build_page(void)
-{ static bool initial=true;
+{ @<Define the top level color stack@>@;
   if(link(contrib_head)==null||output_active)return;
   do
   { pointer p= link(contrib_head);
@@ -31085,6 +30745,7 @@ static void build_page(void)
     int page_penalty=0;
     if (eject) page_penalty=penalty(p);
     @<Record the bottom mark@>@;
+    @<Record the current top level color@>@;
     @<Suppress empty pages if requested@>@;
     link(contrib_head)= link(p);link(p)= null;
     if (link(contrib_head)==null)
@@ -31095,7 +30756,9 @@ static void build_page(void)
     page_goal=0x3fffffff; /* maximum dimension */
     t=collect_output(&p,&q);
     if (p!=null)
-    { hpos0=hpos; hout_node(p); }
+    { hpos0=hpos; hout_node(p);
+      @<Output the current color if needed@>@;
+    }
 recycle_p:
     flush_node_list(p);
     if (q!=null||(eject&&page_contents>=box_there))
@@ -31171,8 +30834,8 @@ if (option_no_empty_page &&
     ((eject && penalty(p)>2*(eject_penalty)) ||
      (page_contents==empty && !is_visible(p))))
 { pointer r, prev_r = p;
-  loop@+{
-    r =link(prev_r);
+  while (true)
+  { r =link(prev_r);
     if (r==null) return;
     else if (is_visible(r)) break;
     else if (type(r)==penalty_node && penalty(r)<=eject_penalty)
@@ -31457,11 +31120,12 @@ if (type(p)==mark_node)
 The following routines extend \TeX's original routines. They check for
 any dependency of the box size on {\tt hsize} or {\tt vsize} and
 create an hset node or hpack node if such a dependency was found.
-
+The |keep_cs| variable will prevent the initialization of the color
+stack; this is needed in the |line_break| routine, where the color
+stack is maintained for the whole paragraph not for the individual lines.
 
 @<Hi\TeX\ routines@>=
-
-static pointer hpack(pointer p,scaled w, scaled hf, scaled vf, small_number m)
+static pointer hpack(pointer p,scaled w, scaled hf, scaled vf, small_number m, bool keep_cs)
 {
   pointer r; /*the box node that will be returned*/
   pointer q; /*trails behind |p|*/
@@ -31470,9 +31134,8 @@ static pointer hpack(pointer p,scaled w, scaled hf, scaled vf, small_number m)
   pointer g; /*points to a glue specification*/
   glue_ord o, sto, sho; /*order of infinity*/
   internal_font_number f; /*the font in a |char_node|*/
-  four_quarters i;  /*font information about a |char_node|*/
-  eight_bits hd; /*height and depth indices for a character*/
   bool repack=false; /* whether repacking is necessary */
+  if (!keep_cs) { @<initialize the color stack@>@;}
   last_badness= 0;r= get_node(box_node_size);type(r)= hlist_node;
   subtype(r)= min_quarterword;shift_amount(r)= 0;
   q= r+list_offset;link(q)= p;
@@ -31491,8 +31154,18 @@ then move to the next node@>;
       case glue_node: @<Incorporate glue into the horizontal totals@>@;@+break;
       case kern_node: case math_node: x=x+width(p);@+break;
       case ligature_node: @<Make node |p| look like a |char_node| and |goto reswitch|@>@;
-      case whatsit_node: @<Incorporate the various extended boxes into an hbox@>@;@+break;
+      case whatsit_node: @<Incorporate the various whatsit nodes into an hbox@>@;@+break;
       default:do_nothing;
+      }
+      if (link(p)==null && keep_cs && link_tos!=null)
+      { pointer r;
+        r=get_node(link_node_size);
+	type(r)=whatsit_node; subtype(r)=end_link_node;
+        if (color_link(color_tos)!=null)
+	  color_ref(r)=color_ref(color_link(color_tos));
+        else
+          color_ref(r)=0xFF;
+        link(r)=null; link(p)=r; p=r;
       }
       p= link(p);
     }
@@ -31572,7 +31245,7 @@ reasonable since the boxes that occur in math formulas are often not very
 complicated. | graph_node|s should not be in a horizontal list, and |disp_node|s
 should be only inside |graph_node|s.
 
-@<Incorporate the various extended boxes into an hbox@>=
+@<Incorporate the various whatsit nodes into an hbox@>=
 switch (subtype(p))
 { case par_node: if (depth(p)> d) d=depth(p); break;
   case disp_node:  break;
@@ -31597,16 +31270,18 @@ switch (subtype(p))
       else { repack=true; break;}
     }
     break;
+    @<cases that flatten the color stack@>@;
   default: break;
 }
 
 @ @<Hi\TeX\ routines@>=
-static pointer vpackage(pointer p, scaled h, scaled hf, scaled vf, small_number m, scaled l)
+static pointer vpackage(pointer p, scaled h, scaled hf, scaled vf, small_number m, bool keep_cs, scaled l)
 { pointer r; /*the box node that will be returned*/
   scaled w,d,x; /*width, depth, and natural height*/
   scaled s=0; /*shift amount*/
   pointer g; /*points to a glue specification*/
   glue_ord sho, sto; /*order of infinity*/
+  if (!keep_cs) {@<initialize the color stack@>@;}
   last_badness= 0; r= get_node(box_node_size); type(r)= vlist_node;
   subtype(r)= min_quarterword; shift_amount(r)= 0;
   list_ptr(r)= p;
@@ -31630,36 +31305,34 @@ static pointer vpackage(pointer p, scaled h, scaled hf, scaled vf, small_number 
           case unset_set_node: case unset_pack_node:
               goto repack;
           case whatsit_node:
-            if (subtype(p)==par_node)
-                          { if (depth(p) > d) d=depth(p);
-			    goto repack; }
-			else if (subtype(p)==disp_node )
-			  goto repack;
-			else if (subtype(p)==vpack_node )
-			  goto repack;
-			else if (subtype(p)==hpack_node )
-			  goto repack;
-			else if (subtype(p)==hset_node )
-			  goto repack;
-			else if (subtype(p)==vset_node )
-			  goto repack;
-			else if (subtype(p)==stream_node )
-			  goto repack;
-			else if (subtype(p)==image_node)
-			{ if (image_xwidth(p)!=null)
-                          { pointer r=image_xwidth(p);
-                            if (xdimen_hfactor(r)==0 && xdimen_vfactor(r)==0)
-                            { if (xdimen_width(r)> w) w= xdimen_width(r); }
-                            else goto repack;
-                          }
-                          if (image_xheight(p)!=null)
-                          { pointer r=image_xheight(p);
-                            if (xdimen_hfactor(r)==0 && xdimen_vfactor(r)==0)
-			    {  x= x+d+xdimen_width(r);d=0;}
-                            else goto repack;
-                          }
-			}
-             break;
+	    switch(subtype(p))
+	    { case par_node:
+                if (depth(p) > d) d=depth(p);
+	        goto repack;
+	      case disp_node:
+	      case vpack_node:
+	      case hpack_node:
+	      case hset_node:
+      	      case vset_node:
+      	      case stream_node:
+		goto repack;
+              case image_node:
+	        if (image_xwidth(p)!=null)
+                { pointer r=image_xwidth(p);
+                  if (xdimen_hfactor(r)==0 && xdimen_vfactor(r)==0)
+                  { if (xdimen_width(r)> w) w= xdimen_width(r); }
+                  else goto repack;
+                }
+                if (image_xheight(p)!=null)
+                { pointer r=image_xheight(p);
+                  if (xdimen_hfactor(r)==0 && xdimen_vfactor(r)==0)
+		  {  x= x+d+xdimen_width(r);d=0;}
+                  else goto repack;
+                }
+                break;
+	        @<cases that flatten the color stack@>
+	    }
+            break;
           case glue_node:
             { glue_ord o;
 			  x= x+d;d= 0;
@@ -31974,8 +31647,25 @@ static void hfinish_stream_after_group(void)
   pop_nest();
 }
 @*1 Page Template Definitions.
+These are the primitives needed to implement page templates:
 
-The data describing a page template is stored in a whatsit node with subtype
+@<Put each...@>=
+primitive("HINTsetpage", extension, setpage_node);@/
+@!@:setpage\_}{\.{\\setpage} primitive@>
+
+primitive("HINTstream", extension, stream_node);@/
+@!@:stream\_}{\.{\\stream} primitive@>
+
+primitive("HINTsetstream", extension, setstream_node);@/
+@!@:setstream\_}{\.{\\setstream} primitive@>
+
+primitive("HINTbefore", extension, stream_before_node);@/
+@!@:before\_}{\.{\\before} primitive@>
+
+primitive("HINTafter", extension, stream_after_node);@/
+@!@:after\_}{\.{\\after} primitive@>
+
+@ The data describing a page template is stored in a whatsit node with subtype
 |setpage_node|.
 Given a pointer |p| to such a node, here are the macros used to access the data stored there:
 
@@ -32017,14 +31707,15 @@ static pointer new_setpage_node(uint8_t i, str_number n)
   for (p=link(prev_p); p!=null; prev_p=p,p=link(p))
     if (setpage_id(p)==i) break;
   if (p==null)
-    @<Allocate a new |setpage_node| |p|@>@;
+    @<allocate a new |setpage_node| |p|@>@;
   else
     link(prev_p)=link(p);
   link(p)=link(setpage_head);
   link(setpage_head)=p;
   return p;
 }
-@ @<Allocate a new |setpage_node| |p|@>=
+@
+@<allocate a new |setpage_node| |p|@>=
 { p=get_node(setpage_node_size);type(p)=whatsit_node;subtype(p)=setpage_node;
   setpage_number(p)=max_ref[page_kind]=++max_page;
   setpage_id(p)=i;
@@ -32043,8 +31734,7 @@ primitive and by the current values of certain
 
 @<Hi\TeX\ routines@>=
 static void hfinish_page_group(void)
-{ uint8_t k;
-  pointer p,q,r;
+{ pointer p;
   end_graf();
   p=hget_current_page();
   if (p!=null)
@@ -32111,7 +31801,7 @@ static void hint_open(void)
   output_file_name=make_name_string();
   DBG(DBGBASIC,"Output file %s opened\n",(char *)name_of_file+1);
 }
-@#
+
 #define HITEX_VERSION "1.1"
 static void  hput_definitions();
 extern int option_global;
@@ -32269,6 +31959,7 @@ static void hdef_init(void)
   @<Initialize definitions for baseline skips@>@;
   @<Initialize definitions for fonts@>@;
   @<Initialize definitions for labels@>@;
+  @<Initialize definitions for colors@>@;
 #if 0
   overfull_rule=0;    /* no overfull rules please */
 #endif
@@ -32286,7 +31977,6 @@ maximum values do no longer change.
 static void  hput_definitions()
 /* write the definitions into the definitions buffer */
 {  int i;
-   uint32_t d, m, s;
    hput_definitions_start();
    hput_max_definitions();
    @<Output language definitions@>@;
@@ -32298,6 +31988,7 @@ static void  hput_definitions()
    @<Output baseline skip definitions@>@;
    @<Output parameter list definitions@>@;
    @<Output discretionary break definitions@>@;
+   @<Output color definitions@>@;
    @<Output page template definitions@>@;
    hput_definitions_end();
    hput_range_defs(); /* expects the definitions section to be ended */
@@ -32326,7 +32017,7 @@ but we will need it repeatedly in the function |hdef_param_node| and the overhea
 not warrant having the mapping in both directions.
 
 @<Hi\TeX\ variables@>=
-static const int hmap_int[] ={@t\1\1@>@/
+static const int hmap_int[] ={@/
 pretolerance_no,  /* |pretolerance_code| 0 */
 tolerance_no,  /* |tolerance_code| 1 */
 line_penalty_no,  /* |line_penalty_code| 2 */
@@ -32369,7 +32060,7 @@ year_no,  /* |year_code| 23 */
 -1,  /* |output_penalty_code| 39 */
 -1,  /* |max_dead_cycles_code| 40 */
 hang_after_no,  /* |hang_after_code| 41*/
-@t\2\2@> floating_penalty_no  /* |floating_penalty_code| 42*/
+floating_penalty_no  /* |floating_penalty_code|	42*/
 };
 
 
@@ -32381,7 +32072,7 @@ hang_after_no,  /* |hang_after_code| 41*/
     if ( hmap_int[i]>=0) int_defined[hmap_int[i]]=int_par(i);
   max_ref[int_kind]=MAX_INT_DEFAULT;
 @ The function |hget_int_no| tries to allocate a predefined integer number;
-if not successful, it returns~$-1$.
+if not successful, it returns $-1$.
 
 @<Hi\TeX\ auxiliary routines@>=
 static int hget_int_no(int32_t n)
@@ -32424,7 +32115,7 @@ We proceed as we did for integers, starting with the array that holds the define
 @<Hi\TeX\ variables@>=
 static scaled dimen_defined[0x100]={0};
 @ @<Hi\TeX\ variables@>=
-static const int hmap_dimen[] ={@t\1\1@>@/
+static const int hmap_dimen[] ={@/
   -1, /* |par_indent_code| 0 */
   -1,  /* |math_surround_code| 1 */
   line_skip_limit_no,  /* |line_skip_limit_code| 2 */
@@ -32445,7 +32136,7 @@ static const int hmap_dimen[] ={@t\1\1@>@/
   hang_indent_no,  /* |hang_indent_code| 17 */
   -1, /* |h_offset_code| 18 */
   -1,  /* |v_offset_code| 19 */
-  @t\2\2@> emergency_stretch_no /* |emergency_stretch_code| 20 */
+  emergency_stretch_no /* |emergency_stretch_code| 20 */
 };
 @ @<Fix definitions for dimension parameters@>=
   dimen_defined[zero_dimen_no]=0;
@@ -32551,7 +32242,8 @@ glue specifications and often a simple comparison of pointers might suffice.
 @<Hi\TeX\ variables@>=
 static pointer glue_defined[0x100];
 @ @<Hi\TeX\ variables@>=
-static int hmap_glue[] ={@t\1\1@>@/
+static int hmap_glue[] ={
+
 line_skip_no,  /* |line_skip_code| 0 */
 baseline_skip_no,  /* |baseline_skip_code| 1 */
 -1,  /* |par_skip_code| 2 */
@@ -32566,7 +32258,7 @@ split_top_skip_no,  /* |split_top_skip_code| 10 */
 tab_skip_no,  /* |tab_skip_code| 11 */
 -1,  /* |space_skip_code| 12 */
 -1,  /* |xspace_skip_code| 13 */
-@t\2\2@> par_fill_skip_no  /* |par_fill_skip_code| 14 */
+par_fill_skip_no  /* |par_fill_skip_code| 14 */
 };
 @ @<Fix definitions for glue parameters@>=
   glue_defined[zero_skip_no]=zero_glue; incr(glue_ref_count(zero_glue));
@@ -32818,8 +32510,8 @@ static bool node_equal(pointer p, pointer q)
 }
 
 static bool list_equal(pointer p, pointer q)
-{@+loop@+{
-    if (p==q) return true;
+{@+while (true)
+  { if (p==q) return true;
     if (p==null || q==null) return false;
     if (!node_equal(p,q)) return false;
     p=link(p);q=link(q);
@@ -32991,7 +32683,7 @@ typedef struct {
   pointer g; /* space glue */
   pointer h; /* default hyphen */
   pointer p[MAX_FONT_PARAMS]; /* font parameters */
-  uint16_t m; /* section number of font metric file */
+  int m;      /* section number of font metric file */
   uint16_t y; /* section number of font glyph file */
 } Font;
 
@@ -33000,6 +32692,7 @@ static int hmap_font[MAX_FONTS];
 @ @<Initialize definitions for fonts@>=
   for (i=0;i<0x100;i++) hmap_font[i]=-1;
   max_ref[font_kind]=-1;
+  
 @ Allocation of a |Font| record takes place when we translate a \TeX\ font
 number to a \HINT\ font number using the function |hget_font_no|, and while
 doing so discover that the corresponding \HINT\ font number does not yet exist.
@@ -33083,10 +32776,8 @@ static char *hfind_glyphs(char *filename)
 }
 
 static uint8_t hget_font_no(uint8_t f)
-
 { int g;
-  char *n,*fn;
-  int l;
+  char *n;
   if (f==0)
   { DBG(DBGFONT,"TeX nullfont -> 0\n");
     return 0;@+
@@ -33103,20 +32794,28 @@ static uint8_t hget_font_no(uint8_t f)
   hmap_font[f]=g;
   hfonts[g]->g=hget_font_space(f);
   hfonts[g]->h=hget_font_hyphen(f);
-  pack_file_name(font_name[f], empty_string,empty_string,".tfm");
-  n = kpse_find_tfm((char*)name_of_file+1);
-  if (n==NULL)
-    QUIT("Unable to find .tfm file for font %s",(char*)name_of_file+1);
-  hfonts[g]->m= hnew_file_section(n);
-  free(n);
-  pack_file_name(font_name[f], empty_string,empty_string,"");
-  n= hfind_glyphs((char*)name_of_file+1);
-  if (n==NULL)
-    QUIT("Unable to find glyph file for font %s",(char*)name_of_file+1);
-  hfonts[g]->y= hnew_file_section(n);
-  free(n);
+  if (IS_X_FONT(f))
+  { hfonts[g]->m= -1;
+    pack_file_name(font_area[f], empty_string, empty_string,"");
+    hfonts[g]->y= hnew_file_section((char*)name_of_file+1);
+  }
+  else
+  { pack_file_name(font_name[f], empty_string,empty_string,".tfm");
+    n = kpse_find_tfm((char*)name_of_file+1);
+    if (n==NULL)
+      QUIT("Unable to find .tfm file for font %s",(char*)name_of_file+1);
+    hfonts[g]->m= hnew_file_section(n);
+    free(n);
+    pack_file_name(font_name[f], empty_string,empty_string,"");
+    n= hfind_glyphs((char*)name_of_file+1);
+    if (n==NULL)
+      QUIT("Unable to find glyph file for font %s",(char*)name_of_file+1);
+    hfonts[g]->y= hnew_file_section(n);
+    free(n);
+  }
   return g;
 }
+
 @ Surprisingly, not all characters that occur in a \HINT\ file are inside the
 content section; some characters might hide in the definition section
 inside the pre- or post-break list of a predefined discretionary break.
@@ -33141,14 +32840,15 @@ static void ensure_font_no(pointer p)
     { Font *hf=hfonts[f];
       internal_font_number g=hf->i;
       uint32_t pos=hpos-hstart;
-      Info i= b000;
+      Info i;
       DBG(DBGDEF,"Defining font %d size 0x%x\n",f,font_size[g]);
       hpos++; HPUTNODE;  /* space for the tag and the node */
       HPUT8(f); /* reference */
       hout_string(font_id_text(g));
       if(font_size[g]>0) HPUT32(font_size[g]);
       else  HPUT32(font_dsize[g]);
-      HPUT16(hf->m);HPUT16(hf->y);
+      if (hf->m>=0) { i=b000; HPUT16(hf->m);} else i=b001;
+      HPUT16(hf->y);
       DBG(DBGDEF,"Defining font space\n");
       HPUTCONTENT(hout_glue_spec,hf->g);
       DBG(DBGDEF,"Defining font hyphen\n");
@@ -33328,8 +33028,8 @@ processing of penalty nodes follows the same pattern we have just seen.
    case penalty_node:
      { int n,i;
        i = penalty(p);
-       if (i>10000) i=10000;
-       else if (i<-10000) i=-10000;
+       if (i>20000) i=20000;
+       else if (i<-20000) i=-20000;
        n=hget_int_no(i);
        if (n<0) tag=hput_int(i);
        else  { HPUT8(n); tag=TAG(penalty_kind,0);}
@@ -34009,6 +33709,7 @@ case start_link_node:
   int n=new_start_link(p);
   i=b010;
   if (n>0xFF) { i|=b001; HPUT16(n);@+} @+else HPUT8(n);
+  if (color_ref(p)!=1) {i|=b100; HPUT8(color_ref(p)); }
   tag= TAG(link_kind,i);
 }
 break;
@@ -34017,16 +33718,21 @@ case end_link_node:
   int n=new_end_link();
   i=b000;
   if (n>0xFF) { i|=b001; HPUT16(n);@+} @+else HPUT8(n);
+  if (color_ref(p)!=0xFF) {i|=b100; HPUT8(color_ref(p)); }
   tag= TAG(link_kind,i);
 }
 break;
 case outline_node: hpos--; new_outline(p);  return;
 
 @*1 Images.
-\indent
-@<cases to output whatsit content nodes@>=
+There is a single primitive to handle images:
+@<Put each...@>=
+primitive("HINTimage", extension, image_node);@/
+@!@:HINTimage\_}{\.{\\HINTimage} primitive@>
+
+@ @<cases to output whatsit content nodes@>=
      case image_node:
-        { Xdimen w={0},h={0}; List d; uint32_t pos;
+        { Xdimen w={0},h={0}; 
           if (image_xwidth(p)!=null)
           { pointer r=image_xwidth(p);
             w.w=xdimen_width(r);
@@ -34354,6 +34060,8 @@ Here is the list of possible options and their explanation:
   @t\qquad@>"\t process STRING like a line in texmf.cnf\n"@/
   " -compress             "@/
   @t\qquad@>"\t enable compression of section 1 and 2\n"@/
+  " [-no]-subset          "@/
+  @t\qquad@>"\t disable/enable the embedding of font subsets\n"@/
   " [-no]-empty-page      "@/
   @t\qquad@>"\t disable/enable empty pages\n"@/
   " [-no]-hyphenate-first-word "@/
@@ -34396,8 +34104,9 @@ static int option_dpi=600;
 static const char *option_mfmode="ljfour", *option_dpi_str="600";
 extern int option_compress;
 extern unsigned int debugflags;
+static int option_subset=true;
 
-static struct option long_options[] = {@t\1\1@>@/
+static struct option long_options[] = {@/
       { "help",                      0, 0, 0 },@/
       { "version",                   0, 0, 0 },@/
       { "interaction",               1, 0, 0 },@/
@@ -34418,6 +34127,8 @@ static struct option long_options[] = {@t\1\1@>@/
       { "file-line-error",           0, &filelineerrorstylep, 1 },@/
       { "no-file-line-error",        0, &filelineerrorstylep, 0 },@/
       { "compress",                  0, &option_compress, 1 },@/
+      { "no-subset",                 0, &option_subset, 0 },@/
+      { "subset",                    0, &option_subset, 1 },@/
       { "no-empty-page",             0, &option_no_empty_page, 1 },@/
       { "empty-page",                0, &option_no_empty_page, 0 },@/
       { "hyphenate-first-word",      0, &option_hyphen_first, 1 },@/
@@ -34428,8 +34139,8 @@ static struct option long_options[] = {@t\1\1@>@/
       { "hint-debug",                1, 0, 0 },@/
       { "hint-debug-help",           0, 0, 0 },@/
 #endif
-@t\2\2@> { 0, 0, 0, 0 } @/
-};
+      { 0, 0, 0, 0 }@+}@+;
+
 
 @ Parsing the command line options is accomplished with the
 |parse_options| function which in turn uses the |getopt_long_only|
@@ -34438,7 +34149,7 @@ function from the \CEE/ library. This function returns 0 and sets the
 the end of all options is reached.
 @<\TeX\ Live  functions@>=
 static void parse_options (int argc, char *argv[])
-{@+ loop @+ {
+{@+ while (true) {
     int option_index;
     int g = getopt_long_only (argc, argv, "+", long_options, &option_index);
     if (g==0)
@@ -34488,7 +34199,7 @@ the option structure.
 #include <kpathsea/kpathsea.h>
 static int argument_is(struct option *opt, char * s)
 {@+ return STREQ(opt->name, s); @+}
-#define ARGUMENT_IS(S) @[argument_is(long_options+option_index,S)@]
+#define ARGUMENT_IS(S) argument_is(long_options+option_index,S)
 
 @ Now we can handle the first two options:
 
@@ -34496,7 +34207,9 @@ static int argument_is(struct option *opt, char * s)
 if (ARGUMENT_IS("help")) usage_help();
 else if (ARGUMENT_IS("version")){@+
        printf(banner@, "\n"@/
+#ifdef HINT_VERSION_STRING
               "HINT version "@,HINT_VERSION_STRING@,"\n"@/
+#endif
               "Prote version "@, Prote_version_string@, "\n");
        exit(0);@+
 }
@@ -34580,7 +34293,7 @@ static char *normalize_quotes (const char *nom, const char *mesg)
 }
 
 @ If the output directory was specified on the command line,
-we save it in an environment variable so that subbrocesses can
+we save it in an environment variable so that subprocesses can
 get the value. If on the other hand the environment specifies
 a directory and the command line does not, save the value from
 the environment to the global variable so that it is used in the
@@ -34619,9 +34332,10 @@ One can provide the name of a file as the content of an other file.
   @<Suppress double quotes in braced input file name@>@;
   j=pool_ptr-1;while ((j >= str_start[str_ptr])&&(area_delimiter==0))
     {@+
-      if ((str_pool[j]=='/')) area_delimiter=j-str_start[str_ptr];
+      if ((str_pool[j]=='/')) 
+        area_delimiter=j-str_start[str_ptr]+1;
       if ((ext_delimiter==0)&&(str_pool[j]=='.'))
-        ext_delimiter=j-str_start[str_ptr];
+        ext_delimiter=j-str_start[str_ptr]+1;
       decr(j);
     }
   flush_list(link(garbage));
@@ -34838,6 +34552,10 @@ fprintf(stderr,"\t XX=%04X \t buffer debugging\n", DBGBUFFER);@/
 fprintf(stderr,"\t XX=%04X \t TeX debugging\n", DBGTEX);@/
 fprintf(stderr,"\t XX=%04X \t page debugging\n", DBGPAGE);@/
 fprintf(stderr,"\t XX=%04X \t font debugging\n", DBGFONT);@/
+#if 0 /* currently not used in hitex */
+fprintf(stderr,"\t XX=%04X \t render debugging\n", DBGRENDER);@/
+#endif
+fprintf(stderr,"\t XX=%04X \t label debugging\n", DBGLABEL);@/
 exit(0);
 }
 #endif
@@ -34966,7 +34684,7 @@ static int texmf_yesno(const char *var)
 
 @ We need a stack, matching the |line_stack| that
 contains the source file names. For the full source filenames we use
-poiters to |char| because these names are just used for output.
+pointers to |char| because these names are just used for output.
 
 @<Global...@>=
 static char * @!source_filename_stack0[max_in_open]={NULL}, **const @!source_filename_stack = @!source_filename_stack0-1;
@@ -35111,7 +34829,7 @@ last=first;
 while (optind < argc) input_add_str(argv[optind++]);
 loc=first;
 return (loc < last);
-}
+@+ }
 
 @ @<Forward declarations@>=
 static int input_command_line(void);
@@ -35165,13 +34883,7 @@ static bool a_open_out(alpha_file *f)  /*open a text file for output*/
   return f->f!=NULL && ferror(f->f)==0;@+
 }
 
-static bool b_open_out(byte_file *f)  /*open a binary file for output*/
-{@+f->f=open_out((char *)name_of_file+1,"wb");
-return f->f!=NULL && ferror(f->f)==0;@+
-}
-@#
 #ifdef @!INIT
-@+@t}\6\4\4{@>
 static bool w_open_out(word_file *f)  /*open a word file for output*/
 {@+f->f=open_out((char *)name_of_file+1,"wb");
    return f->f!=NULL && ferror(f->f)==0;@+
@@ -35359,8 +35071,6 @@ static int get_md5_sum(int s, int file);
 @ The code that follows was taken from the \.{texmfmp.c} file of
 the \TeX\ Live distribution and slightly modified.
 
-@s md5_byte_t int
-@s md5_state_t int
 
 @<\TeX\ Live auxiliary functions@>=
 
@@ -35419,16 +35129,16 @@ make_time_str(time_t t, bool utc)
 static void get_creation_date(void)
 { make_time_str(start_time,source_date_epoch!=NULL);
 }
-@#
-#ifdef WIN32
+
 /* static structure for file status set by |find_input_file| */
-@+@t}\6{@>
+#ifdef WIN32
 static    struct _stat file_stat;
-#define GET_FILE_STAT @[_stat(fname,&file_stat)@]
+#define GET_FILE_STAT _stat(fname,&file_stat)
 #else
 static     struct stat file_stat;
-#define GET_FILE_STAT @[stat(fname,&file_stat)@]
+#define GET_FILE_STAT stat(fname,&file_stat)
 #endif
+
 
 static char* find_input_file(void)
 { char *fname;
@@ -35510,6 +35220,928 @@ static int get_md5_sum(int s, int file)
     md5_finish(&st, md5_digest);
   }
   return DIGEST_SIZE;
+}
+
+
+@* UTF8 processing.
+
+The first function we need is the function that inputs one character |cur_chr|
+from an input buffer |b| at index |i|. We advance |i| for each byte
+read from the buffer and check that |i<=k|.
+Character codes less than |0x80| are stored as a single byte. This is the easy case.
+
+@<input a single byte utf8 code@>=
+  cur_chr=b[i]; incr(i);
+  if (cur_chr<0x80) return i;
+
+@ Values in the range |0x80| to |0x7ff| are encoded using two byte 
+with the first byte having three high bits |110|, indicating a two byte sequence, 
+and the lower five bits equal to the five high bits of |c|. 
+It is followed by a continuation byte. having two high bits |10|
+and the lower six bits equal to the lower six bits of |c|.
+
+@<input a two byte utf8 code@>=
+if ((cur_chr&0xE0)==0xC0)
+{ @<input a continuation byte |d|@>@;
+  cur_chr= ((cur_chr&0x1F)<<6)+(d&0x3F);
+  return i;
+}
+
+@ Reading a continuation byte is simple, but all error conditions need to be
+checked. Some \TeX\ input files test for UTF8 aware engines and skip
+parts of the input file that a considered to be read by 8-bit \TeX\ engines.
+So when the |scanner_status| is |skipping|, we should not produce errors.
+
+@<input a continuation byte |d|@>=
+if (i <= k)
+{  d=b[i]; incr(i); 
+   if ((d&0xC0)!=0x80 && scanner_status!=skipping)
+   { print_err("Invalid UTF8 continuation byte in the input");
+     cur_chr=invalid_code;
+     return i;
+   }
+}
+else if (scanner_status!=skipping)
+{ print_err("Missing UTF8 continuation byte in the input");
+  cur_chr=invalid_code;
+  return i;
+}
+
+@ Values in the range |0x800| to |0xFFFF| are encoded in three byte 
+with the first byte having the high bits |1110| indicating a three 
+byte sequence followed by two continuation bytes.
+
+@<input a three byte utf8 code@>=
+if ((cur_chr&0xF0)==0xE0)
+{ @<input a continuation byte |d|@>@;
+  cur_chr= ((cur_chr&0x0F)<<6)+(d&0x3F);
+ @<input a continuation byte |d|@>@;
+  cur_chr= (cur_chr<<6)+(d&0x3F);
+  return i;
+}
+
+@ Values in the range |0x1000| to |0x1FFFFF| are encoded in four byte 
+with the first byte having the high bits |11110| indicating a four byte 
+sequence followed by three continuation bytes. 
+This range is far greater than the actual range of UTF8 codes which
+ends with |0x10FFFF|. 
+
+@<input a four byte utf8 code@>=
+if ((cur_chr&0xF8)==0xF0)
+{ @<input a continuation byte |d|@>@;
+  cur_chr= ((cur_chr&0x07)<<6)+(d&0x3F);
+  @<input a continuation byte |d|@>@;
+  cur_chr= (cur_chr<<6)+(d&0x3F);
+  @<input a continuation byte |d|@>@;
+  cur_chr= (cur_chr<<6)+(d&0x3F);
+  if (cur_chr>0x10FFFF && scanner_status!=skipping)
+  { print_err("UTF8 code out of range in the input");
+    cur_chr=invalid_code;
+  }
+  return i;
+}
+
+
+@ The following function combines all the cases considered before.
+The parameters are a pointer |b| into an array of byte where
+the next characters is expected at index |i|, and a maximum value for
+the index |k|. The function advances the index |i| for each byte taken from the
+buffer and returns the updated value.
+
+
+
+@p static int utf8_get_cur_chr(unsigned char *b, int i, int k)
+{ uint8_t d;
+  @<input a single byte utf8 code@>@;
+  @<input a two byte utf8 code@>@;
+  @<input a three byte utf8 code@>@;
+  @<input a four byte utf8 code@>@;
+  print_err("Malformed UTF8 code in the input; character ignored");
+  cur_chr=invalid_code;
+  return i;
+}
+
+@ This process can be reverted by printing an UTF8 character
+assuming the user's terminal and log file are UTF8 capable.
+
+@p static void print_utf8(uint32_t c)
+{@+ if (c<0x80) 
+  { print_char(c); }
+  else if (c<0x800)@/
+  { print_char(0xC0|(c>>6)); print_char(0x80|(c&0x3F)); } 
+  else if (c<0x10000)@/
+  { print_char(0xE0|(c>>12)); print_char(0x80|((c>>6)&0x3F));
+    print_char(0x80|(c&0x3F)); } 
+  else if (c<0x180000)@/
+  { print_char(0xF0|(c>>18)); print_char(0x80|((c>>12)&0x3F)); 
+    print_char(0x80|((c>>6)&0x3F)); print_char(0x80|(c&0x3F)); }
+  else
+    print("???");
+} 
+
+
+@ All the information about utf characters comes from a generated file.
+
+@p
+
+#include "hitex.dat.c"
+
+@ The functions defined there replace the definitions of the
+\.{\\catcode}, \.{\\mathcode}, \.{\\uccode}, \.{\\lccode}, and \.{\\delcode}
+tables. \TeX's way to access such information was (and is) to provide an index
+into a table where the index is the sum of a base index depending on the
+type of information desired and an offset depending on the character code.
+The following function requires both parameters to deliver the requested result.
+
+@p static int utf_lookup(pointer b, int i )
+{if (b==utf_lc_code_base) return utf_lccode(i);
+ else if (b==utf_uc_code_base) return utf_uccode(i);
+ else if (i<0x100) 
+ { if (b==utf_cat_code_base) return equiv(cat_code_base+i);
+   else if (b==utf_sf_code_base) return equiv(sf_code_base+i);
+   else if (b==utf_del_code_base) return equiv(del_code_base+i);
+   else if (b==utf_math_codenum_base) return equiv(math_code_base+i);
+   else if (b==utf_math_code_base) return equiv(math_code_base+i);
+   else return 0;
+ }
+ else if (b==utf_cat_code_base) return utf_catcode(i);
+ else if (b==utf_sf_code_base) return utf_sfcode(i);
+ else if (b==utf_math_code_base) return utf_mathcode(i);
+ else if (b==utf_math_codenum_base) return utf_mathcode(i);
+ else if (b==utf_del_code_base) return utf_delcode(i);
+ else return 0;
+}
+
+@ Using |utf_base_mask| and |utf_cp_mask| it is easy to separate base 
+and utf code point from the sum.
+
+@<Show equivalent |n|, in the utf tables@>=
+switch (n&utf_base_mask)
+{@+case utf_cat_code_base:
+   print_esc("catcode");print_int(n&utf_cp_mask);
+   print_char('=');print_int(cat_code(n&utf_cp_mask));
+   break;
+case utf_lc_code_base:
+   print_esc("lccode");print_int(n&utf_cp_mask);
+   print_char('=');print_int(utf_lccode(n&utf_cp_mask));
+   break;
+case utf_uc_code_base:
+   print_esc("uccode");print_int(n&utf_cp_mask);
+   print_char('=');print_int(utf_uccode(n&utf_cp_mask));
+   break;
+case utf_sf_code_base:
+   print_esc("sfcode");print_int(n&utf_cp_mask);
+   print_char('=');print_int(sf_code(n&utf_cp_mask));
+   break;
+case utf_del_code_base:
+   print_esc("delcode");print_int(n&utf_cp_mask);
+   print_char('=');print_int(del_code(n&utf_cp_mask));
+   break;
+case utf_math_code_base:
+   print_esc("mathcode");print_int(n&utf_cp_mask);
+   print_char('=');print_int(math_code(n&utf_cp_mask));
+   break;
+case utf_math_codenum_base:
+   print_esc("mathcodenum");print_int(n&utf_cp_mask);
+   print_char('=');print_int(math_code(n&utf_cp_mask));
+   break;
+}
+
+@ The definition of math codes with \.{\\mathcode} requires a single number.
+In its four digit hexadecimal form the most significant digit is the class,
+the next digit the font family and the lowest two digits the glyph number in the font.
+For the extended range of utf characters, a bit packed format can be used
+where the most significant 8 bits contain the font family, and the lower 24 bits
+are split between the top 3 bit for the class and the low 21 bit for the glyph number.
+Since this bit packed format is not very convenient, there are now two primitives
+to specify math codes:  \.{\\Umathcodenum} expects a single
+number in bit packed format; while \.{\\Umathcode} expects three numbers in the order
+class, family, and glyph number. The three numbers are then converted to the bit packed
+format which is used for internal storage.
+
+@<Read the arguments of \.{\\Umathcode}@>=
+{ int fam, class;
+  scan_int(); class=cur_val; scan_int();fam=cur_val; scan_int();
+  if (fam<0||fam>0xff)
+  { print_err("Invalid family (");print_int(fam);
+    print("), should be in the range 0..255");
+    error();fam=1;
+  }
+  if (class<0||class>7)
+  { print_err("Invalid class (");print_int(class);
+    print("), should be in the range 0..7");
+    error();class=7;
+  }
+  cur_val=(((fam<<3)|class)<<21)|cur_val;
+}
+
+@ Since now all math codes are stored in the bit packed format,
+also the argument of \.{\\mathcode} is converted to the new format.
+The special value |0x8000| is now represented as |0xFFFFFFFF|. 
+Fortunately the 64bit memory words used in Hi\TeX\ are big enough
+to store these values in the available halfword (32 bit) of |eqtb|. 
+
+@d active_math_character_code  0xFFFFFFFF 
+@d math_code_fam(A) (((A)>>24)&0xFF)
+@d math_code_class(A) (((A)>>21)&0x7)
+@d math_code_char(A) ((A)&0x1FFFFF)
+@d Umath_to_math(A) { int fam=math_code_fam(A); int class=math_code_class(A); int cp=math_code_char(A);
+  if (cp<=0xFF && fam<=0xF && class<=0xF) A =(((class<<4)|fam)<<8)|cp; }
+@d math_to_Umath(A) { int class = (A>>12)&0xF, fam = (A>>8)&0xF, cp = A&0xFF; A =(((fam<<3)|class)<<21)|cp;}
+
+
+
+@ Changing values in the utf tables is delegated to the following function
+that combines the function of |eq_define| and |geq_define|.
+We use two new |save_type|s: |restore_utf| and |restore_utf_none|. 
+Changing the |save_type| from |restore_utf| to |restore_utf_none|
+means, that the entry is invalid and must no longer be used to restore a value
+because it was superseded by the assignment of a global value.
+We implement global assignments by going down the |save_stack| 
+and invalidate all corresponding local assignments.
+We do this because we do not want to store assignment levels
+which would need extra data fields in the utf tables that would
+not be compatible with the table compression.
+For now we use two entries on the save stack, 
+but with 64 bits of memory in a memory word, a single entry could suffice.
+To find all relevant entries in the save stack, we use the |save_level|
+to link together all entries of |restore_utf| or |restore_utf_none|
+keeping the index to the top level entry in |utf_restore_list|.
+
+@d restore_utf_none (restore_sa+1)
+@d restore_utf      (restore_utf_none+1)
+
+@p
+static int utf_unsave_list=0;
+static void utf_save(pointer p,int cp, int e)
+{ if (cur_level>level_one)
+  { check_full_save_stack;
+    save_stack[save_ptr].i=e;
+    incr(save_ptr);
+    save_type(save_ptr)=restore_utf;
+    save_level(save_ptr)=utf_unsave_list;
+    utf_unsave_list=save_ptr;
+    save_index(save_ptr)=p+cp;
+    incr(save_ptr);
+  }
+}
+
+static void utf_unsave(pointer p)
+{ int cp, e;
+  utf_unsave_list=save_level(save_ptr);
+  decr(save_ptr);
+  e= save_stack[save_ptr].i;
+  cp=p&utf_cp_mask;
+  p=p&utf_base_mask;
+  if (p==utf_cat_code_base) utf_set_catcode(cp,e);
+  else if (p==utf_lc_code_base) utf_set_lccode(cp,e);
+  else if (p==utf_uc_code_base) utf_set_uccode(cp,e);
+  else if (p==utf_sf_code_base) utf_set_sfcode(cp,e);
+  else if (p==utf_del_code_base) utf_set_delcode(cp,e);
+  else if (p==utf_math_codenum_base) utf_set_mathcode(cp,e);
+}
+
+static void utf_global(pointer p)
+{ /* mark matching save stack entries as |restore_utf_none| */
+  int i=utf_unsave_list;
+  while (i>0)
+  { if (save_type(i)==restore_utf && save_index(i)==p)
+      save_type(i)=restore_utf_none;
+    i=save_level(i);
+  }
+}
+
+
+static void utf_define(pointer p,int cp, int e,bool g)
+{ if (g) assign_trace(p,"globally changing")@;
+  else assign_trace(p,"changing")@;
+  if (p==utf_cat_code_base) e=utf_set_catcode(cp,e);
+  else if (p==utf_lc_code_base) e=utf_set_lccode(cp,e);
+  else if (p==utf_uc_code_base) e=utf_set_uccode(cp,e);
+  else if (p==utf_sf_code_base) e=utf_set_sfcode(cp,e);
+  else if (p==utf_del_code_base) e=utf_set_delcode(cp,e);
+  else if (p==utf_math_codenum_base) e=utf_set_mathcode(cp,e);
+  if (g) utf_global(p+cp);
+  else utf_save(p,cp,e);
+  assign_trace(p,"into")@;@/
+}
+
+@ For characters below |0x100| all codes, except the lower- and uppercase codes
+are still stored in the |eqtb|. The following function is called with an |utf_|\dots|_base|
+and returns the correct base pointer to |eqtb| for character codes below |0x100|.
+
+@p static pointer utf_adjust_base(pointer p)
+{  if (p==utf_cat_code_base) p=cat_code_base;  
+   else if (p==utf_sf_code_base) p=sf_code_base; 
+   else if (p==utf_math_codenum_base) p=math_code_base; 
+   else if (p==utf_math_code_base) p=math_code_base; 
+   else if (p==utf_del_code_base) p=del_code_base; 
+   return p;
+}
+
+
+@ @p 
+#if 0 /* currently not used */
+static void utf_restore(pointer p, int e)
+{ if (p<utf_lc_code_base) utf_set_catcode(p-utf_cat_code_base,e  );
+  else if (p<utf_uc_code_base) utf_set_lccode(p-utf_lc_code_base,e);
+  else if (p<utf_sf_code_base) utf_set_uccode(p-utf_uc_code_base,e);
+  else if (p<utf_code_limit) utf_set_sfcode(p-utf_sf_code_base,e) ;
+#ifdef @!STAT
+  if (tracing_restores > 0) restore_trace(p,"retaining");
+#endif
+}
+#endif
+
+@ While most character codes for UTF are in the tables just defined
+some are still in the |eqtb| table. These are fixed when in init mode
+using the following code:
+
+@<Fix some character code assignments for UTF@>=
+/* changes to make hitex match luatex */
+ /* 125/007D: RIGHT CURLY BRACKET */
+equiv(sf_code_base+'}')=0;
+ /*170/00AA: FEMININE ORDINAL INDICATOR */
+equiv(cat_code_base+170)=11;equiv(math_code_base+170)=31457450; 
+ /*181/B5: MICRO SIGN */
+equiv(cat_code_base+181)=11;equiv(math_code_base+181)=31457461; 
+ /*186/BA: MASCULINE ORDINAL INDICATOR */
+equiv(cat_code_base+186)=11;equiv(math_code_base+186)=31457466; 
+ /*187/BB: RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK */
+equiv(sf_code_base+187)=0;
+ /*192/C0: LATIN CAPITAL LETTER A WITH GRAVE to 214/D6 LATIN CAPITAL LETTER O WITH DIAERESIS*/
+for (k=192; k<=214; k++)
+{ equiv(cat_code_base+k)=11;
+  equiv(sf_code_base+k)=999;
+  equiv(math_code_base+k)=0x1E00000+k;
+}
+ /*216/D8: LATIN CAPITAL LETTER O WITH STROKE to 222/DE LATIN CAPITAL LETTER THORN*/
+for (k=216; k<=222; k++)
+{ equiv(cat_code_base+k)=11;
+  equiv(sf_code_base+k)=999;
+  equiv(math_code_base+k)=0x1E00000+k;
+}
+/*223/DF LATIN SMALL LETTER SHARP S to 246/F6 LATIN SMALL LETTER O WITH DIAERESIS*/
+for (k=223; k<=246; k++)
+{ equiv(cat_code_base+k)=11;
+  equiv(math_code_base+k)=0x1E00000+k;
+}
+/* 248/F8  LATIN SMALL LETTER O WITH STROKE to 255/FF  LATIN SMALL LETTER Y WITH DIAERESIS */
+for (k=248; k<=255; k++)
+{ equiv(cat_code_base+k)=11;
+  equiv(math_code_base+k)=0x1E00000+k;
+}
+
+
+
+@ @<Forward declarations@>=
+static int utf8_get_cur_chr(unsigned char *b, int i, int k);
+static void print_utf8(uint32_t c);
+static uint8_t utf_catcode(uint32_t i);
+static uint32_t utf_set_catcode(uint32_t i, uint8_t cat);
+static uint32_t utf_lccode(uint32_t i);
+static uint32_t utf_set_lccode(uint32_t i, uint32_t lc);
+static uint32_t utf_uccode(uint32_t i);
+static uint32_t utf_set_uccode(uint32_t i, uint32_t uc);
+static uint16_t utf_sfcode(uint32_t i);
+static uint32_t utf_set_sfcode(uint32_t i, uint16_t sf);
+
+static uint32_t utf_set_delcode(uint32_t i, uint32_t dc);
+static int utf_delcode(uint32_t i);
+static uint32_t utf_set_mathcode(uint32_t i, uint32_t mc);
+static uint32_t utf_mathcode(uint32_t i);
+static void utf_unsave(pointer p);
+static int utf_lookup(pointer b, int i );
+static void utf_define(pointer p,int c,int e,bool g);
+static pointer utf_adjust_base(pointer p);
+static int utf_b_used, utf_i_used, utf_unsave_list;
+static scaled x_char_width(internal_font_number g, int c);
+static scaled x_char_height(internal_font_number g, int c);
+static scaled x_char_depth(internal_font_number g, int c);
+static scaled x_char_italic(internal_font_number g, int c);
+
+
+
+
+@* Fonts revisited.
+To use a font for typesetting, \TeX\ needs only a very limited amount
+of information.  The required information is found in a font metric
+file or \.{TFM} file as described before.
+@:TFM files}{\.{TFM} files@>
+@^font metric files@>
+For a typical font used on a modern computer, a \.{TFM} is usually not
+available.  While it is possible to create \.{TFM} files, for example
+with \.{otftotfm}, this is not the best solution, because modern font
+files contain much more information about the best way to typeset a
+given text than what would fit into a \.{TFM} file.  This is
+especially true for ``non-latin'' texts. For this reason, modern \TeX\
+engines, like \.{luatex} or \.{xetex}, load and use the font files
+directly. 
+
+To convert a unicode encoded text into a list of glyphs and
+their positions, Hi\TeX\ like other engines uses an other 
+specialized library called \.{harfbuzz}.  
+
+
+@ Finding the height and depth of a character is
+slightly more complex. It requires loading the glyph
+and retrieving its bounding box.
+Since most of the time we need the height and the depth
+together, we provide one function for both.
+We use |FT_Glyph_Get_CBox| to get the control box which is supposed to be fast.
+Because the glyph has been loaded with |FT_LOAD_NO_SCALE| we call
+|FT_Glyph_Get_CBox| with mode |FT_GLYPH_BBOX_UNSCALED| and
+get unscaled font units in 26.6 pixel format. 
+
+
+
+
+
+
+
+@ The functions just defined are listed here:
+
+@<Forward declarations@>=
+static bool x_char_exists(internal_font_number g, int c);
+static bool x_glyph(internal_font_number g, int c, hb_codepoint_t *glyph);
+static scaled x_char_height(internal_font_number g, int c);
+static scaled x_glyph_width(internal_font_number g, hb_codepoint_t glyph);
+static scaled x_glyph_italic(internal_font_number g, hb_codepoint_t glyph);
+static void x_glyph_height_depth(internal_font_number g, hb_codepoint_t glyph, scaled *h, scaled *d);
+static void x_char_height_depth(internal_font_number g, int c, scaled *h, scaled *d);
+#if 0
+static FT_UInt ft_glyph(FT_Face ft_face, int c);
+static bool ft_exists(FT_Face ft_face, int c);
+static scaled ft_glyph_width(FT_Face ft_face, FT_UInt ft_gid, scaled s);
+static scaled ft_width(FT_Face ft_face, int c, scaled s);
+static FT_Error ft_glyph_bbox(FT_Face ft_face, FT_UInt ft_gid, FT_BBox *ft_bbox);
+static void ft_glyph_height_depth(FT_Face ft_face, FT_UInt ft_gid,
+  scaled *h, scaled *d, scaled s);
+static void ft_height_depth(FT_Face ft_face, int c,
+  scaled *h, scaled *d, scaled s);
+static int ft_last(FT_Face ft_face);
+static int ft_first(FT_Face ft_face);
+#endif
+
+@ To move the functions to the program:
+
+@p 
+  @<harfbuzz font metric functions@>@;
+
+
+
+@ Here is the code to get the basic font parameters for an extended font.
+Let us start with the x-height: the size of one ex in the font.
+|x_height(A)| is defined as |font_info[param_base[g]+x_height_code].sc| with |x_height_code==5|.
+
+@<get the extended fonts parameters@>=
+param_base[g]=fmem_ptr;
+fmem_ptr=fmem_ptr+font_params[g]+1;
+font_info[param_base[g]].sc =0;
+{  hb_position_t h;
+  hb_ot_metrics_get_position_with_fallback(x_font[g]->f,HB_OT_METRICS_TAG_X_HEIGHT,&h);
+  /* if this is not working, I could use |x_char_height(f,'x')| */
+  x_height(g)= HB_TO_SCALED(h);
+}
+
+
+@ The slant value, as needed by \TeX\ is the horizontal extent to the right for a 
+character 1pt high.
+
+@<get the extended fonts parameters@>=
+{ double r;
+  r= hb_style_get_value (f, HB_STYLE_TAG_SLANT_RATIO);
+  slant(g)=(ONE*r+0.5);
+}
+  
+
+@ We call the fonts that Hi\TeX\ will handle by using harfbuzz 
+``extended fonts'', and variables or functions dealing with 
+such fonts will often have an |x_|\dots\  prefix in their name. 
+
+While Hi\TeX\ wants to be compatible with other \TeX\ engines, its
+implementation of the \.{\\font} primitive still uses a simplified
+version of the extended syntax used in \.{xetex}.  For now when the
+\.{\\font} primitive calls the |read_font_info| procedure, the current
+file name may must simply be a file name; it is permissible however to
+enclose the file name in double quotes, curly braces, or square
+brackets. Trailing text after the closing square bracket is ignored.
+
+@<Split the font name into its components@>=
+{ int i=1;
+  int name_start=1;
+  if (name_of_file[i]=='[')
+  { i++;
+    name_start=i;
+    while (name_of_file[i]!=0)
+      if (name_of_file[i]==']') 
+      { name_of_file[i]=0; break; }
+      else i++;
+  }
+  f_name=(char*)name_of_file+name_start;
+}
+
+@ If a file name was given, we use the kpathsearch library to find the file.
+The use of type1 fonts with harfbuzz requires the use of \.{.afm} files
+and this does not work well and is deprecated. For type1 fonts,
+one should use \.{afm2tfm} to convert the \.{.afm} files to \.{tfm} 
+files and put the new \.{tfm} files in a place where the \.{kpathsearch} library
+can find them. Then run \.{mktexls}.
+
+@<Open an extended font file for input@>=
+{  char *f_name;
+   int f_index=0; 
+ /*As soon as I allow other index values, options, and features,
+   I have to extend the test for ``If this font has already been loaded\dots''*/
+   pack_file_name(nom, aire,empty_string,""); /* \TeX\ Live */
+   @<Split the font name into its components@>@;
+   path=kpse_find_file(f_name, kpse_opentype_format, 0);
+   if (path == NULL)
+     path = kpse_find_file(f_name, kpse_truetype_format, 0);
+   if (path!=NULL)
+   { @<load an extended font@>@;
+     if (g!=null_font) file_opened=true; 
+     goto done;
+   }
+}
+
+
+@ Since specifying, finding, and loading a font can be quite complex process,
+the primitive \.{\\tracingfonts} is almost a necessity.
+After reading the font specification, we use this code:
+
+@<Trace the font specification@>=
+if (tracing_fonts>0)
+{@+
+  begin_diagnostic();
+  print_nl("Requested font \"");
+   printn(cur_area);printn(cur_name);
+  print_char('"');
+  if (s < 0) {@+
+    print(" scaled ");
+    print_int(-s);
+  } else{@+
+    print(" at ");
+    print_scaled(s);
+    print("pt");
+  }
+  end_diagnostic(false);
+}
+
+@ After a font file was found, we trace it with this code:
+
+@<Trace the new font@>=
+if (tracing_fonts>0)
+{@+begin_diagnostic();
+   print_nl(" -> ");
+   if (path!=NULL)
+   {  print(path);
+      if (!file_opened) print_nl("Not loadable: font file not found");
+   }
+   else
+     print("no matching file found.");
+  if (g==null_font) print_nl("Font not found, using \"nullfont\"");
+  end_diagnostic(false);
+}
+#if DEBUG
+if (IS_X_FONT(g))
+{ int x_scale, y_scale;
+  unsigned int x_ppem,y_ppem;
+  hb_codepoint_t glyph, cp;
+  hb_glyph_extents_t e;
+  hb_font_t *f;
+  float x_ptem ;
+  hb_position_t ax;
+
+  fprintf(stderr,"\n");
+  fprintf(stderr,"%s\n",path);
+  f=x_font[g]->f;
+  hb_font_get_scale(f,&x_scale,&y_scale);
+  fprintf(stderr,"given scale %d/%d\n",x_scale,y_scale);
+  hb_font_get_ppem(f,&x_ppem,&y_ppem);
+  fprintf(stderr,"given ppem %d/%d\n",x_ppem,y_ppem);
+  x_ptem=hb_font_get_ptem(f);
+  fprintf(stderr,"given ptem %f\n",x_ptem);
+  { hb_set_t *uset= hb_set_create ();
+    hb_face_t *face=hb_font_get_face(f); 
+    hb_face_collect_unicodes (face,uset);
+    fprintf(stderr,"Unicode range %d - %d\n",hb_set_get_min (uset),hb_set_get_max (uset));
+  }
+  cp='A'; @<debug font |f| and codepoint |cp|@>@;
+  cp='g'; @<debug font |f| and codepoint |cp|@>@;
+  cp='T'; @<debug font |f| and codepoint |cp|@>@;
+
+fprintf(stderr,"\n");
+}
+#endif
+
+@ For debugging hitex creates some more output. This part will be deleted after
+the code has stabilized.
+
+  @<debug font |f| and codepoint |cp|@>=
+  { scaled h,d,w;
+    hb_font_get_nominal_glyph (f,cp, &glyph);
+    hb_font_get_glyph_extents (f,glyph,&e);
+    fprintf(stderr,"char= %c/%d id=%d\n", cp,cp,glyph);
+    fprintf(stderr,"\thb: height=y_bearing=%0.2fpt,  depth= %0.2fpt, bbox height= %0.2fpt\n",
+      HB_TO_PT(e.y_bearing),HB_TO_PT(-(e.height+e.y_bearing)),HB_TO_PT(e.height)
+     );
+     h=x_char_height(g,cp);
+     d=x_char_depth(g,cp);
+    fprintf(stderr,"\tft: height=0x%x (%0.2fpt), depth=0x%x (%0.2fpt)\n",
+      h,h/(double)ONE,d,d/(double)ONE
+     );
+     ax=hb_font_get_glyph_h_advance (f, glyph);   
+     fprintf(stderr,"\thb: width=0x%x (%0.2fpt)\n", ax, HB_TO_PT(ax));
+     w=x_char_width (g, cp);   
+     fprintf(stderr,"\tft: width=0x%x (%0.2fpt)\n", w, w/(double)ONE);
+     ax=e.width;
+     fprintf(stderr,"\thb: bbox width=0x%x (%0.2fpt)\n", ax, HB_TO_PT(ax));
+     ax=e.x_bearing;
+     fprintf(stderr,"\thb: bbox x_bearing=0x%x (%0.2fpt)\n", ax, HB_TO_PT(ax));
+     ax=hb_font_get_glyph_h_advance (f, glyph);
+     ax= e.x_bearing+e.width-ax;
+     if (ax<0) ax=0;
+     fprintf(stderr,"\thb: italics=0x%x (%0.2fpt)\n", ax, HB_TO_PT(ax));
+     ax=x_char_italic(g,cp);
+     fprintf(stderr,"\tft: italics=0x%x (%0.2fpt)\n",
+     ax, ax/(double)ONE);
+  }
+
+
+
+
+
+@*Font subsets.
+Very often only a small subset of the glyphs in a font are used in the document at hand.
+For example, the title of this document is ``Hi\TeX'' and if set using a special font,
+only 5 glyphs are actually used. In such cases, it is a waste of memory to embed the
+entire font in the \HINT\ document. So it is desirable to construct from a font
+a subset font, that contains only a subset of all glyphs in the font.
+This can be done easily using the Harfbuzz library.
+
+Embedding only subsets is the default for Hi\TeX. This can be changed by using the
+option \.{-no-subset} on the command line setting the |option_subset| variable to |false|.
+
+
+
+@* Harfbuzz.
+Harfbuzz is a library that can determine the correct positions of characters in a word
+or line of text. This is called ``layout'' and 
+Hi\TeX\ is using harfbuzz to do just that for OpenType fonts or TrueType fonts.
+The function prototypes used are found in these header files.  We use
+|#include "..."| instead of |<...>| because we need to prefer the
+HarfBuzz that is included in \TeX\ Live when doing a ``native'' build there.
+
+@<Header files and function declarations@>=
+#include "hb.h"
+#include "hb-ot.h"
+
+@ When we define an extended font, we allocate an |x_font_info| record
+for the necessary data and store a pointer to it in the |x_font| array
+indexed by the font number. This array can then be used to decide
+whether a font is an extended font or a traditional \TeX\ font.
+
+The \.{\\dump} primitive will not store the contents of the
+|x_font_info| records in the format file. So extended fonts can not be
+preloaded using a format file but must be loaded by \TeX\ each time
+\TeX\ runs.  This decision was made because keeping OpenType or FreeType
+fonts in a format file would make formats very big. And there is
+no benefit in loading a font from a format compared to loading a font
+directly from the font file.  To enforce this rule, the \.{\\dump}
+primitive will issue an error message if it encounters an extended font.
+
+@d IS_X_FONT(F) (x_font[F]!=NULL)
+
+
+@<Glob...@>=
+typedef struct {
+  hb_blob_t *blob; /* can be shared for different faces */
+  hb_font_t *f;
+  int i; /* index */
+  scaled s; /* size */
+} x_font_info;
+typedef x_font_info *x_font_ptr;
+
+static x_font_ptr @!x_font0[font_max-font_base+1]={NULL},
+  *const @!x_font = @!x_font0-font_base;
+
+@ @<load an extended font@>=
+{ hb_blob_t *blob;
+  hb_face_t *face;
+  hb_font_t *f;
+  scaled f_dsize;
+
+  blob = hb_blob_create_from_file(path); 
+  if (blob==NULL) fatal_error("Unable to open extended font file!");
+  face = hb_face_create(blob, f_index);
+  if (face==NULL) fatal_error("Unable to open extended font face!");
+  f = hb_font_create(face);
+  if (f==NULL)
+    fatal_error("Unable to open extended font!");
+  if (font_ptr==font_max|| fmem_ptr+8 > font_mem_size)
+  @<Apologize for not loading the font, |goto done|@>;
+  font_ptr++;
+  g=font_ptr;
+  @<determine the design size@>@;
+  @<adjust the extended font for the given scale factor@>@; 
+  @<initialize the font tables for the extended font |g|@>@;
+}
+
+@ Most of the info in \TeX's font tables is not needed for extended fonts.
+Hi\TeX\ uses the |font_name| and |font_area|, as well as the |font_size|
+and the |font_dsize|.
+
+@<initialize the font tables for the extended font |g|@>=
+x_font[g]= (x_font_ptr)xmalloc(sizeof(x_font_info));
+x_font[g]->blob=blob;
+x_font[g]->i=f_index;
+x_font[g]->f=f;
+x_font[g]->s=s;
+
+font_name[g]=s_no(f_name);font_area[g]=s_no(path);
+font_size[g]=s;font_dsize[g]=f_dsize;
+hyphen_char[g]='-';skew_char[g]=-1;
+bchar_label[g]=non_address;
+font_bchar[g]=non_char;font_false_bchar[g]=non_char;
+char_base[g]=0;width_base[g]=0;
+height_base[g]=0;depth_base[g]=0;
+italic_base[g]=0;lig_kern_base[g]=0;
+kern_base[g]=0;exten_base[g]=0;
+font_glue[g]=null;
+font_params[g]=7;
+if ((font_ptr==font_max)||(fmem_ptr+font_params[g]+1 > font_mem_size))
+  @<Apologize for not loading the font, |goto done|@>;
+font_used[g]=false;
+@<get the extended fonts parameters@>;
+
+@ We start with finding the first and the last character in the font:
+@<get the extended fonts parameters@>=
+{ hb_set_t *uset= hb_set_create ();
+  hb_face_t *face=hb_font_get_face(x_font[g]->f); 
+  hb_face_collect_unicodes (face,uset);
+  font_bc[g]=hb_set_get_min (uset);
+  font_ec[g]=hb_set_get_max (uset);
+}
+
+@ Last, we look at the space character.
+@<get the extended fonts parameters@>=
+{ space(g)=x_char_width(g,' ');
+  space_stretch(g)=space(g)/2;
+  space_shrink(g)=space(g)/3;
+  extra_space(g)=space(g)/3;
+  quad(g)=s;
+}
+
+
+@ Harfbuzz has no fixed units like point, meter, or millimeter to work with,
+and since the variables that hold a position or width are integer variables,
+it might be necessary for any unit to use fractions of it.
+For a given font, you can choose a unit and the relation of this unit to the
+integer value used to represent it.
+For example, we can use the unit pt and represent 1pt by the integer
+value 100. This would allow a precision of $1/100$pt because the smallest
+non zero difference between two integers is 1 and this represents  $1/100$pt.
+When working with TeX, the natural choice for the unit is a printers point
+and its integer representation is a scaled point (sp)with one scaled point equal to
+$2^{-16}$ printer's points, or |0x10000|sp equal to 1pt.
+Unfortunately Harfbuzz will allow scale values only in the range
+$2^4$ to $2^{13}$ and typical values are in the range 1000 to $2^{11}$.
+So we use $2^{11}$ which means that we need to shift the values returned
+by harfbuzz by another 5 bits to obtain \TeX's scaled points.
+
+@d HB_PT_BITS 11 /*Bits of Harfbuzz binary fraction*/ 
+@d HB_ONE_PT (1<<HB_PT_BITS) /*1pt in Harfbuzz*/ 
+@d HB_EPS (1<<(16-HB_PT_BITS-1)) /*$\epsilon$ is $1/2$ of smallest Harfbuzz value*/ 
+@d HB_TO_SCALED(A) ((A)<<(16-HB_PT_BITS)) /*Convert Harfbuzz to scaled point*/
+@d HB_FROM_SCALED(A) (((A)+HB_EPS)>>(16-HB_PT_BITS)) /*Convert scaled to Harfbuzz*/
+@d HB_TO_PT(A) (HB_TO_SCALED(A)/(double)ONE)
+
+@<adjust the extended font for the given scale factor@>=
+if (s<0)
+{  if (s==-1000) s=f_dsize;
+  else s= xn_over_d(f_dsize,-s, 1000);
+}
+#if DEBUG
+fprintf(stderr,"\thb: scale %d(0x%x)\n",HB_FROM_SCALED(s),HB_FROM_SCALED(s));
+#endif
+hb_font_set_scale(f,HB_FROM_SCALED(s), HB_FROM_SCALED(s));
+hb_font_set_ptem(f,(72.0/72.27)*s/(double)ONE);
+
+
+@ The function |hb_ot_layout_get_size_params| can be used to obtain the
+  design size of the font face in units of $1/10$ of a point with 72 points per inch.
+
+@<determine the design size@>=
+{ unsigned int designSize, minSize, maxSize, subFamilyID, nameCode;
+  hb_ot_layout_get_size_params(face, &designSize, &subFamilyID,
+    &nameCode, &minSize, &maxSize);
+  if (designSize==0)
+    designSize=100;  /*use 10pt instead of zero*/
+  f_dsize=(((designSize/72.0)*72.27)/10.0)*ONE+0.5; /* round to a scaled value */
+}  
+
+
+@ To get glyph specific information, for example a characters width,
+we first need to obtain the glyph number that belongs to the character in
+the given font.
+
+@<harfbuzz font metric functions@>=
+
+static bool x_glyph(internal_font_number g, int c, hb_codepoint_t *glyph)
+{ 
+  return hb_font_get_nominal_glyph (x_font[g]->f,c, glyph);
+}
+
+static bool x_char_exists(internal_font_number g, int c)
+{ if (font_bc[g]>c || c>font_ec[g])
+    return false;
+  else
+  { hb_codepoint_t glyph;
+    return x_glyph(g,c, &glyph);
+  }
+}
+
+
+static scaled x_glyph_width(internal_font_number g, hb_codepoint_t glyph)
+{ return  HB_TO_SCALED(hb_font_get_glyph_h_advance (x_font[g]->f, glyph)); 
+}
+
+static scaled x_char_width(internal_font_number g, int c)
+{  hb_codepoint_t glyph;
+   if (x_glyph(g,c,&glyph))
+     return x_glyph_width(g, glyph);
+   else
+     return 0;
+}
+
+@ Finding the height and depth of a character is
+slightly more complex. It requires retrieving its bounding box.
+Since most of the time we need the height and the depth
+together, we provide one function for both.
+
+
+@<harfbuzz font metric functions@>=
+static void x_glyph_height_depth(internal_font_number g, hb_codepoint_t glyph,
+       scaled *h, scaled *d)
+{ hb_glyph_extents_t e;
+  hb_font_get_glyph_extents (x_font[g]->f,glyph,&e);
+  *h=HB_TO_SCALED(e.y_bearing);
+  *d=HB_TO_SCALED(-(e.height+e.y_bearing));
+}
+
+
+static void x_char_height_depth(internal_font_number g, int c,
+       scaled *h, scaled *d)
+{  hb_codepoint_t glyph;
+   if (x_glyph(g,c,&glyph))
+     x_glyph_height_depth(g,glyph,h,d);
+   else
+     *h=*d=0;
+}
+
+
+static scaled x_char_height(internal_font_number g, int c)
+{ hb_glyph_extents_t e;
+  hb_codepoint_t glyph;
+   if (x_glyph(g,c,&glyph))
+   { hb_font_get_glyph_extents (x_font[g]->f,glyph,&e);
+     return HB_TO_SCALED(e.y_bearing);
+   }
+   else
+     return 0;
+}
+
+static scaled x_char_depth(internal_font_number g, int c)
+{ hb_glyph_extents_t e;
+  hb_codepoint_t glyph;
+   if (x_glyph(g,c,&glyph))
+   { hb_font_get_glyph_extents (x_font[g]->f,glyph,&e);
+     return HB_TO_SCALED(-(e.height+e.y_bearing));
+   }
+   else
+     return 0;
+}
+
+
+
+static scaled x_glyph_italic(internal_font_number g, hb_codepoint_t glyph)
+{ hb_position_t a,b;
+  hb_glyph_extents_t e;
+  hb_font_get_glyph_extents (x_font[g]->f,glyph,&e);
+  b=hb_font_get_glyph_h_advance (x_font[g]->f, glyph);
+  a= e.x_bearing+e.width-b;
+  if (a<0) a=0;
+  return HB_TO_SCALED(a);
+}
+
+static scaled x_char_italic(internal_font_number g, int c)
+{ hb_codepoint_t glyph;
+  if (x_glyph(g,c,&glyph))
+  { return x_glyph_italic(g,glyph);
+  }
+  else
+    return 0;
 }
 
 

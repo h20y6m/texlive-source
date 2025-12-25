@@ -1,14 +1,14 @@
 #!/usr/bin/env texlua
 --
---  $Id: luafindfont.lua 735 2023-06-22 19:12:29Z herbert $
+--  $Id: luafindfont.lua 1117 2025-07-04 09:32:59Z herbert $
 -----------------------------------------------------------------------
 --         FILE:  luafindfont.lua
 --  DESCRIPTION:  search for fonts in the database
 -- REQUIREMENTS:  luatex v.0.80 or later; packages lualibs, xindex-lapp
---       AUTHOR:  Herbert Voß  (C) 2023-06-21
+--       AUTHOR:  Herbert Voß  (C) 2025-07-04
 -----------------------------------------------------------------------
         luafindfont = luafindfont or { }
-      local version = 0.13
+      local version = 0.16
 luafindfont.version = version
 
 --[[
@@ -31,14 +31,13 @@ Report bugs to  hvoss@tug.org
 
 ]]
 
+-- equivilant with ConTeXt, e.g. times
 -- mtxrun --script font --list --name --all --pattern=times
 
 kpse.set_program_name("luatex")
 local f = kpse.find_file("lualibs.lua")
 
 require("lualibs")  -- all part of LuaTeX
-
---require("luafindfont-utflib")
 
 if #arg == 0 then
   print("I need at least one argument or option! Will exit ...")
@@ -49,6 +48,7 @@ local args_verbose = 0
 local args_nosymbolicnames = false
 local args_otfinfo = 0
 local args_info = 0
+local args_listonly = 0
 local args_xetex = 0
 local args_max_string = 90
 
@@ -59,10 +59,10 @@ local fontNo = 0
 local i = 1
 while i <= #arg do
   if arg[i] == "-h" or arg[i] == "--help" then
-    print("Version "..version..", Copyright 2021-23 by Herbert Voß") 
+    print("Version "..version..", Copyright 2021-25 by Herbert Voß") 
     print([[Syntax: luafindfont [options] <font> 
     By default the Lua program 'luafindfont' creates a list of the
-    fonts which have in its names the given string.  
+    fonts which have in its names the given string.
 
     parameter handling
     -h,--help
@@ -71,7 +71,9 @@ while i <= #arg do
     -o,--otfinfo (default 0)
     -i,--info (default 0)
     -I,--Info (default 0)
-    -x, --xetex 
+    -l, --listonlynames
+    -L, --listonlyfiles
+    -x, --xetex
     -v, --verbose
     -V, --version
     -m,--max_string (default 90)
@@ -83,6 +85,10 @@ while i <= #arg do
     args_verbose = 1
   elseif (arg[i] == "-n") or (arg[i] == "--nosymbolicnames") or (arg[i] == "--no-symbolic-names") then
     args_nosymbolicnames = true
+  elseif arg[i] == "-l" or arg[i] == "--listonlynames" then
+    args_listonly = 1
+  elseif arg[i] == "-L" or arg[i] == "--listonlyfiles" then
+    args_listonly = 2
   elseif arg[i] == "-x" or arg[i] == "--xetex" then
     args_xetex = 1
   elseif arg[i] == "-o" or arg[i] == "--otfinfo" then
@@ -126,7 +132,7 @@ while i <= #arg do
       args_max_string = 90
     end
   else
-    args_font = arg[i]
+    args_font = arg[i]:lower()
   end    
   i = i + 1
 end
@@ -147,7 +153,7 @@ if vlevel > 0 then
   print("  args_max_string = "..args_max_string)
 end
   
-if not args_font then
+if not args_font and args_listonly < 1 then
   print("No fontname given, will close ...")
   os.exit()
 end
@@ -157,8 +163,11 @@ local info = args_info
 local Info = args_Info
 local noSymbolicNames = args_nosymbolicnames
 local maxStrLength = args_max_string
-local font_str = args_font:lower():gsub("%s+", ""):split("&")
-if #font_str == 1 then font_str[2] = "" end
+local font_str = {}
+if args_listonly < 1 then
+  font_str = args_font:gsub("%s+", ""):split("&")
+end
+if #font_str == 1 then font_str[2] = "" end   -- a & b
 
 local luaVersion = _VERSION
 if vlevel > 0 then 
@@ -233,9 +242,11 @@ function readBinaryOrZippedFile(file)
     f:close()
     local func = load (chunk, "b")
     str = func()
+    logprint("Loaded a chunk ... ") 
     return str
+  else
+    logprint("There is no zipped binary data file ... ") 
   end
-  logprint("There is no zipped binary data file ... ") 
   logprint("Check for unzipped file "..file..".luc")
   local f,err = io.open (file..".luc", "rb") 
   if f then
@@ -282,6 +293,13 @@ function compareEntries(f1, f2)
   end
 end
 
+function centerText(text, width)
+  if text == nil then return "" end
+  local spaces = math.floor((width-string.len(text))/2)
+  local len = string.len(text)
+  return ((" "):rep(spaces)..text..(" "):rep(spaces))
+end
+
 local fontData = {}
 local fontListFile = getFileLocation()
 if fontListFile == "" then
@@ -303,7 +321,32 @@ if not fontData then
   os.exit()
 end
 
---print(require 'xindex-pretty'.dump(fontData)) --["families"]["system"]["otf"]))
+if vlevel > 0 then
+  print(require 'xindex-pretty'.dump(fontData)) --["families"]["system"]["otf"]))
+end
+
+if args_listonly == 1 then
+  local tmp = {}
+  for _,font in ipairs(fontData.mappings) do
+    tmp[#tmp + 1] = font.fontname --.. " (" .. font.basename .. ")"
+  end
+  table.sort(tmp)
+  for _,fontname in ipairs(tmp) do
+    print(fontname)
+  end
+  os.exit()
+elseif args_listonly == 2 then 
+  local tmp = {}
+  for _,font in ipairs(fontData.mappings) do
+    tmp[#tmp + 1] = font.basename
+  end
+  table.sort(tmp)
+  for _,filename in ipairs(tmp) do
+    print(filename)
+  end
+  os.exit()
+end
+
 
 fontDataMap = fontData["mappings"]
 fontFilesTable = fontData["files"]["full"]
@@ -344,24 +387,50 @@ fontDataMap = newFontDataMap
 -- end
 
 local j = 1
+local printFont = 0
 local fontList = {}
 -- now calculate the longest string for all colums
 local l_max = {1, 1, 1}
 for i, v in ipairs(fontDataMap) do 
-  if v["familyname"] then
-      if (string.find (v["familyname"]:lower(), font_str[1], 1, true)  and string.find (v["basename"]:lower(), font_str[2], 1, true) ) or (font_str[1] == "*") then
---	print(string.format("%2d. %30s %20s  %50s",j,v["basename"],v["familyname"],v["fullpath"])) 
-        fontList[#fontList+1] = v
-        local fullpath = getFileParts(v["fullpath"],"path")  -- strip file name
-        local basename = v["basename"]
---      local basename = string.fromutf8(v["basename"])
-        if string.len(basename) > l_max[1] then l_max[1] = string.len(basename) end
-        if string.len(v["familyname"]) > l_max[2] then l_max[2] = string.len(v["familyname"]) end
-        if string.len(fullpath) > l_max[3] then l_max[3] = string.len(fullpath) end
-	j = j + 1
+  if v["basename"] and v["familyname"] then
+--    print(string.format("%2d. %30s %20s  %50s",j,v["basename"],v["familyname"],v["fullpath"])) 
+    if font_str[2] ~= "" then
+      if (( string.find (v["familyname"]:lower(), font_str[1], 1, true) -- symbolic name
+         or
+           string.find (v["basename"]:lower(), font_str[1], 1, true) -- file name
+         )
+        and
+          string.find (v["subfamily"]:lower(), font_str[2], 1, true)  -- file name
+         ) 
+        or (font_str[1] == "*") then
+        printFont = 1
       end
+    else
+      if string.find (v["familyname"]:lower(), font_str[1], 1, true) 
+        or 
+         string.find (v["basename"]:lower(), font_str[1], 1, true)
+        or
+          (font_str[1] == "*") then
+        printFont = 1
+      end
+    end
+    if printFont>0 then
+      print(string.format("%2d. %30s %20s  %50s",j,v["basename"],v["familyname"],v["fullpath"])) 
+      fontList[#fontList+1] = v
+      local fullpath = getFileParts(v["fullpath"],"path")  -- strip file name
+      local basename = v["basename"]
+--      local basename = string.fromutf8(v["basename"])
+      if string.len(basename) > l_max[1] then l_max[1] = string.len(basename) end
+      if string.len(v["familyname"]) > l_max[2] then l_max[2] = string.len(v["familyname"]) end
+      if string.len(fullpath) > l_max[3] then l_max[3] = string.len(fullpath) end
+	  j = j + 1
+      printFont = 0
+--      if j > 100 then os.exit() end
+    end
   end
 end
+
+os.exit()
 
 if #fontList == 0 then
   print("There are no fonts with the given search name!\n")
@@ -375,20 +444,38 @@ if l_max[3] > maxStrLength then l_max[3] = maxStrLength end
 local minChars = 26
 local Fontname = "Filename"
 local Path = "Path"
-local SymbolicName = "Symbolic name"
+local SymbolicName = "Symbolic"
 local lfdNr = "No."
 
 if (font_str ~= "*") and not noSymbolicNames then
   if args_xetex > 0 then
-    print(string.format("%5s %"..l_max[1].."s %"..l_max[2].."s  %"..l_max[3].."s".."%4s",lfdNr,Fontname,SymbolicName,Path,"X")) 
-  else      
-    print(string.format("%5s %"..l_max[1].."s %"..l_max[2].."s  %"..l_max[3].."s",lfdNr,Fontname,SymbolicName,Path)) 
+--    print(string.format("%5s %"..l_max[1].."s %"..l_max[2].."s  %"..l_max[3].."s".."%4s",lfdNr,Fontname,SymbolicName,Path,"X")) 
+    io.write(string.format("%5s",lfdNr))
+    io.write(centerText(Fontname,l_max[1]))
+    io.write(centerText(SymbolicName,l_max[2]))
+    io.write(centerText(Path,l_max[3]))
+    print("X")
+  else
+--    print(string.format("%5s %"..l_max[1].."s %"..l_max[2].."s  %"..l_max[3].."s",lfdNr,Fontname,SymbolicName,Path)) 
+    io.write(string.format("%5s",lfdNr))
+    io.write(centerText(Fontname,l_max[1]))
+    io.write(centerText(SymbolicName,l_max[2]))
+    print(centerText(Path,l_max[3]))
   end
 else
   if args_xetex > 0 then
-    print(string.format("%5s %"..l_max[1].."s  %"..l_max[3].."s".."%4s",lfdNr,Fontname,Path,"X")) 
+--    print(string.format("%5s %"..l_max[1].."s  %"..l_max[3].."s".."%4s",lfdNr,Fontname,Path,"X")) 
+    io.write(string.format("%5s",lfdNr))
+    io.write(centerText(Fontname,l_max[1]))
+    io.write(centerText(SymbolicName,l_max[2]))
+    io.write(centerText(Path,l_max[3]))
+    print("X")
   else
-    print(string.format("%5s %"..l_max[1].."s  %"..l_max[3].."s",lfdNr,Fontname,Path)) 
+--    print(string.format("%5s %"..l_max[1].."s  %"..l_max[3].."s",lfdNr,Fontname,Path)) 
+    io.write(string.format("%5s",lfdNr))
+    io.write(centerText(Fontname,l_max[1]))
+    io.write(centerText(SymbolicName,l_max[2]))
+    print(centerText(Path,l_max[3]))
   end
 end
 

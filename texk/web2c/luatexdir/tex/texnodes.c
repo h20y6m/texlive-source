@@ -1647,37 +1647,37 @@ static halfword synctex_no_files    = 0;
 void synctex_set_mode(int m)
 {
     synctex_anyway_mode = m;
-};
+}
 
 int synctex_get_mode(void)
 {
     return synctex_anyway_mode;
-};
+}
 
 void synctex_set_no_files(int f)
 {
     synctex_no_files = f;
-};
+}
 
 int synctex_get_no_files(void)
 {
     return (int) synctex_no_files ;
-};
+}
 
 void synctex_set_tag(int t)
 {
     cur_input.synctex_tag_field = t;
-};
+}
 
 int synctex_get_tag(void)
 {
     return (int) cur_input.synctex_tag_field;
-};
+}
 
 int synctex_get_line(void)
 {
     return (int) synctex_line_field;
-};
+}
 
 static int forced_tag  = 0;
 static int forced_line = 0;
@@ -1685,17 +1685,17 @@ static int forced_line = 0;
 void synctex_force_tag(int t)
 {
     forced_tag = t;
-};
+}
 
 void synctex_force_line(int t)
 {
     forced_line = t;
-};
+}
 
 void synctex_set_line(int l)
 {
     synctex_line_field = l;
-};
+}
 
 /*tex |if_stack| is called a lot so maybe optimize that one. */
 
@@ -2018,6 +2018,17 @@ void copy_node_wrapup_pdf(halfword p, halfword r)
     }
 }
 
+static void check_disc(halfword p) 
+{ 
+    if (p != null) { 
+        if (vlink(p) != null) { 
+            tlink(p) = tail_of_list(vlink(p));
+        } else { 
+            tlink(p) = null;
+        }
+    }
+}
+
 halfword copy_node(const halfword p)
 {
     /*tex current node being fabricated for new list */
@@ -2091,31 +2102,22 @@ halfword copy_node(const halfword p)
             break;
         case disc_node:
             pre_break(r) = pre_break_head(r);
-            if (vlink_pre_break(p) != null) {
-                s = copy_node_list(vlink_pre_break(p));
-                alink(s) = pre_break(r);
-                tlink_pre_break(r) = tail_of_list(s);
-                vlink_pre_break(r) = s;
-            } else {
-                assert(tlink(pre_break(r)) == null);
-            }
             post_break(r) = post_break_head(r);
-            if (vlink_post_break(p) != null) {
-                s = copy_node_list(vlink_post_break(p));
-                alink(s) = post_break(r);
-                tlink_post_break(r) = tail_of_list(s);
-                vlink_post_break(r) = s;
-            } else {
-                assert(tlink_post_break(r) == null);
-            }
             no_break(r) = no_break_head(r);
+            if (vlink(pre_break(p)) != null) {
+               s = copy_node_list(vlink(pre_break(p)));
+               vlink(pre_break(r)) = s;
+               check_disc(pre_break(r));
+            }
+            if (vlink(post_break(p)) != null) {
+                s = copy_node_list(vlink(post_break(p)));
+                vlink(post_break(r)) = s;
+                check_disc(post_break(r));
+            }
             if (vlink(no_break(p)) != null) {
-                s = copy_node_list(vlink_no_break(p));
-                alink(s) = no_break(r);
-                tlink_no_break(r) = tail_of_list(s);
-                vlink_no_break(r) = s;
-            } else {
-                assert(tlink_no_break(r) == null);
+                s = copy_node_list(vlink(no_break(p)));
+                vlink(no_break(r)) = s;
+                check_disc(no_break(r));
             }
             break;
         case math_node:

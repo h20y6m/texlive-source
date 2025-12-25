@@ -1,3 +1,334 @@
+2025-12-13  Akira Kakuto  <kakuto@jcom.zaq.ne.jp>
+
+	* Makefile.am: sync with the upstream luatex.
+
+2025-12-11  Andreas Scherer  <https://ascherer.github.io>
+
+	* ctangleboot.cin,
+	* cwebboot.cin: Avoid spurious spaces in macro output.
+
+2025-11-30  Karl Berry  <karl@freefriends.org>
+
+	* configure.ac (XETEX_MACOSX): check for enable_xetex=yes
+	as well as for ApplicationServices. Stemmed from original report at
+	https://tug.org/pipermail/tex-k/2025-November/004226.html.
+	* configure: regenerate.
+
+2025-11-11  Karl Berry  <karl@freefriends.org>
+
+	* configure.ac (KPSE_HARFBUZZ_FLAGS): enable if hitex is enabled.
+	Report from balducci,
+	https://tug.org/pipermail/tex-k/2025-November/004229.html.
+
+2025-11-10  Karl Berry  <karl@freefriends.org>
+
+	* PROJECTS: typo.
+
+2025-11-05  Karl Berry  <karl@freefriends.org>
+
+	* ac/web2c.ac (kpse_tex_progs) <hitex>: now depends on harfbuzz.
+	* configure,
+	* Makefile.in: reautoconf.
+	However, undefined reference to `hb_ft_face_create_referenced' remains.
+	https://tug.org/pipermail/tlbuild/2025q4/005883.html
+
+2025-10-02  Karl Berry  <karl@freefriends.org>
+
+	* bibtex.web: version 0.99e, with fixes for weave (only).
+	- No more active `E (reported by Andreas Scherer and Norman Gray).
+	- Use \TeX in \BibTeX and \LaTeX definitions.
+	- Sort names of the sections better (from Andreas).
+	- Remove unused \titlepage macro.
+	- Assorted typos.
+	* bibtex.ch,
+	* uptexdir/upbibtex.ch: adapt.
+
+2025-09-30  Karl Berry  <karl@freefriends.org>
+
+	* doc/web2c.texi (tex invocation): try to clarify
+	command-line/first-line processing, including input filename
+	expansion. Original report from Duncan Murdoch,
+	https://tug.org/pipermail/tex-live/2025-August/051650.html.
+	Also, use @code{TRIP} since that's that Knuth does (noticed by Max
+	Chernoff).
+	(\input filename caveats): mention that Windows reserves CON[.tex],
+	etc. From Max.
+	
+	(Formats) <amstex>: no longer AMS's preferred system.
+	<slitex>: mention ltx-talk.
+	Other updates in passing.
+
+2025-08-10  TANAKA Takuji  <ttk@t-lab.opal.ne.jp>
+
+	* ac/web2c.ac (ptex), Makefile.am, uptexdir/am/uptex.am,
+	euptexdir/am/euptex.am, ptexdir/*, texmfmem.h, texmfmp-help.h:
+	Remove ptex and ptexdir/.
+
+2025-07-27  Andreas Scherer  <https://ascherer.github.io>
+
+	* ctangleboot.cin: CWEB 4.12.2 release.
+
+2025-07-21  Karl Berry  <karl@freefriends.org>
+
+	* doc/web2c.texi (mpost invocation): update option list.
+
+2025-07-19  David Fuchs  <drfuchs@yahoo.com>
+
+	* dvitype.web (scan_bop [99]): verbosely output fnt_def commands
+	that occur after the preamble and before the first bop, or between
+	eop/bop pairs. This replaces the change of 2022-02-24, which fixed
+	the original problem (lack of newline between such fnt_def cmds),
+	but output them tersely.
+	https://tug.org/texmfbug/newbug.html#% https://tug.org/texmfbug/newbug.html#dvitypefontoutput
+
+2025-07-19  David Fuchs  <drfuchs@yahoo.com>
+
+	* dvitype.web (skip_pages [95]): initialize w,x,y,z to protect
+	against use in first_par, which skip_pages can call.
+	https://tug.org/texmfbug/newbug.html#dvitypeinitglobal
+
+2025-05-05  Karl Berry  <karl@freefriends.org>
+
+	* tex.ch (26.449): avoid spurious additional errors
+	from \mkern <non-mu-dimen-or-skip>. Fix from David Fuchs.
+	Report from Tyge Tiessen,
+        https://tug.org/pipermail/tex-k/2025-January/004150.html
+        https://tug.org/texmfbug/newbug.html#B182muerror
+	* tests/invalidmu.tex: test file.
+
+2025-04-30  Andreas Scherer  <https://ascherer.github.io>
+
+	* cwebboot.cin,
+	* help.h: Restore 'verbose' diagnostics in CWEB.
+
+2025-04-18  Andreas Scherer  <https://ascherer.github.io>
+
+	* ctangleboot.cin,
+	* cwebboot.cin: Amend special characters.
+
+2025-04-17  Andreas Scherer  <https://ascherer.github.io>
+
+	* ctangleboot.cin,
+	* cwebboot.cin: Make proper use of 'ishigh' macro.
+
+2025-04-09  Andreas Scherer  <https://ascherer.github.io>
+
+	* ctangleboot.cin,
+	* cwebboot.cin: Replace type 'boolean' with 'bool.
+
+2025-04-09  Andreas Scherer  <https://ascherer.github.io>
+
+	* ctangleboot.cin,
+	* cwebboot.cin: Revert bool change for C23.
+
+2025-03-31  Andreas Scherer  <https://ascherer.github.io>
+
+	* ctangleboot.cin,
+	* cwebboot.cin: Discard trailing whitespace in macros.
+
+2025-03-12  Andreas Scherer  <https://ascherer.github.io>
+
+	* weave.ch: Prevent get_line() when parsing module name.
+	Report and patch from Benjamin Gray
+	(https://tug.org/pipermail/tex-k/2025-March/004166.html).
+
+2025-03-12  Andreas Scherer  <https://ascherer.github.io>
+
+	* weave.ch: Parse and reject verbatim in TeX part.
+	Report and patch from Benjamin Gray
+	(https://tug.org/pipermail/tex-k/2025-March/004169.html).
+
+2025-03-11  Andreas Scherer  <https://ascherer.github.io>
+
+	* tangle.ch,
+	* tangleboot.pin: Prevent integer overflow in scan_numeric().
+	Report and initial patch from Benjamin Gray
+	(https://tug.org/pipermail/tex-k/2025-March/004165.html).
+
+2025-03-10  Andreas Scherer  <https://ascherer.github.io>
+
+	* tangle.ch,
+	* tangleboot.pin: Reject strings as macro names.
+	Report and initial patch from Benjamin Gray
+	(https://tug.org/pipermail/tex-k/2025-March/004163.html).
+
+2025-03-10  Andreas Scherer  <https://ascherer.github.io>
+
+	* tangle.ch,
+	* tangleboot.pin: Change case for letters only.
+	Report and initial patch from Benjamin Gray
+	(https://tug.org/pipermail/tex-k/2025-March/004161.html).
+
+2025-02-01  Karl Berry  <karl@freefriends.org>
+
+	* tex.ch (24.336): comment out this patch for interactive deletion
+	of \outer tokens, since it has the undesirable side effect of
+	deleting through eof.
+	* tests/outerdel.tex,
+	* tests/outerdelsub.tex: test files and info.
+
+	* tex.ch (save_arith_error): declare in Glob...
+	(30.568): save and restore arith_error around the new
+	check for font scaling to >= 2048pt.
+
+2025-01-29  Andreas Scherer  <https://ascherer.github.io>
+
+	* bibtex.ch,
+	* dvicopy.ch,
+	* dvitype.ch,
+	* gftodvi.ch,
+	* gftopk.ch,
+	* gftype.ch,
+	* mft.ch,
+	* patgen.ch,
+	* pktogf.ch,
+	* pktype.ch,
+	* pltotf.ch,
+	* pooltype.ch,
+	* tftopl.ch,
+	* vftovp.ch,
+	* vptovf.ch: Fill a few gaps in the '@x' lines.
+
+2025-01-28  Karl Berry  <karl@freefriends.org>
+
+	* dvitype.ch: run tests/fix-changefile-lines.py to get chapter and
+	line numbers, and update module numbers.
+
+2025-01-27  Karl Berry  <karl@freefriends.org>
+
+	* tex.ch (30.568, 49.1260): avoid scaling fonts to 2048pt or more.
+	Reports from
+	Igor Liferenko (https://tug.org/pipermail/tex-k/2021-June/003604.html)
+	Tyge Tiessen (https://tug.org/pipermail/tex-k/2022-January/003752.html)
+	and patch from Tyge.
+
+2025-01-27  Karl Berry  <karl@freefriends.org>
+
+	* am/texmf.am (tex-pool.c, mf-pool.c): exit 1 if makecpool failed.
+	(tex-final.ch, mf-final.ch): remove $@ and exit 1 if tie failed.
+
+2025-01-24  Karl Berry  <karl@freefriends.org>
+
+	* configure.ac (KPSE_CHECK_FRAMEWORK, KPSE_FONTCONFIG_FLAGS)
+	[enable_xetex]: move these checks to below KPSE_KPATHSEA_FLAGS,
+	so that --with-system-kpathsea --without-xetex build will not
+	result in pkg-config not being checked for.
+	Report from balducci@units.it,
+	https://tug.org/pipermail/tex-k/2025-January/004147.html
+
+2025-01-21  Vincenzo Mantova <vlmantova@gmail.com>
+
+	* configure.ac (KPSE_HARFBUZZ_FLAGS): needed for lua[jit]hbtex,
+	not luatex[53].
+	(KPSE_CHECK_FRAMEWORK, KPSE_FONTCONFIG_FLAGS) [enable_xetex]:
+	make these checks conditional.
+	https://tug.org/pipermail/tlbuild/2024q2/005555.html
+
+2025-01-19  Karl Berry  <karl@freefriends.org>
+
+	* configure.ac (LIBS): 
+
+2025-01-01  Andreas Scherer  <https://ascherer.github.io>
+
+	* ctangleboot.cin: CWEB 4.12.1 release.
+
+2024-12-01  Luigi Scarso  <luigi.scarso@gmail.com>
+
+	* doc/luatex: development LuaTeX Reference Manual, kept in sync with
+	the current version of LuaTeX.
+
+2024-12-01  Karl Berry  <karl@freefriends.org>
+
+	* tex.ch (error): do @<Put help message on the transcript file@>
+	before exiting if halt_on_error_p, to be closer to behavior of TeX
+	without -halt-on-error. Suggestion from jfbu:
+	https://tug.org/pipermail/tex-live/2024-July/050741.html
+
+2024-11-24  David Fuchs  <drfuchs@yahoo.com>
+
+	* tex.ch (Initialize the input routines): also initialize
+	buffer[0]:=0 for uninitialized virtex read, in the
+	cases of printing garbage fixed by Kitagawa-san on 2021-07-19.
+
+2024-11-13  Karl Berry  <karl@freefriends.org>
+
+	* mf.ch (Calculate integers $\alpha$...): comment out erroneous
+	change that "simplified" the assignment of alpha, resulting in a
+	few pen polygons being affected, but don't know if any extant
+	fonts are impacted. Report from Tim Stadelman,
+	https://tug.org/pipermail/tex-k/2021-August/003648.html.
+
+2024-10-20  TANAKA Takuji  <ttk@t-lab.opal.ne.jp>
+
+	* lib/texmfmp.c (maininit): Support ofm in {,e}upTeX.
+	https://github.com/texjporg/tex-jp-build/issues/170
+	* tests/eu3-lmr10.{ofm,ovf,ovp}, tests/eu3-lmr10_eu3.ovf,
+	tests/eu3-lmr10_ucs.{ofm,ovp}, tests/lm-{ec,texnansi}.enc,
+	tests/lmr10.pfb, tests/texnansi-lmr10.tfm,
+	tests/uctt10x.{opl,ofm,ovp,ovf}, am/web.am:
+	Add for tests of upTeX and OFM.
+
+2024-09-16  TANAKA Takuji  <ttk@t-lab.opal.ne.jp>
+
+	* tests/ec-lmr10.tfm, tests/dump-basic.tex:
+	Add for tests of pTeX family
+
+2024-09-07  Karl Berry  <karl@freefriends.org>
+
+	* Makefile.am (texprof.am): include.
+	* ac/web2c.ac (kpse_tex_progs) <texprof>: new entry in table.
+
+2024-09-06  Andreas Scherer  <https://ascherer.github.io>
+
+	* weav-twill.ch,
+	* weave.ch: Sort section names in TWILL.
+
+2024-09-02  Andreas Scherer  <https://ascherer.github.io>
+
+	* bibtex.ch,
+	* dvitype.ch,
+	* gftodvi.ch,
+	* gftopk.ch,
+	* gftype.ch,
+	* mft.ch,
+	* pktype.ch,
+	* pltotf.ch,
+	* pooltype.ch,
+	* tangle.ch,
+	* tftopl.ch,
+	* vftovp.ch,
+	* vptovf.ch,
+	* weave.ch: Flip two section names in the index.
+	* dvicopy.ch,
+	* dvicopy.web,
+	* patgen.ch,
+	* patgen.web,
+	* pktogf.ch,
+	* pktogf.web: Fix sorting order in 'other' WEB codees.
+
+2024-08-31  Andreas Scherer  <https://ascherer.github.io>
+
+	* vftovp.ch: Fix sorting order of new named sections.
+
+2024-08-23  Andreas Scherer  <https://ascherer.github.io>
+
+	* gftopk.ch,
+	* gftype.ch,
+	* pktogf.ch,
+	* pktype.ch: Fix a few spaces.
+
+2024-08-21  Andreas Scherer  <https://ascherer.github.io>
+
+	* weav-twill.ch: Prime the title page.
+
+2024-08-16  Andreas Scherer  <https://ascherer.github.io>
+
+	* showstream.ch: Restore section numbering as far as possible.
+
+2024-08-12  Andreas Scherer  <https://ascherer.github.io>
+
+	* ctangleboot.cin: CWEB 4.12 release.
+
 2024-07-14  Andreas Scherer  <https://ascherer.github.io>
 
 	* mft.ch: Preserve Metafont logo on title page.
@@ -31,13 +362,13 @@
 	* tex.ch (check_outer_validity): don't check unless OK_to_interrupt,
 	to avoid getting into an erroneous state if an \outer token
 	is deleted interactively.
-	Report from Tyge Thiessen:
+	Report from Tyge Tiessen:
 	https://tug.org/pipermail/tex-k/2024-March/004021.html
 	DEK bug entry: https://tug.org/texmfbug/newbug.html#B142outer
 
 2024-06-03  Karl Berry  <karl@freefriends.org>
 
-	* tests/fix-changefile-lines.py: new script from Tyge Thiessen
+	* tests/fix-changefile-lines.py: new script from Tyge Tiessen
 	to update the chapter/section/line numbers in a .ch file,
 	following my request:
 	https://tug.org/pipermail/tex-k/2024-June/004064.html
@@ -10437,7 +10768,7 @@ Tue Apr 11 17:53:15 1995  Ulrik Vieth  <vieth@thphy.uni-duesseldorf.de>
 	* mpext.c: discarded, using routines from ../lib/lib.a instead.
 	Moved code for callmakempx() to file ../lib/openinout.c.
 
-	* mpmath.c: preserved without changes. Ccomments refererring to 
+	* mpmath.c: preserved without changes. Comments refererring to 
 	site.h are no longer applicable when using ../lib/c-auto.h instead.
 
 	* pathexp.c: moved to ../mpware as only DMP uses the pathexpand() 

@@ -4,6 +4,12 @@
 % 11/29/89 (KB)  Version released with 8-bit TeX.
 % (more recent changes in the ChangeLog)
 
+@x [0] l.13
+\def\(#1){} % this is used to make section names sort themselves better
+@y
+\def\({} % this is used to make section names sort themselves better
+@z
+
 @x [0] l.16
 \def\title{POOL\lowercase{type}}
 @y
@@ -29,12 +35,12 @@ copied from \TeX82.
 label 9999; {this labels the end of the program}
 @y
 @z
-@x
+@x [2]
 procedure initialize; {this procedure gets things started properly}
   var @<Local variables for initialization@>@;
   begin @<Set initial values of key variables@>@/
 @y
-@<Define |parse_arguments|@>
+@<Define \(|parse_arguments|@>
 procedure initialize; {this procedure gets things started properly}
   var @<Local variables for initialization@>@;
   begin
@@ -47,7 +53,7 @@ procedure initialize; {this procedure gets things started properly}
 % default type `char' produces signed integers, which are bad array
 % indices in C.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-@x
+@x [6]
 @d text_char == char {the data type of characters in text files}
 @y
 @d text_char == ASCII_code {the data type of characters in text files}
@@ -86,7 +92,7 @@ end.
 
 % [19] The name of the pool file is dynamically determined. We open it at the
 % end of parse_arguments.
-@x
+@x [19]
 reset(pool_file); xsum:=false;
 @y
 xsum:=false;
@@ -112,7 +118,7 @@ Parse a Unix-style command line.
 
 @d argument_is (#) == (strcmp (long_options[option_index].name, #) = 0)
 
-@<Define |parse_arguments|@> =
+@<Define \(|parse_arguments|@> =
 procedure parse_arguments;
 const n_options = 2; {Pascal won't count array lengths for us.}
 var @!long_options: array[0..n_options] of getopt_struct;

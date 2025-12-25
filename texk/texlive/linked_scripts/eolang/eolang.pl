@@ -1,27 +1,8 @@
 #!/usr/bin/perl
-# (The MIT License)
-#
-# Copyright (c) 2022-2024 Yegor Bugayenko
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the 'Software'), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
+# SPDX-FileCopyrightText: Copyright (c) 2021-2025 Yegor Bugayenko
+# SPDX-License-Identifier: MIT
 
-# 2024-02-14 0.18.1
+# 0.22.1 2025/12/18
 package eolang;
 
 use warnings;
@@ -34,7 +15,7 @@ my %args = map { $_ => 1 } @ARGV;
 # Read file content.
 sub readfile {
   my ($path) = @_;
-  open(my $h, '<', $path) or die('Cannot open file: ' . $path);
+  open(my $h, '<', $path) or die('Cannot read from file: ' . $path);
   my $content; { local $/; $content = <$h>; }
   return $content;
 }
@@ -45,8 +26,6 @@ sub savefile {
   open(my $f, '>', $path) or error('Cannot open file for writing: ' . $path);
   print $f $content;
   close($f);
-  my $size = -s $path;
-  info("File saved to '$path' ($size bytes)");
 }
 
 # Print INFO message to the console.
@@ -72,7 +51,7 @@ sub error {
 if (@ARGV+0 eq 0 or exists $args{'--help'} or exists $args{'-?'}) {
   info("This script helps embedding \\phiquation and \\phiq into .tex document\n\n" .
     "Usage:\n" .
-    "  eolang [<options>] <.tex file path>\n\n" .
+    "  eolang [<options>] <.tex input file path> <.tex output file path>\n\n" .
     "Options:\n" .
     "  -v, --version        Print the current version of the tool and exit\n" .
     "  -?, --help           Print this help screen\n" .
@@ -80,7 +59,7 @@ if (@ARGV+0 eq 0 or exists $args{'--help'} or exists $args{'-?'}) {
     "      --tmpdir=path    Temp directory with .tex files ('_eolang' by default)\n\n" .
     "If any issues, report to GitHub: https://github.com/yegor256/bibcop");
 } elsif (exists $args{'--version'} or exists $args{'-v'}) {
-  info('0.18.1 2024-02-14');
+  info('0.22.1 2025/12/18');
 } else {
   my ($src, $target) = grep { not($_ =~ /^-.*$/) } @ARGV;
   if (not $src) {

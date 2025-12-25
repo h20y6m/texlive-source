@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
-# $Id: tlmgr.pl 71331 2024-05-24 07:30:36Z preining $
-# Copyright 2008-2024 Norbert Preining
+# $Id: tlmgr.pl 76962 2025-11-28 17:48:14Z karl $
+# Copyright 2008-2025 Norbert Preining
 # This file is licensed under the GNU General Public License version 2
 # or any later version.
 # 
@@ -8,8 +8,8 @@
 
 use strict; use warnings;
 
-my $svnrev = '$Revision: 71331 $';
-my $datrev = '$Date: 2024-05-24 09:30:36 +0200 (Fri, 24 May 2024) $';
+my $svnrev = '$Revision: 76962 $';
+my $datrev = '$Date: 2025-11-28 18:48:14 +0100 (Fri, 28 Nov 2025) $';
 my $tlmgrrevision;
 my $tlmgrversion;
 my $prg;
@@ -46,9 +46,9 @@ BEGIN {
   $^W = 1;
   # make subprograms (including kpsewhich) have the right path:
   my $kpsewhichname;
+  $Master = __FILE__;
   if ($^O =~ /^MSWin/i) {
     # on w32 $0 and __FILE__ point directly to tlmgr.pl; they can be relative
-    $Master = __FILE__;
     $Master =~ s!\\!/!g;
     $Master =~ s![^/]*$!../../..!
       unless ($Master =~ s!/texmf-dist/scripts/texlive/tlmgr\.pl$!!i);
@@ -56,11 +56,9 @@ BEGIN {
     $kpsewhichname = "kpsewhich.exe";
     # path already set by wrapper batchfile
   } else {
-    $Master = __FILE__;
     $Master =~ s,/*[^/]*$,,;
     $bindir = $Master;
     $Master = "$Master/../..";
-    # make subprograms (including kpsewhich) have the right path:
     $ENV{"PATH"} = "$bindir:$ENV{PATH}";
     $kpsewhichname = "kpsewhich";
   }
@@ -72,8 +70,12 @@ BEGIN {
   # if we have no directory in which to find our modules,
   # no point in going on.
   if (! $Master) {
-    die ("Could not determine directory of tlmgr executable, "
-         . "maybe shared library woes?\nCheck for error messages above");
+    warn "$0: Could not determine (Master) directory of tlmgr executable.\n";
+    warn "$0:   with __FILE__: ", __FILE__, "\n";
+    warn "$0:   and bindir: $bindir\n";
+    warn "$0:   and PATH: $ENV{PATH}\n";
+    die  "$0: Check for error messages above.\n";
+
   }
 
   $::installerdir = $Master;  # for config.guess et al., see TLUtils.pm
@@ -213,6 +215,7 @@ my %action_specification = (
       "list" => 1, 
       "only-installed" => 1,
       "only-remote" => 1,
+      "only-files" => 1,
       "json" => 1
     },
     "run-post" => 0,
@@ -1800,11 +1803,12 @@ sub action_info {
   }
   print "[" if ($fmt eq "json");
   my $first = 1;
+  my $nr_of_pkgs = $#whattolist + 1;
   foreach my $ppp (@whattolist) {
     next if ($ppp =~ m/^00texlive\./);
     print "," if ($fmt eq "json" && !$first);
     $first = 0;
-    $ret |= show_one_package($ppp, $fmt, @adds);
+    $ret |= show_one_package($ppp, $fmt, $nr_of_pkgs, @adds);
   }
   print "]\n" if ($fmt eq "json");
   if ($opts{'debug-json-timing'}) {
@@ -2783,8 +2787,8 @@ sub auto_remove_install_force_packages {
 # tlmgr update --no-depends-at-all foo
 #   will absolutely only update foo not even taking .ARCH into account
 #
-# TLPDB->install_package INSTALLS ONLY ONE PACKAGE, no deps whatsoever
-# anymore. That has all to be done by hand.
+# TLPDB->install_package INSTALLS ONLY ONE PACKAGE, no deps whatsoever.
+# That has all to be done by hand.
 #
 sub machine_line {
   my ($flag1) = @_;
@@ -3414,10 +3418,17 @@ sub action_update {
 
       if ($opts{"backup"} && !$opts{"dry-run"}) {
         my $compressorextension = $Compressors{$::progs{'compressor'}}{'extension'};
-        $tlp->make_container($::progs{'compressor'}, $root,
-                             destdir => $opts{"backupdir"},
-                             relative => $tlp->relocated,
-                             user => 1);
+        my ($s, undef, $fullname) = $tlp->make_container($::progs{'compressor'}, $root,
+                                                         destdir => $opts{"backupdir"},
+                                                         relative => $tlp->relocated,
+                                                         user => 1);
+        if ($s <= 0) {
+          tlwarn("\n$prg: creation of backup container failed for: $pkg\n");
+          tlwarn("$prg: continuing to update other packages, please retry...\n");
+          $ret |= $F_WARNING;
+          # we should try to update other packages at least
+          next;
+        }
         $unwind_package =
             "$opts{'backupdir'}/${pkg}.r" . $tlp->revision . ".tar.$compressorextension";
         
@@ -3520,8 +3531,8 @@ sub action_update {
         if (wndws()) {
           # w32 is notorious for not releasing a file immediately
           # we experienced permission denied errors
-          my $newname = $unwind_package;
-          $newname =~ s/__BACKUP/___BACKUP/;
+          my ($suffix) = $unwind_package =~ /(\.tar\.[^.\s]+)$/;
+          my $newname = TeXLive::TLUtils::tl_tmpfile(SUFFIX => $suffix);
           copy ("-f", $unwind_package, $newname);
           # try to remove the file if has been created by us
           unlink($unwind_package) if $remove_unwind_container;
@@ -3836,8 +3847,8 @@ sub check_announce_format_triggers {
 #   . it does not care for whether a package seems to be installed or
 #     not (that is the --reinstall)
 #
-# TLPDB->install_package does ONLY INSTALL ONE PACKAGE, no deps whatsoever
-# anymore!  That has all to be done by the caller.
+# TLPDB->install_package does ONLY INSTALL ONE PACKAGE, no deps
+# whatsoever; that has all to be done by the caller.
 #
 sub action_install {
   init_local_db(1);
@@ -4051,16 +4062,16 @@ sub action_install {
 }
 
 sub show_one_package {
-  my ($pkg, $fmt, @rest) = @_;
+  my ($pkg, $fmt, $total_nr_of_pkgs, @rest) = @_;
   my $ret;
   if ($fmt eq "list") {
-    $ret = show_one_package_list($pkg, @rest);
+    $ret = show_one_package_list($pkg, $total_nr_of_pkgs, @rest);
   } elsif ($fmt eq "detail") {
-    $ret = show_one_package_detail($pkg, @rest);
+    $ret = show_one_package_detail($pkg, $total_nr_of_pkgs, @rest);
   } elsif ($fmt eq "csv") {
-    $ret = show_one_package_csv($pkg, @rest);
+    $ret = show_one_package_csv($pkg, $total_nr_of_pkgs, @rest);
   } elsif ($fmt eq "json") {
-    $ret = show_one_package_json($pkg);
+    $ret = show_one_package_json($pkg, $total_nr_of_pkgs);
   } else {
     tlwarn("$prg: show_one_package: unknown format: $fmt\n");
     return($F_ERROR);
@@ -4069,7 +4080,7 @@ sub show_one_package {
 }
 
 sub show_one_package_json {
-  my ($p) = @_;
+  my ($p, $total_nr_of_pkgs) = @_;
   my @out;
   my $loctlp = $localtlpdb->get_package($p);
   my $remtlp = $remotetlpdb->get_package($p);
@@ -4098,7 +4109,7 @@ sub show_one_package_json {
 
 
 sub show_one_package_csv {
-  my ($p, @datafields) = @_;
+  my ($p, $total_nr_of_pkgs, @datafields) = @_;
   my @out;
   my $loctlp = $localtlpdb->get_package($p);
   my $remtlp = $remotetlpdb->get_package($p) unless ($opts{'only-installed'});
@@ -4190,7 +4201,7 @@ sub show_one_package_csv {
 }
 
 sub show_one_package_list {
-  my ($p, @rest) = @_;
+  my ($p, $total_nr_of_pkgs, @rest) = @_;
   my @out;
   my $loctlp = $localtlpdb->get_package($p);
   my $remtlp = $remotetlpdb->get_package($p) unless ($opts{'only-installed'});
@@ -4267,7 +4278,7 @@ sub show_one_package_list {
 }
 
 sub show_one_package_detail {
-  my ($ppp, @rest) = @_;
+  my ($ppp, $total_nr_of_pkgs, @rest) = @_;
   my $ret = $F_OK;
   my ($pkg, $tag) = split ('@', $ppp, 2);
   my $tlpdb = $localtlpdb;
@@ -4368,6 +4379,17 @@ sub show_one_package_detail {
       }
     }
   }
+  if ($opts{"only-files"}) {
+    print "$pkg\n" if ($total_nr_of_pkgs > 1);
+    return show_one_package_detail3($tlpdb, $pkg, $tlp, $source_found, $installed, 1, @colls);
+  } else {
+    return show_one_package_detail2($tlpdb, $pkg, $tlp, $source_found, $installed, 0, @colls);
+  }
+}
+
+sub show_one_package_detail2 {
+  my ($tlpdb, $pkg, $tlp, $source_found, $installed, @colls) = @_;
+  my $ret = $F_OK;
   # {
   #   require Data::Dumper;
   #   print Data::Dumper->Dump([\$tlp], [qw(tlp)]);
@@ -4464,48 +4486,57 @@ sub show_one_package_detail {
       }
     }
     print "Included files, by type:\n";
-    # if the package has a .ARCH dependency we also list the files for
-    # those packages
-    my @todo = $tlpdb->expand_dependencies("-only-arch", $tlpdb, ($pkg));
-    for my $d (sort @todo) {
-      my $foo = $tlpdb->get_package($d);
-      if (!$foo) {
-        tlwarn ("$prg: Should not happen, no dependent package $d\n");
-        return($F_WARNING);
-      }
-      if ($d ne $pkg) {
-        print "depending package $d:\n";
-      }
-      if ($foo->runfiles) {
-        print "run files:\n";
-        for my $f (sort $foo->runfiles) { print "  $f\n"; }
-      }
-      if ($foo->srcfiles) {
-        print "source files:\n";
-        for my $f (sort $foo->srcfiles) { print "  $f\n"; }
-      }
-      if ($foo->docfiles) {
-        print "doc files:\n";
-        for my $f (sort $foo->docfiles) {
-          print "  $f";
+    $ret |= show_one_package_detail3($tlpdb, $pkg, $tlp, $source_found, $installed, 0, @colls);
+  }
+  print "\n";
+  return($ret);
+}
+
+sub show_one_package_detail3 {
+  my ($tlpdb, $pkg, $tlp, $source_found, $installed, $silent, @colls) = @_;
+  my $ret = $F_OK;
+  # if the package has a .ARCH dependency we also list the files for
+  # those packages
+  my @todo = $tlpdb->expand_dependencies("-only-arch", $tlpdb, ($pkg));
+  for my $d (sort @todo) {
+    my $foo = $tlpdb->get_package($d);
+    if (!$foo) {
+      tlwarn ("$prg: Should not happen, no dependent package $d\n");
+      return($F_WARNING);
+    }
+    if ($d ne $pkg && !$silent) {
+      print "depending package $d:\n";
+    }
+    if ($foo->runfiles) {
+      print "run files:\n" if (!$silent);
+      for my $f (sort $foo->runfiles) { print "  $f\n"; }
+    }
+    if ($foo->srcfiles) {
+      print "source files:\n" if (!$silent);
+      for my $f (sort $foo->srcfiles) { print "  $f\n"; }
+    }
+    if ($foo->docfiles) {
+      print "doc files:\n" if (!$silent);
+      for my $f (sort $foo->docfiles) {
+        print "  $f";
+        if (!$silent) {
           my $dfd = $foo->docfiledata;
           if (defined($dfd->{$f})) {
             for my $k (keys %{$dfd->{$f}}) {
               print " $k=\"", $dfd->{$f}->{$k}, '"';
             }
           }
-          print "\n";
         }
-      }
-      # in case we have them
-      if ($foo->allbinfiles) {
-        print "bin files (all platforms):\n";
-      for my $f (sort $foo->allbinfiles) { print " $f\n"; }
+        print "\n";
       }
     }
+    # in case we have them
+    if ($foo->allbinfiles) {
+      print "bin files (all platforms):\n" if (!$silent);
+      for my $f (sort $foo->allbinfiles) { print "  $f\n"; }
+    }
   }
-  print "\n";
-  return($ret);
+  return $ret;
 }
 
 #  PINNING
@@ -5244,7 +5275,7 @@ sub action_generate {
   # we create fmtutil.cnf, language.dat, language.def in TEXMFSYSVAR and
   # updmap.cfg in TEXMFDIST. The reason is that we are now using an
   # implementation of updmap that supports multiple updmap files.
-  # Local adaptions should not be made there, but only in TEXMFLOCAL
+  # Local adaptations should not be made there, but only in TEXMFLOCAL
   # or TEXMF(SYS)CONFIG updmap.cfg
   #
   chomp (my $TEXMFSYSVAR = `kpsewhich -var-value=TEXMFSYSVAR`);
@@ -6066,7 +6097,7 @@ sub check_executes {
       if (!check_file($a, $f)) {
         push @{$missingbins{$_}}, "bin/$a/${name}[engine=$engine]" if $mode;
 #      # unfortunately there are too many exceptions to this check:
-#      # cygwin symlinks pointing to .exe names, pdcsplain extras, mptopdf,
+#      # cygwin symlinks pointing to .exe names, pdfcsplain extras, mptopdf,
 #      # *latex-dev pointing to *latex instead of the binary. Instead of
 #      # writing all those error-prone tests, just give up.
 #      } elsif (-l $f) {
@@ -7612,7 +7643,7 @@ and the repository are not compatible:
   # - on every update, save the last seen remote main revision into
   #   00texlive.installation
   #
-  if ($is_main) {
+  if ($is_main && !$opts{"usermode"}) {
     my $rtlp = $remotetlpdb->get_package("texlive-scripts");
     my $ltlp = $localtlpdb->get_package("texlive-scripts");
     my $local_revision;
@@ -7637,9 +7668,11 @@ and the repository are not compatible:
     if ($remote_revision > 0 && $local_revision > $remote_revision) {
       info("fail load $location\n") if ($::machinereadable);
       return(undef, <<OLD_REMOTE_MSG);
-Remote database (revision $remote_revision of the texlive-scripts package)
-seems to be older than the local installation (rev $local_revision of
-texlive-scripts); please use a different mirror and/or wait a day or two.
+Remote database at $location
+(revision $remote_revision of the texlive-scripts package)
+seems to be older than the local installation
+(revision $local_revision of texlive-scripts);
+please use a different mirror and/or wait a day or two.
 OLD_REMOTE_MSG
     }
   }
@@ -8341,8 +8374,10 @@ the L<MACHINE-READABLE OUTPUT> section below.
 =item B<--no-execute-actions>
 
 Suppress the execution of the execute actions as defined in the tlpsrc
-files.  Documented only for completeness, as this is only useful in
-debugging.
+files. Unless you are going to do the postprocessing yourself (as, for
+example, C<install-tl> does), this shouldn't be specified.  Otherwise,
+format files and the filename database will become stale, among other
+problems.
 
 =item B<--package-logfile> I<file>
 
@@ -8666,7 +8701,7 @@ Line endings may be either LF or CRLF depending on the current platform.
 
 The C<generate> action overwrites any manual changes made in the
 respective files: it recreates them from scratch based on the
-information of the installed packages, plus local adaptions.
+information of the installed packages, plus local adaptations.
 The TeX Live installer and C<tlmgr> routinely call C<generate> for
 all of these files.
 
@@ -8817,6 +8852,12 @@ If the option C<--list> is given with a package, the list of contained
 files is also shown, including those for platform-specific dependencies.
 When given with schemes and collections, C<--list> outputs their
 dependencies in a similar way.
+
+=item B<--only-files>
+
+If this option is given, only the files for a given package are listed,
+no further information. If more than one package name is given, each
+file list is preceded by the package name.
 
 =item B<--only-installed>
 
@@ -9076,7 +9117,7 @@ The last three options affect behavior on Windows installations.  If
 C<desktop_integration> is set, then some packages will install items in
 a sub-folder of the Start menu for C<tlmgr gui>, documentation, etc.  If
 C<fileassocs> is set, Windows file associations are made (see also the
-C<postaction> action).  Finally, if C<multiuser> is set, then adaptions
+C<postaction> action).  Finally, if C<multiuser> is set, then changes
 to the registry and the menus are done for all users on the system
 instead of only the current user.  All three options are on by default.
 
@@ -9105,6 +9146,10 @@ program.
 With a program given as the first argument and a paper size as the last
 argument (e.g., C<tlmgr dvips paper a4>), set the default for that
 program to that paper size.
+
+If either C<pdftex> or C<context> is one of the arguments, whether
+implicitly or explicitly, existing formats are rebuilt (i.e., C<fmtutil
+--refresh> is called), unless C<--no-execute-actions> is specified.
 
 With a program given as the first argument and C<--list> given as the
 last argument (e.g., C<tlmgr dvips paper --list>), shows all valid paper
@@ -10591,7 +10636,7 @@ This script and its documentation were written for the TeX Live
 distribution (L<https://tug.org/texlive>) and both are licensed under the
 GNU General Public License Version 2 or later.
 
-$Id: tlmgr.pl 71331 2024-05-24 07:30:36Z preining $
+$Id: tlmgr.pl 76962 2025-11-28 17:48:14Z karl $
 =cut
 
 # test HTML version: pod2html --cachedir=/tmp tlmgr.pl >/tmp/tlmgr.html

@@ -47,13 +47,17 @@ accfonts/mkt1font
 accfonts/vpl2ovp
 accfonts/vpl2vpl
 albatross/albatross.sh
+aomart/aom-fullref.pl
 arara/arara.sh
 attachfile2/pdfatfi.pl
 authorindex/authorindex
 bib2gls/bib2gls.sh
 bib2gls/convertgls2bib.sh
+bib2gls/datatool2bib.sh
 bibcop/bibcop.pl
 bibtexperllibs/ltx2unitxt
+bookshelf/bookshelf-listallfonts
+bookshelf/bookshelf-mkfontsel
 bundledoc/arlatex
 bundledoc/bundledoc
 cachepic/cachepic.tlu
@@ -87,6 +91,8 @@ epspdf/epspdf.tlu
 epspdf/epspdftk.tcl
 epstopdf/epstopdf.pl
 exceltex/exceltex
+expltools/explcheck.lua
+extractbb/extractbb.lua
 fig4latex/fig4latex
 findhyph/findhyph
 fontools/afm2afm
@@ -125,6 +131,7 @@ lwarp/lwarpmk.lua
 m-tx/m-tx.lua
 makedtx/makedtx.pl
 make4ht/make4ht
+markdown/markdown2tex.lua
 match_parens/match_parens
 mathspic/mathspic.pl
 memoize/memoize-clean.pl
@@ -132,6 +139,7 @@ memoize/memoize-clean.py
 memoize/memoize-extract.pl
 memoize/memoize-extract.py
 mf2pt1/mf2pt1.pl
+minted/latexminted.py
 mkgrkindex/mkgrkindex
 mkjobtexmf/mkjobtexmf.pl
 mkpic/mkpic
@@ -150,6 +158,7 @@ pfarrei/pfarrei.tlu
 pkfix-helper/pkfix-helper
 pkfix/pkfix.pl
 pmxchords/pmxchords.lua
+ppmcheckpdf/ppmcheckpdf.lua
 pst2pdf/pst2pdf.pl
 ptex-fontmaps/kanji-config-updmap-sys.sh
 ptex-fontmaps/kanji-config-updmap-user.sh
@@ -161,9 +170,12 @@ pygmentex/pygmentex.py
 pythontex/depythontex.py
 pythontex/pythontex.py
 rubik/rubikrotation.pl
+runtexfile/runtexfile.lua
 runtexshebang/runtexshebang.lua
+show-pdf-tags/show-pdf-tags.lua
 spix/spix.py
 splitindex/splitindex.pl
+sqltex/sqltex
 srcredact/srcredact.pl
 sty2dtx/sty2dtx.pl
 svn-multi/svn-multi.pl
@@ -176,7 +188,6 @@ texdirflatten/texdirflatten
 texfindpkg/texfindpkg.lua
 texdoc/texdoc.tlu
 texfot/texfot.pl
-texlive/extractbb.lua
 texlive/fmtutil-sys.sh
 texlive/fmtutil-user.sh
 texlive/fmtutil.pl

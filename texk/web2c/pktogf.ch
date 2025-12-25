@@ -12,7 +12,7 @@
 % gf and pk formats.  PKtoGF runs silently unless it is given the
 % -v switch in the command line.
 
-@x [0] l.21
+@x [0] l.22
 \def\title{PKtoGF}
 @y
 \def\title{PK$\,$\lowercase{to}$\,$GF changes for C}
@@ -60,7 +60,7 @@ procedure initialize; {this procedure gets things started properly}
   var i:integer; {loop index for initializations}
   begin print_ln(banner);@/
 @y
-@<Define |parse_arguments|@>
+@<Define \(|parse_arguments|@>
 procedure initialize; {this procedure gets things started properly}
   var i:integer; {loop index for initializations}
 begin
@@ -79,12 +79,12 @@ begin
 @<Labels...@>=final_end;
 @y
 @ This module is deleted, because it is only useful for
-a non-local goto, which we don't use in C.
+a non-local |goto|\unskip, which we don't use in C.
 @z
 
 % [6] Remove terminal_line_length, since there is no dialog, and
 % name_length, since there is no maximum size.
-@x
+@x [6]
 @<Constants...@>=
 @!name_length=80; {maximum length of a file name}
 @!terminal_line_length=132; {maximum length of an input line}
@@ -444,7 +444,7 @@ end ;
 dialog ;
 @y
 @z
-@x
+@x [73]
 final_end :
 @y
 @z
@@ -459,7 +459,7 @@ Parse a Unix-style command line.
 
 @d argument_is (#) == (strcmp (long_options[option_index].name, #) = 0)
 
-@<Define |parse_arguments|@> =
+@<Define \(|parse_arguments|@> =
 procedure parse_arguments;
 const n_options = 3; {Pascal won't count array lengths for us.}
 var @!long_options: array[0..n_options] of getopt_struct;

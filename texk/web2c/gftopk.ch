@@ -11,6 +11,12 @@
 % on the origin of fonts in both gf and pk formats.  The program runs
 % silently unless it is given the -v switch in the command line.
 
+@x [0] l.41
+\def\(#1){} % this is used to make section names sort themselves better
+@y
+\def\({} % this is used to make section names sort themselves better
+@z
+
 @x [0] l.44
 \def\title{GFtoPK}
 @y
@@ -63,7 +69,7 @@ produced only when the \.{-v} command line flag is presented.
 const @<Constants in the outer block@>@/
 type @<Types in the outer block@>@/
 var @<Globals in the outer block@>@/
-@<Define |parse_arguments|@>
+@<Define \(|parse_arguments|@>
 procedure initialize; {this procedure gets things started properly}
   var i:integer; {loop index for initializations}
 begin
@@ -82,7 +88,7 @@ begin
 @<Labels...@>=final_end;
 @y
 @ This module is deleted, because it is only useful for
-a non-local goto, which we can't use in C.
+a non-local |goto|\unskip, which we can't use in C.
 @z
 
 @x [6] Dynamic allocation of |row| array.
@@ -98,7 +104,7 @@ contains the only non-local |goto| statement in \.{GFtoPK}.
 @y
 so we might want to |abort| the program with an error message.
 @z
-@x
+@x [8]
 @d abort(#)==begin print(' ',#); jump_out;
     end
 @d bad_gf(#)==abort('Bad GF file: ',#,'!')
@@ -141,7 +147,7 @@ end;
 
 % [40] If the PK filename isn't given on the command line, we construct
 % it from the GF filename.
-@x
+@x [40]
 @p procedure open_pk_file; {prepares to write packed bytes in |pk_file|}
 begin rewrite(pk_file);
 pk_loc := 0 ; pk_open := true ;
@@ -414,7 +420,7 @@ Parse a Unix-style command line.
 @d argument_is (#) == (strcmp (long_options[option_index].name, #) = 0)
 @d do_nothing ==        {empty statement}
 
-@<Define |parse_arguments|@> =
+@<Define \(|parse_arguments|@> =
 procedure parse_arguments;
 const n_options = 3; {Pascal won't count array lengths for us.}
 var @!long_options: array[0..n_options] of getopt_struct;

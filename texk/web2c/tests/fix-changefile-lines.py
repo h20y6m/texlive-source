@@ -58,8 +58,8 @@ class WebReader:
             sys.exit(1)
 
     def next_line(self):
-        """Returns the triple of current part, section and line numbers, as
-        well as the next line. Updates part and section numbers.
+        """Returns the triple of current part, section and line numbers,
+        as well as the next line. Updates part and section numbers.
         """
         if self._pos >= len(self._web_lines):
             return None
@@ -122,7 +122,8 @@ class ChangeReader:
                 while True:
                     self._pos += 1
                     if self._pos >= len(self._lines):
-                        eprint(f"! Change file ended before @y. (l. {self._pos+1} of change file)")
+                        eprint(f"! Change file ended before @y. " +
+                            f"(l. {self._pos+1} of change file)")
                         sys.exit(1)
                     line = self._lines[self._pos]
                     if line.startswith("@y"):
@@ -131,7 +132,8 @@ class ChangeReader:
                         ]
                         return True
                     elif line.startswith("@x") or line.startswith("@z"):
-                        eprint(f"! Where is the matching @y?. (l. {self._pos+1} of change file)")
+                        eprint(f"! Where is the matching @y?. " +
+                            f"(l. {self._pos+1} of change file)")
                         eprint(line)
                         sys.exit(1)
             self._pos += 1
@@ -139,14 +141,15 @@ class ChangeReader:
 
     def find_match_in_web(self, web_reader):
         """Find the match for the current change chunk in the WEB file.
-        Returns the part, section, and line number of the first match line in
-        the WEB file.
+        Returns the part, section, and line number of the first match line
+        in the WEB file.
         """
         while True:
             try:
                 (part, section, line_number), tex_line = web_reader.next_line()
             except:
-                eprint(f"! Change file entry did not match. (l. {self._chunk_start+2} of change file)")
+                eprint(f"! Change file entry did not match. " +
+                    f"(l. {self._chunk_start+2} of change file)")
                 eprint(self._match_lines[0])
                 sys.exit(1)
             if tex_line == self._match_lines[0]:
@@ -156,7 +159,8 @@ class ChangeReader:
                     except:
                         tex_line = None
                     if tex_line is None or tex_line != self._match_lines[i]:
-                        eprint(f"! Change file entry did not match. (l. {self._chunk_start+2+i} of change file)")
+                        eprint(f"! Change file entry did not match. " +
+                            f"(l. {self._chunk_start+2+i} of change file)")
                         eprint(self._match_lines[i])
                         sys.exit(1)
 
@@ -171,18 +175,21 @@ class ChangeReader:
             new_line = self._lines[self._chunk_start]
 
             new_line = re.sub(
-                    "\\[\\d+\\.\\d+\\]", f"[{part}.{section}]", new_line, 1)
+                    "\\[\\d+\\.\\d+\\]", f"[{part}.{section}]",
+                    new_line, count=1)
             new_line = re.sub(
-                    "^@x \\[\\d+\\]", f"@x [{section}]", new_line, 1)
+                    "^@x \\[\\d+\\]", f"@x [{section}]",
+                    new_line, count=1)
             new_line = re.sub(
-                    "l\\.\\d+", f"l.{line_number}", new_line, 1)
+                    "l\\.\\d+", f"l.{line_number}",
+                    new_line, count=1)
 
             # Force '[part.section] l.line' tag after '@x'; useful for untagged
             # change files, e.g., CWEB's '*-w2c.ch' monsters.
             if opt_handler.init_b:
                 new_line = re.sub(
                         "^@x", f"@x [{part}.{section}] l.{line_number}",
-                        new_line, 1)
+                        new_line, count=1)
 
             ch_line = self._lines[self._chunk_start]
             if new_line[:10] != ch_line[:10]:

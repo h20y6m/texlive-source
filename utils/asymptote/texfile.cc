@@ -145,8 +145,11 @@ void texfile::prologue(bool deconstruct)
     beginpage();
 }
 
-void texfile::beginlayer(const string& psname, bool postscript)
+void texfile::beginlayer(string psname, bool postscript)
 {
+#ifdef _WIN32
+  backslashToSlash(psname);
+#endif
   if(box.right > box.left && box.top > box.bottom) {
     if(postscript) {
       if(settings::context(texengine))
@@ -477,9 +480,8 @@ void svgtexfile::properties(const pen& p)
   const LineType *lastlinetype=lastpen.linetype();
 
   if(!(linetype->pattern == lastlinetype->pattern)) {
-    bool xasy=getSetting<bool>("xasy");
     auto qtfix=[&](double x) {
-      return xasy ? max(x,1.0e-6) : x;
+      return settings::xasy ? max(x,1.0e-6) : x;
     };
     size_t n=linetype->pattern.size();
     if(n > 0) {

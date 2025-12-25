@@ -882,7 +882,7 @@ void check_outer_validity(void)
     halfword q;
     if (suppress_outer_error_par)
         return;
-    if (   OK_to_interrupt  && (scanner_status != normal)) {
+    if (scanner_status != normal) {
         deletions_allowed = false;
         /*tex
 
@@ -2667,7 +2667,7 @@ static int do_feedback_pdf(halfword c)
     halfword save_def_ref;
     halfword save_warning_index;
     /*tex temp boolean */
-    boolean bool;
+    boolean bool_val;
     /*tex first temp string */
     str_number s;
     /*tex for use with |set_ff| */
@@ -2740,7 +2740,7 @@ static int do_feedback_pdf(halfword c)
         print_int(pdf_get_obj(static_pdf, obj_type_page, cur_val, false));
         pop_selector;
     } else if (scan_keyword("colorstackinit")) {
-        bool = scan_keyword("page");
+        bool_val = scan_keyword("page");
         if (scan_keyword("direct"))
             cur_val = direct_always;
         else if (scan_keyword("page"))
@@ -2764,7 +2764,7 @@ static int do_feedback_pdf(halfword c)
         warning_index = save_warning_index;
         scanner_status = save_scanner_status;
         str = makecstring(s);
-        cur_val = newcolorstack(str, cur_val, bool);
+        cur_val = newcolorstack(str, cur_val, bool_val);
         free(str);
         flush_str(s);
         cur_val_level = int_val_level;
@@ -2803,7 +2803,7 @@ void conv_toks(void)
     halfword save_def_ref;
     halfword save_warning_index;
     /*tex temp boolean */
-    boolean bool;
+    boolean bool_val;
     /*tex first temp string */
     str_number s;
     /*tex lua chunk name */
@@ -2907,7 +2907,10 @@ void conv_toks(void)
                 /*tex one-step do_assignment */
                 if (cur_cmd > max_non_prefixed_command) {
                     set_box_allowed = false;
-                    prefixed_command();
+                    if (cur_cmd == combine_toks_cmd)
+                        combine_the_toks();
+                    else
+                        prefixed_command();
                     set_box_allowed = true;
                 }
                 /*tex done */
@@ -2922,7 +2925,10 @@ void conv_toks(void)
                             break;
                         } else {
                             set_box_allowed = false;
-                            prefixed_command();
+                            if (cur_cmd == combine_toks_cmd)
+                                combine_the_toks();
+                            else
+                                prefixed_command();
                             set_box_allowed = true;
                         }
                     }
@@ -2993,11 +2999,11 @@ void conv_toks(void)
                 save_def_ref = def_ref;
                 save_warning_index = warning_index;
                 scan_toks(false, true);
-                bool = in_lua_escape;
+                bool_val = in_lua_escape;
                 in_lua_escape = true;
                 escstr.s = (unsigned char *) tokenlist_to_cstring(def_ref, false, &l);
                 escstr.l = (unsigned) l;
-                in_lua_escape = bool;
+                in_lua_escape = bool_val;
                 delete_token_ref(def_ref);
                 def_ref = save_def_ref;
                 warning_index = save_warning_index;

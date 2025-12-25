@@ -73,7 +73,7 @@ int dicread(const char *filename)
 	FILE *fp;
 
 	if (filename!=NULL) {
-		filename = KP_find_file(&kp_dict,filename);
+		filename = KP_find_dict_file(filename);
 		if(kpse_in_name_ok(filename))
 			fp=nkf_open(filename,"rb");
 		else
@@ -100,7 +100,7 @@ int dicread(const char *filename)
 ENV:
 	envfile=kpse_var_value("INDEXDEFAULTDICTIONARY");
 	if ((envfile!=NULL)&&(strlen(envfile)!=0)) {
-		envfile = KP_find_file(&kp_dict,envfile);
+		envfile = KP_find_dict_file(envfile);
 		if(kpse_in_name_ok(envfile))
 			fp=nkf_open(envfile,"rb");
 		else
@@ -369,6 +369,7 @@ int pnumconv(char *page, int attr)
 {
 	int i,cc=0;
 
+	if (attr<0) return 0;  /* inappropriate page type */
 	switch (page_precedence[attr]) {
 	case 'a':
 		cc=page[0]-'a'+1;
@@ -478,6 +479,7 @@ int pnumconv(char *page, int attr)
 			case 'c':
 			case 'C':
 				if (i==0) cc=100;
+				else {
 					switch (page[i-1]) {
 					case 'x':
 					case 'X':
@@ -496,6 +498,7 @@ int pnumconv(char *page, int attr)
 					default:
 						break;
 					}
+				}
 				break;
 
 			case 'd':
@@ -522,6 +525,7 @@ int pnumconv(char *page, int attr)
 			case 'm':
 			case 'M':
 				if (i==0) cc=1000;
+				else {
 					switch (page[i-1]) {
 					case 'c':
 					case 'C':
@@ -536,6 +540,7 @@ int pnumconv(char *page, int attr)
 					default:
 						break;
 					}
+				}
 				break;
 
 			default:
