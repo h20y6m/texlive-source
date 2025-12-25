@@ -28867,8 +28867,14 @@ else  begin @<Get the next non-blank non-relax...@>;
     scan_usv_num;        cur_val:=cur_val1 + cur_val; cur_val1:=0;
   end else begin {normal delimiter}
     scan_delimiter_int;
-    cur_val1:=(cur_val div @"100000)*@"200000 + (cur_val div @"1000) mod @"100;
-    cur_val :=(cur_val div @"100)*@"200000 + cur_val mod @"100;
+    if cur_val>=@"40000000 then begin {extended delimiter code, only one size}
+      cur_val1:=0;
+      cur_val :=cur_val mod @"40000000;
+    end else begin {standard delimiter code, 4-bit families and 8-bit char codes}
+      cur_val1:=cur_val div @"1000;
+      cur_val1:=(cur_val1 div @"100)*@"200000 + cur_val1 mod @"100;
+      cur_val :=((cur_val div @"100) mod 16)*@"200000 + cur_val mod @"100;
+    end;
   end;
   othercases begin cur_val:=-1; end;
   endcases;
