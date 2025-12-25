@@ -1,7 +1,7 @@
 ## $Id$
 ## texk/web2c/nptexdir/am/nptex.am: Makefile fragment for npTeX.
 ##
-## Copyright 2017-2022 Karl Berry <tex-live@tug.org>
+## Copyright 2017-2025 Karl Berry <tex-live@tug.org>
 ## Copyright 2009-2015 Peter Breitenlohner <tex-live@tug.org>
 ## You may freely use, modify and/or distribute this file.
 
@@ -46,7 +46,7 @@ nptex-web2c: nptex.p $(web2c_texmf) nptexdir/nptex.defines
 	@$(web2c) nptex
 
 nptex-pool.c: nptex.pool nptexd.h $(makecpool_stamp)
-	$(makecpool) nptex >$@ || rm -f $@
+	$(makecpool) nptex >$@ || { rm -f $@; exit 1; }
 
 ## Tangling npTeX
 nptex.p nptex.pool: nptex-tangle
@@ -71,7 +71,7 @@ $(srcdir)/nptexdir/nptex_version.h: @MAINTAINER_MODE_TRUE@ nptexdir/nptex.web
 
 ## Generate nptex-final.ch
 nptex-final.ch: tie$(EXEEXT) $(nptex_ch_srcs)
-	$(tie_c) $(nptex_ch_srcs)
+	$(tie_c) $(nptex_ch_srcs) || { rm -f $@; exit 1; }
 nptex_ch_srcs = \
 	nptexdir/nptex.web \
 	nptexdir/tex.ch0 \

@@ -22713,7 +22713,7 @@ nptex-web2c: nptex.p $(web2c_texmf) nptexdir/nptex.defines
 	@$(web2c) nptex
 
 nptex-pool.c: nptex.pool nptexd.h $(makecpool_stamp)
-	$(makecpool) nptex >$@ || rm -f $@
+	$(makecpool) nptex >$@ || { rm -f $@; exit 1; }
 
 nptex.p nptex.pool: nptex-tangle
 	$(np_tangle) nptex nptex-final
@@ -22734,7 +22734,7 @@ $(srcdir)/nptexdir/nptex_version.h: @MAINTAINER_MODE_TRUE@ nptexdir/nptex.web
 	  | sed "s/^.*'-/#define NPTEX_VERSION \"/;s/'.*$$/\"/" >$@
 
 nptex-final.ch: tie$(EXEEXT) $(nptex_ch_srcs)
-	$(tie_c) $(nptex_ch_srcs)
+	$(tie_c) $(nptex_ch_srcs) || { rm -f $@; exit 1; }
 $(libnptex_a_OBJECTS): $(libnptex_prereq)
 odvicopy.c odvicopy.h: odvicopy-web2c
 	@$(web2c) odvicopy
