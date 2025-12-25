@@ -10977,6 +10977,16 @@ if (cur_val<0)or(cur_val>biggest_char) then
   end;
 end;
 
+procedure scan_kchar_num;
+begin scan_int;
+if (cur_val<0)or(cur_val>@"21FFFF) then
+  begin print_err("Bad character code");
+@.Bad character code@>
+  help2("A kchar value must be between 0 and ""21FFFF.")@/
+    ("I changed this one to zero."); int_error(cur_val); cur_val:=0;
+  end;
+end;
+
 @ While we're at it, we might as well deal with similar routines that
 will be needed later.
 
@@ -25571,7 +25581,7 @@ ins_kp:=false;
 case abs(mode)+cur_cmd of
 hmode+letter,hmode+other_char,hmode+char_given:
   if is_cjkx_jachar(cur_chr) then goto main_loop_j else goto main_loop;
-hmode+char_num: begin t:=cur_chr; scan_usv_num; cur_chr:=cur_val;
+hmode+char_num: begin t:=cur_chr; if cur_chr=2 then scan_kchar_num else scan_usv_num; cur_chr:=cur_val;
   case t of
   0: if is_cjkx_jachar(cur_chr) then goto main_loop_j else goto main_loop;
   1: goto main_loop;
@@ -25770,7 +25780,7 @@ collect_native:
     begin if not is_cjkx_jachar(cur_chr) then goto collect_native end
   else if cur_cmd=achar_given then goto collect_native
   else if cur_cmd=char_num then begin t:=cur_chr;
-    scan_usv_num; cur_chr:=cur_val;
+    if cur_chr=2 then scan_kchar_num else scan_usv_num; cur_chr:=cur_val;
     if (t=1)or((t=0)and not is_cjkx_jachar(cur_chr)) then goto collect_native
     else cur_cmd:=kchar_given;
   end;
@@ -26015,7 +26025,7 @@ collected:
       begin if not is_cjkx_jachar(cur_chr) then goto collect_native+1 end
     else if cur_cmd=achar_given then goto collect_native+1
     else if cur_cmd=char_num then begin t:=cur_chr;
-      scan_usv_num; cur_chr:=cur_val;
+      if cur_chr=2 then scan_kchar_num else scan_usv_num; cur_chr:=cur_val;
       if (t=1)or((t=0)and not is_cjkx_jachar(cur_chr)) then goto collect_native+1
       else cur_cmd:=kchar_given;
     end;
@@ -26146,7 +26156,7 @@ if (cur_cmd=letter)or(cur_cmd=other_char)or(cur_cmd=char_given) then
 else if cur_cmd=achar_given then goto main_loop_lookahead+1
 else if cur_cmd=kchar_given then @<goto |main_lig_loop|@>;
 if cur_cmd=char_num then
-  begin t:=cur_chr; scan_usv_num; cur_chr:=cur_val;
+  begin t:=cur_chr; if cur_chr=2 then scan_kchar_num else scan_usv_num; cur_chr:=cur_val;
   case t of
   0: if is_cjkx_jachar(cur_chr) then @<goto |main_lig_loop|@>
     else goto main_loop_lookahead+1;
@@ -26543,7 +26553,7 @@ again_2+1:
       end;
     achar_given: begin ins_kp:=true; cur_l:=qi(0); cur_cmd:=cat_code(cur_chr); end;
     kchar_given: begin cur_l:=qi(get_jfm_pos(KANJI(cur_chr),main_f)); cur_cmd:=cat_code(cur_chr); end;
-    char_num: begin t:=cur_chr; scan_usv_num; cur_chr:=cur_val;
+    char_num: begin t:=cur_chr; if cur_chr=2 then scan_kchar_num else scan_usv_num; cur_chr:=cur_val;
       if (t=1)or((t=0)and not is_cjkx_jachar(cur_chr)) then begin
         ins_kp:=true; cur_l:=qi(0); goto main_loop_j+3;
         end
@@ -28107,7 +28117,7 @@ case cur_cmd of
   kchar_given:
     begin if direction=dir_tate then f:=cur_tfont else f:=cur_jfont;
     cx:=cur_chr; end;
-  char_num: begin cx:=cur_chr; scan_usv_num; cur_chr:=cur_val;
+  char_num: begin cx:=cur_chr; if cur_chr=2 then scan_kchar_num else scan_usv_num; cur_chr:=cur_val;
     if (cx=1)or((cx=0)and not is_cjkx_jachar(cur_chr)) then
       begin if direction=dir_tate then f:=cur_tfont else f:=cur_jfont;
       cx:=cur_chr; end
@@ -28656,7 +28666,7 @@ mmode+letter,mmode+other_char,mmode+char_given:
   else set_math_char(ho(math_code(cur_chr)));
 mmode+achar_given: set_math_char(ho(math_code(cur_chr)));
 mmode+kchar_given: set_math_kchar(ho(cur_chr));
-mmode+char_num: begin t:=cur_chr; scan_usv_num; cur_chr:=cur_val;
+mmode+char_num: begin t:=cur_chr; if cur_chr=2 then scan_kchar_num else scan_usv_num; cur_chr:=cur_val;
   if (t=1)or((t=0)and not is_cjkx_jachar(cur_chr)) then
     set_math_char(ho(math_code(cur_chr)))
   else set_math_kchar(cur_chr);
@@ -29903,7 +29913,7 @@ shorthand_def: begin n:=cur_chr; get_r_token; p:=cur_cs; define(p,relax,256);
     end;
   achar_def_code: begin scan_usv_num; define(p,achar_given,cur_val);
     end;
-  kchar_def_code: begin scan_usv_num; define(p,kchar_given,cur_val);
+  kchar_def_code: begin scan_kchar_num; define(p,kchar_given,cur_val);
     end;
   math_char_def_code: begin scan_fifteen_bit_int; define(p,math_given,cur_val);
     end;
