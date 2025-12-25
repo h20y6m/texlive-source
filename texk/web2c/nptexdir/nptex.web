@@ -28534,7 +28534,7 @@ letter,other_char,char_given:
       begin @<Treat |cur_chr| as an active character@>;
       goto restart;
       end
-    else jx:=is_cjkx_ja_math(c);
+    else jx:=is_cjkx_ja_math(cur_chr);
     end;
 achar_given:
   begin c:=ho(math_code(cur_chr)); jx:=false;
