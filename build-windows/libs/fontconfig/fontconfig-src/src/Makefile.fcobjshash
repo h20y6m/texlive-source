@@ -1,0 +1,20 @@
+CPP=cl -P
+CPPFLAGS=
+SED=sed
+RM=rm
+GPERF=gperf
+fcobjshash.h: fcobjshash.gperf
+	$(GPERF) --pic -m 100 fcobjshash.gperf > $@
+
+fcobjshash.gperf: stamp-fcobjshash.gperf
+stamp-fcobjshash.gperf: fcobjshash.gperf.h fcobjs.h
+	$(CPP) -I. -I.. $<
+	cat fcobjshash.gperf.i | \
+	$(SED) 's/^ *//;s/ *, */,/' | \
+	gawk ' \
+		/CUT_OUT_BEGIN/ { no_write=1; next; }; \
+		/CUT_OUT_END/ { no_write=0; next; }; \
+		/^$$/||/^#/ { next; }; \
+		{ if (!no_write) print; next; }; \
+	' - > $@.tmp && \
+	mv -f $@.tmp fcobjshash.gperf && touch $@ || ( $(RM) $@.tmp && false )

@@ -1,0 +1,121 @@
+/* c-auto.h for W32 native */
+
+/* Guard against double inclusion. */
+#ifndef WEB2C_C_AUTO_H
+#define WEB2C_C_AUTO_H
+
+/* web2c: the version string. */
+#define WEB2CVERSION " (TeX Live 2025)"
+
+
+/* Define if type char is unsigned and you are not using gcc.  */
+#ifndef __CHAR_UNSIGNED__
+#undef __CHAR_UNSIGNED__
+#endif
+
+/* Define as __inline if that's what the C compiler calls it.  */
+#define inline __inline
+
+/* However, inline is a keyword in C++, and should never be #define'd.
+   Apparently Autoconf does not know this, at least the ancient version
+   we are stuck with.  (Even though the Autoconf *test* is #ifdef'd.)  */
+#ifdef __cplusplus
+#undef inline
+#endif
+
+/* Define as the return type of signal handlers (int or void).  */
+#define RETSIGTYPE void
+
+/* Define if your processor stores words with the most significant
+   byte first (like Motorola and SPARC, unlike Intel and VAX).  */
+/* #undef WORDS_BIGENDIAN */
+
+/* Define if the X Window System is missing or not being used.  */
+#define X_DISPLAY_MISSING 1
+
+/* Define if lex declares yytext as a char [] by default.  */
+/* #undef YYTEXT_CHAR */
+
+/* Define if lex declares yytext as a char * by default, not a char[].  */
+#define YYTEXT_POINTER 1
+
+/* Define if lex declares yytext as a unsigned char [] by default.  */
+/* #undef YYTEXT_UCHAR */
+
+/* tex: Define to enable --ipc.  In ptx, #undef IPC (from 2024) */
+#define IPC 1
+/* #define IPC_DEBUG 1 */
+
+/* web2c: Define if gcc asm needs _ on external symbols.  */
+/* #define ASM_NEEDS_UNDERSCORE 1 */
+
+/* web2c: Define to enable HackyInputFileNameForCoreDump.tex.  */
+#undef FUNNY_CORE_DUMP
+
+/* web2c: Define to disable architecture-independent dump files.
+   Faster on LittleEndian architectures.  */
+#undef NO_DUMP_SHARE
+
+/* web2c: Default editor for interactive `e' option.  Although we'd like
+   to use ${VISUAL-${EDITOR-foo}} here, chances are a user's editor
+   won't understand +lineno, so they'll just have to override
+   TEXEDIT/MFEDIT/MPEDIT to get what they want.  No particular reason
+   for emacs vs. vi, just historical.  */
+#define EDITOR "emacs +%d \"%s\""
+
+/* The number of bytes in a long.  */
+#define SIZEOF_LONG 4
+
+/* Define if you have the ftime function.  */
+#define HAVE_FTIME 1
+#define ftime _ftime
+
+/* Define if you have the gettimeofday function.  */
+/* #undef HAVE_GETTIMEOFDAY */
+
+/* Define if you have the mkstemp function.  */
+/* #undef HAVE_MKSTEMP */
+
+/* Define if you have the mktemp function.  */
+#define HAVE_MKTEMP 1
+
+/* Define if you have the strerror function.  */
+#define HAVE_STRERROR 1
+
+/* Define if you have the <sys/time.h> header file.  */
+#undef HAVE_SYS_TIME_H
+
+/* Define if you have the <sys/timeb.h> header file.  */
+#define HAVE_SYS_TIMEB_H 1
+
+/* Define if you have the <zlib.h> header file.  */
+#define HAVE_ZLIB_H 1
+
+/* Define if you have the m library (-lm).  */
+#undef HAVE_LIBM
+
+/* Define if you have the posix library (-lposix).  */
+#undef HAVE_LIBPOSIX
+
+/* Define if you have the z library (-lz).  */
+#define HAVE_LIBZ 1
+#define HAVE_STRTOL 1
+#define HAVE_ACCESS 1
+#define HAVE_ATOI 1
+#define HAVE_DIRENT_H 1
+#define HAVE_INTTYPES_H 1
+#define HAVE_MEMORY_H 1
+#define HAVE_STDLIB_H 1
+#define HAVE_STRING_H 1
+#define HAVE_SYS_STAT_H 1
+#define HAVE_SYS_TYPES_H 1
+#define STDC_HEADERS 1
+#define HAVE_UINTPTR_T 1
+
+#define __attribute__(x)
+
+#include <sys/types.h>
+#undef  off_t
+#define off_t __int64
+
+#endif /* !WEB2C_C_AUTO_H */

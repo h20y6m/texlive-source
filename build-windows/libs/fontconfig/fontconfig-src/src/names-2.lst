@@ -1,0 +1,6 @@
+FcFreeTypeCharIndex
+FcFreeTypeCharSetAndSpacing
+FcFreeTypeCharSet
+FcPatternGetFTFace
+FcPatternAddFTFace
+FcFreeTypeQueryFace

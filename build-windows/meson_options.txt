@@ -1,0 +1,7 @@
+option('no_kpse_dll', type : 'boolean', value : false)
+
+option('euptex_synctex', type : 'boolean', value : true)
+option('xetex_synctex', type : 'boolean', value : true)
+option('nptex_synctex', type : 'boolean', value : true)
+
+option('icu_static', type : 'boolean', value : false)
