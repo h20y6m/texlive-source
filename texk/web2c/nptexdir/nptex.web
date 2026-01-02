@@ -28856,9 +28856,14 @@ begin
       scan_usv_num;        cur_val:=cur_val1 + cur_val; cur_val1:=0;
     end else begin {radical}
       scan_delimiter_int;
-      cur_val1:=cur_val div @"1000;
-      cur_val1:=(cur_val1 div @"100)*@"200000 + cur_val1 mod @"100;
-      cur_val :=((cur_val div @"100) mod 16)*@"200000 + cur_val mod @"100;
+      if cur_val>=@"40000000 then begin {extended delimiter code, only one size}
+        cur_val1:=0;
+        cur_val :=cur_val mod @"40000000;
+      end else begin {standard delimiter code, 4-bit families and 8-bit char codes}
+        cur_val1:=((cur_val div @"100) mod 16)*@"200000 + cur_val mod @"100;
+        cur_val :=cur_val div @"1000;
+        cur_val :=((cur_val div @"100) mod 16)*@"200000 + cur_val mod @"100;
+      end;
     end;
   end
 else  begin @<Get the next non-blank non-relax...@>;
@@ -28881,8 +28886,8 @@ else  begin @<Get the next non-blank non-relax...@>;
       cur_val1:=0;
       cur_val :=cur_val mod @"40000000;
     end else begin {standard delimiter code, 4-bit families and 8-bit char codes}
-      cur_val1:=cur_val div @"1000;
-      cur_val1:=(cur_val1 div @"100)*@"200000 + cur_val1 mod @"100;
+      cur_val1:=((cur_val div @"100) mod 16)*@"200000 + cur_val mod @"100;
+      cur_val :=cur_val div @"1000;
       cur_val :=((cur_val div @"100) mod 16)*@"200000 + cur_val mod @"100;
     end;
   end;
@@ -36867,14 +36872,14 @@ set_kansuji_char: if chr_code>0 then print_esc("kcatcode")
 @ @<Assignments@>=
 set_kansuji_char: if cur_chr>0 then
   begin scan_usv_num; n:=cur_val; scan_optional_equals; scan_int;
-  if cur_val=15 then @<Set |cjkx_code| to 0 for all characters in a Unicode block @>
-  else begin
-    print_err("Invalid code"); print_int(cur_val); print(") for \kcatcode ");
-@.kcat_code is read_only@>
-    help2("In npTeX, \kcatcode is almost read-only integer. So I'm skipping this")@/
-      ("control sequence. Use combination of \catcode and \cjkx code instead.");@/
-    error; return;
+  if (cur_val<14)or(cur_val>20) then
+    begin print_err("Invalid code ("); print_int(cur_val);
+@.Invalid code@>
+    print("), shoukd be in range 14..20");
+    help1("I'm going to use 16 instead of that illegal code value.");@/
+    error; cur_val:=16;
     end;
+  assign_kcatcode(a,n,cur_val);
   end
 else begin
   scan_int; n:=cur_val; scan_optional_equals; scan_usv_num;
@@ -37660,19 +37665,44 @@ current_cjkx_func_code: print_esc("currentcjkxfunc");
 @ @<Cases for fetching an integer value@>=
 current_cjkx_func_code: cur_val:=enable_cjkx_func;
 
-@ @<Set |cjkx_code| to 0 for all characters in a Unicode block @>=
-begin m:=kcatcodekey(n);
-if (m=1)or(m=@"1FD) then begin
-  for p:=@"80 to @"FF do if kcatcodekey(p)=m then define(cjkx_code_base+p,data,0)
-  end
-else if (m=@"A2)or(m=@"1FE)or(m=@"1FF) then begin
-  for p:=@"FF00 to @"FFF0 do if kcatcodekey(p)=m then define(cjkx_code_base+p,data,0)
-  end
-else begin cur_val:=get_ucs_block(m); cur_val1:=get_ucs_block(m+1); 
-  for p:=cur_val to cur_val1 do if kcatcodekey(p)=m then define(cjkx_code_base+p,data,0)
+@ @<Declare subprocedures for |prefixed_command|@>=
+procedure assign_kcatcode(@!a:small_number;@!c:integer;@!n:integer);
+var @!k:integer; {kcatcodekey}
+@!cc,xc:integer; {catcode, cjkxcode}
+@!bc,ec:integer; {begin, end}
+begin k:=kcatcodekey(c);
+if (k<0)or(k>=@"200) then confusion("assign kcatcode");
+if k>0 then begin {do not change ascii}
+  case n of
+  14,15: begin cc:=-1; xc:= 0; end;
+  16,17: begin cc:=11; xc:=14; end;
+  18,20: begin cc:=12; xc:=15; end;
+  19:    begin cc:=11; xc:=12; end;
+  othercases
+         begin cc:=11; xc:=14; end; {kcatcode=16}
+  endcases;
+  case k of
+  @"1FD: begin
+    bc:=get_ucs_block(@"001); ec:=get_ucs_block(@"001+1)-1; end;
+  @"1FE,@"1FF: begin
+    bc:=get_ucs_block(@"0A2); ec:=get_ucs_block(@"0A2+1)-1; end;
+  @"1F9: begin
+    bc:=get_ucs_block(@"06C); ec:=get_ucs_block(@"06C+1)-1; end;
+  @"1FA: begin
+    bc:=get_ucs_block(@"04B); ec:=get_ucs_block(@"04B+1)-1; end;
+  @"1FB: begin
+    bc:=get_ucs_block(@"138); ec:=get_ucs_block(@"138+1)-1; end;
+  @"1FC: begin
+    bc:=get_ucs_block(@"13A); ec:=get_ucs_block(@"13A+1)-1; end;
+  othercases begin
+    bc:=get_ucs_block(k); ec:=get_ucs_block(k+1)-1; end;
+  endcases;
+  for c:=bc to ec do if kcatcodekey(c)=k then begin
+    if cc>=0 then define(cat_code_base+c,data,cc);
+    if xc>=0 then define(cjkx_code_base+c,data,xc);
+    end;
   end;
-end
-
+end;
 
 
 @* \[54] System-dependent changes.

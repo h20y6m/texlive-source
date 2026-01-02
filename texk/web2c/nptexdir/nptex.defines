@@ -192,6 +192,7 @@ authorization from the copyright holders.
 @define function fromUCS ();
 @define function toJIS ();
 @define function toUCS ();
+@define function toDVI ();
 
 @define function getintone ();
 @define procedure setintone ();

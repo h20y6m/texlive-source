@@ -631,9 +631,13 @@ continue:
     prev_p:=link(prev_p); {N.B.: not |prev_p:=p|, |p| might be |lig_trick|}
     p:=link(p);
     jc:=KANJI(info(p)) mod max_char_val;
-    if font_enc[f]=1 then {JIS-encoded TFM}
+    if font_enc[f]=2 then {Unicode TFM}
+      jc:=toUCS(jc)
+    else if font_enc[f]=1 then {JIS-encoded TFM}
       begin if toJIS(jc)=0 then char_warning_jis(f,jc);
-      jc:=toJIS(jc); end;
+      jc:=toJIS(jc); end
+    else
+      jc:=toDVI(jc);
     if (jc<@"10000) then begin
       dvi_out(set2);
     end else begin
