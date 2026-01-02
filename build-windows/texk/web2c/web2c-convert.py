@@ -119,8 +119,8 @@ def pipe_run(args: list[str], lines: list[str]) -> list[str]:
         subprocess.run(
             args,
             input="\n".join(lines) + "\n",
+            stdout=subprocess.PIPE,
             text=True,
-            capture_output=True,
             check=True,
         )
         .stdout.rstrip("\n")

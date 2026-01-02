@@ -42,6 +42,7 @@ harfbuzz_defines += [
 ]
 harfbuzz_defines += [
   '-utf-8',
+  '-bigobj', # harfbuzz.cc is huge
 ]
 # NOTE: Unfortunately, harfbuzz emits a huge number of C4244 warnings,
 #       so I will have no choice but to disable it.
