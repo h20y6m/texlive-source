@@ -1,0 +1,9 @@
+src/fcobjshash.h において
+(int)(long)
+を
+(int)(size_t)
+で置き換えると，64ビットの場合の警告が出なくなる。
+
+src/fcobjshash.h がなかったら
+src/Makefile.fcobjshash
+を参照すること。
