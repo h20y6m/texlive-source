@@ -37695,9 +37695,9 @@ if k>0 then begin {do not change ascii}
   @"1FA: begin
     bc:=get_ucs_block(@"04B); ec:=get_ucs_block(@"04B+1)-1; end;
   @"1FB: begin
-    bc:=get_ucs_block(@"138); ec:=get_ucs_block(@"138+1)-1; end;
+    bc:=get_ucs_block(@"13F); ec:=get_ucs_block(@"13F+1)-1; end;
   @"1FC: begin
-    bc:=get_ucs_block(@"13A); ec:=get_ucs_block(@"13A+1)-1; end;
+    bc:=get_ucs_block(@"141); ec:=get_ucs_block(@"141+1)-1; end;
   othercases begin
     bc:=get_ucs_block(k); ec:=get_ucs_block(k+1)-1; end;
   endcases;
