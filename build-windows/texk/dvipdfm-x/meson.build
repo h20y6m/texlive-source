@@ -203,7 +203,7 @@ dvipdfmx_dll = shared_library('dvipdfmx',
   install : true,
 )
 
-call_dvipdfmx_exe = executable('call-dvipdfmx',
+dvipdfmx_calldll_exe = executable('dvipdfmx-calldll',
   '../calldll/calldll.c',
   c_args : '-DDLLPROC=dlldvipdfmxmain',
   link_with: dvipdfmx_dll,
@@ -211,7 +211,7 @@ call_dvipdfmx_exe = executable('call-dvipdfmx',
 
 foreach exe : ['xdvipdfmx.exe', 'dvipdfmx.exe', 'dvipdfm.exe']
   custom_target(exe,
-    input: call_dvipdfmx_exe,
+    input: dvipdfmx_calldll_exe,
     output: exe,
     command: [copyfile_py, '@INPUT@', '@OUTPUT@'],
     build_by_default : true,

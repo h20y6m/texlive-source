@@ -1,7 +1,7 @@
 #
 # meson.build for the TeX Live subdirectory libs/icu/
 #
-# Copyright 2025      Yukimasa Morimi <h20y6m@yahoo.co.jp>
+# Copyright 2025-2026 Yukimasa Morimi <h20y6m@yahoo.co.jp>
 # You may freely use, modify and/or distribute this file.
 
 subdir('include/unicode')
@@ -16,12 +16,11 @@ icu_version = run_command(
 
 icu_major = icu_version.split('.')[0]
 
-icu_static = get_option('icu_static')
+icu_static = get_option('no_icu_dll')
 
 
 icu_defines = [
   '-DWIN32=1',
-  '-utf-8',
 ]
 if icu_static
   icu_defines += ['-DU_STATIC_IMPLEMENTATION']
@@ -262,7 +261,7 @@ if icu_static
     cpp_args: icu_common_defines,
   )
 else
-  icu_common_lib = shared_library('icucommon',
+  icu_common_lib = shared_library('icutempcommon',
     icu_common_sources,
     c_args : icu_common_defines,
     cpp_args : icu_common_defines,
@@ -738,6 +737,7 @@ if icu_static
     compile_args: ['-DU_STATIC_IMPLEMENTATION'],
     link_with: [
       icu_common_lib,
+      icu_i18n_lib,
       icu_packagedata,
     ],
   )
@@ -752,6 +752,7 @@ else
     compile_args: [],
     link_with: [
       icu_common_lib,
+      icu_i18n_lib,
     ],
   )
 endif

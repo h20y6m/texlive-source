@@ -1,0 +1,13 @@
+/* c-auto.h.  Generated automatically by configure.  */
+/* c-auto.in.  Generated automatically from configure.in by autoheader.  */
+
+/* The number of bytes in a int.  */
+#define SIZEOF_INT 4
+#define PACKAGE_NAME "dvipsk (TeX Live)"
+#define PACKAGE_TARNAME "dvipsk--tex-live-"
+#define PACKAGE "dvipsk--tex-live-"
+#define PACKAGE_BUGREPORT "tex-k@tug.org"
+#define PACKAGE_URL ""
+
+#define TL_VERSION "TeX Live @TL_VERSION@"
+#define VERSION "@VERSION@"

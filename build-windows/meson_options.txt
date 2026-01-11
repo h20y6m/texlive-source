@@ -1,7 +1,28 @@
 option('no_kpse_dll', type : 'boolean', value : false)
 
-option('euptex_synctex', type : 'boolean', value : true)
-option('xetex_synctex', type : 'boolean', value : true)
-option('nptex_synctex', type : 'boolean', value : true)
+option('no_icu_dll', type : 'boolean', value : false)
 
-option('icu_static', type : 'boolean', value : false)
+## texk
+
+option('enable_bibtex_x', type : 'boolean', value : true)
+option('enable_dvi2tty', type : 'boolean', value : true)
+option('enable_dviout_util', type : 'boolean', value : true)
+option('enable_dvipdfm_x', type : 'boolean', value : true)
+option('enable_dvipsk', type : 'boolean', value : true)
+option('enable_makejvf', type : 'boolean', value : true)
+option('enable_mendexk', type : 'boolean', value : true)
+option('enable_seetexk', type : 'boolean', value : true)
+option('enable_upmendex', type : 'boolean', value : true)
+
+## web2c
+
+option('enable_web2c', type : 'boolean', value : true)
+
+option('enable_euptex', type : 'boolean', value : true)
+option('enable_xetex', type : 'boolean', value : true)
+option('enable_nptex', type : 'boolean', value : true)
+
+option('enable_euptex_synctex', type : 'boolean', value : true)
+option('enable_xetex_synctex', type : 'boolean', value : true)
+option('enable_nptex_synctex', type : 'boolean', value : true)
+

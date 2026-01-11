@@ -1,7 +1,7 @@
 #
 # meson.build for the TeX Live subdirectory libs/freetype2/
 #
-# Copyright 2025      Yukimasa Morimi <h20y6m@yahoo.co.jp>
+# Copyright 2025-2026 Yukimasa Morimi <h20y6m@yahoo.co.jp>
 # You may freely use, modify and/or distribute this file.
 
 freetype_dir = '../../../libs/freetype2'
@@ -16,7 +16,6 @@ freetype_defines = [
   '-DFT_CONFIG_MODULES_H=<ftmodule.h>',
   '-DFT_CONFIG_OPTIONS_H=<ftoption.h>',
   '-DFT2_BUILD_LIBRARY=1',
-  '-utf-8',
 ]
 
 freetype_sources = [

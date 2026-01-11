@@ -62,34 +62,40 @@ mktexfmt_exe = executable('mktexfmt',
   sources : mktexfmt_sources,
   c_args : win32_defines,
   dependencies : kpathsea_dep,
+  install : true,
 )
 
 mktexlsr_exe = executable('mktexlsr',
   sources : mktexlsr_sources,
   c_args : win32_defines,
   dependencies : kpathsea_dep,
+  install : true,
 )
 
 mktexmf_exe = executable('mktexmf',
   sources : mktexmf_sources,
   c_args : win32_defines,
   dependencies : kpathsea_dep,
+  install : true,
 )
 
 mktexpk_exe = executable('mktexpk',
   sources : mktexpk_sources + w2c_headers,
   c_args : win32_defines,
   dependencies : kpathsea_dep,
+  install : true,
 )
 
 mktextfm_exe = executable('mktextfm',
   sources : mktextfm_sources + w2c_headers,
   c_args : win32_defines,
   dependencies : kpathsea_dep,
+  install : true,
 )
 
 mktexupd_exe = executable('mktexupd',
   sources : mktexupd_sources,
   c_args : win32_defines,
   dependencies : kpathsea_dep,
+  install : true,
 )

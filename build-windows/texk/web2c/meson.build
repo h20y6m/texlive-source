@@ -1,7 +1,7 @@
 #
 # meson.build for the TeX Live subdirectory texk/web2c/
 #
-# Copyright 2025      Yukimasa Morimi <h20y6m@yahoo.co.jp>
+# Copyright 2025-2026 Yukimasa Morimi <h20y6m@yahoo.co.jp>
 # You may freely use, modify and/or distribute this file.
 
 subdir('lib')
@@ -265,7 +265,7 @@ euptex_ch_synctex = []
 euptex_sources_synctex = []
 euptex_defines_synctex = []
 
-if get_option('euptex_synctex')
+if get_option('enable_euptex_synctex')
   euptex_ch_synctex = [
     'synctexdir/synctex-def.ch0',
     'synctexdir/synctex-ep-mem.ch0',
@@ -300,7 +300,7 @@ xetex_post_ch_synctex = []
 xetex_sources_synctex = []
 xetex_defines_synctex = []
 
-if get_option('xetex_synctex')
+if get_option('enable_xetex_synctex')
   xetex_ch_synctex = [
     'synctexdir/synctex-xe-def.ch0',
     'synctexdir/synctex-mem.ch0',
@@ -327,14 +327,14 @@ if get_option('xetex_synctex')
   ]
 endif
 
-## SyncTeX infrastructure: XeTeX
+## SyncTeX infrastructure: npTeX
 
 nptex_ch_synctex = []
 nptex_post_ch_synctex = []
 nptex_sources_synctex = []
 nptex_defines_synctex = []
 
-if get_option('nptex_synctex')
+if get_option('enable_nptex_synctex')
   nptex_ch_synctex = [
     'synctexdir/synctex-xe-def.ch0',
     'synctexdir/synctex-np-mem.ch0',
@@ -396,6 +396,16 @@ libmd5_dep = declare_dependency(
 #
 ########################################################################
 
+uptex_includes = [
+  web2c_dir,
+  web2c_dir / 'uptexdir',
+]
+
+uptex_defines = [
+  '-DWIN32=1',
+  '-DHAVE_CONFIG_H=1',
+]
+
 ## libukanji
 
 libukanji_lib = static_library('ukanji',
@@ -413,6 +423,381 @@ libukanji_lib = static_library('ukanji',
   ],
 )
 
+## upbibtex
+
+upbibtex_web = custom_target('upbibtex.web',
+  input: [
+    web2c_dir / 'bibtex.web',
+    web2c_dir / 'bibtex.ch',
+  ],
+  output: ['upbibtex.web'],
+  command: [tie_py,
+    '--workdir', '@OUTDIR@',
+    '--tie', tie_exe,
+    '-m', 'upbibtex.web',
+    'bibtex.web',
+    'bibtex.ch',
+  ],
+  env: {
+    'TEXMFCNF': meson.current_source_dir() / web2c_dir / '../kpathsea',
+    'WEBINPUTS': ';'.join(
+      '.',
+      meson.current_source_dir() / web2c_dir
+    ),
+  },
+)
+
+upbibtex_p = custom_target('upbibtex.p',
+  input: [
+    upbibtex_web,
+    web2c_dir / 'uptexdir/upbibtex.ch',
+  ],
+  output: ['upbibtex.p'],
+  command: [tangle_py,
+    '--workdir', '@OUTDIR@',
+    '--tangle', tangle_exe,
+    'upbibtex', 'upbibtex',
+  ],
+  env: {
+    'TEXMFCNF': meson.current_source_dir() / web2c_dir / '../kpathsea',
+    'WEBINPUTS': ';'.join(
+      '.',
+      meson.current_source_dir() / web2c_dir / 'uptexdir',
+      meson.current_source_dir() / web2c_dir,
+    ),
+  }
+)
+
+upbibtex_c_h = custom_target('upbibtex.[ch]',
+  input: [
+    upbibtex_p,
+    web2c_dir / 'uptexdir/uptex.defines',
+  ],
+  output: ['upbibtex.c', 'upbibtex.h'],
+  command: [web2c_convert_py,
+    '--workdir', '@OUTDIR@',
+    '--srcdir', '@CURRENT_SOURCE_DIR@' / web2c_dir,
+    '--splitup', splitup_exe,
+    '--web2c', web2c_exe,
+    '--fixwrites', fixwrites_exe,
+    'upbibtex',
+  ],
+)
+
+upbibtex_sources = [
+  web2c_dir / 'uptexdir/kanji.h',
+]
+
+upbibtex_exe = executable('upbibtex',
+  upbibtex_c_h,
+  upbibtex_sources,
+  include_directories : include_directories(uptex_includes),
+  c_args: uptex_defines,
+  link_with: [
+    libukanji_lib,
+    pproglib_lib,
+    proglib_lib,
+  ],
+  dependencies : [
+    ptexenc_dep,
+    kpathsea_dep,
+    libmd5_dep,
+    zlib_dep,
+    win32api_winsock2,
+  ],
+  install : true,
+)
+
+custom_target('pbibtex.exe',
+  input: upbibtex_exe,
+  output: 'pbibtex.exe',
+  command: [copyfile_py, '@INPUT@', '@OUTPUT@'],
+  build_by_default : true,
+  install : true,
+  install_dir : get_option('bindir'),
+)
+
+## updvitype
+
+updvitype_web = custom_target('updvitype.web',
+  input: [
+    web2c_dir / 'dvitype.web',
+    web2c_dir / 'dvitype.ch',
+  ],
+  output: ['updvitype.web'],
+  command: [tie_py,
+    '--workdir', '@OUTDIR@',
+    '--tie', tie_exe,
+    '-m', 'updvitype.web',
+    'dvitype.web',
+    'dvitype.ch',
+  ],
+  env: {
+    'TEXMFCNF': meson.current_source_dir() / web2c_dir / '../kpathsea',
+    'WEBINPUTS': ';'.join(
+      '.',
+      meson.current_source_dir() / web2c_dir
+    ),
+  },
+)
+
+updvitype_p = custom_target('updvitype.p',
+  input: [
+    updvitype_web,
+    web2c_dir / 'uptexdir/updvitype.ch',
+  ],
+  output: ['updvitype.p'],
+  command: [tangle_py,
+    '--workdir', '@OUTDIR@',
+    '--tangle', tangle_exe,
+    'updvitype', 'updvitype',
+  ],
+  env: {
+    'TEXMFCNF': meson.current_source_dir() / web2c_dir / '../kpathsea',
+    'WEBINPUTS': ';'.join(
+      '.',
+      meson.current_source_dir() / web2c_dir / 'uptexdir',
+      meson.current_source_dir() / web2c_dir,
+    ),
+  }
+)
+
+updvitype_c_h = custom_target('updvitype.[ch]',
+  input: [
+    updvitype_p,
+    web2c_dir / 'uptexdir/uptex.defines',
+  ],
+  output: ['updvitype.c', 'updvitype.h'],
+  command: [web2c_convert_py,
+    '--workdir', '@OUTDIR@',
+    '--srcdir', '@CURRENT_SOURCE_DIR@' / web2c_dir,
+    '--splitup', splitup_exe,
+    '--web2c', web2c_exe,
+    '--fixwrites', fixwrites_exe,
+    'updvitype',
+  ],
+)
+
+updvitype_sources = [
+  web2c_dir / 'uptexdir/kanji.h',
+]
+
+updvitype_exe = executable('updvitype',
+  updvitype_c_h,
+  updvitype_sources,
+  include_directories : include_directories(uptex_includes),
+  c_args: uptex_defines,
+  link_with: [
+    libukanji_lib,
+    pproglib_lib,
+    proglib_lib,
+  ],
+  dependencies : [
+    ptexenc_dep,
+    kpathsea_dep,
+    libmd5_dep,
+    zlib_dep,
+    win32api_winsock2,
+  ],
+  install : true,
+)
+
+custom_target('pdvitype.exe',
+  input: updvitype_exe,
+  output: 'pdvitype.exe',
+  command: [copyfile_py, '@INPUT@', '@OUTPUT@'],
+  build_by_default : true,
+  install : true,
+  install_dir : get_option('bindir'),
+)
+
+## uppltotf
+
+uppltotf_web = custom_target('uppltotf.web',
+  input: [
+    web2c_dir / 'pltotf.web',
+    web2c_dir / 'pltotf.ch',
+  ],
+  output: ['uppltotf.web'],
+  command: [tie_py,
+    '--workdir', '@OUTDIR@',
+    '--tie', tie_exe,
+    '-m', 'uppltotf.web',
+    'pltotf.web',
+    'pltotf.ch',
+  ],
+  env: {
+    'TEXMFCNF': meson.current_source_dir() / web2c_dir / '../kpathsea',
+    'WEBINPUTS': ';'.join(
+      '.',
+      meson.current_source_dir() / web2c_dir
+    ),
+  },
+)
+
+uppltotf_p = custom_target('uppltotf.p',
+  input: [
+    uppltotf_web,
+    web2c_dir / 'uptexdir/uppltotf.ch',
+  ],
+  output: ['uppltotf.p'],
+  command: [tangle_py,
+    '--workdir', '@OUTDIR@',
+    '--tangle', tangle_exe,
+    'uppltotf', 'uppltotf',
+  ],
+  env: {
+    'TEXMFCNF': meson.current_source_dir() / web2c_dir / '../kpathsea',
+    'WEBINPUTS': ';'.join(
+      '.',
+      meson.current_source_dir() / web2c_dir / 'uptexdir',
+      meson.current_source_dir() / web2c_dir,
+    ),
+  }
+)
+
+uppltotf_c_h = custom_target('uppltotf.[ch]',
+  input: [
+    uppltotf_p,
+    web2c_dir / 'uptexdir/uptex.defines',
+  ],
+  output: ['uppltotf.c', 'uppltotf.h'],
+  command: [web2c_convert_py,
+    '--workdir', '@OUTDIR@',
+    '--srcdir', '@CURRENT_SOURCE_DIR@' / web2c_dir,
+    '--splitup', splitup_exe,
+    '--web2c', web2c_exe,
+    '--fixwrites', fixwrites_exe,
+    'uppltotf',
+  ],
+)
+
+uppltotf_sources = [
+  web2c_dir / 'uptexdir/kanji.h',
+]
+
+uppltotf_exe = executable('uppltotf',
+  uppltotf_c_h,
+  uppltotf_sources,
+  include_directories : include_directories(uptex_includes),
+  c_args: uptex_defines,
+  link_with: [
+    libukanji_lib,
+    pproglib_lib,
+    proglib_lib,
+  ],
+  dependencies : [
+    ptexenc_dep,
+    kpathsea_dep,
+    libmd5_dep,
+    zlib_dep,
+    win32api_winsock2,
+  ],
+  install : true,
+)
+
+custom_target('ppltotf.exe',
+  input: uppltotf_exe,
+  output: 'ppltotf.exe',
+  command: [copyfile_py, '@INPUT@', '@OUTPUT@'],
+  build_by_default : true,
+  install : true,
+  install_dir : get_option('bindir'),
+)
+
+## uptftopl
+
+uptftopl_web = custom_target('uptftopl.web',
+  input: [
+    web2c_dir / 'tftopl.web',
+    web2c_dir / 'tftopl.ch',
+  ],
+  output: ['uptftopl.web'],
+  command: [tie_py,
+    '--workdir', '@OUTDIR@',
+    '--tie', tie_exe,
+    '-m', 'uptftopl.web',
+    'tftopl.web',
+    'tftopl.ch',
+  ],
+  env: {
+    'TEXMFCNF': meson.current_source_dir() / web2c_dir / '../kpathsea',
+    'WEBINPUTS': ';'.join(
+      '.',
+      meson.current_source_dir() / web2c_dir
+    ),
+  },
+)
+
+uptftopl_p = custom_target('uptftopl.p',
+  input: [
+    uptftopl_web,
+    web2c_dir / 'uptexdir/uptftopl.ch',
+  ],
+  output: ['uptftopl.p'],
+  command: [tangle_py,
+    '--workdir', '@OUTDIR@',
+    '--tangle', tangle_exe,
+    'uptftopl', 'uptftopl',
+  ],
+  env: {
+    'TEXMFCNF': meson.current_source_dir() / web2c_dir / '../kpathsea',
+    'WEBINPUTS': ';'.join(
+      '.',
+      meson.current_source_dir() / web2c_dir / 'uptexdir',
+      meson.current_source_dir() / web2c_dir,
+    ),
+  }
+)
+
+uptftopl_c_h = custom_target('uptftopl.[ch]',
+  input: [
+    uptftopl_p,
+    web2c_dir / 'uptexdir/uptex.defines',
+  ],
+  output: ['uptftopl.c', 'uptftopl.h'],
+  command: [web2c_convert_py,
+    '--workdir', '@OUTDIR@',
+    '--srcdir', '@CURRENT_SOURCE_DIR@' / web2c_dir,
+    '--splitup', splitup_exe,
+    '--web2c', web2c_exe,
+    '--fixwrites', fixwrites_exe,
+    'uptftopl',
+  ],
+)
+
+uptftopl_sources = [
+  web2c_dir / 'uptexdir/kanji.h',
+]
+
+uptftopl_exe = executable('uptftopl',
+  uptftopl_c_h,
+  uptftopl_sources,
+  include_directories : include_directories(uptex_includes),
+  c_args: uptex_defines,
+  link_with: [
+    libukanji_lib,
+    pproglib_lib,
+    proglib_lib,
+  ],
+  dependencies : [
+    ptexenc_dep,
+    kpathsea_dep,
+    libmd5_dep,
+    zlib_dep,
+    win32api_winsock2,
+  ],
+  install : true,
+)
+
+custom_target('ptftopl.exe',
+  input: uptftopl_exe,
+  output: 'ptftopl.exe',
+  command: [copyfile_py, '@INPUT@', '@OUTPUT@'],
+  build_by_default : true,
+  install : true,
+  install_dir : get_option('bindir'),
+)
 
 ########################################################################
 #
@@ -573,52 +958,54 @@ euptex_sources += [
 ]
 
 
-euptex_dll = shared_library('euptex',
-  euptex_sources + euptex_sources_synctex,
-  include_directories : euptex_includes,
-  c_args: euptex_defines + euptex_defines_synctex,
-  link_with: [
-    libukanji_lib,
-    pproglib_lib,
-    proglib_lib,
-  ],
-  dependencies : [
-    ptexenc_dep,
-    kpathsea_dep,
-    libmd5_dep,
-    zlib_dep,
-    win32api_winsock2,
-  ],
-  install : true,
-)
-
-call_euptex = executable('call-euptex',
-  '../calldll/calldll.c',
-  c_args : '-DDLLPROC=dlleuptexmain',
-  implicit_include_directories : false,
-  link_with: euptex_dll,
-)
-
-foreach exe : [
-  'eptex.exe',
-  'euptex.exe',
-  'platex.exe',
-  'platex-dev.exe',
-  'ptex.exe',
-  'uplatex.exe',
-  'uplatex-dev.exe',
-  'uptex.exe',
-]
-  custom_target(exe,
-    input: call_euptex,
-    output: exe,
-    command: [copyfile_py, '@INPUT@', '@OUTPUT@'],
-    build_by_default : true,
+if get_option('enable_euptex')
+  euptex_dll = shared_library('euptex',
+    euptex_sources + euptex_sources_synctex,
+    include_directories : euptex_includes,
+    c_args: euptex_defines + euptex_defines_synctex,
+    link_with: [
+      libukanji_lib,
+      pproglib_lib,
+      proglib_lib,
+    ],
+    dependencies : [
+      ptexenc_dep,
+      kpathsea_dep,
+      libmd5_dep,
+      zlib_dep,
+      win32api_winsock2,
+    ],
     install : true,
-    install_dir : get_option('bindir'),
   )
-endforeach
 
+  euptex_calldll_exe = executable('euptex-calldll',
+    '../calldll/calldll.c',
+    c_args : '-DDLLPROC=dlleuptexmain',
+    implicit_include_directories : false,
+    link_with: euptex_dll,
+  )
+
+  foreach exe : [
+    'eptex.exe',
+    'euptex.exe',
+    'platex.exe',
+    'platex-dev.exe',
+    'ptex.exe',
+    'uplatex.exe',
+    'uplatex-dev.exe',
+    'uptex.exe',
+  ]
+    custom_target(exe,
+      input: euptex_calldll_exe,
+      output: exe,
+      command: [copyfile_py, '@INPUT@', '@OUTPUT@'],
+      build_by_default : true,
+      install : true,
+      install_dir : get_option('bindir'),
+    )
+  endforeach
+
+endif # enable_euptex
 
 ########################################################################
 #
@@ -809,36 +1196,39 @@ xetex_sources += [
 ]
 
 
-xetex_dll = shared_library('xetex',
-  xetex_sources + xetex_sources_synctex,
-  include_directories : xetex_includes,
-  c_args: xetex_defines + xetex_defines_synctex,
-  cpp_args: xetex_defines + xetex_defines_synctex,
-  link_with: [
-    libxetex_lib,
-    proglib_lib,
-  ],
-  dependencies : xetex_deps,
-  install : true,
-)
-
-call_xetex = executable('call-xetex',
-  '../calldll/calldll.c',
-  c_args : '-DDLLPROC=dllxetexmain',
-  implicit_include_directories : false,
-  link_with: xetex_dll,
-)
-
-foreach exe : ['xetex.exe', 'xelatex.exe', 'xelatex-dev.exe']
-  custom_target(exe,
-    input: call_xetex,
-    output: exe,
-    command: [copyfile_py, '@INPUT@', '@OUTPUT@'],
-    build_by_default : true,
+if get_option('enable_xetex')
+  xetex_dll = shared_library('xetex',
+    xetex_sources + xetex_sources_synctex,
+    include_directories : xetex_includes,
+    c_args: xetex_defines + xetex_defines_synctex,
+    cpp_args: xetex_defines + xetex_defines_synctex,
+    link_with: [
+      libxetex_lib,
+      proglib_lib,
+    ],
+    dependencies : xetex_deps,
     install : true,
-    install_dir : get_option('bindir'),
   )
-endforeach
+
+  xetex_calldll_exe = executable('xetex-calldll',
+    '../calldll/calldll.c',
+    c_args : '-DDLLPROC=dllxetexmain',
+    implicit_include_directories : false,
+    link_with: xetex_dll,
+  )
+
+  foreach exe : ['xetex.exe', 'xelatex.exe', 'xelatex-dev.exe']
+    custom_target(exe,
+      input: xetex_calldll_exe,
+      output: exe,
+      command: [copyfile_py, '@INPUT@', '@OUTPUT@'],
+      build_by_default : true,
+      install : true,
+      install_dir : get_option('bindir'),
+    )
+  endforeach
+endif # enable_xetex
+
 
 ########################################################################
 #
@@ -976,36 +1366,37 @@ nptex_sources += [
   web2c_dir / 'nptexdir/nptex_version.h',
 ]
 
-
-nptex_dll = shared_library('nptex',
-  nptex_sources,
-  nptex_sources_synctex,
-  include_directories : nptex_includes,
-  c_args: nptex_defines + nptex_defines_synctex,
-  cpp_args: nptex_defines + nptex_defines_synctex,
-  link_with: [
-    libnptex_lib,
-    libxetex_lib,
-    proglib_lib,
-  ],
-  dependencies : nptex_deps,
-  install : true,
-)
-
-call_nptex = executable('call-nptex',
-  '../calldll/calldll.c',
-  c_args : '-DDLLPROC=dllnptexmain',
-  implicit_include_directories : false,
-  link_with: nptex_dll,
-)
-
-foreach exe : ['nptex.exe', 'nplatex.exe', 'nplatex-dev.exe']
-  custom_target(exe,
-    input: call_nptex,
-    output: exe,
-    command: [copyfile_py, '@INPUT@', '@OUTPUT@'],
-    build_by_default : true,
+if get_option('enable_nptex')
+  nptex_dll = shared_library('nptex',
+    nptex_sources,
+    nptex_sources_synctex,
+    include_directories : nptex_includes,
+    c_args: nptex_defines + nptex_defines_synctex,
+    cpp_args: nptex_defines + nptex_defines_synctex,
+    link_with: [
+      libnptex_lib,
+      libxetex_lib,
+      proglib_lib,
+    ],
+    dependencies : nptex_deps,
     install : true,
-    install_dir : get_option('bindir'),
   )
-endforeach
+
+  nptex_calldll_exe = executable('nptex-calldll',
+    '../calldll/calldll.c',
+    c_args : '-DDLLPROC=dllnptexmain',
+    implicit_include_directories : false,
+    link_with: nptex_dll,
+  )
+
+  foreach exe : ['nptex.exe', 'nplatex.exe', 'nplatex-dev.exe']
+    custom_target(exe,
+      input: nptex_calldll_exe,
+      output: exe,
+      command: [copyfile_py, '@INPUT@', '@OUTPUT@'],
+      build_by_default : true,
+      install : true,
+      install_dir : get_option('bindir'),
+    )
+  endforeach
+endif # enable_nptex

@@ -118,4 +118,7 @@
 #undef  off_t
 #define off_t __int64
 
+/* Define to 1 if stdbool.h conforms to C99. */
+#mesondefine HAVE_STDBOOL_H
+
 #endif /* !WEB2C_C_AUTO_H */

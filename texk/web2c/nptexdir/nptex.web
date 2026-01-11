@@ -6620,6 +6620,9 @@ here, and the |number_regs| \.{\\dimen} registers.
 @d pdf_page_height   == dimen_par(pdf_page_height_code)
 @d t_baseline_shift==dimen_par(t_baseline_shift_code)
 @d y_baseline_shift==dimen_par(y_baseline_shift_code)
+@#
+@d enc_jis=1
+@d enc_ucs=2
 
 @p procedure print_length_param(@!n:integer);
 begin case n of
@@ -6918,6 +6921,7 @@ begin
 if s<=biggest_char then begin
   if s<0 then begin p:=undefined_primitive; goto found; end
   else p:=(s mod prim_prime)+prim_base; {we start searching here}
+  l:=1;
   end
 else begin
   j:=str_start_macro(s);
@@ -7295,8 +7299,8 @@ procedure print_font_dir_and_enc(f:internal_font_number);
 begin
   if font_dir[f]=dir_tate then print("/TATE")
   else if font_dir[f]=dir_yoko then print("/YOKO");
-  if font_enc[f]=2 then print("+Unicode")
-  else if font_enc[f]=1 then print("+JIS");
+  if font_enc[f]=enc_ucs then print("+Unicode")
+  else if font_enc[f]=enc_jis then print("+JIS");
 end;
 
 @* \[19] Saving and restoring equivalents.
@@ -14215,7 +14219,7 @@ if jfm_flag<>dir_default then
   for k:=ctype_base[f] to ctype_base[f]+nt-1 do
     begin
     fget; read_twentyfourx(cx);
-    if jfm_enc=1 then {JIS-encoded TFM}
+    if jfm_enc=enc_jis then {JIS-encoded TFM}
       font_info[k].hh.rh:=tokanji(fromJIS(cx))
     else
       font_info[k].hh.rh:=tokanji(cx); {|kchar_code|}
@@ -36827,8 +36831,8 @@ exit:end;
 @ @<Scan the font encoding specification@>=
 begin jfm_enc:=0;
 if scan_keyword_noexpand("in") then
-  if scan_keyword_noexpand("jis") then jfm_enc:=1
-  else if scan_keyword_noexpand("ucs") then jfm_enc:=2
+  if scan_keyword_noexpand("jis") then jfm_enc:=enc_jis
+  else if scan_keyword_noexpand("ucs") then jfm_enc:=enc_ucs
   else begin
     print_err("Unknown TFM encoding");
 @.Unknown TFM encoding@>
@@ -37691,9 +37695,9 @@ if k>0 then begin {do not change ascii}
   @"1FA: begin
     bc:=get_ucs_block(@"04B); ec:=get_ucs_block(@"04B+1)-1; end;
   @"1FB: begin
-    bc:=get_ucs_block(@"138); ec:=get_ucs_block(@"138+1)-1; end;
+    bc:=get_ucs_block(@"13F); ec:=get_ucs_block(@"13F+1)-1; end;
   @"1FC: begin
-    bc:=get_ucs_block(@"13A); ec:=get_ucs_block(@"13A+1)-1; end;
+    bc:=get_ucs_block(@"141); ec:=get_ucs_block(@"141+1)-1; end;
   othercases begin
     bc:=get_ucs_block(k); ec:=get_ucs_block(k+1)-1; end;
   endcases;

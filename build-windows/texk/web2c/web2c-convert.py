@@ -31,7 +31,7 @@ def cvtbib(lines: list[str]) -> list[str]:
         # ---- 置換群（sed の順番に） ----
 
         # s/goto lab31 ; */{lab31=1; return;}/
-        line = re.sub(r"goto lab31 ; *", r"{lab31=1; return;}\1", line, count=1)
+        line = re.sub(r"goto lab31 ; *", r"{lab31=1; return;}", line, count=1)
 
         # s/goto lab32/longjmp(jmp32,1)/
         line = re.sub(r"goto lab32", r"longjmp(jmp32,1)", line, count=1)

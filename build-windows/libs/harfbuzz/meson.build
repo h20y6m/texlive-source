@@ -1,7 +1,7 @@
 #
 # meson.build for the TeX Live subdirectory libs/harfbuzz/
 #
-# Copyright 2025      Yukimasa Morimi <h20y6m@yahoo.co.jp>
+# Copyright 2025-2026 Yukimasa Morimi <h20y6m@yahoo.co.jp>
 # You may freely use, modify and/or distribute this file.
 
 harfbuzz_srcdir = '../../../libs/harfbuzz'
@@ -41,7 +41,6 @@ harfbuzz_defines += [
   '-DHAVE_GRAPHITE2',
 ]
 harfbuzz_defines += [
-  '-utf-8',
   '-bigobj', # harfbuzz.cc is huge
 ]
 # NOTE: Unfortunately, harfbuzz emits a huge number of C4244 warnings,
