@@ -56,6 +56,7 @@ subdir('libs/pplib')
 subdir('libs/teckit')
 
 subdir('libs/gmp')
+subdir('libs/mpfr') # depends on gmp
 
 ## Additional libraries for Windows
 
