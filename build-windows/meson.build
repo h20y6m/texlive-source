@@ -55,6 +55,8 @@ subdir('libs/icu')
 subdir('libs/pplib')
 subdir('libs/teckit')
 
+subdir('libs/gmp')
+
 ## Additional libraries for Windows
 
 subdir('libs/expat')
