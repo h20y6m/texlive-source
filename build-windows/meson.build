@@ -58,6 +58,7 @@ subdir('libs/teckit')
 subdir('libs/gmp')
 subdir('libs/mpfr') # depends on gmp
 subdir('libs/mpfi') # depends on gmp, mpfr
+subdir('libs/pixman')
 
 ## Additional libraries for Windows
 
