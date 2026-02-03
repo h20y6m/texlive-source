@@ -59,6 +59,7 @@ subdir('libs/gmp')
 subdir('libs/mpfr') # depends on gmp
 subdir('libs/mpfi') # depends on gmp, mpfr
 subdir('libs/pixman')
+subdir('libs/cairo') # depends on pixman, libpng, zlib
 
 ## Additional libraries for Windows
 

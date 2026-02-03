@@ -65,6 +65,8 @@ PATH=$(SolutionDir)libs\icu;$(SolutionDir)texk\kpathsea;$(Path)
 
 以下のディレクトリのファイルは角藤氏の `windows-src2025.tar.xz` に含まれているものである。
 
+  * `libs/cairo/cairo-src`
+      * `texlive-source` にも含まれているがそちらは MSVC では使用できない。
   * `libs/expat/expat-src`
   * `libs/fontconfig/fontconfig-src`
 
