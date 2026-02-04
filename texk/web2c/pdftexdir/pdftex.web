@@ -1,4 +1,4 @@
-% Copyright 1996-2025 Han Th\^e\llap{\raise 0.5ex\hbox{\'{}}} Th\`anh,
+% Copyright 1996-2026 Han Th\^e\llap{\raise 0.5ex\hbox{\'{}}} Th\`anh,
 % <thanh@@pdftex.org>
 
 % This file is part of pdfTeX.
@@ -1887,8 +1887,14 @@ amounts of user interaction:
 @d print_err(#)==begin if interaction=error_stop_mode then wake_up_terminal;
   print_nl("! "); print(#);
   end
-@d print_ignored_err(#)==begin if interaction=error_stop_mode then wake_up_terminal;
-  print_nl("ignored error: "); print(#);
+@d print_ignored_err(#)==begin
+  {An error in original \TeX, but we want to send it only to the log in
+   other engines, and without the word |"error"|, which humans and
+   software look for.}
+  old_selector_ignored_err := selector;
+  selector := log_only;
+  wlog_cr; wlog('ignored: '); print(#);
+  selector := old_selector_ignored_err;
   end
 
 @<Glob...@>=
@@ -6221,6 +6227,8 @@ routines are going to work.
 
 @<Glob...@>=
 @!old_setting:0..max_selector;
+@!old_selector_ignored_err:0..max_selector; { for |print_ignored_err|}
+
 @!sys_time,@!sys_day,@!sys_month,@!sys_year:integer;
     {date and time supplied by external system}
 
@@ -16237,8 +16245,10 @@ begin
     must_insert_space := false;
     must_end_string := false;
 
-    if not pdf_doing_text then
+    if not pdf_doing_text then begin
         pdf_begin_text;
+        must_set_text_pos := true;
+    end;
 
     {delay font switch if we must insert interword space}
     if (not gen_faked_interword_space and pdf_f <> f)
@@ -16275,10 +16285,12 @@ begin
         v_out := 0;
     end;
 
-    must_set_text_pos := (v <> 0)
-        or (abs(s) >= @'100000)
-        or (get_font_auto_expand_ratio(f) <> pdf_cur_Tm_a)
-        or get_font_auto_expand_ratio(f) <> get_font_auto_expand_ratio(pdf_f);
+    if not must_set_text_pos then begin
+      must_set_text_pos := (v <> 0)
+          or (abs(s) >= @'100000)
+          or (get_font_auto_expand_ratio(f) <> pdf_cur_Tm_a)
+          or get_font_auto_expand_ratio(f) <> get_font_auto_expand_ratio(pdf_f);
+    end;
 
     if must_set_text_pos then begin
         must_end_string := true;
