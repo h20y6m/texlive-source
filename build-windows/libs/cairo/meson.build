@@ -192,7 +192,8 @@ subdir('cairo')
 
 cairo_dep = declare_dependency(
   sources : cairo_include_headers,
-  include_directories : include_directories('.'),
+  include_directories : include_directories('cairo'),
+  compile_args : ['-DCAIRO_WIN32_STATIC_BUILD'],
   link_with : cairo_lib,
   dependencies : [
     pixman_dep,

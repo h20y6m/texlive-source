@@ -353,6 +353,447 @@ libmd5_dep = declare_dependency(
 
 ########################################################################
 #
+# libmputil, libmplib, used by MetaPost and luaTeX
+#
+########################################################################
+
+## libmputil
+
+libmputil_sources = [
+  web2c_dir / 'mplibdir/avl.h',
+  web2c_dir / 'mplibdir/avl.c',
+  web2c_dir / 'mplibdir/decNumber.c',
+  web2c_dir / 'mplibdir/decNumber.h',
+  web2c_dir / 'mplibdir/decNumberLocal.h',
+  web2c_dir / 'mplibdir/decContext.h',
+  web2c_dir / 'mplibdir/decContext.c',
+]
+
+libmputil_lib = static_library('mputil',
+  libmputil_sources,
+  include_directories : include_directories(
+    web2c_dir / 'mplibdir',
+  ),
+  c_args: [
+    '-DWIN32',
+  ],
+)
+
+## libmplib
+
+libmplibcore_sources = []
+libmplibextramath_sources = []
+libmplibbackends_sources = []
+libmplib_gen_c_h_files = {} # for pMetaPost, upMetaPost
+
+libmplib_tfmin_c = custom_target('tfmin.c',
+  input: [
+    web2c_dir / 'mplibdir/tfmin.w',
+  ],
+  output: ['tfmin.c'],
+  command: [tangle_py,
+    '--workdir', '@OUTDIR@',
+    '--tangle', ctangle_exe,
+    'tfmin.w',
+  ],
+  env: {
+    'TEXMFCNF': meson.current_source_dir() / web2c_dir / '../kpathsea',
+    'CWEBINPUTS': meson.current_source_dir() / web2c_dir / 'mplibdir',
+  }
+)
+libmplibcore_sources += libmplib_tfmin_c
+
+libmplib_mp_c_h = custom_target('mp.[ch]',
+  input: [
+    web2c_dir / 'mplibdir/mp.w',
+  ],
+  output: [
+    'mp.c',
+    'mplib.h',
+    'mpmp.h',
+  ],
+  command: [tangle_py,
+    '--workdir', '@OUTDIR@',
+    '--tangle', ctangle_exe,
+    'mp',
+  ],
+  env: {
+    'TEXMFCNF': meson.current_source_dir() / web2c_dir / '../kpathsea',
+    'CWEBINPUTS': meson.current_source_dir() / web2c_dir / 'mplibdir',
+  }
+)
+libmplibcore_sources += libmplib_mp_c_h
+libmplibcore_sources += web2c_dir / 'mplibdir/mpconfig.h'
+libmplibextramath_sources += libmplib_mp_c_h[2]
+libmplibbackends_sources += libmplib_mp_c_h[2]
+
+foreach name : ['mpmath', 'mpmathbinary', 'mpmathdecimal', 'mpmathdouble', 'mpmathinterval', 'mpstrings']
+  libmplib_c_h = custom_target(f'@name@.[ch]',
+    input: [
+      web2c_dir / 'mplibdir' / f'@name@.w',
+    ],
+    output: [
+      f'@name@.h',
+      f'@name@.c',
+    ],
+    command: [tangle_py,
+      '--workdir', '@OUTDIR@',
+      '--tangle', ctangle_exe,
+      name,
+    ],
+    env: {
+      'TEXMFCNF': meson.current_source_dir() / web2c_dir / '../kpathsea',
+      'CWEBINPUTS': meson.current_source_dir() / web2c_dir / 'mplibdir',
+    }
+  )
+  if name == 'mpmathbinary' or name == 'mpmathinterval'
+    libmplibextramath_sources += libmplib_c_h
+  else
+    libmplibcore_sources += libmplib_c_h
+  endif
+  libmplib_gen_c_h_files += {
+    f'@name@.h' : libmplib_c_h[0],
+    f'@name@.c' : libmplib_c_h[1],
+  }
+endforeach
+
+foreach name : ['ps', 'svg', 'png']
+  libmplib_c_h = custom_target(f'mp@name@out.[ch]',
+    input: [
+      web2c_dir / 'mplibdir' / f'@name@out.w',
+    ],
+    output: [
+      f'mplib@name@.h',
+      f'mp@name@out.h',
+      f'@name@out.c',
+    ],
+    command: [tangle_py,
+      '--workdir', '@OUTDIR@',
+      '--tangle', ctangle_exe,
+      f'@name@out',
+    ],
+    env: {
+      'TEXMFCNF': meson.current_source_dir() / web2c_dir / '../kpathsea',
+      'CWEBINPUTS': meson.current_source_dir() / web2c_dir / 'mplibdir',
+    }
+  )
+  if name == 'ps'
+    libmplibcore_sources += libmplib_c_h
+  else
+    libmplibbackends_sources += libmplib_c_h
+    libmplibcore_sources += [libmplib_c_h[0], libmplib_c_h[1]]
+  endif
+  libmplib_gen_c_h_files += {
+    f'mplib@name@.h' : libmplib_c_h[0],
+    f'mp@name@out.h' : libmplib_c_h[1],
+    f'@name@out.c' : libmplib_c_h[2],
+  }
+endforeach
+
+libmplibcore_lib = static_library('mplibcore',
+  libmplibcore_sources,
+  include_directories : include_directories(
+    web2c_dir,
+    web2c_dir / 'mplibdir',
+  ),
+  c_args: [
+    '-DWIN32',
+  ],
+  dependencies : [
+    libpng_dep,
+    zlib_dep,
+    kpathsea_dep,
+  ],
+)
+
+libmplibcore_lib = static_library('mplibextramath',
+  libmplibextramath_sources,
+  include_directories : include_directories(
+    web2c_dir,
+    web2c_dir / 'mplibdir',
+  ),
+  c_args: [
+    '-DWIN32',
+  ],
+  dependencies : [
+    mpfi_dep,
+    mpfr_dep,
+    gmp_dep,
+    kpathsea_dep,
+  ],
+)
+
+libmplibcore_lib = static_library('mplibbackends',
+  libmplibbackends_sources,
+  include_directories : include_directories(
+    web2c_dir,
+    web2c_dir / 'mplibdir',
+  ),
+  c_args: [
+    '-DWIN32',
+  ],
+  dependencies : [
+    mpfi_dep,
+    mpfr_dep,
+    gmp_dep,
+    cairo_dep,
+    pixman_dep,
+    libpng_dep,
+    zlib_dep,
+    kpathsea_dep,
+  ],
+)
+
+########################################################################
+#
+# pMetaPost and upMetaPost
+#
+########################################################################
+
+pmp_sed_py = find_program('pmp-sed.py')
+
+pmpost_sources = []
+
+foreach name : ['mpost', 'tfmin']
+  pmpost_w = custom_target(f'p@name@.w',
+    input: web2c_dir / 'mplibdir' / f'@name@.w',
+    output: f'p@name@.w',
+    command: [pmp_sed_py, '@INPUT@', '@OUTPUT@'],
+  )
+  pmpost_c = custom_target(f'p@name@.c',
+    input: [
+      pmpost_w,
+      web2c_dir / 'pmpostdir' / f'p@name@.ch',
+    ],
+    output: f'p@name@.c',
+    command: [tangle_py,
+      '--workdir', '@OUTDIR@',
+      '--tangle', ctangle_exe,
+      f'p@name@', f'p@name@',
+    ],
+    env: {
+      'TEXMFCNF': meson.current_source_dir() / web2c_dir / '../kpathsea',
+      'CWEBINPUTS': ';'.join(['.', meson.current_source_dir() / web2c_dir / 'pmpostdir']),
+    }
+  )
+  pmpost_sources += pmpost_c
+endforeach
+
+pmpost_pmp_w = custom_target('pmp.w',
+  input: web2c_dir / 'mplibdir' / 'mp.w',
+  output: f'pmp.w',
+  command: [pmp_sed_py, '@INPUT@', '@OUTPUT@'],
+)
+pmpost_pmp_c_h = custom_target('pmp.[ch]',
+  input: [
+    pmpost_pmp_w,
+    web2c_dir / 'pmpostdir' / 'pmp.ch',
+  ],
+  output: [
+    'pmp.c',
+    'pmplib.h',
+    'pmpmp.h',
+  ],
+  command: [tangle_py,
+    '--workdir', '@OUTDIR@',
+    '--tangle', ctangle_exe,
+    'pmp', 'pmp',
+  ],
+  env: {
+    'TEXMFCNF': meson.current_source_dir() / web2c_dir / '../kpathsea',
+    'CWEBINPUTS': ';'.join(['.', meson.current_source_dir() / web2c_dir / 'pmpostdir']),
+  }
+)
+pmpost_sources += pmpost_pmp_c_h
+
+foreach name : ['mpmath', 'mpmathbinary', 'mpmathdecimal', 'mpmathdouble', 'mpmathinterval', 'mpstrings']
+  pmpost_c = custom_target(f'p@name@.c',
+    input: libmplib_gen_c_h_files[f'@name@.c'],
+    output: f'p@name@.c',
+    command: [pmp_sed_py, '@INPUT@', '@OUTPUT@'],
+  )
+  pmpost_sources += pmpost_c
+  pmpost_h = custom_target(f'p@name@.h',
+    input: libmplib_gen_c_h_files[f'@name@.h'],
+    output: f'p@name@.h',
+    command: [pmp_sed_py, '@INPUT@', '@OUTPUT@'],
+  )
+  pmpost_sources += pmpost_h
+endforeach
+
+foreach name : ['mpxout']
+  pmpost_w = custom_target(f'p@name@.w',
+    input: web2c_dir / 'mplibdir' / f'@name@.w',
+    output: f'p@name@.w',
+    command: [pmp_sed_py, '@INPUT@', '@OUTPUT@'],
+  )
+  pmpost_c_h = custom_target(f'p@name@.[ch]',
+    input: [
+      pmpost_w,
+      web2c_dir / 'pmpostdir' / f'p@name@.ch',
+    ],
+    output: [
+      f'p@name@.c',
+      f'p@name@.h',
+    ],
+    command: [tangle_py,
+      '--workdir', '@OUTDIR@',
+      '--tangle', ctangle_exe,
+      f'p@name@', f'p@name@',
+    ],
+    env: {
+      'TEXMFCNF': meson.current_source_dir() / web2c_dir / '../kpathsea',
+      'CWEBINPUTS': ';'.join(['.', meson.current_source_dir() / web2c_dir / 'pmpostdir']),
+    }
+  )
+  pmpost_sources += pmpost_c_h
+endforeach
+
+foreach name : ['ps', 'svg']
+  pmpost_w = custom_target(f'p@name@out.w',
+    input: web2c_dir / 'mplibdir' / f'@name@out.w',
+    output: f'p@name@out.w',
+    command: [pmp_sed_py, '@INPUT@', '@OUTPUT@'],
+  )
+  pmpost_c_h = custom_target(f'p@name@out.[ch]',
+    input: [
+      pmpost_w,
+      web2c_dir / 'pmpostdir' / f'p@name@out.ch',
+    ],
+    output: [
+      f'pmplib@name@.h',
+      f'pmp@name@out.h',
+      f'p@name@out.c',
+    ],
+    command: [tangle_py,
+      '--workdir', '@OUTDIR@',
+      '--tangle', ctangle_exe,
+      f'p@name@out', f'p@name@out',
+    ],
+    env: {
+      'TEXMFCNF': meson.current_source_dir() / web2c_dir / '../kpathsea',
+      'CWEBINPUTS': ';'.join(['.', meson.current_source_dir() / web2c_dir / 'pmpostdir']),
+    }
+  )
+  pmpost_sources += pmpost_c_h
+endforeach
+
+foreach name : ['png']
+  pmpost_h = custom_target(f'pmplib@name@.h',
+    input: libmplib_gen_c_h_files[f'mplib@name@.h'],
+    output: f'pmplib@name@.h',
+    command: [pmp_sed_py, '@INPUT@', '@OUTPUT@'],
+  )
+  pmpost_sources += pmpost_h
+  pmpost_h = custom_target(f'pmp@name@out.h',
+    input: libmplib_gen_c_h_files[f'mp@name@out.h'],
+    output: f'pmp@name@out.h',
+    command: [pmp_sed_py, '@INPUT@', '@OUTPUT@'],
+  )
+  pmpost_sources += pmpost_h
+  pmpost_c = custom_target(f'p@name@out.c',
+    input: libmplib_gen_c_h_files[f'@name@out.c'],
+    output: f'p@name@out.c',
+    command: [pmp_sed_py, '@INPUT@', '@OUTPUT@'],
+  )
+  pmpost_sources += pmpost_c
+endforeach
+
+if get_option('enable_pmp')
+  pmpost_dll = shared_library('pmpost',
+    pmpost_sources,
+    include_directories : include_directories(
+      web2c_dir,
+      web2c_dir / 'pmpostdir',
+      web2c_dir / 'mplibdir',
+    ),
+    c_args: [
+      '-DWIN32',
+    ],
+    link_with : [
+      libmputil_lib,
+      libmputil_lib,
+    ],
+    dependencies : [
+      mpfi_dep,
+      mpfr_dep,
+      gmp_dep,
+      cairo_dep,
+      pixman_dep,
+      libpng_dep,
+      zlib_dep,
+      ptexenc_dep,
+      kpathsea_dep,
+    ],
+    install : true,
+  )
+  pmpost_calldll_exe = executable('pmpost-calldll',
+    '../calldll/calldll.c',
+    c_args : '-DDLLPROC=dllpmpostmain',
+    implicit_include_directories : false,
+    link_with: pmpost_dll,
+  )
+  foreach exe : ['pmpost.exe', 'pdvitomp.exe', 'r-pmpost.exe']
+    custom_target(exe,
+      input: pmpost_calldll_exe,
+      output: exe,
+      command: [copyfile_py, '@INPUT@', '@OUTPUT@'],
+      build_by_default : true,
+      install : true,
+      install_dir : get_option('bindir'),
+    )
+  endforeach
+endif # enable_upmp
+
+if get_option('enable_upmp')
+  upmpost_dll = shared_library('upmpost',
+    pmpost_sources,
+    include_directories : include_directories(
+      web2c_dir,
+      web2c_dir / 'pmpostdir',
+      web2c_dir / 'mplibdir',
+    ),
+    c_args: [
+      '-DUPMP',
+      '-DWIN32',
+    ],
+    link_with : [
+      libmputil_lib,
+      libmputil_lib,
+    ],
+    dependencies : [
+      mpfi_dep,
+      mpfr_dep,
+      gmp_dep,
+      cairo_dep,
+      pixman_dep,
+      libpng_dep,
+      zlib_dep,
+      ptexenc_dep,
+      kpathsea_dep,
+    ],
+    install : true,
+  )
+  upmpost_calldll_exe = executable('upmpost-calldll',
+    '../calldll/calldll.c',
+    c_args : '-DDLLPROC=dllupmpostmain',
+    implicit_include_directories : false,
+    link_with: upmpost_dll,
+  )
+  foreach exe : ['upmpost.exe', 'updvitomp.exe', 'r-upmpost.exe']
+    custom_target(exe,
+      input: upmpost_calldll_exe,
+      output: exe,
+      command: [copyfile_py, '@INPUT@', '@OUTPUT@'],
+      build_by_default : true,
+      install : true,
+      install_dir : get_option('bindir'),
+    )
+  endforeach
+endif # enable_upmp
+
+########################################################################
+#
 # upTeX
 #
 ########################################################################
