@@ -55,6 +55,12 @@ subdir('libs/icu')
 subdir('libs/pplib')
 subdir('libs/teckit')
 
+subdir('libs/gmp')
+subdir('libs/mpfr') # depends on gmp
+subdir('libs/mpfi') # depends on gmp, mpfr
+subdir('libs/pixman')
+subdir('libs/cairo') # depends on pixman, libpng, zlib
+
 ## Additional libraries for Windows
 
 subdir('libs/expat')

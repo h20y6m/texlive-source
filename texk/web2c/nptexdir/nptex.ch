@@ -95,14 +95,6 @@ if translate_filename then begin
   wterm_ln('" ignored)');
 @z
 
-@x l.1891 - have print_ignored_error respect --file-line-error
-  print_nl("ignored error: "); print(#);
-@y
-  if file_line_error_style_p then print_file_line
-  else print_nl("");
-  print("ignored error: "); print(#);
-@z
-
 @x l.2020 - add a new |history| value for failure of the output driver
 has been detected. It has four possible values: |spotless|, |warning_issued|,
 |error_message_issued|, and |fatal_error_stop|.

@@ -21,6 +21,10 @@ icu_static = get_option('no_icu_dll')
 
 icu_defines = [
   '-DWIN32=1',
+  # Disable some warnings. ICU gives a lot of warnings.
+  '/wd4244',
+  '/wd4275',
+  '/wd4805',
 ]
 if icu_static
   icu_defines += ['-DU_STATIC_IMPLEMENTATION']
@@ -72,6 +76,7 @@ icu_common_sources = [
   icu_src / 'common/errorcode.cpp',
   icu_src / 'common/filteredbrk.cpp',
   icu_src / 'common/filterednormalizer2.cpp',
+  icu_src / 'common/fixedstring.cpp',
   icu_src / 'common/icudataver.cpp',
   icu_src / 'common/icuplug.cpp',
   icu_src / 'common/loadednormalizer2impl.cpp',

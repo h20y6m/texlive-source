@@ -18,6 +18,9 @@ option('enable_upmendex', type : 'boolean', value : true)
 
 option('enable_web2c', type : 'boolean', value : true)
 
+option('enable_pmp', type : 'boolean', value : true, description : 'pMetaPost')
+option('enable_upmp', type : 'boolean', value : true, description : 'upMetaPost')
+
 option('enable_euptex', type : 'boolean', value : true)
 option('enable_xetex', type : 'boolean', value : true)
 option('enable_nptex', type : 'boolean', value : true)
