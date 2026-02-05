@@ -6095,6 +6095,13 @@ if i<too_big_usv then is_cjkx_jachar:=is_cjkx_jachar_inner(i)
 else is_cjkx_jachar:=true;
 end;
 
+function is_cjkx_jachardef(@!c:integer):boolean;
+begin
+if (c>=0)and(c<=256) then is_cjkx_jachardef:=false
+else if is_cjkx_jachar(c) then is_cjkx_jachardef:=true
+else is_cjkx_jachardef:=false;
+end;
+
 @ Region 5 of |eqtb| contains the integer parameters and registers defined
 here, as well as the |del_code| table. The latter table differs from the
 |cat_code..math_code| tables that precede it, since delimiter codes are
@@ -25589,11 +25596,13 @@ big_switch: get_x_token;@/
 reswitch: @<Give diagnostic information, if requested@>;
 ins_kp:=false;
 case abs(mode)+cur_cmd of
-hmode+letter,hmode+other_char,hmode+char_given:
+hmode+letter,hmode+other_char:
   if is_cjkx_jachar(cur_chr) then goto main_loop_j else goto main_loop;
+hmode+char_given:
+  if is_cjkx_jachardef(cur_chr) then goto main_loop_j else goto main_loop;
 hmode+char_num: begin t:=cur_chr; if cur_chr=2 then scan_kchar_num else scan_usv_num; cur_chr:=cur_val;
   case t of
-  0: if is_cjkx_jachar(cur_chr) then goto main_loop_j else goto main_loop;
+  0: if is_cjkx_jachardef(cur_chr) then goto main_loop_j else goto main_loop;
   1: goto main_loop;
   2: goto main_loop_j;
   endcases;
@@ -25782,16 +25791,20 @@ collect_native:
 
   {try to collect as many chars as possible in the same font}
   get_next;
-  if (cur_cmd=letter) or (cur_cmd=other_char) or (cur_cmd=char_given) then
+  if (cur_cmd=letter) or (cur_cmd=other_char) then
     begin if not is_cjkx_jachar(cur_chr) then goto collect_native end
+  else if cur_cmd=char_given then
+    begin if not is_cjkx_jachardef(cur_chr) then goto collect_native end
   else if cur_cmd=achar_given then goto collect_native;
   x_token_if_call;
-  if (cur_cmd=letter) or (cur_cmd=other_char) or (cur_cmd=char_given) then
+  if (cur_cmd=letter) or (cur_cmd=other_char) then
     begin if not is_cjkx_jachar(cur_chr) then goto collect_native end
+  else if cur_cmd=achar_given then
+    begin if not is_cjkx_jachardef(cur_chr) then goto collect_native end
   else if cur_cmd=achar_given then goto collect_native
   else if cur_cmd=char_num then begin t:=cur_chr;
     if cur_chr=2 then scan_kchar_num else scan_usv_num; cur_chr:=cur_val;
-    if (t=1)or((t=0)and not is_cjkx_jachar(cur_chr)) then goto collect_native
+    if (t=1)or((t=0)and not is_cjkx_jachardef(cur_chr)) then goto collect_native
     else cur_cmd:=kchar_given;
   end;
   if (cur_cmd<=max_command)and(cur_cmd<>letter)and(cur_cmd<>other_char)
@@ -26033,10 +26046,12 @@ collected:
     x_token; native_len:=0;
     if (cur_cmd=letter) or (cur_cmd=other_char) or (cur_cmd=char_given) then
       begin if not is_cjkx_jachar(cur_chr) then goto collect_native+1 end
+    else if cur_cmd=char_given then
+      begin if not is_cjkx_jachardef(cur_chr) then goto collect_native+1 end
     else if cur_cmd=achar_given then goto collect_native+1
     else if cur_cmd=char_num then begin t:=cur_chr;
       if cur_chr=2 then scan_kchar_num else scan_usv_num; cur_chr:=cur_val;
-      if (t=1)or((t=0)and not is_cjkx_jachar(cur_chr)) then goto collect_native+1
+      if (t=1)or((t=0)and not is_cjkx_jachardef(cur_chr)) then goto collect_native+1
       else cur_cmd:=kchar_given;
     end;
     if (cur_cmd<=max_command)and(cur_cmd<>letter)and(cur_cmd<>other_char)
@@ -26154,13 +26169,19 @@ look ahead for it.
 
 @<Look ahead for another character...@>=
 get_next; {set only |cur_cmd| and |cur_chr|, for speed}
-if (cur_cmd=letter)or(cur_cmd=other_char)or(cur_cmd=char_given) then
+if (cur_cmd=letter)or(cur_cmd=other_char) then
   begin if is_cjkx_jachar(cur_chr) then @<goto |main_lig_loop|@>
+  else goto main_loop_lookahead+1; end
+else if cur_cmd=char_given then
+  begin if is_cjkx_jachardef(cur_chr) then @<goto |main_lig_loop|@>
   else goto main_loop_lookahead+1; end
 else if cur_cmd=achar_given then goto main_loop_lookahead+1
 else if cur_cmd=kchar_given then @<goto |main_lig_loop|@>;
 x_token; {now expand and set |cur_cmd|, |cur_chr|, |cur_tok|}
-if (cur_cmd=letter)or(cur_cmd=other_char)or(cur_cmd=char_given) then
+if (cur_cmd=letter)or(cur_cmd=other_char) then
+  begin if is_cjkx_jachar(cur_chr) then @<goto |main_lig_loop|@>
+  else goto main_loop_lookahead+1; end
+else if cur_cmd=char_given then
   begin if is_cjkx_jachar(cur_chr) then @<goto |main_lig_loop|@>
   else goto main_loop_lookahead+1; end
 else if cur_cmd=achar_given then goto main_loop_lookahead+1
@@ -26168,7 +26189,7 @@ else if cur_cmd=kchar_given then @<goto |main_lig_loop|@>;
 if cur_cmd=char_num then
   begin t:=cur_chr; if cur_chr=2 then scan_kchar_num else scan_usv_num; cur_chr:=cur_val;
   case t of
-  0: if is_cjkx_jachar(cur_chr) then @<goto |main_lig_loop|@>
+  0: if is_cjkx_jachardef(cur_chr) then @<goto |main_lig_loop|@>
     else goto main_loop_lookahead+1;
   1: goto main_loop_lookahead+1;
   2: @<goto |main_lig_loop|@>;
@@ -26556,7 +26577,7 @@ again_2+1:
       else begin ins_kp:=true; cur_l:=qi(0); end;
       end;
     char_given: begin
-      if is_cjkx_jachar(cur_chr) then
+      if is_cjkx_jachardef(cur_chr) then
         begin cur_l:=qi(get_jfm_pos(KANJI(cur_chr),main_f)); end
       else begin ins_kp:=true; cur_l:=qi(0); end;
       cur_cmd:=cat_code(cur_chr);
@@ -26564,7 +26585,7 @@ again_2+1:
     achar_given: begin ins_kp:=true; cur_l:=qi(0); cur_cmd:=cat_code(cur_chr); end;
     kchar_given: begin cur_l:=qi(get_jfm_pos(KANJI(cur_chr),main_f)); cur_cmd:=cat_code(cur_chr); end;
     char_num: begin t:=cur_chr; if cur_chr=2 then scan_kchar_num else scan_usv_num; cur_chr:=cur_val;
-      if (t=1)or((t=0)and not is_cjkx_jachar(cur_chr)) then begin
+      if (t=1)or((t=0)and not is_cjkx_jachardef(cur_chr)) then begin
         ins_kp:=true; cur_l:=qi(0); goto main_loop_j+3;
         end
       else begin cur_l:=qi(get_jfm_pos(KANJI(cur_chr),main_f)); end
@@ -28119,7 +28140,11 @@ end;
 @ @<Create a character node |q| for the next...@>=
 q:=null; f:=cur_font;  KANJI(cx):=empty;
 case cur_cmd of
-  letter,other_char,char_given: if is_cjkx_jachar(cur_chr) then
+  letter,other_char: if is_cjkx_jachar(cur_chr) then
+      begin if direction=dir_tate then f:=cur_tfont else f:=cur_jfont;
+      cx:=cur_chr; end
+    else begin q:=new_character(f,cur_chr); cur_val:=cur_chr end;
+  char_given: if is_cjkx_jachardef(cur_chr) then
       begin if direction=dir_tate then f:=cur_tfont else f:=cur_jfont;
       cx:=cur_chr; end
     else begin q:=new_character(f,cur_chr); cur_val:=cur_chr end;
@@ -28128,7 +28153,7 @@ case cur_cmd of
     begin if direction=dir_tate then f:=cur_tfont else f:=cur_jfont;
     cx:=cur_chr; end;
   char_num: begin cx:=cur_chr; if cur_chr=2 then scan_kchar_num else scan_usv_num; cur_chr:=cur_val;
-    if (cx=1)or((cx=0)and not is_cjkx_jachar(cur_chr)) then
+    if (cx=1)or((cx=0)and not is_cjkx_jachardef(cur_chr)) then
       begin if direction=dir_tate then f:=cur_tfont else f:=cur_jfont;
       cx:=cur_chr; end
     else  begin q:=new_character(f,cur_chr); cur_val:=cur_chr; KANJI(cx):=empty; end;
@@ -28677,7 +28702,7 @@ mmode+letter,mmode+other_char,mmode+char_given:
 mmode+achar_given: set_math_char(ho(math_code(cur_chr)));
 mmode+kchar_given: set_math_kchar(ho(cur_chr));
 mmode+char_num: begin t:=cur_chr; if cur_chr=2 then scan_kchar_num else scan_usv_num; cur_chr:=cur_val;
-  if (t=1)or((t=0)and not is_cjkx_jachar(cur_chr)) then
+  if (t=1)or((t=0)and not is_cjkx_jachardef(cur_chr)) then
     set_math_char(ho(math_code(cur_chr)))
   else set_math_kchar(cur_chr);
   end;
