@@ -28604,7 +28604,8 @@ kchar_given:
       goto restart;
       end;
     end;
-char_num: begin scan_char_num; cur_chr:=cur_val; cur_cmd:=char_given;
+char_num: begin c:=cur_chr; scan_char_num; cur_chr:=cur_val;
+  cur_cmd:=char_given+c; {char, achar, kchar}
   goto reswitch;
   end;
 math_char_num:
