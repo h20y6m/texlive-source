@@ -6087,6 +6087,7 @@ cjkxcode 4, 12 $\longmapsto$ kcatcode 19 (hangul)
   or ( (#>=force_cjkx_threshold) and (enable_cjkx_func=2) ))
 @d is_cjkx_nospc(#)==((cjkx_code(#)div 2)mod 2=1)
 @d is_cjkx_widowpenalty(#)==(cjkx_code(#) mod 2=1)
+@d is_cjkx_ja_math_chardef(#)==((#>=256)and is_cjkx_ja_math(#))
 
 @p
 function is_cjkx_jachar(@!i:integer):boolean;
@@ -28573,13 +28574,21 @@ var c:integer; {math character code}
 jx:boolean; {Japanese character}
 begin restart:@<Get the next non-blank non-relax...@>;
 reswitch:case cur_cmd of
-letter,other_char,char_given:
+letter,other_char:
   begin c:=ho(math_code(cur_chr));
     if is_active_math_char(c) then
       begin @<Treat |cur_chr| as an active character@>;
       goto restart;
       end
     else jx:=is_cjkx_ja_math(cur_chr);
+    end;
+char_given:
+  begin c:=ho(math_code(cur_chr));
+    if is_active_math_char(c) then
+      begin @<Treat |cur_chr| as an active character@>;
+      goto restart;
+      end
+    else jx:=is_cjkx_ja_math_chardef(cur_chr);
     end;
 achar_given:
   begin c:=ho(math_code(cur_chr)); jx:=false;
@@ -28696,13 +28705,16 @@ was first properly typeset by \TeX. The code in this section was used.
 @^Knuth, Donald Ervin@>
 
 @<Cases of |main_control| that build...@>=
-mmode+letter,mmode+other_char,mmode+char_given:
+mmode+letter,mmode+other_char:
   if is_cjkx_ja_math(cur_chr) then set_math_kchar(cur_chr)
+  else set_math_char(ho(math_code(cur_chr)));
+mmode+char_given:
+  if is_cjkx_ja_math_chardef(cur_chr) then set_math_kchar(cur_chr)
   else set_math_char(ho(math_code(cur_chr)));
 mmode+achar_given: set_math_char(ho(math_code(cur_chr)));
 mmode+kchar_given: set_math_kchar(ho(cur_chr));
 mmode+char_num: begin t:=cur_chr; if cur_chr=2 then scan_kchar_num else scan_usv_num; cur_chr:=cur_val;
-  if (t=1)or((t=0)and not is_cjkx_jachardef(cur_chr)) then
+  if (t=1)or((t=0)and not is_cjkx_ja_math_chardef(cur_chr)) then
     set_math_char(ho(math_code(cur_chr)))
   else set_math_kchar(cur_chr);
   end;
