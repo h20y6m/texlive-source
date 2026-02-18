@@ -24,15 +24,20 @@
 # done only when a release is tagged, not from the
 # commit-triggered builds here.
 
-# only build on push to trunk, not branch.
+## only build on push to trunk, not branch.
+#on:
+#  release:
+#    types:
+#      - released
+#      - prereleased
+#  push:
+#    branches:
+#      - trunk
 on:
-  release:
-    types:
-      - released
-      - prereleased
   push:
     branches:
-      - trunk
+      - test-arm-runner
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -40,7 +45,7 @@ concurrency:
 
 jobs:
   build_job:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.runner || 'ubuntu-latest' }}
     name: Build on ${{ matrix.tl_name }}
 
     strategy:
@@ -73,17 +78,17 @@ jobs:
           - tl_name: aarch64-linux
             image: arm64v8/debian:bullseye
             platform: aarch64
-            ci_build: false
-            use_qemu: true
-            qemu_arch: aarch64
+            ci_build: true
+            use_qemu: false
             buildsys: debian
+            runner: ubuntu-24.04-arm
           - tl_name: armhf-linux
             image: arm32v7/debian:bullseye
             platform: arm/v7
-            ci_build: false
-            use_qemu: true
-            qemu_arch: arm
+            ci_build: true
+            use_qemu: false
             buildsys: debian
+            runner: ubuntu-24.04-arm
 
     steps:
       - name: checkout-main
