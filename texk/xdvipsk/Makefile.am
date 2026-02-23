@@ -5,11 +5,11 @@
 ## Copyright 2009-2015 Peter Breitenlohner <tex-live@tug.org>
 ## You may freely use, modify and/or distribute this file.
 ##
+SUBDIRS = squeeze man
+
 GRAPHLIB_INCLUDES = -I$(srcdir)/graphlib
 OTFLIB_INCLUDES = -I$(srcdir)/otflib
 
-## liblua53
-##
 LUA_INCLUDES = $(LUA53_INCLUDES) $(LUA53_DEFINES)
 LUA_LIBS = $(LUA53_LIBS)
 LUA_DEPEND = $(LUA53_DEPEND)
@@ -22,7 +22,13 @@ if cross
 endif
 bin_PROGRAMS = xdvipsk
 
-xdvipsk_CPPFLAGS = $(OTFLIB_INCLUDES) $(GRAPHLIB_INCLUDES) $(LUA_INCLUDES) $(ZLIB_INCLUDES) $(LIBPNG_INCLUDES) $(LIBJPEG_INCLUDES) $(LIBTIFF_INCLUDES) $(KPATHSEA_INCLUDES) $(FREETYPE2_INCLUDES) -DUNIX -DKPATHSEA -DSHIFTLOWCHARS -DXDVIPSK
+# Force Automake to use CXXLD for linking
+nodist_EXTRA_xdvipsk_SOURCES = dummy.cxx
+
+xdvipsk_CPPFLAGS = $(OTFLIB_INCLUDES) $(GRAPHLIB_INCLUDES) $(LUA_INCLUDES) \
+                   $(ZLIB_INCLUDES) $(LIBPNG_INCLUDES) $(LIBJPEG_INCLUDES) \
+                   $(LIBTIFF_INCLUDES) $(KPATHSEA_INCLUDES) $(FREETYPE2_INCLUDES) \
+                   -DUNIX -DKPATHSEA -DSHIFTLOWCHARS -DXDVIPSK
 
 xdvipsk_SOURCES = \
 	bbox.c \
@@ -41,6 +47,7 @@ xdvipsk_SOURCES = \
 	emspecialex.c \
 	finclude.c \
 	fontdef.c \
+	font_glyph_maps.h \
 	glyphlist_table.h \
 	glyphmap.c \
 	glyphmap.h \
@@ -230,8 +237,10 @@ LIBTIFF_LIBS = libtiff.a
 
 $(libtiff_a_OBJECTS): config.force
 
-$(xdvipsk_OBJECTS): $(KPATHSEA_DEPEND) $(LUA_DEPEND) $(ZLIB_DEPEND) $(LIBPNG_DEPEND) $(LIBJPEG_DEPEND) $(LIBTIFF_DEPEND) $(FREETYPE2_DEPEND)
-xdvipsk_LDADD = libdvipsgraph.a $(KPATHSEA_LIBS) $(LUA_LIBS) $(LIBTIFF_LIBS) $(LIBPNG_LIBS) $(ZLIB_LIBS) $(LIBJPEG_LIBS) $(FREETYPE2_LIBS) -lstdc++
+$(xdvipsk_OBJECTS): $(KPATHSEA_DEPEND) $(LUA_DEPEND) $(ZLIB_DEPEND) $(LIBPNG_DEPEND) \
+                    $(LIBJPEG_DEPEND) $(LIBTIFF_DEPEND) $(FREETYPE2_DEPEND)
+xdvipsk_LDADD = libdvipsgraph.a $(KPATHSEA_LIBS) $(LUA_LIBS) $(LIBTIFF_LIBS) \
+                $(LIBPNG_LIBS) $(ZLIB_LIBS) $(LIBJPEG_LIBS) $(FREETYPE2_LIBS) -lstdc++
 if cross
    xdvipsk_SOURCES += mingw/include/wingdi.h
    xdvipsk_LDFLAGS = -fno-lto -fno-use-linker-plugin -static -static-libgcc -static-libstdc++ --disable-shared
@@ -274,10 +283,6 @@ AM_CXXFLAGS = @AM_CXXFLAGS@
 
 libdvipsgraph_a_CPPFLAGS = $(ZLIB_INCLUDES) $(LIBPNG_INCLUDES) $(LIBJPEG_INCLUDES) $(LIBTIFF_INCLUDES)
 
-###############################################################################
-# THE LIBRARIES TO BUILD
-###############################################################################
-
 ## Rebuild libkpathsea
 @KPATHSEA_RULE@
 ## Rebuild liblua53
@@ -289,5 +294,25 @@ libdvipsgraph_a_CPPFLAGS = $(ZLIB_INCLUDES) $(LIBPNG_INCLUDES) $(LIBJPEG_INCLUDE
 ## Rebuild freetype2
 @FREETYPE2_RULE@
 
-# Files not to be distributed
+prolog_DATA = $(prologues)
+dist_prologues = xdvipsk-cid.lpro
+prologdir = $(datarootdir)/texmf-dist/dvips/xdvipsk
+prologues = $(dist_prologues:.lpro=.pro)
+
+SUFFIXES = .pro .lpro
+
+.lpro.pro:
+	$(AM_V_GEN)squeeze/squeeze <$< >t-$@ && mv t-$@ $@
+
+$(prologues): squeeze/stamp-squeeze
+
+squeeze/stamp-squeeze:
+	cd squeeze && $(MAKE) $(AM_MAKEFLAGS) stamp-squeeze
+
+EXTRA_DIST = $(dist_prologues)
+
+TESTS = testdata/xdvipsk-help.test \
+        testdata/xdvipsk-version.test
+EXTRA_DIST += $(TESTS)
+
 include $(srcdir)/../../am/dist_hook.am

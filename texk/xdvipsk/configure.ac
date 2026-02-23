@@ -58,13 +58,11 @@ AC_SUBST([AM_CXXFLAGS])
 AC_SUBST([AM_LDFLAGS])
 AC_SUBST([LIBS])
 
-AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([Makefile  man/Makefile])
 
 # The subdirectory squeeze must be configured for the build system.
-KPSE_NATIVE_SUBDIRS()
+KPSE_NATIVE_SUBDIRS([squeeze])
 
 AC_HEADER_SYS_WAIT
-# Force Automake to use CXXLD for linking
-nodist_EXTRA_xdvipsk_SOURCES = dummy.cxx
 
 AC_OUTPUT
