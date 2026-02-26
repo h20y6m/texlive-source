@@ -54,7 +54,7 @@ upmendex_sources = [
 ]
 
 
-upmendex_exe = executable('mendex',
+upmendex_exe = executable('upmendex',
   upmendex_sources,
   upmendex_gen_headers,
   c_args : upmendex_defines,
