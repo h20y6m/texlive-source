@@ -70,6 +70,9 @@ subdir('libs/fontconfig') # depends on expat, freetype2, kpathsea
 
 subdir('texk/ptexenc')
 
+if get_option('enable_bibtex_x')
+  subdir('texk/bibtex-x') # depends on icu
+endif
 if get_option('enable_dvi2tty')
   subdir('texk/dvi2tty') # depends on ptexenc
 endif

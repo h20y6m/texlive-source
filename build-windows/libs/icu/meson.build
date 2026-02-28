@@ -266,7 +266,7 @@ if icu_static
     cpp_args: icu_common_defines,
   )
 else
-  icu_common_lib = shared_library('icutempcommon',
+  icu_common_stubdata_dll = shared_library('icuuc-stubdata',
     icu_common_sources,
     c_args : icu_common_defines,
     cpp_args : icu_common_defines,
@@ -274,6 +274,7 @@ else
       icu_stubdata_lib,
     ],
   )
+  icu_common_lib = icu_common_stubdata_dll
 endif
 
 ## i18n
@@ -547,7 +548,7 @@ if icu_static
     cpp_args: icu_i18n_defines,
   )
 else
-  icu_i18n_lib = shared_library('icui18n',
+  icu_i18n_stubdata_dll = shared_library('icui18n-stubdata',
     icu_i18n_sources,
     include_directories: [icu_src / 'common'],
     c_args: icu_i18n_defines,
@@ -556,8 +557,8 @@ else
       icu_common_lib,
     ],
     version : icu_version,
-    install : true,
   )
+  icu_i18n_lib = icu_i18n_stubdata_dll
 endif
 
 ## tools/toolutil
@@ -604,7 +605,7 @@ if icu_static
     cpp_args: icu_toolutil_defines,
   )
 else
-  icu_toolutil_lib = shared_library('icutu',
+  icu_toolutil_stubdata_dll = shared_library('icutu-stubdata',
     icu_toolutil_sources,
     include_directories: [
       icu_src / 'common',
@@ -617,6 +618,7 @@ else
       icu_common_lib,
     ],
   )
+  icu_toolutil_lib = icu_toolutil_stubdata_dll
 endif
 
 ## tools/icupkg
@@ -714,12 +716,21 @@ else
   )
 endif
 
-## common rebuild DLL with non-stub data
+## rebuild DLL with non-stub data
 
 if not icu_static
-  icu_common_lib = shared_library('icuuc',
-    objects: icu_common_lib.extract_all_objects(recursive : false), # reuse built objects
+  icu_common_dll = shared_library('icuuc',
+    objects: icu_common_stubdata_dll.extract_all_objects(recursive : false), # reuse built objects
     link_with : [
+      icu_packagedata[0],
+    ],
+    version : icu_version,
+    install : true,
+  )
+  icu_i18n_dll = shared_library('icui18n',
+    objects: icu_i18n_stubdata_dll.extract_all_objects(recursive : false), # reuse built objects
+    link_with : [
+      icu_common_dll,
       icu_packagedata[0],
     ],
     version : icu_version,
@@ -756,8 +767,8 @@ else
     ),
     compile_args: [],
     link_with: [
-      icu_common_lib,
-      icu_i18n_lib,
+      icu_common_dll,
+      icu_i18n_dll,
     ],
   )
 endif
