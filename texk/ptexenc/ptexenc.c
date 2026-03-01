@@ -1299,7 +1299,7 @@ int input_line_nptex(FILE *fp, int *buff,
                     i = j;
                     break;
                 } else { /* JIS encoding */
-                    i = fromJIS(HILO(j, i));
+                    i = fromJIS(HILO(i, j));
                     buff[last++] = (i == 0) ? U_REPLACEMENT_CHARACTER : i;
                 }
             } else {  /* normal */
