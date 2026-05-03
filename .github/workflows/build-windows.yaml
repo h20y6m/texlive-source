@@ -1,4 +1,4 @@
-name: build-windows
+name: Build Windows binaries
 
 on:
   push:
@@ -9,6 +9,9 @@ on:
 
 jobs:
   build:
+    runs-on: ${{ matrix.runner }}
+    name: Build ${{ matrix.target }}
+
     strategy:
       fail-fast: false
       matrix:
@@ -23,10 +26,8 @@ jobs:
             runner: windows-11-arm
             msvc_arch: arm64
 
-    runs-on: ${{ matrix.runner }}
-
     steps:
-      - name: Checkout repository
+      - name: Check out repository
         uses: actions/checkout@v6
 
       - name: Set up Python 3.13
@@ -39,24 +40,29 @@ jobs:
           python -m pip install --upgrade pip
           pip install meson ninja
 
-      - name: Set up MSVC
-        uses: h20y6m/actions-setup-msvc-env@v1
+      - name: Set up MSVC environment
+        uses: h20y6m/actions-setup-msvc-env@v2
         with:
           arch: ${{ matrix.msvc_arch }}
 
-      - name: Configure (Meson)
+      - name: Configure build
         run: |
           meson setup --backend=ninja --buildtype=release Work-${{ matrix.target }} build-windows
 
-      - name: Build
+      - name: Build binaries
         run: |
           meson compile -C Work-${{ matrix.target }}
 
-      - name: Install (staging)
+      - name: Install to staging directory
         run: |
           meson install -C Work-${{ matrix.target }} --destdir ../inst-${{ matrix.target }}
 
-      - name: Create zip
+      - name: Copy required VC++ runtime DLLs
+        uses: h20y6m/actions-copy-vc-runtime@v1
+        with:
+          bindir: inst-${{ matrix.target }}/bin
+
+      - name: Create ZIP archive
         shell: pwsh
         run: |
           $zipPath = "texlive-bin-${{ matrix.target }}.zip"
@@ -80,14 +86,14 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Download artifacts
+      - name: Download build artifacts
         uses: actions/download-artifact@v8
         with:
           path: Work-download
           pattern: texlive-bin-*
           skip-decompress: true
 
-      - name: Create GitHub Release
+      - name: Create GitHub release
         uses: softprops/action-gh-release@v3
         with:
           fail_on_unmatched_files: true
