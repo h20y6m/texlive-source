@@ -24,6 +24,7 @@ if test x"$1" = xno-prepare; then
   do_prepare=0
 fi
 
+# emacs-page
 echo "$0: Building on $buildsys (do_prepare=$do_prepare)"
 
 if test $do_prepare = 1; then
@@ -37,15 +38,16 @@ if test $do_prepare = 1; then
        ;;
      almalinux)
        yum update -y
-       yum install -y gcc-toolset-11 fontconfig-devel libX11-devel libXmu-devel libXaw-devel
-       . /opt/rh/gcc-toolset-11/enable
+       yum install -y gcc-toolset-15 fontconfig-devel perl-interpreter \
+                      libX11-devel libXmu-devel libXaw-devel
+       . /opt/rh/gcc-toolset-15/enable
        ;;
-     alpine)
+     alpine) # aka musl
        apk update
-       apk add --no-progress bash gcc15-devel make perl fontconfig-dev libx11-dev libxmu-dev libxaw-dev
+       apk add --no-progress bash gcc g++ make musl-dev perl fontconfig-dev libx11-dev libxmu-dev libxaw-dev
        ;;
      freebsd)
-       env ASSUME_ALWAYS_YES=YES pkg install -y gmake gcc pkgconf libX11 libXt libXaw fontconfig perl5
+       env ASSUME_ALWAYS_YES=YES pkg install -y gmake gcc15-devel pkgconf libX11 libXt libXaw fontconfig perl5
        ;;
      netbsd)
        pkg_add gmake gcc pkgconf libX11 libXt libXaw fontconfig perl5
@@ -87,25 +89,28 @@ touch ./utils/xindy/xindy-src/tex2xindy/tex2xindy.c
 touch ./texk/dvipng/doc/dvipng.1
 touch ./texk/dvipng/dvipng-src/dvipng.1
 
+# emacs-page
 # default settings
 TL_MAKE_FLAGS="-j 2"
 BUILDARGS=
 
 # special cases
 case "$arch" in
-  armhf-linux) # debian:buster
+  armhf-linux)
     TL_MAKE_FLAGS="-j 1"
-    export CXXFLAGS='-std=c++17'
     ;;
-  aarch64-linux) # debian:buster
+  aarch64-linux)
     BUILDARGS="--enable-arm-neon=on"
-    export CXXFLAGS='-std=c++17'
+    ;;
+  x86_64-linuxmusl)
+    # alpine3.22 provides only gcc14, and gcc14 is problematic,
+    # as explained under freebsd below. Force use of older C standard.
+    export CFLAGS="-std=gnu11"
     ;;
   *-solaris)
     export PATH=/opt/csw/bin:$PATH
     export TL_MAKE=gmake
-    if [ $arch = "i386-solaris" ]
-    then
+    if test $arch = "i386-solaris"; then
       export CC="gcc -m32"
       export CXX="g++ -m32"
       # these commands make xdvipsk work:
@@ -119,7 +124,7 @@ case "$arch" in
       # 2026-02-11T15:08:00.6385876Z ld.so.1: teckit_compile: fatal: teckit_compile: mismatched ELF symbol versioning
       # 2026-02-11T15:08:00.6386286Z ../../../libs/teckit/teckit.test: line 7: 5876: Killed
       # 
-      # So instead, let's disable xdvipsk.
+      # So instead, let's disable xdvipsk on i386-solaris.
       BUILDARGS=--disable-xdvipsk
     else
       export CC="gcc -m64"
@@ -132,21 +137,60 @@ case "$arch" in
     # per https://tug.org/pipermail/tlbuild/2026q2/005996.html
     # gcc14.x has only partial support for C23, despite defining
     #   options to get it, which autoconf-2.73 finds :(.
+    #   So we need gcc15. See more comments in main.yml.
     export CC="gcc15 -Wl,-rpath,/usr/local/lib/gcc15"
     export CXX="g++15 -Wl,-rpath,/usr/local/lib/gcc15"
     export CFLAGS='-D_NETBSD_SOURCE'
-    export CXXFLAGS='-D_NETBSD_SOURCE -std=c++17'
-    ;;
-  x86_64-linux|i386-linux|x86_64-linuxmusl)
-    export CXXFLAGS='-std=c++17'
+    export CXXFLAGS='-D_NETBSD_SOURCE'
     ;;
 esac
 export TL_MAKE_FLAGS
 
-# If we explicitly set CFLAGS or CXXFLAGS above, it's up to us to enable
-# optimization, since we are overriding what Autoconf does.
-test -n "$CFLAGS" && CFLAGS="$CFLAGS -O2"
-test -n "$CXXFLAGS" && CXXFLAGS="$CXXFLAGS -O2"
+# ICU requires C++17, so we always need it.
+export CXXFLAGS="$CXXFLAGS -std=c++17"
+
+# Report the compiler version.
+echo "$0: checking \$CC --version:"
+${CC-gcc} --version || true # defeat -e in case, configure will fail anyway
+
+showfile() {
+  for f in "$@"; do
+    echo "$0: ==> $f"
+    cat $f
+    echo "$0: end $f <=="
+  done
+}
+
+# Make binaries harder to exploit with -fhardened. This option is only
+# supported on GNU/Linux, and only as of GCC 15. Older versions have
+# some support, but we'd have to specify a bunch of explicit options,
+# which seems a recipe for unnecessary maintenance pain.
+# 
+# Instead of hardwiring version numbers and platforms, try a test
+# compilation.
+# 
+echo "$0: checking whether we can enable -fhardened"
+touch empty.c
+# Get warning about _FORTIFY_SOURCE without optimization.
+if ${CC-gcc} $CFLAGS -O2 -fhardened -c empty.c >empty.out 2>&1; then
+  # Although it's only a warning if not supported, e.g., on freebsd,
+  # it's too annoying to see the warning on every compilation.
+  if test -s empty.out; then
+    echo "$0: empty.c -fhardened compilation got diagnostics, not setting."
+    showfile empty.out
+  else
+    echo "$0: empty.c -fhardened compilation successful, setting."
+    export CFLAGS="$CFLAGS -fhardened"
+  fi
+else
+  echo "$0: empty.c -fhardened compilation failed, not setting."
+  showfile empty.out
+fi
+
+# It's up to us to enable optimization if we are overriding the
+# compilation flags.
+test -z "$CFLAGS" || CFLAGS="$CFLAGS -O2"
+test -z "$CXXFLAGS" || CXXFLAGS="$CXXFLAGS -O2"
 
 echo "$0: variables set:"
 echo "  BUILDARGS=$BUILDARGS"
@@ -158,22 +202,25 @@ echo "  TL_MAKE=$TL_MAKE"
 echo "  TL_MAKE_FLAGS=$TL_MAKE_FLAGS"
 echo "$0: (end variables)."
 
+# emacs-page
 printf "\n\f $0: build starting: `date`"
-./Build -C $BUILDARGS || true # defeat sh -e
-status=$?
-
+if ./Build -C $BUILDARGS; then # thanks to -e; keep exit status without exiting
+  status=$?
+else
+  status=$?
+fi
 printf "\n\f $0: build finished: `date`"
 echo "$0: status = $status"
 echo "$0: Here are the Work/build?*.log files:" >&2
-head -n 99999 Work/build?*.log >&2
+showfile Work/build?*.log >&2
 
 if test $status = 0; then
   echo "$0: succeeded: Build -C $BUILDARGS"
+  # continue below.
 else
   echo "$0: failed: Build -C $BUILDARGS" >&2
-  echo "$0: here is config.log, too:" >&2
-  head -n 99999 config.log >&2
-  echo "$0: aborting." >&2
+  showfile Work/config.log >&2
+  echo "$0: aborting with status $status." >&2
   exit $status
 fi
 
@@ -183,7 +230,7 @@ fi
 #
 build_log=Work/build.log
 if grep 'compile:.* -O' $build_log; then :; else
-  echo "$0: aborting, no optimization (compile:* -O) in $build_log" >&2
+  echo "$0: aborting, no optimization /compile:.* -O/ in $build_log" >&2
   exit 1
 fi
 
