@@ -255,6 +255,16 @@ gmp_mpn_sources = [
   gmp_tree / 'mpn/generic/zero_p.c',
 ]
 
+# Functions that are never used are still required
+# for linking in 'debug' builds without optimizations.
+if get_option('buildtype') == 'debug'
+  gmp_mpn_sources += [
+    gmp_tree / 'mpn/generic/mod_1_1.c',
+    gmp_tree / 'mpn/generic/mod_1_2.c',
+    gmp_tree / 'mpn/generic/mod_1_4.c',
+  ]
+endif
+
 gmp_mpz_sources = [
   gmp_tree / 'mpz/abs.c',
   gmp_tree / 'mpz/add.c',
