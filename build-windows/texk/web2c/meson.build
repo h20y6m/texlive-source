@@ -386,11 +386,11 @@ libmplibextramath_sources = []
 libmplibbackends_sources = []
 libmplib_gen_c_h_files = {} # for pMetaPost, upMetaPost
 
-libmplib_tfmin_c = custom_target('tfmin.c',
+libmplib_tfmin_c_h = custom_target('tfmin.c',
   input: [
     web2c_dir / 'mplibdir/tfmin.w',
   ],
-  output: ['tfmin.c'],
+  output: ['tfmin.c', 'tfmin.h'],
   command: [tangle_py,
     '--workdir', '@OUTDIR@',
     '--tangle', ctangle_exe,
@@ -401,7 +401,7 @@ libmplib_tfmin_c = custom_target('tfmin.c',
     'CWEBINPUTS': meson.current_source_dir() / web2c_dir / 'mplibdir',
   }
 )
-libmplibcore_sources += libmplib_tfmin_c
+libmplibcore_sources += libmplib_tfmin_c_h
 
 libmplib_mp_c_h = custom_target('mp.[ch]',
   input: [
@@ -506,7 +506,7 @@ libmplibcore_lib = static_library('mplibcore',
   ],
 )
 
-libmplibcore_lib = static_library('mplibextramath',
+libmplibextramath_lib = static_library('mplibextramath',
   libmplibextramath_sources,
   include_directories : include_directories(
     web2c_dir,
@@ -523,7 +523,7 @@ libmplibcore_lib = static_library('mplibextramath',
   ],
 )
 
-libmplibcore_lib = static_library('mplibbackends',
+libmplibbackends_lib = static_library('mplibbackends',
   libmplibbackends_sources,
   include_directories : include_directories(
     web2c_dir,
@@ -554,7 +554,7 @@ pmp_sed_py = find_program('pmp-sed.py')
 
 pmpost_sources = []
 
-foreach name : ['mpost', 'tfmin']
+foreach name : ['mpost']
   pmpost_w = custom_target(f'p@name@.w',
     input: web2c_dir / 'mplibdir' / f'@name@.w',
     output: f'p@name@.w',
@@ -621,7 +621,7 @@ foreach name : ['mpmath', 'mpmathbinary', 'mpmathdecimal', 'mpmathdouble', 'mpma
   pmpost_sources += pmpost_h
 endforeach
 
-foreach name : ['mpxout']
+foreach name : ['mpxout', 'tfmin']
   pmpost_w = custom_target(f'p@name@.w',
     input: web2c_dir / 'mplibdir' / f'@name@.w',
     output: f'p@name@.w',

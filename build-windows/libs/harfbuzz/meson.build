@@ -55,7 +55,6 @@ harfbuzz_sources = [
   harfbuzz_tree / 'src/hb-subset-cff-common.cc',
   harfbuzz_tree / 'src/hb-subset-cff1.cc',
   harfbuzz_tree / 'src/hb-subset-cff2.cc',
-  harfbuzz_tree / 'src/hb-subset-cff2-to-cff1.cc',
   harfbuzz_tree / 'src/hb-subset-input.cc',
   harfbuzz_tree / 'src/hb-subset-instancer-iup.cc',
   harfbuzz_tree / 'src/hb-subset-instancer-solver.cc',
@@ -69,6 +68,7 @@ harfbuzz_sources = [
   harfbuzz_tree / 'src/hb-subset-table-other.cc',
   harfbuzz_tree / 'src/hb-subset-table-var.cc',
   harfbuzz_tree / 'src/hb-subset.cc',
+  harfbuzz_tree / 'src/hb-depend.cc',
 ]
 
 
