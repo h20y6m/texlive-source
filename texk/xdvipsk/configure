@@ -645,6 +645,14 @@ LIBOBJS
 subdirs
 AM_LDFLAGS
 AM_CXXFLAGS
+BUNDLED_LIBTIFF_FALSE
+BUNDLED_LIBTIFF_TRUE
+LIBTIFF_INCLUDES
+LIBTIFF_LIBS
+BUNDLED_LIBJPEG_FALSE
+BUNDLED_LIBJPEG_TRUE
+LIBJPEG_INCLUDES
+LIBJPEG_LIBS
 FREETYPE2_RULE
 FREETYPE2_DEPEND
 FREETYPE2_LIBS
@@ -668,6 +676,8 @@ KPATHSEA_LIBS
 KPATHSEA_INCLUDES
 PKG_CONFIG
 LUA53_DEFINES
+WIN32_FALSE
+WIN32_TRUE
 cross_FALSE
 cross_TRUE
 CXXCPP
@@ -731,6 +741,7 @@ AMDEP_FALSE
 AMDEP_TRUE
 am__include
 DEPDIR
+am__tar_ignore_stderr
 am__untar
 am__tar
 AMTAR
@@ -826,6 +837,8 @@ with_zlib_includes
 with_zlib_libdir
 with_system_libpng
 with_system_freetype2
+with_system_libjpeg
+with_system_libtiff
 enable_year2038
 '
       ac_precious_vars='build_alias
@@ -1510,6 +1523,10 @@ Optional Packages:
                           pkg-config)
   --with-system-freetype2 use installed freetype2 headers and library
                           (requires freetype-config)
+  --with-system-libjpeg   use installed libjpeg headers and library (requires
+                          pkg-config)
+  --with-system-libtiff   use installed libtiff headers and library (requires
+                          pkg-config)
 
 Some influential environment variables:
   CXX         C++ compiler command
@@ -4075,7 +4092,7 @@ else
 fi
 
 
-am__api_version='1.18'
+am__api_version='1.19'
 
 
 
@@ -9967,10 +9984,15 @@ mkdir_p='$(MKDIR_P)'
 
 # We need awk for the "check" target (and possibly the TAP driver).  The
 # system "awk" is bad on some platforms.
-# Always define AMTAR for backward compatibility.  Yes, it's still used
-# in the wild :-(  We should find a proper way to deprecate it ...
+# Always define AMTAR for backward compatibility.  It's still used
+# in the wild, let's not break things.
 AMTAR='$${TAR-tar}'
 
+
+# The dist rules treat anything $(am__tar) writes to standard error as
+# a failure (automake bug#19614).  Set this to "yes" for archivers that
+# write there when all is well; cpio reports a block count.
+am__tar_ignore_stderr=no
 
 # We'll loop over all known methods to create a tar archive until one works.
 _am_tools='gnutar plaintar pax cpio none'
@@ -10022,11 +10044,12 @@ printf %s "checking how to create a ustar tar archive... " >&6; }
   _am_tools=${am_cv_prog_tar_ustar-$_am_tools}
 
   for _am_tool in $_am_tools; do
+    am__tar_ignore_stderr=no
     case $_am_tool in
     gnutar)
       for _am_tar in tar gnutar gtar; do
-        { echo "$as_me:$LINENO: $_am_tar --version" >&5
-   ($_am_tar --version) >&5 2>&5
+        { echo "$as_me:$LINENO: $_am_tar --version | grep GNU >/dev/null" >&5
+   ($_am_tar --version | grep GNU >/dev/null) >&5 2>&5
    ac_status=$?
    echo "$as_me:$LINENO: \$? = $ac_status" >&5
    (exit $ac_status); } && break
@@ -10038,7 +10061,7 @@ printf %s "checking how to create a ustar tar archive... " >&6; }
     plaintar)
       # Must skip GNU tar: if it does not support --format= it doesn't create
       # ustar tarball either.
-      (tar --version) >/dev/null 2>&1 && continue
+      (tar --version | grep GNU) >/dev/null 2>&1 && continue
       am__tar='tar chf - "$$tardir"'
       am__tar_='tar chf - "$tardir"'
       am__untar='tar xf -'
@@ -10052,6 +10075,7 @@ printf %s "checking how to create a ustar tar archive... " >&6; }
       am__tar='find "$$tardir" -print | cpio -o -H ustar -L'
       am__tar_='find "$tardir" -print | cpio -o -H ustar -L'
       am__untar='cpio -i -H ustar -d'
+      am__tar_ignore_stderr=yes
       ;;
     none)
       am__tar=false
@@ -10100,6 +10124,7 @@ fi
 
   { printf '%s\n' "$as_me:${as_lineno-$LINENO}: result: $am_cv_prog_tar_ustar" >&5
 printf '%s\n' "$am_cv_prog_tar_ustar" >&6; }
+
 
 
 
@@ -20662,7 +20687,6 @@ else
   cross_FALSE=
 fi
 
-
 { printf '%s\n' "$as_me:${as_lineno-$LINENO}: checking for native WIN32 or MINGW32" >&5
 printf %s "checking for native WIN32 or MINGW32... " >&6; }
 if test ${kpse_cv_have_win32+y}
@@ -20714,6 +20738,16 @@ esac
 fi
 { printf '%s\n' "$as_me:${as_lineno-$LINENO}: result: $kpse_cv_have_win32" >&5
 printf '%s\n' "$kpse_cv_have_win32" >&6; }
+
+ if test "x$kpse_cv_have_win32" != xno; then
+  WIN32_TRUE=
+  WIN32_FALSE='#'
+else
+  WIN32_TRUE='#'
+  WIN32_FALSE=
+fi
+
+
 
 LUA53_DEFINES='-DLUA_COMPAT_MODULE -DLUA_COMPAT_5_2 -DLUAI_HASHLIMIT=6'
 
@@ -22992,6 +23026,76 @@ ${top_builddir}/../../libs/freetype2/freetype2/ft2build.h:
 fi
 
 
+
+
+
+
+
+
+
+# Check whether --with-system-libjpeg was given.
+if test ${with_system_libjpeg+y}
+then :
+  withval=$with_system_libjpeg;
+fi
+
+if test "x$with_system_libjpeg" = xyes
+then :
+  if $PKG_CONFIG libjpeg; then
+  LIBJPEG_INCLUDES=`$PKG_CONFIG libjpeg --cflags`
+  LIBJPEG_LIBS=`$PKG_CONFIG libjpeg --libs`
+else
+  LIBJPEG_INCLUDES=
+  LIBJPEG_LIBS=-ljpeg
+fi
+else case e in #(
+  e) LIBJPEG_LIBS=libjpeg.a
+   LIBJPEG_INCLUDES='-I$(abs_top_srcdir)/thirdparty/libjpeg/libjpeg-src' ;;
+esac
+fi
+
+
+ if test "x$with_system_libjpeg" != xyes; then
+  BUNDLED_LIBJPEG_TRUE=
+  BUNDLED_LIBJPEG_FALSE='#'
+else
+  BUNDLED_LIBJPEG_TRUE='#'
+  BUNDLED_LIBJPEG_FALSE=
+fi
+
+
+
+# Check whether --with-system-libtiff was given.
+if test ${with_system_libtiff+y}
+then :
+  withval=$with_system_libtiff;
+fi
+
+if test "x$with_system_libtiff" = xyes
+then :
+  if $PKG_CONFIG libtiff-4; then
+  LIBTIFF_INCLUDES=`$PKG_CONFIG libtiff-4 --cflags`
+  LIBTIFF_LIBS=`$PKG_CONFIG libtiff-4 --libs`
+else
+  LIBTIFF_INCLUDES=
+  LIBTIFF_LIBS=-ltiff
+fi
+else case e in #(
+  e) LIBTIFF_LIBS=libtiff.a
+   LIBTIFF_INCLUDES='-I$(abs_top_srcdir)/thirdparty/libtiff/libtiff-src' ;;
+esac
+fi
+
+
+ if test "x$with_system_libtiff" != xyes; then
+  BUNDLED_LIBTIFF_TRUE=
+  BUNDLED_LIBTIFF_FALSE='#'
+else
+  BUNDLED_LIBTIFF_TRUE='#'
+  BUNDLED_LIBTIFF_FALSE=
+fi
+
+
 echo timestamp >config.force
 
 # distribute additional compiler and linker flags
@@ -23181,6 +23285,18 @@ fi
 
 if test -z "${cross_TRUE}" && test -z "${cross_FALSE}"; then
   as_fn_error $? "conditional \"cross\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${WIN32_TRUE}" && test -z "${WIN32_FALSE}"; then
+  as_fn_error $? "conditional \"WIN32\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${BUNDLED_LIBJPEG_TRUE}" && test -z "${BUNDLED_LIBJPEG_FALSE}"; then
+  as_fn_error $? "conditional \"BUNDLED_LIBJPEG\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${BUNDLED_LIBTIFF_TRUE}" && test -z "${BUNDLED_LIBTIFF_FALSE}"; then
+  as_fn_error $? "conditional \"BUNDLED_LIBTIFF\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 

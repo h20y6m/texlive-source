@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2022-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
-# 2026-06-05 0.0.33
+# 2026-08-29 0.0.35
 package bibcop;
 
 use warnings;
@@ -28,6 +28,10 @@ my %blessed = (
 
 # See https://research.arizona.edu/faq/what-do-you-mean-when-you-say-use-title-case-proposalproject-titles
 my %minors = map { $_ => 1 } qw/in of at to by the a an and or as if up via yet nor but off on for into vs versus/;
+
+# These tags bibcop wraps in curled brackets of its own, thus one more pair
+# of brackets around them is the protection made by the author.
+my %wrapped = map { $_ => 1 } qw/title booktitle journal/;
 
 # Check the presence of mandatory tags.
 sub check_mandatory_tags {
@@ -80,8 +84,10 @@ sub check_capitalization {
       next;
     }
     my @ends = qw/ ; ? . --- : ! ` /;
-    my $value = $entry{$tag};
-    my @words = only_words($value);
+    if (protected($tag, $entry{$tag})) {
+      next;
+    }
+    my @words = only_words($entry{$tag});
     my $pos = 0;
     foreach my $word (@words) {
       $word =~ s/\.$//g;
@@ -374,7 +380,7 @@ sub check_type_capitalization {
   }
 }
 
-# Check that no values have non-ASCII symbols.
+# Check that no values have non-ASCII symbols outside of curled brackets.
 sub check_ascii {
   my (%entry) = @_;
   foreach my $tag (keys %entry) {
@@ -383,17 +389,17 @@ sub check_ascii {
     }
     my $value = $entry{$tag};
     for my $pos (0..length($value)-1) {
-      my $char = substr($value, $pos, 1);
-      my $ord = ord($char);
+      my $ord = ord(substr($value, $pos, 1));
       if ($ord == 9 || $ord == 10 || $ord == 13) {
         next;
       }
       if ($ord < 20) {
         return "In the '$tag', don't use control symbol '0x" . (sprintf '%04x', $ord) . "'"
       }
-      if ($ord > 0x7f) {
-        return "In the '$tag', don't use Unicode symbol '0x" . (sprintf '%04x', $ord) . "'"
-      }
+    }
+    my $naked = naked_unicode($value);
+    if ($naked > 0) {
+      return "In the '$tag', don't use Unicode symbol '0x" . (sprintf '%04x', $naked) . "' outside of curled brackets"
     }
   }
 }
@@ -609,14 +615,20 @@ sub entry_fix {
     if (not exists $allowed{$tag} and not exists $allowed{$tag . '?'}) {
       next;
     }
-    my $fixer = "fix_$tag";
-    my $fixed = $value;
-    if (defined &{$fixer}) {
-      no strict 'refs';
-      $value = $fixer->($value);
+    if (protected($tag, $entry{$tag})) {
+      $value = '{' . $value . '}';
+    } else {
+      my $fixer = "fix_$tag";
+      if (defined &{$fixer}) {
+        no strict 'refs';
+        $value = $fixer->($value);
+      }
+      $value = fix_unicode($value);
+      if (naked_unicode($value) > 0) {
+        $value = '{' . $value . '}';
+      }
     }
-    $value = fix_unicode($value);
-    if ($tag =~ /title|booktitle|journal/) {
+    if (exists $wrapped{$tag}) {
       $value = '{' . $value . '}';
     }
     if (not $value eq '') {
@@ -1062,6 +1074,44 @@ sub strip_outer_braces {
   return $s;
 }
 
+# Check whether curled brackets protect the entire value of the tag. The pair
+# of brackets that a tag demands on its own does not count as protection, since
+# it belongs to bibcop and not to the author.
+sub protected {
+  my ($tag, $value) = @_;
+  if (exists $wrapped{$tag}) {
+    $value = strip_outer_braces($value);
+  }
+  return strip_outer_braces($value) ne $value;
+}
+
+# Find the first non-ASCII symbol that curled brackets do not protect and return
+# its code. Return zero when every non-ASCII symbol is protected, or when there
+# are no such symbols at all. An escaped bracket protects nothing.
+sub naked_unicode {
+  my ($tex) = @_;
+  my $depth = 0;
+  my $escape = 0;
+  for my $pos (0..length($tex)-1) {
+    my $char = substr($tex, $pos, 1);
+    if ($escape) {
+      $escape = 0;
+    } elsif ($char eq '\\') {
+      $escape = 1;
+    } elsif ($char eq '{') {
+      $depth = $depth + 1;
+      next;
+    } elsif ($char eq '}') {
+      $depth = $depth - 1;
+      next;
+    }
+    if (ord($char) > 0x7f and $depth <= 0) {
+      return ord($char);
+    }
+  }
+  return 0;
+}
+
 # Take a TeX string and return a cleaner one, without redundant spaces, brackets, etc.
 sub clean_tex {
   my ($tex) = @_;
@@ -1185,7 +1235,7 @@ if (@ARGV+0 eq 0 or exists $args{'--help'} or exists $args{'-?'}) {
     "      --latex     Report errors in LaTeX format using the \\PackageWarningNoLine command\n\n" .
     "If any issues, please, report to GitHub: https://github.com/yegor256/bibcop");
 } elsif (exists $args{'--version'} or exists $args{'-v'}) {
-  info('0.0.33 2026-06-05');
+  info('0.0.35 2026-08-29');
 } else {
   my ($file) = grep { not($_ =~ /^-.*$/) } @ARGV;
   if (not $file) {
