@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: tlmgr.pl 79639 2026-07-10 16:45:34Z karl $
+# $Id: tlmgr.pl 80687 2026-10-18 11:24:31Z mseven $
 # Copyright 2008-2026 Norbert Preining
 # This file is licensed under the GNU General Public License version 2
 # or any later version.
@@ -8,8 +8,8 @@
 
 use strict; use warnings;
 
-my $svnrev = '$Revision: 79639 $';
-my $datrev = '$Date: 2026-07-10 18:45:34 +0200 (Fri, 10 Jul 2026) $';
+my $svnrev = '$Revision: 80687 $';
+my $datrev = '$Date: 2026-10-18 13:24:31 +0200 (Sun, 18 Oct 2026) $';
 my $tlmgrrevision;
 my $tlmgrversion;
 my $prg;
@@ -363,6 +363,8 @@ my %globaloptions = (
   "persistent-downloads" => "!",
   "pause" => 1,
   "pin-file" => "=s",
+  "prefetch" => ":s",
+  "no-prefetch" => 1,
   "print-platform|print-arch" => 1,
   "print-platform-info" => 1,
   "usermode|user-mode" => 1,
@@ -405,9 +407,18 @@ sub main {
   # save command line options for later restart, if necessary
   @::SAVEDARGV = @ARGV;
 
+  # rename TL_ to TEXLIVE_ envvars
+  TeXLive::TLUtils::tl_env_renames();
+
   TeXLive::TLUtils::process_logging_options();
 
   GetOptions(\%opts, keys(%optarg)) or pod2usage(2);
+
+  # set up the TEXLIVE_PREFETCH env var according to the options
+  TeXLive::TLUtils::setup_prefetch_parallel_env_var(
+    'TEXLIVE_PREFETCH', 'prefetch', 'no-prefetch', \%opts,
+    $TeXLive::TLConfig::DefaultPrefetchPolicy
+  );
 
   # load the config file and set the config options
   # load it BEFORE starting downloads as we set persistent-downloads there!
@@ -847,8 +858,10 @@ sub execute_action {
 # log output with logcommand (tlmgr-commands.log).
 # return F_OK or F_ERROR.
 # 
+# With $online, the output is read as it comes, and $online is called
+# after each line; fmtutil uses that to report formats as they are done.
 sub do_cmd_and_check {
-  my $cmd = shift;
+  my ($cmd, $online) = @_;
   # we output the pre-running notice on a separate line so that
   # tlmgr front ends (MacOSX's TeX Live Utility) can read it
   # and show it to the user before the possibly long delay.
@@ -866,6 +879,21 @@ sub do_cmd_and_check {
     tlwarn("Cannot run wrapper due to missing luatex.dll\n");
     $ret = $F_OK;
     $out = "";
+  } elsif ($online) {
+    $out = "";
+    if (open(my $fh, "$cmd 2>&1 |")) {
+      while (my $l = <$fh>) {
+        $out .= $l;
+        &$online();
+      }
+      close($fh);
+      # as in TLUtils::run_cmd
+      $ret = $?;
+      $ret /= 256 if ($ret > 0);
+    } else {
+      $out = "cannot run $cmd: $!";
+      $ret = 1;
+    }
   } else {
     ($out, $ret) = TeXLive::TLUtils::run_cmd("$cmd 2>&1");
   }
@@ -968,7 +996,6 @@ sub handle_execute_actions {
     # format-regenerate is used when the paper size changes.
     # In that case we simply want to generate all formats
     #
-    my %done_formats;
     my %updated_engines;
     my %format_to_engine;
     my %do_enable;
@@ -995,46 +1022,44 @@ sub handle_execute_actions {
       TeXLive::TLUtils::create_fmtutil($localtlpdb,
                                        "$TEXMFDIST/web2c/fmtutil.cnf");
     }
+    # All the formats to rebuild are selected in one fmtutil run, so that
+    # its --parallel can build them at the same time, and a format that is
+    # selected more than once (say, by its engine and by its hyphenation
+    # patterns) is still built only once.
     if (!$::regenerate_all_formats) {
-      # first regenerate all formats --byengine 
-      for my $e (keys %updated_engines) {
+      my @select;
+      # all formats built with an updated engine
+      for my $e (sort keys %updated_engines) {
         debug ("updating formats based on $e\n");
-        $errors += do_cmd_and_check
-          ("$fmtutil_cmd --byengine $e --no-error-if-no-format $fmtutil_args");
-        read_and_report_fmtutil_status_file($status_file);
-        unlink($status_file);
+        push (@select, "--byengine $e");
       }
-      # now rebuild all other formats
-      for my $f (keys %do_enable) {
+      # all other formats
+      for my $f (sort keys %do_enable) {
         next if defined($updated_engines{$format_to_engine{$f}});
         # ignore disabled formats
         next if !$::execute_actions{'enable'}{'formats'}{$f}{'mode'};
         debug ("(re)creating format dump $f\n");
-        $errors += do_cmd_and_check ("$fmtutil_cmd --byfmt $f $fmtutil_args");
-        read_and_report_fmtutil_status_file($status_file);
-        unlink($status_file);
-        $done_formats{$f} = 1;
+        push (@select, "--byfmt $f");
       }
-    }
-
-    # now go back to the hyphenation patterns and regenerate formats
-    # based on the various language files
-    # this will in some cases duplicate fmtutil calls,
-    # but it is much easier than actually checking which formats
-    # don't need to be updated
-    #
-    if ($regenerate_language) {
-      for my $ext ("dat", "def", "dat.lua") {
-        my $lang = "language.$ext";
-        if (! TeXLive::TLUtils::wndws()) {
-          # Use full path for external command, except on Windows.
-          $lang = "$TEXMFSYSVAR/tex/generic/config/$lang";
+      # formats based on the various language files
+      if ($regenerate_language) {
+        for my $ext ("dat", "def", "dat.lua") {
+          my $lang = "language.$ext";
+          if (! TeXLive::TLUtils::wndws()) {
+            # Use full path for external command, except on Windows.
+            $lang = "$TEXMFSYSVAR/tex/generic/config/$lang";
+          }
+          push (@select, "--byhyphen \"$lang\"");
         }
-        if (!$::regenerate_all_formats) {
-          $errors += do_cmd_and_check ("$fmtutil_cmd --byhyphen \"$lang\" $fmtutil_args");
-          read_and_report_fmtutil_status_file($status_file);
-          unlink($status_file);
-        }
+      }
+      if (@select) {
+        my $pos = 0;
+        my $report = sub { read_and_report_fmtutil_status_file($status_file,
+                                                               \$pos); };
+        $errors += do_cmd_and_check("$fmtutil_cmd @select $fmtutil_args",
+                                    $report);
+        &$report();
+        unlink($status_file);
       }
     }
 
@@ -1044,8 +1069,12 @@ sub handle_execute_actions {
       info("Regenerating existing formats, this may take some time ...");
       # --refresh might already be in $fmtutil_args, but that's ok.
       my $args = "--refresh --all";
-      $errors += do_cmd_and_check("$fmtutil_cmd $args $fmtutil_args");
-      read_and_report_fmtutil_status_file($status_file);
+      my $pos = 0;
+      my $report = sub { read_and_report_fmtutil_status_file($status_file,
+                                                             \$pos); };
+      $errors += do_cmd_and_check("$fmtutil_cmd $args $fmtutil_args",
+                                  $report);
+      &$report();
       unlink($status_file);
       info("done\n");
       $::regenerate_all_formats = 0;
@@ -1116,14 +1145,30 @@ sub run_postinst_logcommand {
   return $ret;
 }
 
+# With $posref, report only what was added since the last call, which
+# left off at $$posref; fmtutil may still be writing the file then, so a
+# last line without its newline is left for the next call.
 sub read_and_report_fmtutil_status_file {
-  my $status_file = shift;
+  my ($status_file, $posref) = @_;
+  # called for every line of output, so be cheap when nothing was added
+  return if ($posref && (-s $status_file || 0) <= $$posref);
   my $fh;
   if (!open($fh, '<', $status_file)) {
     printf STDERR "Cannot read status file $status_file, strange!\n";
     return;
   }
-  chomp(my @lines = <$fh>);
+  my @lines;
+  if ($posref) {
+    seek($fh, $$posref, 0);
+    while (my $l = <$fh>) {
+      last if ($l !~ m/\n$/);
+      push(@lines, $l);
+      $$posref = tell($fh);
+    }
+    chomp(@lines);
+  } else {
+    chomp(@lines = <$fh>);
+  }
   close $fh;
   my @failed;
   my @success;
@@ -2033,7 +2078,7 @@ sub restore_one_package {
   # this way we get rid of useless files
   my $restore_file;
   for my $ext (map {$Compressors{$_}{'extension'}} 
-                 sort {$Compressors{$a}{'priority'} <=> $Compressors{$a}{'priority'}} 
+                 sort {$Compressors{$a}{'priority'} <=> $Compressors{$b}{'priority'}} 
                    keys %Compressors) {
     if (-r "$bd/${pkg}.r${rev}.tar.$ext") {
       $restore_file = "$bd/${pkg}.r${rev}.tar.$ext";
@@ -3345,8 +3390,26 @@ sub action_update {
   # OTOH, the control flow in the "new package" part is much simpler
   # and following it after the change would make it much harder
   #
-  foreach my $pkg (@inst_packs, @new_packs, @inst_colls, @new_colls, @inst_schemes, @new_schemes) {
-    
+  # fetch the containers in the background while we install; a no-op unless
+  # TEXLIVE_PREFETCH is set.  The list has to be the one the loop below
+  # walks, in that order, because the prefetch follows the loop through it;
+  # packages that are not going to be installed are skipped by name.
+  my @toprefetch = (@inst_packs, @new_packs, @inst_colls, @new_colls,
+                    @inst_schemes, @new_schemes);
+  my %noprefetch;
+  if ($opts{"no-auto-install"}) {
+    $noprefetch{$_} = 1 for (@new_packs, @new_colls, @new_schemes);
+  }
+  my $prefetch;
+  if (!$opts{"list"} && !$opts{"dry-run"}) {
+    $prefetch = TeXLive::TLUtils::prefetch_start($remotetlpdb, \@toprefetch,
+      $localtlpdb->option("install_srcfiles"),
+      $localtlpdb->option("install_docfiles"), \%noprefetch);
+  }
+  my $prefetch_idx = 0;
+  foreach my $pkg (@toprefetch) {
+    TeXLive::TLUtils::prefetch_pump($prefetch, $prefetch_idx++);
+
     if (!$is_new{$pkg}) {
       # skip this loop if infra update on w32
       next if ($pkg =~ m/^00texlive/);
@@ -3652,6 +3715,8 @@ sub action_update {
       }
     }
   }
+
+  TeXLive::TLUtils::prefetch_stop($prefetch);
 
   #
   # special check for depending format updates:
@@ -4009,7 +4074,19 @@ sub action_install {
   print "total-bytes\t$sizes{'__TOTAL__'}\n" if $::machinereadable;
   print "end-of-header\n" if $::machinereadable;
 
+  # fetch the containers in the background while we install; a no-op unless
+  # TEXLIVE_PREFETCH is set.  %packs holds packages asked for from one
+  # particular repository; the prefetch leaves those alone, since it
+  # resolves pkg@tag differently than get_package does.
+  my $prefetch;
+  $prefetch = TeXLive::TLUtils::prefetch_start($remotetlpdb, \@todo,
+    $localtlpdb->option("install_srcfiles"),
+    $localtlpdb->option("install_docfiles"), \%packs)
+    if !$opts{"dry-run"};
+
+  my $prefetch_idx = 0;
   foreach my $pkg (@todo) {
+    TeXLive::TLUtils::prefetch_pump($prefetch, $prefetch_idx++);
     my $flag = $FLAG_INSTALL;
     my $re = "";
     my $tlp = $remotetlpdb->get_package($pkg);
@@ -4066,6 +4143,7 @@ sub action_install {
     $donesize += $sizes{$pkg};
     $currnr++;
   }
+  TeXLive::TLUtils::prefetch_stop($prefetch);
   print "end-of-updates\n" if $::machinereadable;
 
 
@@ -8446,6 +8524,11 @@ Change the pinning file location from C<TEXMFLOCAL/tlpkg/pinning.txt>
 (see L</Pinning> below).  Documented only for completeness, as this is
 only useful in debugging.
 
+=item B<--prefetch> I<jobs>[B<:>I<mb>]
+
+Same as setting C<TEXLIVE_PREFETCH> to I<jobs>[B<:>I<mb>]; see below.
+This is enabled by default.
+
 =item B<--usermode>
 
 Activates user mode for this run of C<tlmgr>; see L<USER MODE> below.
@@ -8950,6 +9033,11 @@ array element is the JSON representation of a single C<TLPOBJ> but with
 additional information. For details see C<tlpkg/doc/json-formats.txt>,
 format definition: C<TLPOBJINFO>. If both C<--json> and C<--data> are
 given, C<--json> takes precedence.
+
+The JSON output is generated internally by default; to use the standard
+Perl C<JSON> module, set the environment variable C<TEXLIVE_JSONMODE>
+(or C<TL_JSONMODE> if not set, for compatibility) to C<json>. The only
+other valid value is C<texlive> for the default.
 
 =back
 
@@ -10000,12 +10088,13 @@ Additional trusted keys can be added using the C<key> action.
 =head2 Configuration of GnuPG invocation
 
 The executable used for GnuPG is searched as follows: If the environment
-variable C<TL_GNUPG> is set, it is tested and used; otherwise C<gpg> is
-checked; finally C<gpg2> is checked.
+variable C<TEXLIVE_GNUPG> is set, it is tested and used; next (for
+compatibility), C<TL_GNUPG> is checked; next C<gpg> is checked; finally
+C<gpg2> is checked.
 
 Further adaptation of the C<gpg> invocation can be made using the two
-environment variables C<TL_GNUPGHOME>, which is passed to C<gpg> as the
-value for C<--homedir>, and C<TL_GNUPGARGS>, which replaces the default
+environment variables C<TEXLIVE_GNUPGHOME>, which is passed to C<gpg> as the
+value for C<--homedir>, and C<TEXLIVE_GNUPGARGS>, which replaces the default
 options C<--no-secmem-warning --no-permission-warning>.
 
 =head1 USER MODE
@@ -10638,9 +10727,9 @@ unaffected, to minimize download sizes.
 
 =item C<TEXLIVE_DOWNLOADER>
 
-=item C<TL_DOWNLOAD_PROGRAM>
+=item C<TEXLIVE_DOWNLOAD_PROGRAM>
 
-=item C<TL_DOWNLOAD_ARGS>
+=item C<TEXLIVE_DOWNLOAD_ARGS>
 
 These options allow selecting different download programs then the ones
 automatically selected by the installer. The order of selection is:
@@ -10651,50 +10740,96 @@ automatically selected by the installer. The order of selection is:
 
 If the environment variable C<TEXLIVE_DOWNLOADER> is defined, use it;
 abort if the specified program doesn't work. Possible values: C<lwp>,
-C<curl>, C<wget>. The necessary options are added internally.
+C<aria2c>, C<curl>, C<wget>. The necessary options are added internally.
 
 =item 2.
 
-If the environment variable C<TL_DOWNLOAD_PROGRAM> is
+If the environment variable C<TEXLIVE_DOWNLOAD_PROGRAM> is
 defined (can be any value), use it together with
-C<TL_DOWNLOAD_ARGS>; abort if it doesn't work.
+C<TEXLIVE_DOWNLOAD_ARGS>; abort if it doesn't work.
 
 =item 3.
 
-If LWP is available and working, use that (by far the most
-efficient method, as it supports persistent downloads).
+If LWP is available and working, use that; unless prefetching is enabled
+(see below), this is by far the most efficient method, as it supports
+persistent downloads.
 
 =item 4.
 
-If curl is available (from the system) and working, use that.
+If aria2c is available (from the system) and working, use that.
 
 =item 5.
+
+If curl is available (from the system) and working, use that.
+
+=item 6.
 
 If wget is available (either from the system or TL) and working, use that.
 
 =back
 
-TL provides C<wget> binaries for platforms where necessary, so some
-download method should always be available.
+No aria2c binaries are shipped with TeX Live, so it is used only when the
+system provides it. TL provides C<wget> binaries for platforms where
+necessary, so some download method should always be available.
+
+For historical compatibility, C<TL_DOWNLOAD_PROGRAM> and
+C<TL_DOWNLOAD_ARGS> are recognized if the corresponding C<TEXLIVE_*>
+environment variables are not set.
 
 =item C<TEXLIVE_PREFER_OWN>
 
-By default, compression and download programs provided by the system,
-i.e., found along C<PATH> are preferred over those shipped with TeX
-Live.
+By default, the compression and download programs provided by the
+system, i.e., found along C<PATH>, are preferred over those shipped with
+TeX Live.
 
-This can create problems with systems that are too old, and so can be
-overridden by setting the environment variable C<TEXLIVE_PREFER_OWN> to
-1. In this case, executables shipped with TL will be preferred.
+This can be problematic with systems that are too old, and so the
+opposite can be achieved by setting the environment variable
+C<TEXLIVE_PREFER_OWN> to 1. In this case, executables shipped with TL
+will be preferred.
 
 Extra compression/download programs not provided by TL, such as gzip,
 lwp, and curl, are still checked for on the system and used if
 available, per the above. C<TEXLIVE_PREFER_OWN> only applies when the
-program being checked for is shipped with TL, namely the lz4 and
-xz compressors and wget downloader.
+program being checked for is shipped with TL, namely the lz4 and xz
+compressors and wget downloader.
 
 Exception: on Windows, the C<tar.exe> shipped with TL is always used,
 regardless of any setting.
+
+=item C<TEXLIVE_PREFETCH>
+
+C<TEXLIVE_PREFETCH> (or the C<--prefetch> option, which overrides it)
+fetches containers in the background while the installation proceeds.
+It is enabled by default.
+
+The value for both the environment variable and the option is
+I<jobs>[B<:>I<mb>], where I<jobs> is
+
+  unset or 0   one container at a time, as before
+  1            one background worker
+  N            N background workers
+  auto         as many as there are processors, but at most 8 (the default)
+
+and I<mb> is explained below; the default is C<auto:200>.
+
+Even one worker helps, since it downloads while the installation unpacks;
+more workers additionally overlap the downloads with each other.  The
+downloader is the one that would be used anyway (see C<TEXLIVE_DOWNLOADER>
+above), except that C<lwp> is not used for this operation, so the first
+non-lwp downloader is used.
+
+Containers are removed again as they are installed. To bound how much
+the background download may pile up in the meantime, it pauses while
+more than I<mb> megabytes (default 200; C<0> for no limit) are waiting
+to be installed. The workers check before starting on the next
+containers rather than during, so the cache in fact usually reaches a
+few (around 2-3) multiples of this setting.
+
+A container whose prefetch fails is downloaded normally instead; the
+first such failure is reported.  After five failures, prefetching is
+turned off for the rest of the run.
+
+Prefetch has no effect at all when installing from a local repository.
 
 =back
 
@@ -10704,7 +10839,7 @@ This script and its documentation were written for the TeX Live
 distribution (L<https://tug.org/texlive>) and both are licensed under the
 GNU General Public License Version 2 or later.
 
-$Id: tlmgr.pl 79639 2026-07-10 16:45:34Z karl $
+$Id: tlmgr.pl 80687 2026-10-18 11:24:31Z mseven $
 =cut
 
 # test HTML version: pod2html --cachedir=/tmp tlmgr.pl >/tmp/tlmgr.html
@@ -10714,4 +10849,4 @@ $Id: tlmgr.pl 79639 2026-07-10 16:45:34Z karl $
 ### tab-width: 2
 ### indent-tabs-mode: nil
 ### End:
-# vim:set tabstop=2 shiftwidth=2 expandtab: #
+# vim:set tabstop=2 shiftwidth=2 softtabstop=-1 expandtab: #

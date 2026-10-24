@@ -175,8 +175,20 @@ set (HB_VERSION_MINOR ${CMAKE_MATCH_3})
 set (HB_VERSION_MICRO ${CMAKE_MATCH_4})
 
 ## Define sources and headers of the project
-set (project_sources ${PROJECT_SOURCE_DIR}/src/harfbuzz.cc) # use amalgam source
+# Keep sources in separate archive members so duplicate internal sources in
+# dependent static libraries do not result in multiple definitions.
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
+             ${PROJECT_SOURCE_DIR}/src/harfbuzz.cc)
+file(STRINGS ${PROJECT_SOURCE_DIR}/src/harfbuzz.cc project_source_includes
+     REGEX "^#include \".*\\.cc\"$")
+foreach (project_source_include IN LISTS project_source_includes)
+  string(REGEX REPLACE "^#include \"(.*\\.cc)\"$" "\\1"
+         project_source ${project_source_include})
+  list(APPEND project_sources ${PROJECT_SOURCE_DIR}/src/${project_source})
+endforeach ()
 set (subset_project_sources
+     ${PROJECT_SOURCE_DIR}/src/OT/Var/VARC/VARC.cc
+     ${PROJECT_SOURCE_DIR}/src/OT/Var/VARC/VARC-subset.hh
      ${PROJECT_SOURCE_DIR}/src/hb-number.cc
      ${PROJECT_SOURCE_DIR}/src/hb-number.hh
      ${PROJECT_SOURCE_DIR}/src/hb-ot-cff1-table.cc
@@ -187,6 +199,7 @@ set (subset_project_sources
      ${PROJECT_SOURCE_DIR}/src/hb-subset-cff-common.hh
      ${PROJECT_SOURCE_DIR}/src/hb-subset-cff1.cc
      ${PROJECT_SOURCE_DIR}/src/hb-subset-cff2.cc
+     ${PROJECT_SOURCE_DIR}/src/hb-subset-cff2-round.hh
      ${PROJECT_SOURCE_DIR}/src/hb-subset-input.cc
      ${PROJECT_SOURCE_DIR}/src/hb-subset-input.hh
      ${PROJECT_SOURCE_DIR}/src/hb-subset-instancer-iup.hh
@@ -208,6 +221,7 @@ set (subset_project_sources
      ${PROJECT_SOURCE_DIR}/src/hb-subset.cc
      ${PROJECT_SOURCE_DIR}/src/hb-subset.hh
      ${PROJECT_SOURCE_DIR}/src/hb-repacker.hh
+     ${PROJECT_SOURCE_DIR}/src/hb-result.hh
      ${PROJECT_SOURCE_DIR}/src/graph/graph.hh
      ${PROJECT_SOURCE_DIR}/src/graph/gsubgpos-graph.hh
      ${PROJECT_SOURCE_DIR}/src/graph/gsubgpos-context.hh
@@ -258,6 +272,7 @@ set (project_headers
 )
 set (subset_project_headers
      ${PROJECT_SOURCE_DIR}/src/hb-subset.h
+     ${PROJECT_SOURCE_DIR}/src/hb-subset-depend.h
      ${PROJECT_SOURCE_DIR}/src/hb-subset-serialize.h
 )
 set (raster_project_sources
@@ -586,6 +601,12 @@ endif ()
 
 
 ## Define harfbuzz library
+set(HB_VISIBILITY_INLINES_HIDDEN TRUE)
+# XCOFF rejects hidden visibility on references to imported inline symbols.
+if(CMAKE_SYSTEM_NAME MATCHES "^(AIX|OS400)$")
+  set(HB_VISIBILITY_INLINES_HIDDEN FALSE)
+endif()
+
 add_library(harfbuzz ${project_sources} ${project_extra_sources} ${project_headers})
 target_link_libraries(harfbuzz ${THIRD_PARTY_LIBS})
 if (MINGW)
@@ -594,7 +615,7 @@ endif()
 target_include_directories(harfbuzz PUBLIC
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>"
                            "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/harfbuzz>")
-set_target_properties(harfbuzz PROPERTIES VISIBILITY_INLINES_HIDDEN TRUE)
+set_target_properties(harfbuzz PROPERTIES VISIBILITY_INLINES_HIDDEN ${HB_VISIBILITY_INLINES_HIDDEN})
 if (HB_HAVE_FREETYPE AND TARGET freetype)
   target_link_libraries(harfbuzz freetype)
 endif ()
@@ -605,7 +626,7 @@ if (HB_HAVE_ICU)
   add_library(harfbuzz-icu ${PROJECT_SOURCE_DIR}/src/hb-icu.cc ${PROJECT_SOURCE_DIR}/src/hb-icu.h)
   add_dependencies(harfbuzz-icu harfbuzz)
   target_link_libraries(harfbuzz-icu harfbuzz ${THIRD_PARTY_LIBS})
-  set_target_properties(harfbuzz-icu PROPERTIES VISIBILITY_INLINES_HIDDEN TRUE)
+  set_target_properties(harfbuzz-icu PROPERTIES VISIBILITY_INLINES_HIDDEN ${HB_VISIBILITY_INLINES_HIDDEN})
 
   if (BUILD_SHARED_LIBS)
     if (BUILD_FRAMEWORK)
@@ -629,15 +650,15 @@ endif ()
 ## Define harfbuzz-subset library
 if (HB_BUILD_SUBSET)
   add_library(harfbuzz-subset ${subset_project_sources} ${subset_project_headers})
-  list(APPEND project_headers ${PROJECT_SOURCE_DIR}/src/hb-subset.h ${PROJECT_SOURCE_DIR}/src/hb-subset-serialize.h)
+  list(APPEND project_headers ${subset_project_headers})
   add_dependencies(harfbuzz-subset harfbuzz)
   target_link_libraries(harfbuzz-subset harfbuzz ${THIRD_PARTY_LIBS})
-  set_target_properties(harfbuzz-subset PROPERTIES VISIBILITY_INLINES_HIDDEN TRUE)
+  set_target_properties(harfbuzz-subset PROPERTIES VISIBILITY_INLINES_HIDDEN ${HB_VISIBILITY_INLINES_HIDDEN})
 
   if (MINGW)
     target_compile_options(harfbuzz-subset PRIVATE "-Wa,-mbig-obj")
   endif()
-  
+
   if (BUILD_SHARED_LIBS)
     if (BUILD_FRAMEWORK)
       set_target_properties(harfbuzz harfbuzz-subset PROPERTIES
@@ -660,7 +681,7 @@ if (HB_BUILD_RASTER)
   add_library(harfbuzz-raster ${raster_project_sources} ${raster_project_headers})
   add_dependencies(harfbuzz-raster harfbuzz)
   target_link_libraries(harfbuzz-raster harfbuzz ${HB_RASTER_THIRD_PARTY_LIBS})
-  set_target_properties(harfbuzz-raster PROPERTIES VISIBILITY_INLINES_HIDDEN TRUE)
+  set_target_properties(harfbuzz-raster PROPERTIES VISIBILITY_INLINES_HIDDEN ${HB_VISIBILITY_INLINES_HIDDEN})
 
   if (MINGW)
     target_compile_options(harfbuzz-raster PRIVATE "-Wa,-mbig-obj")
@@ -689,7 +710,7 @@ if (HB_BUILD_VECTOR)
   add_library(harfbuzz-vector ${vector_project_sources} ${vector_project_headers})
   add_dependencies(harfbuzz-vector harfbuzz)
   target_link_libraries(harfbuzz-vector harfbuzz ${HB_VECTOR_THIRD_PARTY_LIBS})
-  set_target_properties(harfbuzz-vector PROPERTIES VISIBILITY_INLINES_HIDDEN TRUE)
+  set_target_properties(harfbuzz-vector PROPERTIES VISIBILITY_INLINES_HIDDEN ${HB_VISIBILITY_INLINES_HIDDEN})
 
   if (MINGW)
     target_compile_options(harfbuzz-vector PRIVATE "-Wa,-mbig-obj")
@@ -718,7 +739,7 @@ if (HB_BUILD_GPU)
   add_library(harfbuzz-gpu ${gpu_project_sources} ${gpu_project_headers})
   add_dependencies(harfbuzz-gpu harfbuzz)
   target_link_libraries(harfbuzz-gpu harfbuzz)
-  set_target_properties(harfbuzz-gpu PROPERTIES VISIBILITY_INLINES_HIDDEN TRUE)
+  set_target_properties(harfbuzz-gpu PROPERTIES VISIBILITY_INLINES_HIDDEN ${HB_VISIBILITY_INLINES_HIDDEN})
 
   if (MINGW)
     target_compile_options(harfbuzz-gpu PRIVATE "-Wa,-mbig-obj")
@@ -789,7 +810,7 @@ if (HB_HAVE_GOBJECT)
   include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR}/src)
   add_dependencies(harfbuzz-gobject harfbuzz)
   target_link_libraries(harfbuzz-gobject harfbuzz ${GOBJECT_LIBRARIES} ${THIRD_PARTY_LIBS})
-  set_target_properties(harfbuzz-gobject PROPERTIES VISIBILITY_INLINES_HIDDEN TRUE)
+  set_target_properties(harfbuzz-gobject PROPERTIES VISIBILITY_INLINES_HIDDEN ${HB_VISIBILITY_INLINES_HIDDEN})
 
   if (BUILD_SHARED_LIBS)
     if (BUILD_FRAMEWORK)
@@ -815,7 +836,7 @@ if (HB_HAVE_CAIRO)
   add_library(harfbuzz-cairo ${PROJECT_SOURCE_DIR}/src/hb-cairo.cc ${PROJECT_SOURCE_DIR}/src/hb-static.cc ${PROJECT_SOURCE_DIR}/src/hb-cairo.h)
   add_dependencies(harfbuzz-cairo harfbuzz)
   target_link_libraries(harfbuzz-cairo harfbuzz ${THIRD_PARTY_LIBS})
-  set_target_properties(harfbuzz-cairo PROPERTIES VISIBILITY_INLINES_HIDDEN TRUE)
+  set_target_properties(harfbuzz-cairo PROPERTIES VISIBILITY_INLINES_HIDDEN ${HB_VISIBILITY_INLINES_HIDDEN})
 
   if (BUILD_SHARED_LIBS)
     if (BUILD_FRAMEWORK)
@@ -1254,7 +1275,7 @@ if (NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL)
       ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
       LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
       RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-      FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR} 
+      FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
       COMPONENT runtime OPTIONAL
     )
     make_pkgconfig_pc_file("harfbuzz-gobject")
