@@ -1,8 +1,8 @@
 #!/usr/bin/perl
-# SPDX-FileCopyrightText: Copyright (c) 2022-2025 Yegor Bugayenko
+# SPDX-FileCopyrightText: Copyright (c) 2022-2026 Yegor Bugayenko
 # SPDX-License-Identifier: MIT
 
-# 2025/04/28 0.0.32
+# 2026-10-16 0.0.37
 package bibcop;
 
 use warnings;
@@ -18,7 +18,7 @@ my %args = map { $_ => 1 } @ARGV;
 
 # Only these tags are allowed and only these types of entries.
 my %blessed = (
-  'article' => ['doi', 'year', 'title', 'author', 'journal', 'volume', 'number', 'month?', 'pages?'],
+  'article' => ['doi', 'year', 'title', 'author', 'journal', 'volume', 'number', 'month?', 'pages?', 'archiveprefix?', 'eprint?', 'primaryclass?'],
   'inproceedings' => ['doi', 'booktitle', 'title', 'author', 'year', 'pages?', 'month?', 'organization?', 'volume?'],
   'incollection' => ['doi', 'booktitle', 'title', 'author', 'year', 'editor', 'pages?', 'month?', 'volume?', 'publisher?'],
   'book' => ['title', 'author', 'year', 'publisher', 'doi?', 'edition?'],
@@ -29,6 +29,10 @@ my %blessed = (
 # See https://research.arizona.edu/faq/what-do-you-mean-when-you-say-use-title-case-proposalproject-titles
 my %minors = map { $_ => 1 } qw/in of at to by the a an and or as if up via yet nor but off on for into vs versus/;
 
+# These tags bibcop wraps in curled brackets of its own, thus one more pair
+# of brackets around them is the protection made by the author.
+my %wrapped = map { $_ => 1 } qw/title booktitle journal/;
+
 # Check the presence of mandatory tags.
 sub check_mandatory_tags {
   if (exists $args{'--no:tags'}) {
@@ -37,7 +41,7 @@ sub check_mandatory_tags {
   my (%entry) = @_;
   my $type = $entry{':type'};
   if (not exists $blessed{$type}) {
-    return "The type of entry is not allowed: '$type'"
+    return "The type of entry '$type' is not allowed"
   }
   my $mandatory = $blessed{$type};
   foreach my $tag (@$mandatory) {
@@ -47,6 +51,9 @@ sub check_mandatory_tags {
     if (not(exists $entry{$tag})) {
       my $listed = listed_tags(%entry);
       if ($tag eq 'doi' and exists $args{'--no:doi'}) {
+        next;
+      }
+      if ($type eq 'article' and exists $entry{'archiveprefix'} and grep { $_ eq $tag } qw/journal volume number/) {
         next;
       }
       return "A mandatory '$tag' tag for '\@$type' is missing among $listed"
@@ -76,9 +83,11 @@ sub check_capitalization {
     if (not exists $tags{$tag}) {
       next;
     }
-    my @ends = qw/ ; ? . --- : ! /;
-    my $value = $entry{$tag};
-    my @words = only_words($value);
+    my @ends = qw/ ; ? . --- : ! ` /;
+    if (protected($tag, $entry{$tag})) {
+      next;
+    }
+    my @words = only_words($entry{$tag});
     my $pos = 0;
     foreach my $word (@words) {
       $word =~ s/\.$//g;
@@ -138,6 +147,9 @@ sub check_author {
       if (index($a, ' ') != -1 and index($a, ',') == -1) {
         return "The last name should go first, all other names must follow, after a comma in @{[as_position($pos)]} '$tag', as in 'Knuth, Donald E.'";
       }
+      if (($a =~ tr/,//) > 1) {
+        return "Too many commas in @{[as_position($pos)]} '$tag', perhaps 'and' is missing between co-authors, as in 'Knuth, Donald E. and Duane, Bibby'";
+      }
       my $npos = 0;
       for my $name (split(/[ ,]+/, $a)) {
         $npos += 1;
@@ -154,7 +166,7 @@ sub check_author {
           next
         }
         if ($name =~ /^[A-Z]$/) {
-          return "A shortened name must have a tailing dot in @{[as_position($pos)]} '$tag', as in 'Knuth, Donald E.'";
+          return "A shortened name must have a trailing dot in @{[as_position($pos)]} '$tag', as in 'Knuth, Donald E.'";
         }
         return "In @{[as_position($pos)]} '$tag' @{[as_position($npos)]} name looks suspicious ($name), use something like 'Knuth, Donald E. and Duane, Bibby'";
       }
@@ -162,7 +174,7 @@ sub check_author {
   }
 }
 
-# Check that titles don't have shortened words with a tailing dot.
+# Check that titles don't have shortened words with a trailing dot.
 sub check_shortenings {
   my (%entry) = @_;
   my %tags = map { $_ => 1 } qw/title booktitle journal/;
@@ -189,13 +201,13 @@ sub check_shortenings {
   }
 }
 
-# Check the right format of the 'title' and 'booktitle.'
+# Check the right format of the 'title', 'booktitle', and 'journal.'
 sub check_wrapping {
   if (exists $args{'--no:wraps'}) {
     return;
   }
   my (%entry) = @_;
-  my @tags = qw/title booktitle/;
+  my @tags = qw/title booktitle journal/;
   foreach my $tag (@tags) {
     if (not exists($entry{$tag})) {
       next;
@@ -211,26 +223,33 @@ sub check_wrapping {
 # See https://arxiv.org/help/arxiv_identifier
 sub check_arXiv {
   my (%entry) = @_;
-  if (exists($entry{'archiveprefix'})) {
-    if (not exists $entry{'eprint'}) {
-      return "The 'eprint' is mandatory when 'archiveprefix' is there"
-    }
-    if (not $entry{'eprint'} =~ /^[0-9]{4}\.[0-9]{4,5}(v[0-9]+)?$/) {
-      return "The 'eprint' must have two integers separated by a dot"
-    }
-    my $eprint = $entry{'eprint'};
-    my ($head, $tail) = split(/\./, $eprint);
-    my $year = substr($head, 0, 2);
-    my $month = substr($head, 2);
-    if ($month > 12) {
-      return "The month '$month' of the 'eprint' is wrong, it can't be bigger than 12"
-    }
-    if (not exists $entry{'primaryclass'}) {
-      return "The 'primaryclass' is mandatory when 'archiveprefix' is there"
-    }
-    if (not $entry{'primaryclass'} =~ /^[a-z]{2,}\.[A-Z]{2}$/) {
-      return "The 'primaryclass' must have two parts, like 'cs.PL'"
-    }
+  if (not grep { exists $entry{$_} } qw/archiveprefix eprint primaryclass/) {
+    return;
+  }
+  if (not exists $entry{'archiveprefix'}) {
+    return "The 'archiveprefix' is mandatory when arXiv tags are there"
+  }
+  if (not $entry{'archiveprefix'} eq 'arXiv') {
+    return "The 'archiveprefix' must be 'arXiv'"
+  }
+  if (not exists $entry{'eprint'}) {
+    return "The 'eprint' is mandatory when 'archiveprefix' is there"
+  }
+  if (not $entry{'eprint'} =~ /^[0-9]{4}\.[0-9]{4,5}(v[0-9]+)?$/) {
+    return "The 'eprint' must have two integers separated by a dot"
+  }
+  my $eprint = $entry{'eprint'};
+  my ($head, $tail) = split(/\./, $eprint);
+  my $year = substr($head, 0, 2);
+  my $month = substr($head, 2);
+  if ($month > 12) {
+    return "The month '$month' of the 'eprint' is wrong, it can't be bigger than 12"
+  }
+  if (not exists $entry{'primaryclass'}) {
+    return "The 'primaryclass' is mandatory when 'archiveprefix' is there"
+  }
+  if (not $entry{'primaryclass'} =~ /^[a-z]{2,}\.[A-Z]{2}$/) {
+    return "The 'primaryclass' must have two parts, like 'cs.PL'"
   }
 }
 
@@ -243,19 +262,23 @@ sub check_org_in_booktitle {
   my @orgs = qw/ACM IEEE/;
   if (exists($entry{'booktitle'})) {
     my $title = $entry{'booktitle'};
+    # First, drop the single outer pair of curly brackets that wraps the
+    # whole booktitle (the inner pair of the mandatory double braces), then
+    # drop substrings protected by curly brackets (TeX case-preservation),
+    # so '{ACM}' or '{IEEE}' inside the booktitle is treated as part of the
+    # original conference name and does not trigger this warning.
+    $title = strip_outer_braces($title);
+    while ($title =~ s/\{[^{}]*\}//g) {};
     foreach my $o (@orgs) {
       if ($title =~ /^.*\Q$o\E.*$/) {
         return "The '$o' organization must not be mentioned in the booktitle, use 'publisher' tag instead"
       }
     }
-    if ($title =~ /^.*(ACM|IEEE).*$/) {
-      return "Don't mention the organization in the booktitle, use 'publisher' tag instead"
-    }
   }
 }
 
-# Check that no values have tailing dots.
-# Check that there are no spaces before commans.
+# Check that no values have trailing dots.
+# Check that there are no spaces before commands.
 sub check_typography {
   my (%entry) = @_;
   my %symbols = (
@@ -323,7 +346,12 @@ sub check_typography {
     }
     foreach my $s (@need_space_after) {
       my $p = join('', @no_space_before);
-      if ($value =~ /^.*[^\\]\Q$s\E[^\}\s\Q$p\E].*$/) {
+      my $checked = $value;
+      if ($s eq ')' or $s eq ']') {
+        my $o = ($s eq ')') ? '(' : '[';
+        $checked =~ s/\Q$o\E[A-Z][A-Za-z]*\Q$s\E[A-Z][A-Za-z]*//g;
+      }
+      if ($checked =~ /^.*[^\\]\Q$s\E[^\}\s\Q$p\E].*$/) {
         return "In the '$tag', put a space after the $symbols{$s}"
       }
     }
@@ -349,7 +377,7 @@ sub check_type_capitalization {
   }
 }
 
-# Check that no values have non-ASCII symbols.
+# Check that no values have non-ASCII symbols outside of curled brackets.
 sub check_ascii {
   my (%entry) = @_;
   foreach my $tag (keys %entry) {
@@ -358,17 +386,17 @@ sub check_ascii {
     }
     my $value = $entry{$tag};
     for my $pos (0..length($value)-1) {
-      my $char = substr($value, $pos, 1);
-      my $ord = ord($char);
+      my $ord = ord(substr($value, $pos, 1));
       if ($ord == 9 || $ord == 10 || $ord == 13) {
         next;
       }
-      if ($ord < 20) {
+      if ($ord < 0x20) {
         return "In the '$tag', don't use control symbol '0x" . (sprintf '%04x', $ord) . "'"
       }
-      if ($ord > 0x7f) {
-        return "In the '$tag', don't use Unicode symbol '0x" . (sprintf '%04x', $ord) . "'"
-      }
+    }
+    my $naked = naked_unicode($value);
+    if ($naked > 0) {
+      return "In the '$tag', don't use Unicode symbol '0x" . (sprintf '%04x', $naked) . "' outside of curled brackets"
     }
   }
 }
@@ -391,17 +419,16 @@ sub check_year_in_titles {
 }
 
 # Check the right format of the 'booktitle' in the 'inproceedings' entry.
-sub check_booktile_of_inproceedings {
+sub check_booktitle_of_inproceedings {
   if (exists $args{'--no:inproc'}) {
     return;
   }
   my (%entry) = @_;
-  my $tag = 'inproceedings';
-  if ($entry{':type'} eq $tag) {
+  if ($entry{':type'} eq 'inproceedings') {
     if (exists $entry{'booktitle'}) {
       my @words = only_words($entry{'booktitle'});
       if (lc($words[0]) ne 'proceedings' or lc($words[1]) ne 'of' or lc($words[2]) ne 'the') {
-        return "The '$tag' must start with 'Proceedings of the ...'"
+        return "The booktitle must start with 'Proceedings of the ...'"
       }
     }
   }
@@ -431,7 +458,7 @@ sub check_howpublished {
     }
     my $url = substr($how, 5, -1);
     if (not $url =~ /^https?:\/\/.+$/) {
-      return "The format of the URL in 'howpublished' is wrong, doesn't start with https://: '$url'"
+      return "The format of the URL in 'howpublished' is wrong, doesn't start with http:// or https://: '$url'"
     }
     my $max = 64;
     my $len = length($url);
@@ -463,7 +490,7 @@ sub check_month {
   my (%entry) = @_;
   if (exists $entry{'month'}) {
     my $month = $entry{'month'};
-    if (not $month =~ /^[1-9]|10|11|12$/) {
+    if (not $month =~ /^([1-9]|1[0-2])$/) {
       return "The format of the 'month' is wrong"
     }
   }
@@ -557,7 +584,7 @@ sub entry_fix {
   }
   my $type = $entry{':type'};
   if (not exists $blessed{$type}) {
-    error("I don't know what to do with \@$type type of BibTeX entry");
+    error("I don't know what to do with \@$type type of BibTeX entry, I only understand " . join(', ', sort keys %blessed) . ' (case sensitive)');
   }
   if (not exists $entry{':name'}) {
     error("I don't know what to do with an entry without a name");
@@ -576,7 +603,7 @@ sub entry_fix {
       next;
     }
     my $value = clean_tex($entry{$tag});
-    if ($tag eq 'url') {
+    if ($tag eq 'url' and exists $allowed{'howpublished?'} and exists $allowed{'note?'}) {
       my $today = strftime('%d-%m-%Y', localtime(time));
       push(@lines, "  howpublished = {\\url{$value}},");
       push(@lines, "  note = {[Online; accessed $today]},");
@@ -585,14 +612,20 @@ sub entry_fix {
     if (not exists $allowed{$tag} and not exists $allowed{$tag . '?'}) {
       next;
     }
-    my $fixer = "fix_$tag";
-    my $fixed = $value;
-    if (defined &{$fixer}) {
-      no strict 'refs';
-      $value = $fixer->($value);
+    if (protected($tag, $entry{$tag})) {
+      $value = '{' . $value . '}';
+    } else {
+      my $fixer = "fix_$tag";
+      if (defined &{$fixer}) {
+        no strict 'refs';
+        $value = $fixer->($value);
+      }
+      $value = fix_unicode($value);
+      if (naked_unicode($value) > 0) {
+        $value = '{' . $value . '}';
+      }
     }
-    $value = fix_unicode($value);
-    if ($tag =~ /title|booktitle|journal/) {
+    if (exists $wrapped{$tag}) {
       $value = '{' . $value . '}';
     }
     if (not $value eq '') {
@@ -711,6 +744,7 @@ sub fix_capitalization {
 sub fix_title {
   my ($value) = @_;
   $value = fix_capitalization($value);
+  $value = fix_quotes($value);
   $value =~ s/([^ ])---/$1 ---/g;
   $value =~ s/---([^ ])/--- $1/g;
   return $value;
@@ -807,6 +841,7 @@ sub fix_organization {
 
 sub fix_unicode {
   my ($value) = @_;
+  $value = fix_quotes($value);
   my %literals = (
     'ò' => '\`{o}', 'ó' => '\\\'{o}', 'ô' => '\^{o}', 'ö' => '\"{o}', 'ő' => '\H{o}', 'ǒ' => '\v{o}', 'õ' => '\~{o}',
     'à' => '\`{a}', 'á' => '\\\'{a}', 'â' => '\^{a}', 'ä' => '\"{a}', 'å' => '\r{a}', 'ą' => '\k{a}', 'ǎ' => '\v{a}', 'ã' => '\~{a}',
@@ -827,6 +862,14 @@ sub fix_unicode {
   return $value;
 }
 
+sub fix_quotes {
+  my ($value) = @_;
+  $value =~ s/“/``/g;
+  $value =~ s/”/''/g;
+  $value =~ s/(?<!\\)"([^"\n]+)(?<!\\)"/``$1''/g;
+  return $value;
+}
+
 # Parse the incoming .bib file and return an array
 # of hash-maps, where each one is a bibentry.
 sub entries {
@@ -837,9 +880,8 @@ sub entries {
   my $acc = '';
   my $tag = '';
   my $interrupted = ''; # where the comment interrupted the proceeding (state name)
-  my $lineno = 0;
+  my $lineno = 1;
   my $nest = 0;
-  my $escape = 0;
   for my $pos (0..length($bib)-1) {
     my $char = substr($bib, $pos, 1);
     if ($char eq ' ') {
@@ -857,6 +899,17 @@ sub entries {
       }
     } elsif ($s eq 'comment') {
       # ignore the comment
+    } elsif ($s eq 'skip') {
+      if (substr($bib, $pos - 1, 1) eq '\\') {
+        # the escaped symbol
+      } elsif ($char eq '{') {
+        $nest = $nest + 1;
+      } elsif ($char eq '}') {
+        $nest = $nest - 1;
+        if ($nest == 0) {
+          $s = 'top';
+        }
+      }
     } elsif ($s eq 'top') {
       if ($char eq '@') {
         %entry = ();
@@ -871,7 +924,12 @@ sub entries {
     } elsif ($char eq '{' and $s eq 'start') {
       $entry{':type'} = substr($acc, 1);
       $acc = '';
-      $s = 'body';
+      if (lc($entry{':type'}) =~ /^(string|preamble|comment)$/) {
+        $nest = 1;
+        $s = 'skip';
+      } else {
+        $s = 'body';
+      }
     } elsif ($char =~ /[a-zA-Z0-9]/ and $s eq 'body') {
       $acc = '';
       $s = 'tag';
@@ -925,18 +983,17 @@ sub entries {
       $s = 'brackets';
       $acc = '';
     } elsif ($s eq 'brackets') {
-      if ($char eq '\\') {
-        $escape = 1;
-      } elsif ($char eq '{' and $escape != 1) {
+      if (substr($bib, $pos - 1, 1) eq '\\') {
+        # the escaped symbol
+      } elsif ($char eq '{') {
         $nest = $nest + 1;
-      } elsif ($char eq '}' and $escape != 1) {
+      } elsif ($char eq '}') {
         $nest = $nest - 1;
         if ($nest == 0) {
           $entry{$tag} = substr($acc, 1);
           $s = 'value';
         }
       }
-      $escape = 0;
     } else {
       warning("It is impossible to parse the .bib file, because I do not know what to do with '$char' at line no.$lineno (s=$s)");
       last;
@@ -949,15 +1006,142 @@ sub entries {
   return @entries;
 }
 
-# Takes the text and returns only list of words seen there.
+# Extract citation keys from a LaTeX .aux file.
+sub citations {
+  my ($aux) = @_;
+  my %cited;
+  while ($aux =~ /\\citation\{([^}]*)\}/g) {
+    remember_citations($1, \%cited);
+  }
+  while ($aux =~ /\\abx\@aux\@cite\{[^}]*\}\{([^}]*)\}/g) {
+    remember_citations($1, \%cited);
+  }
+  while ($aux =~ /\\abx\@aux\@segm\{[^}]*\}\{[^}]*\}\{([^}]*)\}/g) {
+    remember_citations($1, \%cited);
+  }
+  return %cited;
+}
+
+sub remember_citations {
+  my ($keys, $cited) = @_;
+  foreach my $key (split(/,/, $keys)) {
+    $key =~ s/^\s+|\s+$//g;
+    if ($key ne '') {
+      $cited->{$key} = 1;
+    }
+  }
+}
+
+sub cited_entries {
+  my ($file) = @_;
+  my %cited;
+  my $dir = dirname($file);
+  my $name = basename($file);
+  $name =~ s/\.[^.]+$/.aux/;
+  open(my $fh, '<', "$dir/$name") or return %cited;
+  my $aux; { local $/; $aux = <$fh>; }
+  close($fh);
+  my %found = citations($aux);
+  foreach my $key (keys %found) {
+    $cited{$key} = 1;
+  }
+  return %cited;
+}
+
+# Takes the text and returns only list of words seen there. Whatever curled
+# brackets protect stays inside its word, no matter how deeply the brackets
+# nest, so that 'Soci{\'e}t{\'e}' remains one word and not three.
 sub only_words {
   my ($tex) = @_;
-  my $t = clean_tex($tex);
-  $t =~ s/([^a-zA-Z0-9\\'])/ $1 /g;
+  my $t = '';
+  my $depth = 0;
+  my $escape = 0;
+  foreach my $char (split //, clean_tex($tex)) {
+    my $inside = $depth ne 0;
+    if ($escape) {
+      $escape = 0;
+    } elsif ($char eq '\\') {
+      $escape = 1;
+    } elsif ($char eq '{') {
+      $depth = $depth + 1;
+      $inside = 1;
+    } elsif ($char eq '}' and $depth > 0) {
+      $depth = $depth - 1;
+      $inside = 1;
+    }
+    if ($inside or $char =~ /[a-zA-Z0-9\\']/) {
+      $t .= $char;
+    } else {
+      $t .= " $char ";
+    }
+  }
   $t =~ s/- +- +-/---/g;
-  $t =~ s/{ /{/g;
-  $t =~ s/ }/}/g;
+  $t =~ s/^ +//;
   return split(/ +/, $t);
+}
+
+# Remove the single outermost pair of curly brackets, but only if the leading
+# '{' is actually matched by the trailing '}'. This avoids the greedy mistake
+# of stripping '{ACM} ... {Notes}' down to 'ACM} ... {Notes', which would leak
+# a brace-protected organization name into the visible text.
+sub strip_outer_braces {
+  my ($s) = @_;
+  if ($s =~ /^\{(.*)\}$/s) {
+    my $inner = $1;
+    my $depth = 1;
+    foreach my $c (split //, $inner) {
+      if ($c eq '{') {
+        $depth += 1;
+      } elsif ($c eq '}') {
+        $depth -= 1;
+      }
+      if ($depth == 0) {
+        # The leading '{' was closed before the end, so it does not wrap
+        # the whole string; leave it untouched.
+        return $s;
+      }
+    }
+    return $inner;
+  }
+  return $s;
+}
+
+# Check whether curled brackets protect the entire value of the tag. The pair
+# of brackets that a tag demands on its own does not count as protection, since
+# it belongs to bibcop and not to the author.
+sub protected {
+  my ($tag, $value) = @_;
+  if (exists $wrapped{$tag}) {
+    $value = strip_outer_braces($value);
+  }
+  return strip_outer_braces($value) ne $value;
+}
+
+# Find the first non-ASCII symbol that curled brackets do not protect and return
+# its code. Return zero when every non-ASCII symbol is protected, or when there
+# are no such symbols at all. An escaped bracket protects nothing.
+sub naked_unicode {
+  my ($tex) = @_;
+  my $depth = 0;
+  my $escape = 0;
+  for my $pos (0..length($tex)-1) {
+    my $char = substr($tex, $pos, 1);
+    if ($escape) {
+      $escape = 0;
+    } elsif ($char eq '\\') {
+      $escape = 1;
+    } elsif ($char eq '{') {
+      $depth = $depth + 1;
+      next;
+    } elsif ($char eq '}') {
+      $depth = $depth - 1;
+      next;
+    }
+    if (ord($char) > 0x7f and $depth <= 0) {
+      return ord($char);
+    }
+  }
+  return 0;
 }
 
 # Take a TeX string and return a cleaner one, without redundant spaces, brackets, etc.
@@ -1039,7 +1223,7 @@ sub info {
   print $txt . "\n";
 }
 
-# Print INFO message to the console.
+# Print WARNING message to the console.
 sub warning {
   my ($txt) = @_;
   if (exists $args{'--latex'}) {
@@ -1076,14 +1260,14 @@ if (@ARGV+0 eq 0 or exists $args{'--help'} or exists $args{'-?'}) {
     "      --no:XXX    Disable one of the following checks (e.g. --no:wraps):\n" .
     "                    tags    Only some tags are allowed, while some of them are mandatory\n" .
     "                    caps    All major words in titles and booktitles must be capitalized\n" .
-    "                    wraps   Double curly braces are required around titles and booktitles\n" .
+    "                    wraps   Double curly braces are required around titles, booktitles, and journals\n" .
     "                    doi     The presence of the 'doi' tag is mandatory in all entries\n" .
     "                    inproc  The booktitle of \@inproceedings must start with 'Proceedings of the'\n" .
     "                    org     The booktitle may not mention ACM or IEEE\n" .
     "      --latex     Report errors in LaTeX format using the \\PackageWarningNoLine command\n\n" .
     "If any issues, please, report to GitHub: https://github.com/yegor256/bibcop");
 } elsif (exists $args{'--version'} or exists $args{'-v'}) {
-  info('0.0.32 2025/04/28');
+  info('0.0.37 2026-10-16');
 } else {
   my ($file) = grep { not($_ =~ /^-.*$/) } @ARGV;
   if (not $file) {
@@ -1104,7 +1288,7 @@ if (@ARGV+0 eq 0 or exists $args{'--help'} or exists $args{'-?'}) {
       $fixed = $fixed . entry_fix(%entry);
       $seen{$name} = 1;
     }
-    my ($head) = $bib =~ /^((?:%.*\n)+\n*)/;
+    my $head = $bib =~ /^((?:%.*\n)+\n*)/ ? $1 : '';
     $fixed = $head . $fixed;
     if (exists $args{'-i'} or exists $args{'--in-place'}) {
       open(my $out, '>', $file) or error('Cannot open file for writing: ' . $file);
@@ -1116,9 +1300,24 @@ if (@ARGV+0 eq 0 or exists $args{'--help'} or exists $args{'-?'}) {
   } else {
     debug((@entries+0) . ' entries found in ' . $file);
     my $found = 0;
+    my %seen;
+    my %cited = cited_entries($file);
+    my $citations = keys %cited;
+    my $all = exists $cited{'*'};
     for my $i (0..(@entries+0 - 1)) {
       my %entry = %{ $entries[$i] };
       debug("Checking $entry{':name'} (no.$i)...");
+      my $name = $entry{':name'};
+      if (defined $name and exists $seen{$name}) {
+        warning("The entry '$name' is seen more than once");
+        $found += 1;
+      } elsif (defined $name) {
+        $seen{$name} = 1;
+      }
+      if ($citations > 0 and not $all and defined $name and not exists $cited{$name}) {
+        warning("The entry '$name' is not cited");
+        $found += 1;
+      }
       foreach my $err (process_entry(%entry)) {
         warning("$err, in the '$entry{':name'}' entry");
         $found += 1;

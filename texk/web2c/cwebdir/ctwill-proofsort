@@ -1,5 +1,4 @@
 #!/usr/bin/env perl
-# $Id$
 # Public domain.  Originally written by Andreas Scherer, 2023.
 
 use strict;
@@ -39,7 +38,20 @@ sub help_handler {
 }
 ## version()
 sub version {
-  return $progname.' $Revision$ $Date$'."\n";
+  return "This is $progname (2026).\n";
+}
+
+## Compare two locations:
+# Internal locations ('\[246') are compared numerically,
+# external locations ('\]{MMIX-ARITH}3') as strings.
+sub compare_location {
+  my ($a_loc,$b_loc) = @_;
+  if ($a_loc =~ m/\\\[/ && $b_loc =~ m/\\\[/) {
+    $a_loc =~ s/\\\[//; $b_loc =~ s/\\\[//;
+    $a_loc <=> $b_loc;
+  } else {
+    $a_loc cmp $b_loc;
+  }
 }
 
 # Read input from the console and look for blocks like
@@ -55,6 +67,8 @@ sub version {
 # is used in the storage.
 my %mini_index; # storage for index entries of a section
 my $print_index = 0; # do we collect and print a mini-index?
+my $lines_processed = 0;
+
 foreach my $line (<STDIN>)
 {
 	if ("\\mini\n" eq $line) { # start of mini-index
@@ -67,7 +81,7 @@ foreach my $line (<STDIN>)
 			print sort { # (II) sort by third and first column
 				my ($a_loc,undef,$a_id) = split / /, $a, 3;
 				my ($b_loc,undef,$b_id) = split / /, $b, 3;
-				$a_id cmp $b_id || $a_loc cmp $b_loc }
+				$a_id cmp $b_id || compare_location($a_loc,$b_loc) }
 			@{ $mini_index{$key} };
 		}
 		$print_index = 0;
@@ -81,7 +95,10 @@ foreach my $line (<STDIN>)
 	}
 
 	print $line;
+	$lines_processed++;
 }
+
+die $usage unless $lines_processed;
 
 exit 0;
 
@@ -119,7 +136,7 @@ Example from MMIX (https://github.com/ascherer/mmix, 'local' branch):
 
 =over
 
-=item $ tie -c mmotype-twill.ch mmotype.{w,ch} mmotype-mini.ch
+=item $ tie -c mmotype-twill.ch mmotype.{w,ch,tch}
 
 =item $ ctwill +P -x mmotype mmotype-twill (run this two times)
 

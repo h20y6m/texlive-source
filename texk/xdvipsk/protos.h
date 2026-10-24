@@ -160,6 +160,7 @@ extern void set_bitfile(const char *s, int mode);
 extern void vertical_in_hps(void);
 extern void end_current_box(void);
 extern void start_new_box(void);
+extern void set_hps_origin(void);
 #endif /* HPS */
 
 /* prototypes for functions from loadfont.c */
@@ -173,7 +174,10 @@ extern void loadfont(fontdesctype *curfnt);
 /* prototypes for functions from luamap.c */
 extern void LuaMap_cache_init(void);
 extern luamaptype *LuaMap_cache_get(int id);
+/* loads .xdvipk/*.encodings.map tables; only if the luatable is not yet present -- hence should be called before the Luamap_otf_get() */
 extern int LuaMap_cache_find(const char *luamap_name);
+/* obtains encoding from an .otf file; appends used glyphs for all subsequential tex local fonts, belonging to the particular common luamap */
+extern int Luamap_otf_get(const char *luamap_name, const charusetype_entry *cu_head);
 extern void LuaMap_cache_close(void);
 #endif /* XDVIPSK */
 
@@ -181,6 +185,9 @@ extern void LuaMap_cache_close(void);
 extern void makefont(char *name, int dpi, int bdpi);
 
 /* prototypes for functions from output.c */
+#ifdef XDVIPSK
+extern boolean is_ps_name_char(unsigned char ch);
+#endif /* XDVIPSK */
 extern void copyfile(const char *s);
 extern void copyfile_general(const char *s, struct header_list *h);
 extern void figcopyfile(char *s, int systemtype);
@@ -303,6 +310,8 @@ extern char *expandfilename(const char *src);
    returned file object should be fclose'd, if not NULL
    returned p_real_fpath should be removed after return, if not NULL: if (*p_real_fpath) free(*p_real_fpath); */
 extern FILE *lookup_font_file(const char *fpath, char **p_real_fpath, int *p_is_dfont);
+
+extern long sfntscale(long what, unsigned short unitsPerEm);
 
 extern int sfntload(fontdesctype *curfnt);
 #endif /* XDVIPSK */
@@ -550,6 +559,7 @@ extern Boolean flib;
 extern Boolean inHTMLregion;
 extern integer HREF_COUNT;
 extern int current_pushcount;
+extern Boolean NEED_ORIGIN;
 extern Boolean noprocset;
 #endif
 
@@ -610,7 +620,7 @@ extern Boolean lua_process_stack;
 extern Boolean lua_dvips_exit;
 extern Boolean lua_callback_defined(lua_State *L, const char* lua_callback);
 extern void load_lua_scripts(const char* luascript);
-extern int run_lua_specials(lua_State *L, const char* lua_func, char* p, Boolean lua_available);
+extern int run_lua_specials(lua_State *L, const char* lua_func, char **pp, Boolean lua_available);
 extern void run_lua_after_prescan(lua_State *L);
 extern void run_lua_after_drawchar(lua_State *L, chardesctype *c, int cc, int rhh, int rvv, integer dir, int lastfont, int tu_count, unsigned int *tounicode);
 extern void run_lua_after_drawrule(lua_State *L, integer rw, integer rh);

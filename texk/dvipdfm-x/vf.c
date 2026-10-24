@@ -458,7 +458,7 @@ void vf_set_char(int32_t ch, int vf_font)
     if (idx >= vf_fonts[vf_font].num_chars || idx < 0 ||
 	!(start = (vf_fonts[vf_font].ch_pkt)[idx])) {
       int is_jfm = tfm_is_jfm(vf_fonts[vf_font].dev_fonts[0].tfm_id);
-      if (is_jfm && ch < CHAR_INDEX_MIN && ch <= JFM_LASTCHAR) {
+      if (is_jfm && ch <= JFM_LASTCHAR) {
         /* fallback multibyte character for (u)pTeX */
         if (dpx_conf.verbose_level == 1)
 	  if (vf_fonts[vf_font].message_flag == 0) {

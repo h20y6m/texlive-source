@@ -1,12 +1,12 @@
 # TeXLive::TLConfig.pm - module exporting configuration values
-# Copyright 2007-2025 Norbert Preining
+# Copyright 2007-2026 Norbert Preining
 # This file is licensed under the GNU General Public License version 2
 # or any later version.
 
 use strict; use warnings;
 package TeXLive::TLConfig;
 
-my $svnrev = '$Revision: 73776 $';
+my $svnrev = '$Revision: 80599 $';
 my $_modulerevision = ($svnrev =~ m/: ([0-9]+) /) ? $1 : "unknown";
 sub module_revision { return $_modulerevision; }
 
@@ -25,13 +25,16 @@ BEGIN {
     @AcceptedFallbackDownloaders
     %FallbackDownloaderProgram
     %FallbackDownloaderArgs
+    %BatchDownloaderArgs
     $DefaultCompressorFormat
     $CompressorExtRegexp
     %Compressors
     $InfraLocation
     $DatabaseName
     $DatabaseLocation
-    $PackageBackupDir 
+    $CatalogueDatabaseName
+    $CatalogueDatabaseLocation
+    $PackageBackupDir
     $BlockSize
     $Archive
     $TeXLiveServerURL
@@ -55,13 +58,15 @@ BEGIN {
     $ChecksumLength
     $ChecksumProgram
     $ChecksumExtension
+    $DefaultPrefetchPolicy
+    $DefaultFmtutilParallelPolicy
   );
   @EXPORT = @EXPORT_OK;
 }
 
 # the year of our release, will be used in the location of the
 # network packages, and in menu names, and other places.
-our $ReleaseYear = 2025;
+our $ReleaseYear = 2026;
 
 # users can upgrade from this year to the current year; might be the
 # same as the release year, or any number of releases earlier.
@@ -88,6 +93,13 @@ our $DefaultCategory = "Package";
 our $InfraLocation = "tlpkg";
 our $DatabaseName = "texlive.tlpdb";
 our $DatabaseLocation = "$InfraLocation/$DatabaseName";
+
+# the catalogue-only database holds the catalogue-related fields
+# (longdesc, catalogue-* keys, etc.) that are factored out of the main
+# texlive.tlpdb so that frequent catalogue updates do not force package
+# updates. It is loaded on demand only (catalogue listing and searching).
+our $CatalogueDatabaseName = "texlive-catalogue-only.tlpdb";
+our $CatalogueDatabaseLocation = "$InfraLocation/$CatalogueDatabaseName";
 
 # location of backups in default autobackup setting (under tlpkg)
 our $PackageBackupDir = "$InfraLocation/backups";
@@ -133,8 +145,14 @@ if ($^O =~ /^MSWin/i) {
 }
 
 #
-our @AcceptedFallbackDownloaders = qw/curl wget/;
-our %FallbackDownloaderProgram = ( 'wget' => 'wget', 'curl' => 'curl');
+# in order of preference; download_file tries lwp first, then these
+our @AcceptedFallbackDownloaders = qw/aria2c curl wget/;
+our %FallbackDownloaderProgram = ( 'wget' => 'wget', 'curl' => 'curl',
+                                   'aria2c' => 'aria2c');
+# The curl and wget lists end with the option taking the output file name,
+# which _download_file_program appends. aria2c is different: its --out is
+# relative to --dir, so both are appended there and its list has no
+# trailing output option.
 our %FallbackDownloaderArgs = (
   'curl' => ['--user-agent', 'texlive/curl',
              '--retry', '4', '--retry-delay', '4',
@@ -142,6 +160,48 @@ our %FallbackDownloaderArgs = (
              '--fail', '--location', '--silent', '--output'],
   'wget' => ['--user-agent=texlive/wget', '--tries=4',
              "--timeout=$NetworkTimeout", '-q', '-O'],
+  # -x1 -s1: a single connection per file, as curl and wget do
+  'aria2c' => ['--user-agent=texlive/aria2c', '--max-tries=4',
+               "--connect-timeout=$NetworkTimeout",
+               "--timeout=$NetworkTimeout",
+               '--auto-file-renaming=false', '--allow-overwrite=true',
+               '--quiet=true', '-x', '1', '-s', '1'],
+);
+# Fetching many files with one invocation, so that the connection is reused
+# instead of being set up again for every container.  Downloaders without an
+# entry here are simply called once per file.
+#   listfmt  the line(s) written to the list file for each file, with
+#            %u the url, %f the full destination path, %b its base name
+#   args     the invocation, with %d the destination directory; the name of
+#            the list file is appended by TLUtils::_download_files_batch
+our %BatchDownloaderArgs = (
+  'curl' => { 'listfmt' => "url = \"%u\"\noutput = \"%f\"\n",
+              'args' => ['--user-agent', 'texlive/curl',
+                         '--retry', '4', '--retry-delay', '4',
+                         '--connect-timeout', "$NetworkTimeout",
+                         '--fail', '--location', '--silent', '--config'] },
+  # wget names the files after the url, which is what we want here, and
+  # -nc keeps it from appending .1 to a name that is already taken
+  'wget' => { 'listfmt' => "%u\n",
+              'args' => ['--user-agent=texlive/wget', '--tries=4',
+                         "--timeout=$NetworkTimeout", '-q', '-nc',
+                         '--directory-prefix=%d', '--input-file'] },
+  'aria2c' => { 'listfmt' => "%u\n  out=%b\n",
+                'args' => ['--user-agent=texlive/aria2c', '--max-tries=4',
+                           "--connect-timeout=$NetworkTimeout",
+                           "--timeout=$NetworkTimeout",
+                           '--auto-file-renaming=false',
+                           '--allow-overwrite=true', '--quiet=true',
+                           # it would otherwise create the file at its full
+                           # size at once, and _prefetch_await takes the
+                           # size to mean the file is complete
+                           '--file-allocation=none',
+                           # -j1 -x1 -s1: one connection, since the caller
+                           # already runs as many of these as it wants in
+                           # parallel; aria2c would otherwise default to 5
+                           # downloads of its own per invocation
+                           '-j', '1', '-x', '1', '-s', '1',
+                           '--dir=%d', '--input-file'] },
 );
 # the way we package things on the web
 our $DefaultCompressorFormat = "xz";
@@ -165,6 +225,15 @@ our %Compressors = (
     "compress_args"   => ["-zf"],
     "extension"       => "xz",
     "priority"        => 30,
+  },
+  # zstd: fast decompression at near-xz ratios; not shipped with TL, so
+  # only available where the system provides it.  Priority between lz4 and
+  # gzip: lz4 (shipped everywhere) stays the default for backups.
+  "zstd" => {
+    "decompress_args" => ["-dcf"],
+    "compress_args"   => ["-zqf"],
+    "extension"       => "zst",
+    "priority"        => 15,
   },
 );
 our $CompressorExtRegexp = "("
@@ -255,8 +324,13 @@ our %TLPDBSettings = (
 
 our $WindowsMainMenuName = "TeX Live $ReleaseYear";
 
-# Comma-separated list of engines which do not exist on all platforms.
-our $PartialEngineSupport = "luametatex,luajithbtex,luajittex,mfluajit";
+# Comma-separated list of engines which do not exist in all installations.
+# The lua versions are not buildable everywhere.
+# Although XeTeX can be built everywhere, people can install TL without
+# it, and we don't want that to cause an error from fmtutil.
+# Specifically, context-legacy has a cont-en.fmt and csplain has a
+# pdfcsplain.fmt which are built with XeTeX.
+our $PartialEngineSupport = "luametatex,luajithbtex,luajittex,mfluajit,xetex";
 
 # Flags for error handling across the scripts and modules
 # all fine
@@ -282,6 +356,12 @@ our $ChecksumProgram = "sha512sum";
 
 # The extension of the checksum file
 our $ChecksumExtension = "sha512";
+
+# Default prefetch policy
+our $DefaultPrefetchPolicy = "auto";
+
+# Default fmtutil --parallel policy
+our $DefaultFmtutilParallelPolicy = "auto";
 
 1;
 
@@ -345,6 +425,17 @@ plain text file, not any kind of relational or other database.
 Concatenation of C<InfraLocation> "/" C<DatabaseName>, i.e.,
 C<tlpkg/texlive.tlpdb>.
 
+=item C<$TeXLive::TLConfig::CatalogueDatabaseName>
+
+The name of the catalogue-only database file:
+C<texlive-catalogue-only.tlpdb>. It holds the catalogue-related fields
+factored out of the main database and is loaded only on demand.
+
+=item C<$TeXLive::TLConfig::CatalogueDatabaseLocation>
+
+Concatenation of C<InfraLocation> "/" C<CatalogueDatabaseName>, i.e.,
+C<tlpkg/texlive-catalogue-only.tlpdb>.
+
 =item C<$TeXLive::TLConfig::BlockSize>
 
 The assumed block size, currently 4k.
@@ -382,6 +473,15 @@ The texmf-tree name that can be relocated, defaults to C<texmf-dist>.
 
 The string that replaces the C<RelocTree> in the tlpdb if a package is
 relocated, defaults to C<RELOC>".
+
+=item C<$TeXLive::TLConfig::DefaultPrefetchPolicy>
+
+The default value for C<--prefetch> in the installer and TeX Live
+Manager.
+
+=item C<$TeXLive::TLConfig::DefaultFmtutilParallelPolicy>
+
+The default value for C<--parallel> in C<fmtutil>.
 
 =back
 

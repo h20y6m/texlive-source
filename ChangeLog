@@ -1,3 +1,23 @@
+2026-09-10  Karl Berry  <karl@freefriends.org>
+
+	* automake 1.19.
+
+2026-05-21  Karl Berry  <karl@freefriends.org>
+
+	* AGENTS.md,
+	* CODE_OF_AI_CONDUCT.md,
+	* CLAUDE.md,
+	* CODEX.md: new files with information for LLMs and their human
+	users.
+
+2026-05-07  Karl Berry  <karl@tug.org>
+
+	* Build (set -vx): move to outside the subshell.
+
+2025-03-02  Karl Berry  <karl@tug.org>
+
+	* TL'26 release.
+
 2026-02-15  Karl Berry  <karl@freefriends.org>
 
 	* .github/scripts/build-tl.sh (CFLAGS, CXXFLAGS): add -O2 if we

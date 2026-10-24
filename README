@@ -55,8 +55,6 @@ i386-netbsd, amd64-netbsd:
     LDFLAGS='-L/usr/X11R7/lib -Wl,-rpath,/usr/X11R7/lib' \
   ./Build --enable-xindy CLISP=/usr/local/bin/clisp
 
-i386-solaris, x86_64-solaris: github, see below.
-
 universal-darwin: See Master/source/mactexdoc.tar.xz.
 
 windows:
@@ -85,4 +83,4 @@ x86_64-linuxmusl,
 and others noted above for github:
   built at https://github.com/TeX-Live/texlive-source/releases.
   see ./github/scripts/build-tl.sh and workflows/main.yml.
-  Some asy binaries are also built here; see */build-asy.*.
+  Most asy binaries are also built here; see .github/*/build-asy.*.

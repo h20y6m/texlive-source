@@ -1,3 +1,88 @@
+2026-10-23  Akira Kakuto  <kakuto@jcom.zaq.ne.jp>
+
+	Import harfbuzz-15.0.0.
+	* version.ac: Adjusted.
+
+2026-10-06  Akira Kakuto  <kakuto@jcom.zaq.ne.jp>
+
+	Import harfbuzz-14.6.0.
+	* version.ac: Adjusted.
+
+2026-10-01  Akira Kakuto  <kakuto@jcom.zaq.ne.jp>
+
+	Import harfbuzz-14.5.1.
+	* version.ac: Adjusted.
+
+2026-09-22  Akira Kakuto  <kakuto@jcom.zaq.ne.jp>
+
+	Import harfbuzz-14.5.0.
+	* version.ac: Adjusted.
+
+2026-08-27  Akira Kakuto  <kakuto@jcom.zaq.ne.jp>
+
+	Import harfbuzz-14.4.0.
+	* version.ac: Adjusted.
+
+2026-08-14  Akira Kakuto  <kakuto@jcom.zaq.ne.jp>
+
+	Import harfbuzz-14.3.1.
+	* version.ac: Adjusted.
+
+2026-08-01  Akira Kakuto  <kakuto@jcom.zaq.ne.jp>
+
+	Import harfbuzz-14.3.0.
+	* version.ac, Makefile.am, include/Makefile.am: Adjusted.
+
+2026-06-03  Akira Kakuto  <kakuto@jcom.zaq.ne.jp>
+
+	Import harfbuzz-14.2.1.
+	* version.ac: Adjusted.
+
+2026-04-21  Akira Kakuto  <kakuto@jcom.zaq.ne.jp>
+
+	Import harfbuzz-14.2.0.
+	* version.ac: Adjusted.
+
+2026-04-05  Akira Kakuto  <kakuto@jcom.zaq.ne.jp>
+
+	Import harfbuzz-14.1.0.
+	* version.ac: Adjusted.
+
+2026-04-02  Akira Kakuto  <kakuto@jcom.zaq.ne.jp>
+
+	Import harfbuzz-14.0.0.
+	* version.ac: Adjusted.
+
+2026-03-20  Akira Kakuto  <kakuto@jcom.zaq.ne.jp>
+
+	Import harfbuzz-13.2.1.
+	* version.ac: Adjusted.
+
+2026-03-19  Akira Kakuto  <kakuto@jcom.zaq.ne.jp>
+
+	Import harfbuzz-13.2.0.
+	* version.ac: Adjusted.
+
+2026-03-13  Akira Kakuto  <kakuto@jcom.zaq.ne.jp>
+
+	Import harfbuzz-13.1.1.
+	* version.ac: Adjusted.
+
+2026-03-11  Akira Kakuto  <kakuto@jcom.zaq.ne.jp>
+
+	Import harfbuzz-13.1.0.
+	* version.ac: Adjusted.
+
+2026-03-08  Akira Kakuto  <kakuto@jcom.zaq.ne.jp>
+
+	Import harfbuzz-13.0.1.
+	* version.ac: Adjusted.
+
+2026-03-05  Akira Kakuto  <kakuto@jcom.zaq.ne.jp>
+
+	Import harfbuzz-13.0.0.
+	* Makefile.am, include/Makefile.am, version.ac: Adjusted.
+
 2026-01-25  Akira Kakuto  <kakuto@jcom.zaq.ne.jp>
 
 	Import harfbuzz-12.3.2.

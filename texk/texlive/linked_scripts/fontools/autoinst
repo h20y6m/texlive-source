@@ -4,7 +4,7 @@
 
 ----------------------------------------------------------------------------
 
-    Copyright (C) 2005-2026 Marc Penninga.
+    Copyright 2005-2026 Marc Penninga.
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -41,7 +41,7 @@ use Getopt::Long ();
 use Pod::Usage ();
 use POSIX ();
 
-my $VERSION = '20260210';
+my $VERSION = '20260706';
 
 my ($d, $m, $y) = (localtime time)[3 .. 5];
 my $TODAY = sprintf "%04d/%02d/%02d", $y + 1900, $m + 1, $d;
@@ -96,8 +96,13 @@ sub main {
     my %fontfamily;
     for my $fontfile (@ARGV) {
         my $font = Font::parse($fontfile);
-        my $family = $font->{family};
-        push @{$fontfamily{$family}}, $font;
+
+        # Sanitize family name so it can safely be used in LaTeX command names
+        my @DIGITS = qw(Zero One Two Three Four Five Six Seven Eight Nine);
+        $font->{family} =~ s/(\d)/$DIGITS[$1]/xmsge;
+        $font->{family} =~ s/[^A-Za-z]+//xmsg;
+
+        push @{$fontfamily{$font->{family}}}, $font;
     }
 
     while (my ($family, $fontlist) = each %fontfamily) {
@@ -116,6 +121,7 @@ sub main {
         my $mappings = Attr::map_nfss_codes($fontlist);
         my ($from_nfss, $to_nfss) = @{$mappings};
         $log->log_nfss_mapping($from_nfss);
+        $log->log_missing_series($fontlist, $to_nfss);
 
         my @workitems = Work::generate_worklist($fontlist);
         $log->log_worklist(\@workitems);
@@ -267,7 +273,7 @@ sub _get_abbreviated_forms {
 
 my @WEIGHT = (
     ul  =>  [ qw( ultralight thin 100 hairline ) ],
-    el  =>  [ qw( extralight 200 ) ],
+    el  =>  [ qw( extralight extlight 200 ) ],
     l   =>  [ qw( light 300 ) ],
     sl  =>  [ qw( semilight blond ) ],
     ''  =>  [ qw( regular normal text book 400 normallight normaldark plain ) ],
@@ -662,7 +668,7 @@ sub parse {
 
     $self->_parse_metadata($metadata)
          ->_parse_featuredata()
-         ->_parse_sizedata()
+         ->_parse_optical_size()
          ->_parse_nfss_classification()
          ->_parse_fonttype()
          ;
@@ -781,10 +787,6 @@ sub _parse_metadata {
 
     $self->{originalfamily} = $data->{family};
 
-    for my $key (keys %{$data}) {
-        $data->{$key} =~ s/\s+//xmsg;
-    }
-
     for my $item (qw(family subfamily fullname)) {
         if (!$data->{$item}) {
             die <<"END_ERR_METADATA_MISSING"
@@ -794,17 +796,27 @@ END_ERR_METADATA_MISSING
         }
     }
 
-    $data->{family}    =  $data->{preferredfamily} || $data->{family};
-    $data->{subfamily} =  $data->{preferredsubfamily} || $data->{subfamily};
-    $data->{fullname}  =~ s/\A$data->{family}//xms;
-    $data->{fullname}  =  lc $data->{fullname};
+    $data->{family}    = $data->{preferredfamily}    || $data->{family};
+    $data->{subfamily} = $data->{preferredsubfamily} || $data->{subfamily};
 
-    # clean up family name (it's used in LaTeX command names)
-    my @DIGITS = qw(Zero One Two Three Four Five Six Seven Eight Nine);
-    $data->{family}    =~ s/(?: LT | MT)(?: Std | Pro )//xms;
-    $data->{family}    =~ s/(\d)/$DIGITS[$1]/xmsge;
-    $data->{family}    =~ s/[^A-Za-z]+//xmsg;
+    # Fullname is one of the fields we'll be looking at when determining
+    # a font's weight and width.
+    # We remove all words that make up the family name from Fullname;
+    # these words won't help identify individual fonts (since they're
+    # the same across the whole family), but may cause false positives.
+    for my $word (split m/\s+/, $data->{family}) {
+        $data->{fullname} =~ s/$word//xms;
+    }
+    $data->{fullname} = lc $data->{fullname};
 
+    # Remove all spaces from the metadata values,
+    # as some of these will be used in LaTeX fontnames.
+    for my $key (keys %{$data}) {
+        $data->{$key} =~ s/\s+//xmsg;
+    }
+
+    # clean up family and subfamily name
+    $data->{family} =~ s/(?: LT | MT)(?: Std | Pro )//xms;
     if ($data->{family} =~ s/\A DTL//xms) {
         $data->{subfamily} =~ s/\A (?: ST | T | SD | D)//xms;
     }
@@ -815,7 +827,7 @@ END_ERR_METADATA_MISSING
     # with different values for the optical size range.
     # We therefore move the optical master name from the family to the subfamily.
     # We don't discard this information entirely, since we need it later on
-    # in _parse_sizedata().
+    # in _parse_optical_size().
     # This hack causes problems with Libertinus Serif Display,
     # so we skip it for that font.
     if ($data->{family} !~ m/Libertinus/xmsi) {
@@ -831,12 +843,10 @@ END_ERR_METADATA_MISSING
     # so we need to test against both
     my $fullinfo = lc "$data->{subfamily} | $data->{fullname}";
 
-    # remove Adobe's SmallText size, to avoid mistaking it for Text weight
-    $fullinfo =~ s/(?: SmallText | SmText )//gxmsi;
-
-    # remove the word 'TypeWriter' from the info, to avoid it matching
-    # against the "It" shape
-    $fullinfo =~ s/typewriter//gxmsi;
+    # Some clean-up to prevent known false matches
+    $fullinfo =~ s/(?: SmallText | SmText )//gxmsi; # matches "Text" weight
+    $fullinfo =~ s/typewriter//gxmsi;               # matches "It"
+    $fullinfo =~ s/ITC//g;                          # matches "It"
 
     # We need to be careful when parsing the font info; in particular
     # we must parse strings like 'UltraCondensed' as 'Regular' weight
@@ -935,12 +945,9 @@ END_ERR_METADATA_MISSING
     }
     # Some font families put italic shapes into separate families;
     # we merge these into the 'main' family.
-    $shapes = join '|', Util::sort_desc_length(qw(it italic));
-    if ($self->{family} =~ m/(.+?) ($shapes) \z/xmsi
-            and ($self->{shape} eq 'regular'
-                    or $self->{shape} eq Attr::unabbreviate(lc($2)))) {
+    if ($self->{family} =~ m/(.+?) italic \z/xmsi) {
         $self->{family} = $1;
-        $self->{shape}  = Attr::unabbreviate(lc($2));
+        $self->{shape}  = 'italic';
     }
 
     # Some font families put different widths into separate families;
@@ -1044,9 +1051,41 @@ sub _parse_featuredata {
 # --------------------------------------------------------------------------
 #   Extracts 'minsize' and 'maxsize' from the optical design size info.
 # --------------------------------------------------------------------------
-sub _parse_sizedata {
+sub _parse_optical_size {
     my $self = shift;
 
+    my ($minsize, $maxsize);
+
+    # We first test if any of the user-defined opsz ranges match ...
+    my $found;
+    if (@{$ARGV{opsz}}) {
+        for my $opsz (@{$ARGV{opsz}}) {
+            my $pattern;
+            ($pattern, $minsize, $maxsize) = @$opsz;
+            if (index($self->{filename}, $pattern) != -1) {
+                if (!$found) {
+                    $self->{minsize} = $minsize;
+                    $self->{maxsize} = $maxsize;
+                    $found = $pattern || 'default';
+
+                    $self->{family} =~ s/$found//xms;
+                }
+                else {
+                    if ($pattern) {
+                        warn <<"END_WARNING_MULTIPLE_MATCHES";
+[WARNING]   '$self->{name}' matches both '$found' and '$pattern'; I will use '$found'
+END_WARNING_MULTIPLE_MATCHES
+                    }
+                }
+            }
+        }
+    }
+
+    return $self if $found;
+
+    # ... then we search the font for optical size info
+    # (note that `otfinfo` _only_ reads the OS/2 table, whereas
+    # many newer fonts store the the optical size data elsewhere!)
     my $cmd = qq(otfinfo --optical-size "$self->{filename}");
     open my $otfinfo, '-|', $cmd
         or die "[ERROR]     Could not run '$cmd': $!";
@@ -1054,9 +1093,9 @@ sub _parse_sizedata {
     close $otfinfo
         or die "[ERROR]     '$cmd' failed";
 
-    my ($minsize, $maxsize)
+    ($minsize, $maxsize)
         = $data =~ m/[([] ([\d.]+) (?:\s* pt)?, \s*
-                          ([\d.]+) (?:\s* pt)?  \s* [])]/xms;
+                            ([\d.]+) (?:\s* pt)?  \s* [])]/xms;
 
     $minsize //= 0;
     $maxsize //= 0;
@@ -1085,7 +1124,7 @@ sub _parse_sizedata {
     # spec and keeps its optical size info as a `size` feature rather
     #  than in the OS/2 table. This isn't (yet?) supported by otfinfo,
     #  so we add the missing size info here.
-    elsif ($self->{family} eq 'SourceSerifFour'
+    elsif ($self->{family} eq 'SourceSerif4'
         && $minsize == 0 && $maxsize == 0) {
         if ($self->{subfamily} eq 'Caption') {
             ($minsize, $maxsize) = (0, 6);
@@ -2222,6 +2261,13 @@ I'm using the following options:
     nfssweight:         @{[ join q{, }, @{$ARGV{nfssweight}} ]}
     nfsswidth:          @{[ join q{, }, @{$ARGV{nfsswidth}}  ]}
 
+    opticalsizes:       @{[
+                            join q{, },
+                                 map { "@{[ $_->[0] || 'default' ]}=$_->[1]-$_->[2]" }
+                                     sort { $a->[1] <=> $b->[1] }
+                                          @{$ARGV{opsz}}
+                        ]}
+
     math:               @{[ $ARGV{math} ? 'yes' : 'no' ]}
     mathspacing:        $ARGV{mathspacing}
 
@@ -2303,6 +2349,34 @@ sub log_nfss_mapping {
 
 
 # --------------------------------------------------------------------------
+#   Logs all weights and width that are not mapped to standard NFSS codes
+# --------------------------------------------------------------------------
+sub log_missing_series {
+    my ($self, $fontlist, $to_nfss) = @_;
+
+    my %messages;
+    for my $font (@{$fontlist}) {
+        my $series = $font->{series};
+        next unless $series eq $font->{weight} or $series eq $font->{width};
+        if (!exists $to_nfss->{$series}) {
+            $messages{"'$series' not mapped to standard NFSS code"} = 1;
+        }
+    }
+
+    my @messages = sort keys %messages;
+    if (@messages) {
+        print {$self} "\n\nUnmapped 'series' attributes:\n\n";
+        for my $message (@messages) {
+            print {$self} "    $message\n";
+            print "[INFO]      $message\n";
+        }
+    }
+
+    return;
+}
+
+
+# --------------------------------------------------------------------------
 #   Logs all fonts we're going to create.
 # --------------------------------------------------------------------------
 sub log_worklist {
@@ -2320,7 +2394,7 @@ sub log_worklist {
         if ($prevfn ne $workitem->{font}{filename}) {
             print {$self} <<"END_FONTINFO";
 
-    ------------------------------------------------------------------------
+----------------------------------------------------------------------------
 
     $workitem->{font}{filename}
 
@@ -2405,12 +2479,14 @@ Possible options:
 
     -nfssweight=XX=YYYY     Map the "XX" NFSS code to the "YYYY" weight
     -nfsswidth=XX=YYYY      Map the "XX" NFSS code to the "YYYY" width
+    -opticalsizes=PATTERN=MIN-MAX[,...]
+                            Set the optical size ranges of the fonts
 
     -help                   Print this text and exit
     -doc                    Print the complete documentation and exit
     -dryrun                 Don't generate fonts, only log what would be done
     -logfile="FILE"         Write log to "FILE" (default: <fontfamily>.log)
-    -verbose                Print more data to log file
+    -verbose                Print and log more informational data
     -version                Print version number and exit
 
     -math                   Generate basic math fonts
@@ -2454,6 +2530,7 @@ END_USAGE
     verbose         => 0,
     nfsswidth       => [],
     nfssweight      => [],
+    opsz            => [],
     math            => 0,
     mathspacing     => 0,
     t1suffix        => 'none',
@@ -2521,17 +2598,90 @@ sub parse_options {
                                      Attr::set_width($key, @values);
                                      $ARGV{$key} = 'user-defined';
                                  },
+        'opticalsizes=s'      => sub {
+                                     my ($ignored, $opticalsizes) = @_;
+                                     $ARGV{opsz} = [ split m/\s*,\s*/, $opticalsizes ];
+                                 },
         'math!'               => \$ARGV{math},
         'mathspacing=i'       => \$ARGV{mathspacing},
         't1suffix:s'          => \$ARGV{t1suffix},
     )
     or die "$USAGE";
 
+    process_opticalsizes_option() if @{$ARGV{opsz}};
+
     if (!@ARGV) {
         Pod::Usage::pod2usage(
             -msg => '[ERROR]     No font files given, nothing to do!',
             -verbose => 1);
     }
+
+    return;
+}
+
+
+sub process_opticalsizes_option {
+    # parse each size range
+    my @tmp;
+    for my $opsz (@{$ARGV{opsz}}) {
+        my ($pat, $min, $max) =
+            $opsz =~ m/ \A  ([^=[:space:]]*)
+                            \s* = \s*
+                            ([0-9.]*)
+                            \s* - \s*
+                            ([0-9.]*|inf)
+                        \z
+                      /xms
+            or die "[ERROR]     Invalid size range '$opsz'";
+        push @tmp, [$pat, $min || 0, $max || "inf"];
+    }
+
+    # sort size ranges in ascending order
+    @tmp = sort { $a->[1] <=> $b->[1] or $a->[2] <=> $b->[2] or $a cmp $b }
+                @tmp;
+
+    # check for empty or overlapping size ranges
+    my ($pat_prev, $min_prev, $max_prev);
+    for my $opsz (@tmp) {
+        my ($pat, $min, $max) = @$opsz;
+        if ($min >= $max) {
+            die "[ERROR]     Empty size range '$pat=$min-$max'\n";
+        }
+
+        if (!defined $pat_prev) {
+            if ($min) {
+                print "[INFO]      Size range '$pat=$min-$max'"
+                    . " adjusted to '0-$max'\n";
+                $opsz->[1] = $min = 0;
+            }
+        }
+        else {
+            if ($min < $max_prev) {
+                die "[ERROR]     Overlapping size ranges"
+                . " '$pat_prev=$min_prev-$max_prev' and '$pat=$min-$max'\n";
+            }
+            if ($min > $max_prev) {
+                print "[INFO]      Size range '$pat=$min-$max'"
+                    . " adjusted to '$max_prev-$max'\n";
+                $opsz->[1] = $min = $max_prev;
+            }
+        }
+
+        ($pat_prev, $min_prev, $max_prev) = ($pat, $min, $max);
+    }
+    if ($tmp[-1][2] < "inf") {
+        print "[INFO]      Size range '$tmp[-1][0]=$tmp[-1][1]-$tmp[-1][2]'"
+            . " adjusted to '$tmp[-1][1]-inf'\n";
+        $tmp[-1][2] = "inf";
+    }
+
+    # we test the size ranges in descending order of pattern length
+    $ARGV{opsz} = [
+        sort {
+            length $b->[0] <=> length $a->[0] or $a->[0] cmp $b->[0]
+        }
+        @tmp
+    ];
 
     return;
 }
@@ -2971,7 +3121,7 @@ sub process_styles_options {
     elsif ($ARGV{inferiors} eq 'sinf') { $FIGURESTYLE{Inf}{reqd} = ['sinf'] }
     elsif ($ARGV{inferiors} eq 'dnom') { $FIGURESTYLE{Inf}{reqd} = ['dnom'] }
     else  {
-        # Apparently we mistook the first argument (font name) for
+        # Apparently we mistook the first argument (fontname) for
         # an optional argument to -inferiors; let's undo that.
         unshift @ARGV, $ARGV{inferiors};
         $ARGV{inferiors} = 'auto';
@@ -3466,7 +3616,7 @@ sub cleanup {
 
 
 # --------------------------------------------------------------------------
-#   Modify the font and file names of all generated .pfb files.
+#   Modify the font- and filenames of all generated .pfb files.
 # --------------------------------------------------------------------------
 sub modify_fontnames {
     my ($family, $fontlist) = @_;
@@ -3980,7 +4130,7 @@ A font of "Cond" width and "Ultra" weight will then be known
 as "ultrablackcondensed".
 
 The exact mapping between fonts and NFSS codes can be found
-in the generated F<fd> files and in the log file
+in the log file and in the generated F<fd> files
 (you may want to run B<autoinst> with the I<-dryrun> option
 to check the chosen mapping beforehand).
 The I<-nfssweight> and I<-nfsswidth> command-line options can be used
@@ -3989,6 +4139,9 @@ to finetune the mapping between NFSS codes and fonts.
 To access specific weights or widths,
 one can always use the C<\fontseries> command with the full series name
 (i.e., C<\fontseries{demibold}\selectfont>).
+
+B<autoinst> will print a message for each weight and width that
+could not be mapped to a standard NFSS code.
 
 
 =head2 Ornaments
@@ -4033,7 +4186,7 @@ do not allow redistributing such converted versions under their original name.
 
 In order to try to meet such licensing requirements, B<autoinst> provides
 a I<-t1suffix> command-line option that appends a suffix to the names
-(both the filename and the internal font name)
+(both the filename and the internal fontname)
 of all generated Type1 fonts; see L</COMMAND-LINE OPTIONS> below.
 
 Please note that I am not a lawyer and do not guarantee that
@@ -4279,12 +4432,12 @@ when used in maths; some fonts need even more. Use your own judgement!
 
 =item B<-t1suffix> [ = I<SUFFIX> ]
 
-Tell B<autoinst> to modify the font names of all generated Type1-fonts,
+Tell B<autoinst> to modify the fontnames of all generated Type1-fonts,
 by adding I<SUFFIX> to the family name.
 If you use this option without specifying a I<SUFFIX> value,
 B<autoinst> will use the value "PS".
 The default behaviour when this option is not given
-is to not modify font names at all.
+is to not modify fontnames at all.
 
 See also L</OpenType fonts and licensing issues> in L<WARNINGS AND CAVEATS> above.
 
@@ -4339,18 +4492,67 @@ for their default figure style; and even in that case,
 B<autoinst>'s default values (B<-defaultlining> and B<-defaulttabular>)
 are usually correct.
 
-=item B<-nfssweight>=I<code>=I<weight>
+=item B<-nfssweight>="I<code>=I<weight>"
 
-=item B<-nfsswidth>=I<code>=I<width>
+=item B<-nfsswidth>="I<code>=I<width>"
 
 Map the NFSS code I<code> to the given weight or width,
 overriding the built-in tables.
 Each of these options may be given multiple times,
 to override more than one NFSS code.
 Example: to map the C<ul> code to the "Thin" weight,
-use C<-nfssweight=ul=thin>.
+use C<-nfssweight="ul=thin">.
 To inhibit the use of the C<ul> code completely,
-use C<-nfssweight=ul=>.
+use C<-nfssweight="ul=">.
+
+=item B<-opticalsizes>="I<pattern>=I<min>-I<max> [, I<pattern>=I<min>-I<max> ...]"
+
+Manually set or override the fonts' optical size information.
+If a font's filename matches I<pattern>, its optical size information
+will be set to the range I<min>-I<max> (both given in points).
+The lower bound I<min> is included in the range, the upper bound I<max> isn't.
+Empty values for I<min> and I<max> are interpreted as zero and infinity,
+respectively.
+Multiple optical size range specifications must be separated by commas.
+
+Example:
+
+   autoinst \
+       -opticalsizes="9pt=0-25,72pt=25-100,144pt=100-" \
+       Fraunces9pt-Regular.otf \
+       Fraunces72pt-Regular.otf \
+       Fraunces144pt-Regular.otf
+
+The I<pattern> can be any string that is valid in filenames
+and LaTeX fontnames.
+A default size range can be specified with an empty pattern:
+
+    -opticalsize="Capt=-8.4,=8.4-13,Subh=13-19.9,Disp=19.9-"
+
+Patterns are tested in descending order of pattern length
+and the first match wins, though B<autoinst> will warn if it finds
+multiple matching patterns (except for the empty pattern).
+
+If a font's filename does not contain any of the given patterns,
+the optical size data in the font's C<OS/2> table (if any) will be used.
+
+B<autoinst> will adjust size ranges so that there are no gaps;
+e.g. a set of ranges 5-7, 9-14 and 18-72 will be adjusted to
+0-7, 7-14 and 14-infinity. Empty or overlapping ranges are an error.
+
+In some font families, the optical size name is part of the family name;
+e.g., Fraunces in fact consists of three separate families
+"Fraunces 9pt", "Fraunces 72pt" and "Fraunces 144pt".
+When given the I<-opticalsizes> option, B<autoinst> will try to remove
+the optical size names (i.e., I<pattern>) from the family name,
+so that all fonts will be installed as a single LaTeX family.
+Note that Literata (and maybe other fonts as well) has filenames
+like "Literata_24pt-Regular.ttf" but family names like "Literata 24pt";
+in this case the I<pattern> "24pt" will be removed from the family name,
+but the I<pattern> "_24pt" will not, since the underscore doesn't match.
+
+If the transition size between two fonts with design sizes I<S> and I<L>
+is unknown, sqrt(I<S> * I<L>) might be a good starting value.
 
 =item B<-extra>=I<extra options>
 
@@ -4388,7 +4590,7 @@ and, if necessary, update the filename database;
 Note that some options (I<-target>, I<-vendor> and I<-typeface>)
 are meaningless, and hence ignored, in manual mode.
 
-Also note that font name modification doesn't happen in manual mode.
+Also note that fontname modification doesn't happen in manual mode.
 
 =item B<-nofigurekern>
 
@@ -4436,7 +4638,7 @@ don't paraphase.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2005-2026 Marc Penninga.
+Copyright 2005-2026 Marc Penninga.
 
 
 =head1 LICENSE
@@ -4459,7 +4661,7 @@ GNU General Public License for more details.
 
 =head1 VERSION
 
-This document describes B<autoinst> version 20260210.
+This document describes B<autoinst> version 20260706.
 
 
 =head1 RECENT CHANGES
@@ -4467,6 +4669,35 @@ This document describes B<autoinst> version 20260210.
 (See the source for the full story, all the way back to 2005.)
 
 =over 12
+
+=item I<2026-07-06>
+
+Yea another bugfix: the "Facit" family was split into "Fac" and "Facit".
+
+=item I<2026-05-29>
+
+Small bugfix.
+
+=item I<2026-04-22>
+
+Several additions and bugfixes (reports and patches by Chris Spiel):
+
+=over 2
+
+=item - Added the C<-opticalsizes> option
+
+=item - Log all weights and widths that could not be mapped
+to standard NFSS "series" codes
+
+=item - Bugfix: fontnames starting with "ITC" would be parsed
+as "italic"
+
+=back
+
+=item I<2026-04-01>
+
+Added the "extlight" weight to the font info parsing
+(reported by Chris Spiel).
 
 =item I<2026-02-10>
 
@@ -4477,6 +4708,13 @@ Added the I<scriptscale> option to the generated style file.
 When creating math fonts, we use the font's "mgrk" feature,
 if present.
 Fixed a few obscure bugs.
+
+=back
+
+
+=begin Really_old_history
+
+=over 12
 
 =item I<2025-09-09>
 
@@ -4503,7 +4741,7 @@ except for Libertinus.
 
 =item I<2025-06-23>
 
-Introduced the "U_" rule for encoding file names.
+Introduced the "U_" rule for encoding filenames.
 
 =item I<2025-04-16>
 
@@ -4518,13 +4756,6 @@ for Source Serif 4 was biting Libertinus Serif Display
 (and maybe other fonts as well),
 so we now test if the family is actually Source Serif 4
 before applying that fix.
-
-=back
-
-
-=begin Really_old_history
-
-=over 12
 
 =item I<2024-01-04>
 
@@ -4606,7 +4837,7 @@ to improve compatibility with the F<microtype> package.
 Made sure that F<pfb> fonts are always generated whenever
 the input fonts are in F<otf> format.
 Added the I<-t1suffix> command-line option,
-to modify the font and file names of those generated Type1 fonts.
+to modify the font- and filenames of those generated Type1 fonts.
 
 =item I<2020-06-19>
 

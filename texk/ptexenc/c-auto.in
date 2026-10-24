@@ -6,7 +6,7 @@
 #define PTEXENC_C_AUTO_H
 
 /* ptexenc: the version string. */
-#define PTEXENCVERSION "ptexenc version 1.5.2"
+#define PTEXENCVERSION "ptexenc version 1.5.3/dev"
 
 /* Define to 1 if the 'closedir' function returns void instead of int. */
 #undef CLOSEDIR_VOID
@@ -164,6 +164,10 @@
 /* Enable extensions on AIX, Interix, z/OS.  */
 #ifndef _ALL_SOURCE
 # undef _ALL_SOURCE
+#endif
+/* Enable extensions on Cosmopolitan Libc. */
+#ifndef _COSMO_SOURCE
+# undef _COSMO_SOURCE
 #endif
 /* Enable general extensions on macOS.  */
 #ifndef _DARWIN_C_SOURCE

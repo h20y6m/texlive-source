@@ -42,7 +42,7 @@ distinction.
 #  define too_big_char   (biggest_char+1) /* 1114112, |biggest_char+1| */
 #  define special_char   (biggest_char+2) /* 1114113, |biggest_char+2| */
 #  define number_chars   (biggest_char+3) /* 1114112, |biggest_char+1| */
-#  define number_fonts (5535-font_base+1)
+#  define number_fonts (65535-font_base+1)
 #  define biggest_lang             32767
 #  define too_big_lang             32768
 #  define text_size                    0  /* size code for the largest size in a family */
@@ -317,8 +317,9 @@ the |number_regs| \.{\\dimen} registers.
 #  define var_fam_code 124
 #  define ignore_primitive_error_code 125 				/*ignore some primitive/engine errors*/
 #  define math_empty_display_mode_code 126
+#  define math_large_operator_mode_code 127
 
-#  define backend_int_base_code (math_empty_display_mode_code+1)
+#  define backend_int_base_code (math_large_operator_mode_code+1)
 #  define backend_int_last_code (backend_int_base_code+32)              /* we need some 25 but take some slack */
 
 #  define tex_int_pars (backend_int_last_code+1)                        /* total number of integer parameters */
@@ -814,6 +815,7 @@ extern halfword last_cs_name;
 #define math_defaults_mode_par       int_par(math_defaults_mode_code)
 #define math_rule_thickness_mode_par int_par(math_rule_thickness_mode_code)
 #define math_delimiters_mode_par     int_par(math_delimiters_mode_code)
+#define math_large_operator_mode_par int_par(math_large_operator_mode_code)
 
 /*
     #define box(A) equiv(box_base+(A))

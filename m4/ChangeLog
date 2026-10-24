@@ -1,3 +1,19 @@
+2026-09-16  Karl Berry  <karl@freefriends.org>
+
+	* kpse-common.m4 (KPSE_KPATHSEA_PATHS_H): new macro, taken from
+	texk/web2c/configure.ac and used also in texk/xdvipsk/configure.ac.
+	Suggestion from Florian Schmaus,
+	https://github.com/TeX-Live/texlive-source/pull/85
+
+2026-05-25  Karl Berry  <karl@freefriends.org>
+
+	* kpse-pkgs.m4 (KPSE_UTILS_PKGS): add utfpatgen.
+
+2026-04-20  Karl Berry  <karl@freefriends.org>
+
+	* ax_cxx_compile_stdcxx.m4: update to version 25.
+	https://gnu.org/software/autoconf-archive/ax_cxx_compile_stdcxx.html
+
 2026-02-20  Karl Berry  <karl@freefriends.org>
 
 	* kpse-harfbuzz-flags.m4 (KPSE_HARFBUZZ_SYSTEM_FLAGS):

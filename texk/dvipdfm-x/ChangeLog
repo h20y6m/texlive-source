@@ -1,3 +1,142 @@
+2026-10-13  Norbert Preining  <norbert@preining.info>
+
+	* bmpimage.c (bmp_include_image): reject non-positive sizes and
+	sizes whose raster size overflows int; the buffer was allocated
+	too small and the rows read past it.
+	* dvipdfmx-bmp.test, tests/badbmp-size.bmp, Makefile.am: test.
+
+	* bmpimage.c (bmp_include_image): accept RLE8 only with 8 and RLE4
+	only with 4 bits per pixel; the decoders assume that row size.
+	(read_raster_rle8, read_raster_rle4): reject a delta that moves
+	past the last row.
+	(read_raster_rle4): do not write past the last nibble of an
+	absolute run starting at an odd pixel.
+	Report by Stephan Lipp (Ada Logics) and Anthropic, ANT-2026-QT5FYZWT.
+	* dvipdfmx-bmp.test, tests/badbmp-rle*.bmp, Makefile.am: test.
+
+	* bmpimage.c (read_header): check the info header size before
+	reading it into the fixed-size stack buffer.
+	Report by Stephan Lipp (Ada Logics) and Anthropic, ANT-2026-8R159DVS.
+	* dvipdfmx-bmp.test, tests/badbmp.{tex,dvi}, tests/badbmp-hdr.bmp,
+	Makefile.am: regression test.
+
+2026-09-27  Munehiro Yamamoto <munepixyz@gmail.com>
+
+	* pdfdraw.c (pdf_dev_clip, pdf_dev_eoclip): emit "n" after W/W*.
+	PostScript clip/eoclip keeps the current path, and MetaPost
+	output may continue with setrgbcolor, fshow, etc. after clip,
+	which produced invalid sequences such as "h W BT".  PDF requires
+	W to be followed by a path-painting operator.  The internal
+	current path is kept, as in PostScript.
+	Reported by Thomas (Chingatome),
+	https://tug.org/pipermail/dvipdfmx/2026-September/.
+	* dvipdfmx-mpclip.test, tests/mpclip.{mp,mps,tex,dvi},
+	Makefile.am: regression test.
+
+2026-06-05  Karl Berry  <karl@freefriends.org>
+
+	* man/dvipdfmx.1: some font updates and others, per Bjarni Ingi
+	Gislason, https://tug.org/pipermail/dvipdfmx/2026-June/000430.html.
+	(Others of his tool's proposed changes rejected.)
+
+2026-05-03  Akira Kakuto  <kakuto@jcom.zaq.ne.jp>
+
+	* pdfparse.c: Apply a patch for parse_pdf_name() given by
+	Satoki Tsuji.
+
+2026-04-15  Max Chernoff  <tex@maxchernoff.ca>
+
+	* pdffont.c: avoid bigendian-specific union.
+	* dvipdfmx-incl.test: update.
+	From Werner Fink.
+
+2026-04-04  TANAKA Takuji  <ttk@t-lab.opal.ne.jp>
+
+	* vf.c: Enable fallback SVS/IVS characters in virtual fonts
+	for upTeX.
+	* dvipdfmx-upjf2.test, tests/upj{f,v}5_fb.{vf,zvp0},
+	tests/Makefile_upjf, Makefile.am:
+	Add tests for fallback SVS/IVS characters.
+	Thanks to Yukimasa Morimi.
+	https://github.com/texjporg/tex-jp-build/issues/196
+	* configure.ac: version 20260404.
+
+2026-03-31  Munehiro Yamamoto <munepixyz@gmail.com>
+
+	* dvipdfmx: fix spot_color_name double-free by deep-copying in
+	pdf_color_copycolor
+
+        pdf_color_copycolor() used a raw memcpy, so when the same pdf_color
+        was pushed for both stroke and fill (as spc_handler_color_push does),
+        they shared the spot_color_name pointer.  A non-top color pop then
+        freed both copies independently, causing a double-free crash.
+
+        Fix: deep-copy spot_color_name in pdf_color_copycolor() via
+        NEW()+strcpy(), and free the old pointer before overwriting in
+        pdf_color_set() and pdf_color_pop().
+
+        Reported by Norbert Preining.
+
+	* dvipdfmx-spot.test, tests/spot_doublefree.{tex,dvi}:
+	regression test for the double-free fix.
+
+2026-03-25  Munehiro Yamamoto <munepixyz@gmail.com>
+
+        dvipdfmx: fix color stack cross-pop between color push/pop and
+        pdf:bcolor/ecolor
+
+        * pdfcolor.h: add PDF_COLOR_SOURCE_DVIPS, PDF_COLOR_SOURCE_BCOLOR.
+          pdf_color_push(), pdf_color_pop(): add int source parameter.
+        * pdfcolor.c (color_stack): add source[] array.
+          (pdf_color_push): store source tag.
+          (pdf_color_pop): search for matching source; remove by shifting
+          if not at top; NULL out abandoned slot's spot_color_name pointers.
+        * spc_color.c: pass PDF_COLOR_SOURCE_DVIPS for color push/pop.
+        * spc_pdfm.c: pass PDF_COLOR_SOURCE_BCOLOR for pdf:bcolor/ecolor.
+        * dvi.c: pass PDF_COLOR_SOURCE_DVIPS for XeTeX rgba font color.
+
+	* dvipdfmx-color.test, tests/color_stack.{tex,dvi}: regression
+	test for the cross-pop fix.
+	* Makefile.am (TESTS): Add dvipdfmx-color.test.
+
+2026-03-17  Karl Berry  <karl@freefriends.org>
+
+	* configure.ac: version 20260318 (17 was branch, so distinguish).
+
+	* dpxfile.c: comment most #else and #endif lines; more debugging info.
+
+	* pdfximage.c: rearrange verbose messages to start on new lines, 
+	and not output the command template.
+	* dpxfile.c (dpx_file_apply_filter): output actual command being run.
+
+2026-03-17  Karl Berry  <karl@tug.org>
+
+	* data/dvipdfmx.cfg (D): use -- to also protect against dangerous
+	filenames; suggestion from Max Chernoff. Add some description
+	of how the D string value is parsed.
+
+2026-03-17  Norbert Preining  <norbert@preining.info>
+
+	* dpxfile.c (filename_unsafe_for_command): new fn to check for
+	' or " in filenames.
+	(dpx_file_apply_filter): call it. Filenames with embedded " chars,
+	which worked before, will now fail.
+	Report to tlsecurity from Dawid Kulikowski of CERN,
+        9 Mar 2026 15:28:18.
+
+2026-03-14  Karl Berry  <karl@freefriends.org>
+
+	* dpxfile.c (dpx_open_file) <DPX_RES_TYPE_TEXT>: print found file,
+	which is dvipdfmx.cfg. Simplify verbose check.
+	* dvipdfmx.c (read_config_file): if verbose, print prefix and
+	terminator around looking up the config file.
+	* fontmap.c (pdf_load_fontmap_file): if verbose, output newline
+	after (long) fontmap filename.
+
+2026-03-02  Karl Berry  <karl@tug.org>
+
+	* TL'26 release.
+
 2026-01-13  TANAKA Takuji  <ttk@t-lab.opal.ne.jp>
 
 	* pst_obj.c: Check NULL pointer for a new ojbect.
