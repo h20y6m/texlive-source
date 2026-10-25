@@ -1,3 +1,64 @@
+2026-09-16  Karl Berry  <karl@freefriends.org>
+
+	* configure.ac (KPSE_KPATHSEA_PATHS_H): replace inline check
+	with call to new m4 macro, so xdvipsk can also use it.
+	Suggestion from Florian Schmaus,
+	https://github.com/TeX-Live/texlive-source/pull/85
+
+2026-07-26  Andreas Scherer  <https://ascherer.github.io>
+
+	* Makefile.in: autoreconf
+	* mplibdir/am/libmplib.am: Add infrastructure for TFMIN.
+	* pmpostdir/am/pmpost.am: Adapt PTFMIN to upstream changes.
+
+2026-07-22  Andreas Scherer  <https://ascherer.github.io>
+
+	* Makefile.in,
+	* am/cweb.am: Actually add the new script to the other two.
+
+2026-07-18  Andreas Scherer  <https://ascherer.github.io>
+
+	* am/cweb.am (dist_bin_SCRIPTS): new script cwebdir/ctwill-refsort2.
+
+2026-01-09  Andreas Scherer  <https://ascherer.github.io>
+
+	* patgen.web: more sorting fixes in the "names of the sections".
+
+2026-06-19  Karl Berry  <karl@freefriends.org>
+
+	* tex.ch (scan_file_name): do not ignore \relax before looking for
+	the filename, as this allows recursive \input. The main part of
+	this change was accidentally committed in r78759 (2026-04-20)
+	as part of an unrelated change. Today's change just tinkers with
+	the comments, adds test files (not run by make check) and removes
+	an apparently-unneeded assignment name_in_progress:=false.	       
+	* NEWS: mention this.
+	* tests/inputtop.tex,
+	* tests/inputsub.tex: test recursive \input.
+
+2026-04-20  Karl Berry  <karl@freefriends.org>
+
+	* configure.ac [XeTeX]: ICU 76 requires C++17, so XeTeX does too.
+	From Norbert.
+	https://sourceforge.net/p/xetex/bugs/205/
+
+2026-04-12  Karl Berry  <karl@freefriends.org>
+
+	* am/bootstrap.am (ctangleboot_DEPENDENCIES): add
+	cwebdir/ctang-w2c.ch cwebdir/comm-w2c.ch, attempting to alleviate
+	a report from Andreas. The same should be done for cwebboot, somehow.
+
+2026-03-22  Karl Berry  <karl@freefriends.org>
+
+	* tangle-sh.in (recovering),
+	* ctangleboot-sh.in (recovering): abort if the $stamp.lock/
+	directory (e.g., common-ctangle.lock) still exists after 180 sec,
+	since if it's gone on that long presumably it's never going to work.
+
+2026-03-02  Karl Berry  <karl@tug.org>
+
+	* TL'26 release.
+
 2026-01-30  Karl Berry  <karl@freefriends.org>
 
 	* doc/web2c.tex: fix some outdated urls and references.
@@ -331,7 +392,7 @@
 	* patgen.ch,
 	* patgen.web,
 	* pktogf.ch,
-	* pktogf.web: Fix sorting order in 'other' WEB codees.
+	* pktogf.web: Fix sorting order in 'other' WEB programs.
 
 2024-08-31  Andreas Scherer  <https://ascherer.github.io>
 

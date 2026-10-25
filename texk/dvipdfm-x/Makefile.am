@@ -1,7 +1,7 @@
 ## $Id$
 ## Makefile.am for the TeX Live subdirectory texk/dvipdfm-x/
 ##
-## Copyright 2015-2025 Karl Berry <tex-live@tug.org>
+## Copyright 2015-2026 Karl Berry <tex-live@tug.org>
 ## Copyright 2009-2015 Peter Breitenlohner <tex-live@tug.org>
 ## You may freely use, modify and/or distribute this file.
 ##
@@ -198,7 +198,7 @@ include $(top_srcdir)/../../am/man1_links.am
 ##
 configdatadir = $(datarootdir)/texmf-dist/dvipdfmx
 dist_configdata_DATA = data/dvipdfmx.cfg
- 
+
 glyphlistdatadir = $(datarootdir)/texmf-dist/fonts/map/glyphlist
 dist_glyphlistdata_DATA = data/glyphlist.txt data/pdfglyphlist.txt
 
@@ -249,13 +249,21 @@ TESTS += xdvipdfm-rev.test xdvipdfm-ttc.test
 TESTS += dvipdfmx-upjf.test dvipdfmx-upjf2.test dvipdfmx-upjf3.test dvipdfmx-incl.test
 TESTS += dvipdfmx-lmr0.test dvipdfmx-lmr1.test
 TESTS += dvipdfmx-ttf0.test
+TESTS += dvipdfmx-color.test
+TESTS += dvipdfmx-spot.test
+TESTS += dvipdfmx-mpclip.test
+TESTS += dvipdfmx-bmp.test
 xdvipdfmx.log xdvipdfm-ann.log xdvipdfm-bad.log xdvipdfm-bb.log \
 	xdvipdfm-bkm.log xdvipdfm-pdf.log xdvipdfm-psz.log \
 	xdvipdfm-ptx.log xdvipdfm-res.log \
 	xdvipdfm-rev.log xdvipdfm-ttc.log \
 	dvipdfmx-upjf.log dvipdfmx-upjf2.log dvipdfmx-upjf3.log dvipdfmx-incl.log \
 	dvipdfmx-lmr0.log dvipdfmx-lmr1.log \
-	dvipdfmx-ttf0.log: \
+	dvipdfmx-ttf0.log \
+	dvipdfmx-color.log \
+	dvipdfmx-spot.log \
+	dvipdfmx-mpclip.log \
+	dvipdfmx-bmp.log: \
 	xdvipdfmx$(EXEEXT)
 EXTRA_DIST = $(TESTS)
 ## xdvipdfmx.test
@@ -317,6 +325,8 @@ DISTCLEANFILES += upjf.vf upjv.vf upjf-*.ofm upjv-*.ofm upjf-*.tfm upjf_*.pdf up
 ## dvipdfmx-upjf2.test
 EXTRA_DIST += tests/upjf2_full.zvp0 tests/upjf2_full.vf
 EXTRA_DIST += tests/upjv2_full.zvp0 tests/upjv2_full.vf
+EXTRA_DIST += tests/upjf5_fb.zvp0 tests/upjf5_fb.vf
+EXTRA_DIST += tests/upjv5_fb.zvp0 tests/upjv5_fb.vf
 EXTRA_DIST += tests/upjf-c.pl tests/upjf-c.tfm
 EXTRA_DIST += tests/upjv-c.pl tests/upjv-c.tfm
 EXTRA_DIST += tests/upjf-hara.map
@@ -341,3 +351,19 @@ EXTRA_DIST += tests/cprm00.tex tests/cprm00.dvi
 DISTCLEANFILES += cprm*.pdf
 ##
 EXTRA_DIST += tests/fullmap.dvi tests/fullmap.tex
+## dvipdfmx-color.test
+EXTRA_DIST += tests/color_stack.dvi tests/color_stack.tex
+DISTCLEANFILES += color_stack.pdf
+## dvipdfmx-spot.test
+EXTRA_DIST += tests/spot_doublefree.dvi tests/spot_doublefree.tex
+DISTCLEANFILES += spot_doublefree.pdf
+## dvipdfmx-mpclip.test
+EXTRA_DIST += tests/mpclip.dvi tests/mpclip.tex tests/mpclip.mp tests/mpclip.mps
+DISTCLEANFILES += mpclip.pdf
+## dvipdfmx-bmp.test
+EXTRA_DIST += tests/badbmp.dvi tests/badbmp.tex
+EXTRA_DIST += tests/badbmp-hdr.bmp tests/badbmp-rle4delta.bmp
+EXTRA_DIST += tests/badbmp-rle8delta.bmp tests/badbmp-rle4bits.bmp
+EXTRA_DIST += tests/badbmp-rle8bits.bmp tests/badbmp-rle4odd.bmp
+EXTRA_DIST += tests/badbmp-size.bmp
+DISTCLEANFILES += badbmp.bmp badbmp.log badbmp.pdf

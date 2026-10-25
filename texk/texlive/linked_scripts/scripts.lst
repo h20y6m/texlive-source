@@ -128,9 +128,9 @@ ltximg/ltximg.pl
 luafindfont/luafindfont.lua
 luaotfload/luaotfload-tool.lua
 lwarp/lwarpmk.lua
-m-tx/m-tx.lua
-makedtx/makedtx.pl
+make-paper-tarball/make-paper-tarball
 make4ht/make4ht
+makedtx/makedtx.pl
 markdown/markdown2tex.lua
 match_parens/match_parens
 mathspic/mathspic.pl
@@ -173,6 +173,7 @@ rubik/rubikrotation.pl
 runtexfile/runtexfile.lua
 runtexshebang/runtexshebang.lua
 show-pdf-tags/show-pdf-tags.lua
+spanish-mathml-intent/spmmli-tool.lua
 spix/spix.py
 splitindex/splitindex.pl
 sqltex/sqltex
@@ -181,6 +182,7 @@ sty2dtx/sty2dtx.pl
 svn-multi/svn-multi.pl
 tex4ebook/tex4ebook
 texblend/texblend
+texchanges/texchanges-merge.py
 texcount/texcount.pl
 texdef/texdef.pl
 texdiff/texdiff

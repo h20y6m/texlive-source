@@ -409,7 +409,9 @@ if ( $is_TL ) { # TeX Live, MiKTeX, or W32TeX
     die "$cmd: Cannot locate xindy modules directory"  unless -d $modules_dir;
 
     if ( $is_w32 ) {
-       if ( -d "$cmd_dir/../../../bin/win32" ) {	# TeX Live
+       if ( -d "$cmd_dir/../../../bin/windows" ) {	# TeX Live
+	   $cmd_dir = "$cmd_dir/../../../bin/windows";
+       } elsif ( -d "$cmd_dir/../../../bin/win32" ) {	# TeX Live (older)
 	   $cmd_dir = "$cmd_dir/../../../bin/win32";
        } elsif ( -d "$cmd_dir/../../miktex/bin/x64/internal" ) {	# MiKTeX 64-bit
 	   $cmd_dir = "$cmd_dir/../../miktex/bin/x64/internal";
@@ -823,7 +825,13 @@ sub xindy_expression () {
 	    } else {
     # Here we call kpsewhich to search for a module. Thus modules can be under
     # (anytexmf)/xindy/modules/
-		my $fnmodule=`kpsewhich -progname=xindy -format=othertext $module`;
+		my $fnmodule;
+		# use -| form to avoid interpreting metacharacters.
+		if (open(my $kpse, '-|', 'kpsewhich',
+			 '-progname=xindy', '-format=othertext', $module)) {
+		    $fnmodule = <$kpse>;
+		    close($kpse);
+		}
 		if ($fnmodule) {
 		   chomp($fnmodule);
 		   print $sf "(require \"$fnmodule\")\n";

@@ -111,7 +111,7 @@ static char *find_in_output_directory(const char *s)
 
 int kpse_available(const char *m) {
     if (!kpse_init) {
-        fprintf(stdout,"missing kpse replacement callback '%s', quitting\n",m);
+        fprintf(stdout,"missing kpse replacement replacement/callback index %s, quitting\n",m);
         exit(1);
     }
     return 1 ;
@@ -123,11 +123,15 @@ char *luatex_find_read_file(const char *s, int n, int callback_index)
     int callback_id = callback_defined(callback_index);
     if (callback_id > 0) {
         (void) run_callback(callback_id, "dS->R", n, s, &ftemp);
-    } else if (kpse_available("find_read_file")) {
+    } else {
+      char str[21]; 
+      snprintf(str, sizeof(str), "%lld", callback_index);
+      if (kpse_available(str)) {
         /*tex Use kpathsea here. */
         ftemp = find_in_output_directory(s);
         if (!ftemp)
             ftemp = kpse_find_file(s, kpse_tex_format, 1);
+      }
     }
     if (ftemp) {
         if (fullnameoffile)
@@ -145,7 +149,10 @@ char *luatex_find_file(const char *s, int callback_index)
     int callback_id = callback_defined(callback_index);
     if (callback_id > 0) {
         (void) run_callback(callback_id, "S->R", s, &ftemp);
-    } else if (kpse_available("find_read_file")) {
+    } else {
+      char str[21]; 
+      snprintf(str, sizeof(str), "%lld", callback_index);
+      if (kpse_available(str)) {
         /*tex Use kpathsea here. */
         switch (callback_index) {
             case find_enc_file_callback:
@@ -187,6 +194,7 @@ char *luatex_find_file(const char *s, int callback_index)
                 printf("luatex_find_file(): do not know how to handle file %s of type %d\n", s, callback_index);
                 break;
         }
+      }
     }
     return ftemp;
 }
@@ -332,6 +340,10 @@ boolean lua_a_open_out(alpha_file * f, char *fn, int n)
     boolean ret = false;
     callback_id = callback_defined(find_write_file_callback);
     if (callback_id > 0) {
+      /*tex kpathsea can be disabled from the command line (kpse_init==0) but otherwise  
+        the name must be a valid name for the output file. 
+      */
+      if (kpse_init==0 || (kpse_init && openoutnameok(fn)) ) {
         test = run_callback(callback_id, "dS->R", n, fn, &fnam);
         if ((test) && (fnam != NULL) && (strlen(fnam) > 0)) {
             /*tex
@@ -344,6 +356,7 @@ boolean lua_a_open_out(alpha_file * f, char *fn, int n)
             ret = open_outfile(f, fnam, FOPEN_W_MODE);
             free(fnam);
         }
+      }
     } else {
         if (openoutnameok(fn)) {
             if (n > 0 && selector != term_only && log_file) {
@@ -844,6 +857,11 @@ char *open_fmt_file(void)
 
 */
 
+/*tex To ensure that input is not recursive */        
+
+int input_recursion_depth = 0;
+
+
 /*tex is a file name being scanned? */
 
 boolean name_in_progress;
@@ -983,9 +1001,10 @@ void start_input(void)
 {
     str_number temp_str;
     char *fn;
+    input_recursion_depth++; 
     do {
         get_x_token();
-    } while ((cur_cmd == spacer_cmd) || (cur_cmd == relax_cmd));
+    } while (cur_cmd == spacer_cmd);
 
     back_input();
     if (cur_cmd != left_brace_cmd) {
@@ -1083,6 +1102,7 @@ void start_input(void)
         buffer[ilimit] = (packed_ASCII_code) end_line_char_par;
     first = ilimit + 1;
     iloc = istart;
+    input_recursion_depth--;
 }
 
 /*tex

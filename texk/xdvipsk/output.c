@@ -114,6 +114,13 @@ static time_t jobtime;
 #define strtoll _strtoi64
 #endif
 
+#ifdef XDVIPSK
+boolean is_ps_name_char(unsigned char ch)
+{
+    return((ch >= 0x20 /* ' ' */) && (ch < 0x80) && (!strchr(" ()<>[]{}/%", ch)));
+}
+#endif /* XDVIPSK */
+
 #define INVALID_EPOCH_VALUE ((time_t) -1)
 
 static time_t
@@ -242,7 +249,7 @@ static void rename_enc_glname(FILE *enc_file, const char *pfb_name)
     while (TRUE)
     {
         ch = getc(enc_file);
-        if ((!isalnum(ch)) || (dest_pt >= glyph_name_buf + GLYPH_NAME_LEN))
+        if ((!is_ps_name_char((unsigned char)ch)) || (dest_pt >= glyph_name_buf + GLYPH_NAME_LEN))
             break;
         *dest_pt++ = ch;
     }
@@ -287,7 +294,7 @@ char *get_alias_fname(const char *alias_name)
             {
                 while ((enc_ptr > specinfo) && (*(enc_ptr - 1) == ' ')) --enc_ptr;
                 enc_name = enc_ptr;
-                while ((enc_name > specinfo) && isalnum(*(enc_name - 1))) --enc_name;
+                while ((enc_name > specinfo) && is_ps_name_char((unsigned char)*(enc_name - 1))) --enc_name;
                 if (enc_ptr - enc_name <= ENC_BUF_SIZE)
                 {
                     strncpy(enc_name_to, enc_name, ENC_BUF_SIZE);
@@ -2196,14 +2203,21 @@ drawchar(chardesctype *c, int cc)
       }
       else hvpos();
       if (lastfont != curfnt->psname) {
-		 if (curfnt->resfont->embolden) {
-		   double fontscale;
-		   textStrokeFlag = 1;
-		   fontscale = curfnt->scaledsize * conv;
-		   sprintf(textstrokecmd, "%g ct_st", (fontscale * curfnt->resfont->embolden) / 100.0);
-		 }
-		 else
-		   textStrokeFlag = 0;
+         boolean new_textStrokeFlag;
+         if (curfnt->resfont->embolden) {
+            double fontscale;
+            new_textStrokeFlag = 1;
+            fontscale = curfnt->scaledsize * conv;
+            sprintf(textstrokecmd, "%g ct_st", (fontscale * curfnt->resfont->embolden) / 100.0);
+         }
+         else
+            new_textStrokeFlag = 0;
+         if (instring && (textStrokeFlag != new_textStrokeFlag))
+         {
+            stringend();
+            chrcmd('p');
+         }
+         textStrokeFlag = new_textStrokeFlag;
          fontout(curfnt->psname);
 	  }
       scout2Octal(c->cid);

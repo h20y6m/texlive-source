@@ -2,7 +2,7 @@
 
 --[[
 
-File l3build.lua Copyright (C) 2014-2025 The LaTeX Project
+File l3build.lua Copyright (C) 2014-2026 The LaTeX Project
 
 It may be distributed and/or modified under the conditions of the
 LaTeX Project Public License (LPPL), either version 1.3c of this
@@ -25,7 +25,7 @@ for those people who are interested.
 --]]
 
 -- Version information
-release_date = "2025-12-24"
+release_date = "2026-10-19"
 
 -- File operations are aided by the LuaFileSystem module
 local lfs = require("lfs")
@@ -46,7 +46,7 @@ local open             = io.open
 kpse.set_program_name("kpsewhich")
 build_kpse_path = match(lookup("l3build.lua"),"(.*[/])")
 local function build_require(s)
-  require(lookup("l3build-"..s..".lua", { path = build_kpse_path } ) )
+  return require(lookup("l3build-"..s..".lua", { path = build_kpse_path } ) )
 end
 
 -- Minimal code to do basic checks
@@ -67,6 +67,11 @@ build_require("tagging")
 build_require("upload")
 build_require("stdmain")
 
+-- Look for some configuration details
+if fileexists("build.lua") then
+  dofile("build.lua")
+end
+
 -- This has to come after stdmain(),
 -- and that has to come after the functions are defined
 if options["target"] == "help" then
@@ -77,10 +82,13 @@ elseif options["target"] == "version" then
   exit(0)
 end
 
+if options["help"] and options["target"] then
+  help(options["target"])
+  exit(0)
+end
+
 -- Look for some configuration details
-if fileexists("build.lua") then
-  dofile("build.lua")
-else
+if not fileexists("build.lua") then
   print("Error: Cannot find configuration build.lua")
   exit(1)
 end

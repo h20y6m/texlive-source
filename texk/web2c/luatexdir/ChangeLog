@@ -1,3 +1,144 @@
+2026-10-02 Luigi Scarso <luigi.scarso@gmail.com>
+
+	* Luatex 1.27.5
+
+2026-10-02 Luigi Scarso <luigi.scarso@gmail.com>
+
+	* Recursive use of \input is no longer allowed.
+
+
+2026-09-27 Luigi Scarso <luigi.scarso@gmail.com>
+
+	* Some fixes for synctex  (Ronnie Chen)
+	* Luatex 1.27.4
+
+
+2026-09-27 Luigi Scarso <luigi.scarso@gmail.com>
+
+	* Sync with upstream luaharfbuzz commit  (Udi Fogiel)
+	* Luatex 1.27.3
+
+
+2026-09-21 Luigi Scarso <luigi.scarso@gmail.com>
+
+	* Patch for LuaTeX's \variablefam (M.F. Krüger)
+	* Luatex 1.27.2
+
+2026-09-02 Luigi Scarso <luigi.scarso@gmail.com>
+
+	* New primitive for italic correction: 
+          setting \mathlargeoperatormode to a positive value enforces 
+          the traditional TeX path (with zero being the default) (HH).
+        * LuaTeX 1.27.1
+
+2026-08-15 Luigi Scarso <luigi.scarso@gmail.com>
+
+	* Several code refactoring operations based on the results of the GCC 16.1 analyzer
+        * LuaTeX 1.27.0
+
+
+2026-07-03 Luigi Scarso <luigi.scarso@gmail.com>
+
+        * source/libs/pplib/pplib-src/src/ppload.c: changed
+          #define XREF_STREAM_MAX_FIELD 4
+          to
+          #define XREF_STREAM_MAX_FIELD 8
+        * LuaTeX 1.26.4
+
+2026-06-12 Luigi Scarso <luigi.scarso@gmail.com>
+
+	* Fixed wrong shift of rules with left field (Udi Fogiel)
+	* LuaTeX 1.26.3
+
+	
+2026-06-12 Luigi Scarso <luigi.scarso@gmail.com>
+
+	* slunicode updated from tcl8.6.18/generic/tclUniData.c (Unicode version 17)
+	* LuaTeX 1.26.2
+
+
+2026-06-12 Luigi Scarso <luigi.scarso@gmail.com>
+
+	* Fixed coordinate corruption with spurious enddir node (Udi Fogiel)	
+	* LuaTeX 1.26.1
+
+
+2026-06-09 Luigi Scarso <luigi.scarso@gmail.com>
+
+	*  LuaTeX 1.26.0
+
+         
+2026-06-09 Luigi Scarso <luigi.scarso@gmail.com>
+
+	*  On non Windows systems, spawn_command on child calls _exit instead of exit;
+	 see [Dev-luatex] Failed os.spawn() causes part of file to be read twice  
+         (thanks to David Chiang).
+         
+
+2026-04-27 Luigi Scarso <luigi.scarso@gmail.com>
+
+	*  GNU Autoconf 2.73
+
+
+2026-04-11 Luigi Scarso <luigi.scarso@gmail.com>
+
+	* Synced with TeXLive rev. 78806: HarfBUzz 14.2.0, libpng 1.6.58. LuaTeX 1.25.9
+
+
+2026-04-11 Luigi Scarso <luigi.scarso@gmail.com>
+
+	* Fixed math italic (H.Hagen). LuaTeX 1.25.8
+
+
+2026-04-11 Luigi Scarso <luigi.scarso@gmail.com>
+
+	* Fixed wrong luatex_version. Synced with TeXLive rev. 78663. LuaTeX 1.25.7
+	
+
+2026-04-09 Luigi Scarso <luigi.scarso@gmail.com>
+
+	* Better fixes  for  xdvipsk (Hans Hagen).
+	
+
+2026-04-09 Luigi Scarso <luigi.scarso@gmail.com>
+
+	* Fixed dvigen.c for  xdvipsk (Hans Hagen). LuaTeX 1.25.6
+
+
+2026-04-08 Luigi Scarso <luigi.scarso@gmail.com>
+
+	* Fixed io.tmpdir in --safer mode. LuaTeX 1.25.5
+
+
+2026-04-08 Luigi Scarso <luigi.scarso@gmail.com>
+
+	* Fixed io.open in --safer mode. LuaTeX 1.25.4
+
+
+2026-03-30 Luigi Scarso <luigi.scarso@gmail.com>
+
+	* LuaTeX extensions for xdvipsk support (Sigitas Tolušis)
+
+	
+2026-03-30 Luigi Scarso <luigi.scarso@gmail.com>
+
+	* Fixed #define number_fonts 
+	* New FORMAT_ID (907+61)
+	* LuaTeX 1.25.3
+
+
+2026-03-20 Luigi Scarso <luigi.scarso@gmail.com>
+
+	* New callback.listidx(), returns a table of internal indexes associated with the callbacks, useful for debugging. 
+	* In kpse_mode  find_write_file  obeys the kpathsea rules for the validity of names.
+	* LuaTeX 1.25.2
+
+
+2026-03-05 Luigi Scarso <luigi.scarso@gmail.com>
+
+        * Fixed wrong local_par node subtype (thanks to Udi Fogiel)
+	* LuaTeX 1.25.1
+
 2026-02-18  Luigi Scarso  <luigi.scarso@gmail.com>
 
 	* [luatex] Spacing issue: Partial fix. WORK IN PROGRESS.

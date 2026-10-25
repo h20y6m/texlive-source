@@ -1,3 +1,54 @@
+2026-09-19  Karl Berry  <karl@freefriends.org>
+
+	* hps.c,
+	* dopage.c,
+	* protos.h: propagate fix from Tom Rokicki (committed in (r80313)
+	so that dvipsk recognizes hypertex specials emitted in vertical
+	mode. See dvipsk/ChangeLog for details and a new test
+
+2026-09-16  Karl Berry  <karl@freefriends.org>
+
+	* configure.ac (KPSE_KPATHSEA_PATHS_H): call new macro.
+	Suggestion from Florian Schmaus,
+	https://github.com/TeX-Live/texlive-source/pull/85
+
+2026-09-10  Sigitas Tolušis <sigitas@vtex.lt>
+
+	* output.c: flush string on font embolding changes (MP).
+
+	* xdvips.c: version to 2026.09.10.
+
+2026-09-04    Sigitas Tolušis <sigitas@vtex.lt>
+
+	* dospecial.c, protos.h, xdvipsk.c: fix run_lua_specials();
+	* output.c, protos.h, writet1.c: implement is_ps_name_char();
+	* glyphlist_table.lua, glyphlist_table.h: extend glyph-to-Unicode
+	table with ~360 entries from the newtx/newpx (ntx) and luaotf glyph
+	sets: blackboard-bold letters, math arrows and brackets, accent
+	combiners, and miscellaneous symbols;
+	* configure.ac, configure, Makefile.am, Makefile.in: add
+	--with-system-libjpeg and --with-system-libtiff options using KPSE
+	macro infrastructure; when a system library is chosen, the
+	corresponding bundled thirdparty/ sources are skipped entirely;
+	* loadJPEG.c, loadTIFF.c: improve loading graphlib.
+
+2026-06-25  Tomas Rokicki  <rokicki@gmail.com>
+
+	[Copying fix from ../dvipsk.]
+	* download.c (quarterword): compute yoff(set), not xoff twice.
+	See dvipsk/ChangeLog for details.
+
+2026-04-10  Sigitas Tolušis <sigitas@vtex.lt>
+
+	* fulfill font maps tables (MP);
+	* add GlyphNames2Unicode implementation for OpenType fonts (MP);
+	* store OpenType fonts encoding only for the used glyphs (MP);
+	* overoll code improvement and optimization (MP).
+
+2026-03-02  Karl Berry  <karl@tug.org>
+
+	* TL'26 release.
+
 2026-02-21  Sigitas Tolušis <sigitas@vtex.lt>
 
 	* : add internal glyph table loading on demand

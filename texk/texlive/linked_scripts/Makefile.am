@@ -1,7 +1,7 @@
 ## $Id$
 ## Makefile.am for the TeX Live subdirectory texk/texlive/linked_scripts/
 ##
-## Copyright 2016-2025 Karl Berry <tex-live@tug.org>
+## Copyright 2016-2026 Karl Berry <tex-live@tug.org>
 ## Copyright 2009-2015 Peter Breitenlohner <tex-live@tug.org>
 ## You may freely use, modify and/or distribute this file.
 ##
@@ -14,6 +14,9 @@ scripts-list: Makefile
 	@for f in $(nobase_dist_texmf_scripts_SCRIPTS); do echo "$$f"; done >>$@
 	@echo "'" >>$@
 	cmp -s $(srcdir)/scripts.lst $@ || cp -f $@ $(srcdir)/scripts.lst
+# Also want to update scripts-targets.lst, so, weirdly:
+	$(MAKE) install-data-hook >linked_scripts_install.out
+	cd $(srcdir) && ls -l scripts.lst scripts-targets.lst
 
 # Hard to remember the target name different from final file name.
 scripts-lst:
@@ -187,9 +190,9 @@ texmf_other_scripts = \
 	luafindfont/luafindfont.lua \
 	luaotfload/luaotfload-tool.lua \
 	lwarp/lwarpmk.lua \
-	m-tx/m-tx.lua \
-	makedtx/makedtx.pl \
+	make-paper-tarball/make-paper-tarball \
 	make4ht/make4ht \
+	makedtx/makedtx.pl \
 	markdown/markdown2tex.lua \
 	match_parens/match_parens \
 	mathspic/mathspic.pl \
@@ -232,6 +235,7 @@ texmf_other_scripts = \
 	runtexfile/runtexfile.lua \
 	runtexshebang/runtexshebang.lua \
 	show-pdf-tags/show-pdf-tags.lua \
+	spanish-mathml-intent/spmmli-tool.lua \
 	spix/spix.py \
 	splitindex/splitindex.pl \
 	sqltex/sqltex \
@@ -240,6 +244,7 @@ texmf_other_scripts = \
 	svn-multi/svn-multi.pl \
 	tex4ebook/tex4ebook \
 	texblend/texblend \
+	texchanges/texchanges-merge.py \
 	texcount/texcount.pl \
 	texdef/texdef.pl \
 	texdiff/texdiff \
@@ -346,7 +351,8 @@ else !WIN32
 	  echo 'unable to compute relative path for linked scripts' >&2; \
 	  exit 1; \
 	fi; \
-	cd $(DESTDIR)$(bindir) && \
+	echo "linked_scripts(install-data-hook): updating in $(DESTDIR)$(bindir)"; \
+	cd "$(DESTDIR)$(bindir)" && \
 	  for s in $(nobase_dist_texmf_scripts_SCRIPTS); do \
 	    target=`basename $$s | tr '[A-Z]' '[a-z]'`; \
 ## We can't portably use fgrep or egrep or grep -E or ere patterns,

@@ -1,0 +1,108 @@
+.TH UTFPATGEN 1 "30 May 2026" "utfpatgen 1.0"
+.\"=====================================================================
+.if t .ds TX \fRT\\h'-0.10m'\\v'0.17v'E\\v'-0.17v'\\h'-0.06m'X\fP
+.if n .ds TX TeX
+.ie t .ds OX \fIT\h'-0.17m'\v'+0.21m'E\v'-0.21m'\h'-0.04m'X\fP
+.el .ds OX TeX
+.\"=====================================================================
+.SH NAME
+utfpatgen \- generate patterns for TeX hyphenation
+.SH SYNOPSIS
+.B utfpatgen
+.I dictionary_file pattern_file patout_file translate_file
+.\"=====================================================================
+.SH DESCRIPTION
+.I UTFpatgen
+is an extension to
+.BR patgen (1)
+for generating patterns from large input alphabets, with an extended
+hyphenation level range and native dynamic memory management.
+.PP
+The program reads a
+.I dictionary_file
+containing a list of hyphenated words and a
+.I pattern_file
+containing previously-generated patterns (if any) for a particular
+language (not a complete \*(TX source file; see below), and produces the
+.I patout_file
+with (previously- plus newly-generated) hyphenation patterns for that
+language.
+.PP
+The
+.I translate_file
+defines language specific values for the parameters
+.IR left_hyphen_min " and " right_hyphen_min
+used by \*(TX's hyphenation algorithm and the external representation
+of the lower and upper case version(s) of all `letters' of that
+language.
+.PP
+Further details of the pattern generation process such as
+hyphenation levels and pattern lengths are requested interactively from
+the user's terminal. Optionally,
+.I UTFpatgen
+creates a new dictionary file
+.BI pattmp. n
+showing the good and bad hyphens found by the generated patterns, where
+.I n
+is the highest hyphenation level.
+.PP
+All filenames must be complete; no adding of default
+extensions or path searching is done.
+.\"=====================================================================
+.SH INPUT FORMATS
+.TP \w'@@'u+2n
+.B Letters
+.I UTFpatgen
+is able to process any UTF-8 encoded character, or more generally, any
+encoding that is prefix-free (no letter is a prefix of another) and does
+not use the `0xFF' byte, which has a special meaning in 
+.IR UTFpatgen ),
+described next:
+.TP \w'@@'u+2n
+.B Levels and weights
+Non-character parts of the text, such as hyphenation levels or weights,
+should be represented as a 2-byte sequence `0xFF <value>'. If a file
+uses the
+.BR patgen (1)
+encoding (ASCII numerals), we recommend using
+.BR sed (1)
+for conversion.
+.TP \w'@@'u+2n
+.B File formats
+The formats and conventions required in the 4 input files (
+.I dictionary_file, pattern_file, patout_file, translate_file
+) are identical to those in
+.BR patgen (1)
+with the only exception of level and weight encoding described earlier.
+.\"=====================================================================
+.SH "SEE ALSO"
+Frank Liang,
+.IR "Word hy-phen-a-tion by com-puter" ,
+STAN-CS-83-977,
+Stanford University Ph.D. thesis, 1983,
+http://tug.org/docs/liang.
+.PP
+Donald E. Knuth,
+.IR "The \*(OXbook" ,
+Addison-Wesley, Appendix H.
+.TP
+https://ctan.org/pkg/patgen
+The original patgen program, by Frank Liang, with system updates by
+Peter Breitenlohner.
+.TP
+https://ctan.org/pkg/hyph-utf8
+Collected hyphenation patterns for many languages in many formats.
+.TP
+https://ctan.org/tex-archive/language/
+General CTAN directory for patterns and support for many other languages.
+.TP
+https://tug.org/TUGboat/Contents/listkeyword.html#CatTAGMultilingualDocumentProcessing
+\fITUGboat\fP articles on hyphenation and other aspects of
+language-specific document processing.
+.\"=====================================================================
+.SH AUTHORS
+Ondřej Metelka
+.br
+Released under the MIT license.
+.br
+https://ctan.org/pkg/utfpatgen

@@ -1,3 +1,39 @@
+2026-07-18  Andreas Scherer  <https://ascherer.github.io>
+
+	* ctwill.man: New utility 'ctwill-refsort2' for CTWILL process.
+
+2026-06-20  Karl Berry  <karl@freefriends.org>
+
+	* ctie.man: add analogous references to tie.man, other tweaks.
+	* tie.man: further tweaks.
+
+2026-06-19  Karl Berry  <karl@freefriends.org>
+
+	* tie.man: add some references.
+
+2026-04-22  Karl Berry  <karl@freefriends.org>
+
+	* tex.man: typo .IF -> .IR for mktex<format>.
+	Report from Hille, https://tug.org/pipermail/tex-k/2026-April/004310.html
+
+2026-04-22  Andreas Scherer  <https://ascherer.github.io>
+
+	* twill.man: \*(WB is no longer defined.
+
+2026-04-12  Karl Berry  <karl@freefriends.org>
+
+	* tex.man,
+	* bibtex.man: OL is the oblique LaTeX logo (comment only).
+
+2026-04-06  Karl Berry  <karl@freefriends.org>
+
+	* luatex.man (--safer): explain that everything possible
+	is already set by default.
+
+2026-03-02  Karl Berry  <karl@tug.org>
+
+	* TL'26 release.
+
 2026-02-14  Karl Berry  <karl@freefriends.org>
 
 	* pdftex.man: mention supp-pdf{.tex,mkii}, and TEXMF_DEBUG_PNG_COPY.

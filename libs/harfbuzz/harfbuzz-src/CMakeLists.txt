@@ -7,7 +7,9 @@ if(POLICY CMP0063)
   cmake_policy(SET CMP0063 NEW)
 endif()
 
-set(CMAKE_CXX_STANDARD 11)
+if(NOT DEFINED CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 11)
+endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 ## Disallow in-source builds, as CMake generated make files can collide with autotools ones
@@ -24,6 +26,10 @@ Before that, remove the files created by this failed run with"
   rm -rf CMakeCache.txt CMakeFiles")
 endif ()
 
+# Add a .gitignore file to build directory (inspired by Meson)
+if (NOT ("${PROJECT_BINARY_DIR}" STREQUAL "${PROJECT_SOURCE_DIR}") AND NOT (EXISTS "${PROJECT_BINARY_DIR}/.gitignore"))
+  file(WRITE "${PROJECT_BINARY_DIR}/.gitignore" "*")
+endif ()
 
 ## HarfBuzz build configurations
 option(HB_HAVE_CAIRO "Enable cairo interop helpers" OFF)
@@ -51,6 +57,25 @@ if (HB_BUILD_UTILS)
 endif ()
 
 option(HB_BUILD_SUBSET "Build harfbuzz-subset" ON)
+option(HB_BUILD_RASTER "Build harfbuzz-raster" ON)
+option(HB_BUILD_VECTOR "Build harfbuzz-vector" ON)
+option(HB_BUILD_GPU "Build harfbuzz-gpu" ON)
+set(HB_BUILD_GPU_DEMO "AUTO" CACHE STRING "Build hb-gpu demo tool (AUTO, ON, or OFF)")
+set_property(CACHE HB_BUILD_GPU_DEMO PROPERTY STRINGS AUTO ON OFF)
+string(TOUPPER "${HB_BUILD_GPU_DEMO}" HB_BUILD_GPU_DEMO)
+if (NOT HB_BUILD_GPU_DEMO MATCHES "^(AUTO|ON|OFF)$")
+  message(FATAL_ERROR "HB_BUILD_GPU_DEMO must be AUTO, ON, or OFF")
+endif ()
+if (HB_BUILD_GPU_DEMO STREQUAL "ON" AND NOT HB_BUILD_GPU)
+  message(FATAL_ERROR "HB_BUILD_GPU_DEMO is ON but HB_BUILD_GPU is OFF")
+endif ()
+if (HB_BUILD_GPU_DEMO STREQUAL "ON" AND NOT HB_BUILD_UTILS)
+  message(FATAL_ERROR "HB_BUILD_GPU_DEMO is ON but HB_BUILD_UTILS is OFF")
+endif ()
+set(HB_HAVE_SUBSET ${HB_BUILD_SUBSET})
+set(HB_HAVE_RASTER ${HB_BUILD_RASTER})
+set(HB_HAVE_VECTOR ${HB_BUILD_VECTOR})
+set(HB_HAVE_GPU ${HB_BUILD_GPU})
 
 option(HB_HAVE_GOBJECT "Enable GObject Bindings" OFF)
 if (HB_HAVE_GOBJECT)
@@ -150,8 +175,20 @@ set (HB_VERSION_MINOR ${CMAKE_MATCH_3})
 set (HB_VERSION_MICRO ${CMAKE_MATCH_4})
 
 ## Define sources and headers of the project
-set (project_sources ${PROJECT_SOURCE_DIR}/src/harfbuzz.cc) # use amalgam source
+# Keep sources in separate archive members so duplicate internal sources in
+# dependent static libraries do not result in multiple definitions.
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
+             ${PROJECT_SOURCE_DIR}/src/harfbuzz.cc)
+file(STRINGS ${PROJECT_SOURCE_DIR}/src/harfbuzz.cc project_source_includes
+     REGEX "^#include \".*\\.cc\"$")
+foreach (project_source_include IN LISTS project_source_includes)
+  string(REGEX REPLACE "^#include \"(.*\\.cc)\"$" "\\1"
+         project_source ${project_source_include})
+  list(APPEND project_sources ${PROJECT_SOURCE_DIR}/src/${project_source})
+endforeach ()
 set (subset_project_sources
+     ${PROJECT_SOURCE_DIR}/src/OT/Var/VARC/VARC.cc
+     ${PROJECT_SOURCE_DIR}/src/OT/Var/VARC/VARC-subset.hh
      ${PROJECT_SOURCE_DIR}/src/hb-number.cc
      ${PROJECT_SOURCE_DIR}/src/hb-number.hh
      ${PROJECT_SOURCE_DIR}/src/hb-ot-cff1-table.cc
@@ -162,6 +199,7 @@ set (subset_project_sources
      ${PROJECT_SOURCE_DIR}/src/hb-subset-cff-common.hh
      ${PROJECT_SOURCE_DIR}/src/hb-subset-cff1.cc
      ${PROJECT_SOURCE_DIR}/src/hb-subset-cff2.cc
+     ${PROJECT_SOURCE_DIR}/src/hb-subset-cff2-round.hh
      ${PROJECT_SOURCE_DIR}/src/hb-subset-input.cc
      ${PROJECT_SOURCE_DIR}/src/hb-subset-input.hh
      ${PROJECT_SOURCE_DIR}/src/hb-subset-instancer-iup.hh
@@ -183,6 +221,7 @@ set (subset_project_sources
      ${PROJECT_SOURCE_DIR}/src/hb-subset.cc
      ${PROJECT_SOURCE_DIR}/src/hb-subset.hh
      ${PROJECT_SOURCE_DIR}/src/hb-repacker.hh
+     ${PROJECT_SOURCE_DIR}/src/hb-result.hh
      ${PROJECT_SOURCE_DIR}/src/graph/graph.hh
      ${PROJECT_SOURCE_DIR}/src/graph/gsubgpos-graph.hh
      ${PROJECT_SOURCE_DIR}/src/graph/gsubgpos-context.hh
@@ -194,6 +233,7 @@ set (subset_project_sources
      ${PROJECT_SOURCE_DIR}/src/graph/split-helpers.hh
      ${PROJECT_SOURCE_DIR}/src/graph/serialize.hh
      ${PROJECT_SOURCE_DIR}/src/OT/Color/COLR/colrv1-closure.hh
+     ${PROJECT_SOURCE_DIR}/src/OT/Color/COLR/colrv1-depend.hh
 )
 set (project_extra_sources)
 set (project_headers
@@ -210,6 +250,7 @@ set (project_headers
      ${PROJECT_SOURCE_DIR}/src/hb-map.h
      ${PROJECT_SOURCE_DIR}/src/hb-ot-color.h
      ${PROJECT_SOURCE_DIR}/src/hb-ot-deprecated.h
+     ${PROJECT_SOURCE_DIR}/src/hb-ot-fetch.h
      ${PROJECT_SOURCE_DIR}/src/hb-ot-font.h
      ${PROJECT_SOURCE_DIR}/src/hb-ot-layout.h
      ${PROJECT_SOURCE_DIR}/src/hb-ot-math.h
@@ -231,7 +272,45 @@ set (project_headers
 )
 set (subset_project_headers
      ${PROJECT_SOURCE_DIR}/src/hb-subset.h
+     ${PROJECT_SOURCE_DIR}/src/hb-subset-depend.h
      ${PROJECT_SOURCE_DIR}/src/hb-subset-serialize.h
+)
+set (raster_project_sources
+     ${PROJECT_SOURCE_DIR}/src/hb-raster-image.cc
+     ${PROJECT_SOURCE_DIR}/src/hb-raster-image.hh
+     ${PROJECT_SOURCE_DIR}/src/hb-raster.hh
+     ${PROJECT_SOURCE_DIR}/src/hb-raster-draw.cc
+     ${PROJECT_SOURCE_DIR}/src/hb-raster-paint.cc
+     ${PROJECT_SOURCE_DIR}/src/hb-raster-paint.hh
+     ${PROJECT_SOURCE_DIR}/src/hb-static.cc
+)
+set (raster_project_headers
+     ${PROJECT_SOURCE_DIR}/src/hb-raster.h
+)
+set (vector_project_sources
+     ${PROJECT_SOURCE_DIR}/src/hb-zlib.cc
+     ${PROJECT_SOURCE_DIR}/src/hb-zlib.hh
+     ${PROJECT_SOURCE_DIR}/src/hb-vector.cc
+     ${PROJECT_SOURCE_DIR}/src/hb-vector-draw.cc
+     ${PROJECT_SOURCE_DIR}/src/hb-vector-path.cc
+     ${PROJECT_SOURCE_DIR}/src/hb-vector-paint.cc
+     ${PROJECT_SOURCE_DIR}/src/hb-vector-paint-svg.cc
+     ${PROJECT_SOURCE_DIR}/src/hb-vector-paint-pdf.cc
+     ${PROJECT_SOURCE_DIR}/src/hb-vector-path.hh
+     ${PROJECT_SOURCE_DIR}/src/hb-vector-buf.hh
+     ${PROJECT_SOURCE_DIR}/src/hb-static.cc
+)
+set (vector_project_headers
+     ${PROJECT_SOURCE_DIR}/src/hb-vector.h
+)
+set (gpu_project_sources
+     ${PROJECT_SOURCE_DIR}/src/hb-gpu.cc
+     ${PROJECT_SOURCE_DIR}/src/hb-gpu-draw.cc
+     ${PROJECT_SOURCE_DIR}/src/hb-gpu-paint.cc
+     ${PROJECT_SOURCE_DIR}/src/hb-static.cc
+)
+set (gpu_project_headers
+     ${PROJECT_SOURCE_DIR}/src/hb-gpu.h
 )
 
 ## Find and include needed header folders and libraries
@@ -255,7 +334,7 @@ if (HB_HAVE_FREETYPE AND NOT TARGET freetype)
 endif ()
 
 if (HB_HAVE_FREETYPE)
-  list(APPEND PC_REQUIRES_PRIV "freetype2 >= 12.0.6")
+  list(APPEND PC_REQUIRES_PRIV "freetype2 >= 20.0.14")
 endif ()
 
 if (HB_HAVE_GRAPHITE2)
@@ -302,13 +381,15 @@ if (HB_HAVE_ICU)
 
   find_package(ICU REQUIRED COMPONENTS uc)
 
-  if (ICU_VERSION VERSION_GREATER_EQUAL 75.1)
+  if (ICU_VERSION VERSION_GREATER_EQUAL 75.1 AND
+      CMAKE_CXX_STANDARD LESS 17)
     set(CMAKE_CXX_STANDARD 17)
   endif ()
 
   list(APPEND project_headers ${PROJECT_SOURCE_DIR}/src/hb-icu.h)
 
-  list(APPEND THIRD_PARTY_LIBS ICU::uc)
+  get_target_property(ICU_UC_LIBRARY ICU::uc IMPORTED_LOCATION)
+  list(APPEND THIRD_PARTY_LIBS ${ICU_UC_LIBRARY})
 endif ()
 
 if (APPLE AND HB_HAVE_CORETEXT)
@@ -394,6 +475,24 @@ if (HB_HAVE_CAIRO)
   list(APPEND project_headers ${PROJECT_SOURCE_DIR}/src/hb-cairo.h)
   list(APPEND THIRD_PARTY_LIBS ${CAIRO_LIBRARIESNAMES})
 endif()
+
+if (HB_BUILD_RASTER)
+  find_package(PNG QUIET)
+  if (PNG_FOUND)
+    add_compile_definitions(HAVE_PNG=1)
+    list(APPEND HB_RASTER_THIRD_PARTY_LIBS PNG::PNG)
+    list(APPEND PC_REQUIRES_PRIV_RASTER png)
+  endif ()
+endif ()
+
+if (HB_BUILD_VECTOR)
+  find_package(ZLIB QUIET)
+  if (ZLIB_FOUND)
+    add_compile_definitions(HAVE_ZLIB=1)
+    list(APPEND HB_VECTOR_THIRD_PARTY_LIBS ZLIB::ZLIB)
+    list(APPEND PC_REQUIRES_PRIV_VECTOR zlib)
+  endif ()
+endif ()
 
 if (HB_HAVE_GOBJECT)
   add_compile_definitions(HAVE_GOBJECT)
@@ -502,6 +601,12 @@ endif ()
 
 
 ## Define harfbuzz library
+set(HB_VISIBILITY_INLINES_HIDDEN TRUE)
+# XCOFF rejects hidden visibility on references to imported inline symbols.
+if(CMAKE_SYSTEM_NAME MATCHES "^(AIX|OS400)$")
+  set(HB_VISIBILITY_INLINES_HIDDEN FALSE)
+endif()
+
 add_library(harfbuzz ${project_sources} ${project_extra_sources} ${project_headers})
 target_link_libraries(harfbuzz ${THIRD_PARTY_LIBS})
 if (MINGW)
@@ -510,7 +615,7 @@ endif()
 target_include_directories(harfbuzz PUBLIC
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>"
                            "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/harfbuzz>")
-set_target_properties(harfbuzz PROPERTIES VISIBILITY_INLINES_HIDDEN TRUE)
+set_target_properties(harfbuzz PROPERTIES VISIBILITY_INLINES_HIDDEN ${HB_VISIBILITY_INLINES_HIDDEN})
 if (HB_HAVE_FREETYPE AND TARGET freetype)
   target_link_libraries(harfbuzz freetype)
 endif ()
@@ -521,7 +626,7 @@ if (HB_HAVE_ICU)
   add_library(harfbuzz-icu ${PROJECT_SOURCE_DIR}/src/hb-icu.cc ${PROJECT_SOURCE_DIR}/src/hb-icu.h)
   add_dependencies(harfbuzz-icu harfbuzz)
   target_link_libraries(harfbuzz-icu harfbuzz ${THIRD_PARTY_LIBS})
-  set_target_properties(harfbuzz-icu PROPERTIES VISIBILITY_INLINES_HIDDEN TRUE)
+  set_target_properties(harfbuzz-icu PROPERTIES VISIBILITY_INLINES_HIDDEN ${HB_VISIBILITY_INLINES_HIDDEN})
 
   if (BUILD_SHARED_LIBS)
     if (BUILD_FRAMEWORK)
@@ -545,15 +650,15 @@ endif ()
 ## Define harfbuzz-subset library
 if (HB_BUILD_SUBSET)
   add_library(harfbuzz-subset ${subset_project_sources} ${subset_project_headers})
-  list(APPEND project_headers ${PROJECT_SOURCE_DIR}/src/hb-subset.h ${PROJECT_SOURCE_DIR}/src/hb-subset-serialize.h)
+  list(APPEND project_headers ${subset_project_headers})
   add_dependencies(harfbuzz-subset harfbuzz)
   target_link_libraries(harfbuzz-subset harfbuzz ${THIRD_PARTY_LIBS})
-  set_target_properties(harfbuzz-subset PROPERTIES VISIBILITY_INLINES_HIDDEN TRUE)
+  set_target_properties(harfbuzz-subset PROPERTIES VISIBILITY_INLINES_HIDDEN ${HB_VISIBILITY_INLINES_HIDDEN})
 
   if (MINGW)
     target_compile_options(harfbuzz-subset PRIVATE "-Wa,-mbig-obj")
   endif()
-  
+
   if (BUILD_SHARED_LIBS)
     if (BUILD_FRAMEWORK)
       set_target_properties(harfbuzz harfbuzz-subset PROPERTIES
@@ -565,6 +670,93 @@ if (HB_BUILD_SUBSET)
         OUTPUT_NAME "harfbuzz-subset"
         XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY ""
         MACOSX_FRAMEWORK_IDENTIFIER "harfbuzz-subset"
+        MACOSX_FRAMEWORK_SHORT_VERSION_STRING "${HB_VERSION}"
+        MACOSX_FRAMEWORK_BUNDLE_VERSION "${HB_VERSION}"
+      )
+    endif ()
+  endif ()
+endif ()
+
+if (HB_BUILD_RASTER)
+  add_library(harfbuzz-raster ${raster_project_sources} ${raster_project_headers})
+  add_dependencies(harfbuzz-raster harfbuzz)
+  target_link_libraries(harfbuzz-raster harfbuzz ${HB_RASTER_THIRD_PARTY_LIBS})
+  set_target_properties(harfbuzz-raster PROPERTIES VISIBILITY_INLINES_HIDDEN ${HB_VISIBILITY_INLINES_HIDDEN})
+
+  if (MINGW)
+    target_compile_options(harfbuzz-raster PRIVATE "-Wa,-mbig-obj")
+  endif()
+
+  if (BUILD_SHARED_LIBS)
+    if (BUILD_FRAMEWORK)
+      list(APPEND project_headers ${raster_project_headers})
+      set_target_properties(harfbuzz-raster PROPERTIES
+        FRAMEWORK TRUE
+        FRAMEWORK_VERSION "${HB_VERSION}"
+        PUBLIC_HEADER "${project_headers}"
+        PRODUCT_BUNDLE_IDENTIFIER "harfbuzz.harfbuzz-raster"
+        XCODE_ATTRIBUTE_INSTALL_PATH "@rpath"
+        OUTPUT_NAME "harfbuzz-raster"
+        XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY ""
+        MACOSX_FRAMEWORK_IDENTIFIER "harfbuzz-raster"
+        MACOSX_FRAMEWORK_SHORT_VERSION_STRING "${HB_VERSION}"
+        MACOSX_FRAMEWORK_BUNDLE_VERSION "${HB_VERSION}"
+      )
+    endif ()
+  endif ()
+endif ()
+
+if (HB_BUILD_VECTOR)
+  add_library(harfbuzz-vector ${vector_project_sources} ${vector_project_headers})
+  add_dependencies(harfbuzz-vector harfbuzz)
+  target_link_libraries(harfbuzz-vector harfbuzz ${HB_VECTOR_THIRD_PARTY_LIBS})
+  set_target_properties(harfbuzz-vector PROPERTIES VISIBILITY_INLINES_HIDDEN ${HB_VISIBILITY_INLINES_HIDDEN})
+
+  if (MINGW)
+    target_compile_options(harfbuzz-vector PRIVATE "-Wa,-mbig-obj")
+  endif()
+
+  if (BUILD_SHARED_LIBS)
+    if (BUILD_FRAMEWORK)
+      list(APPEND project_headers ${vector_project_headers})
+      set_target_properties(harfbuzz-vector PROPERTIES
+        FRAMEWORK TRUE
+        FRAMEWORK_VERSION "${HB_VERSION}"
+        PUBLIC_HEADER "${project_headers}"
+        PRODUCT_BUNDLE_IDENTIFIER "harfbuzz.harfbuzz-vector"
+        XCODE_ATTRIBUTE_INSTALL_PATH "@rpath"
+        OUTPUT_NAME "harfbuzz-vector"
+        XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY ""
+        MACOSX_FRAMEWORK_IDENTIFIER "harfbuzz-vector"
+        MACOSX_FRAMEWORK_SHORT_VERSION_STRING "${HB_VERSION}"
+        MACOSX_FRAMEWORK_BUNDLE_VERSION "${HB_VERSION}"
+      )
+    endif ()
+  endif ()
+endif ()
+
+if (HB_BUILD_GPU)
+  add_library(harfbuzz-gpu ${gpu_project_sources} ${gpu_project_headers})
+  add_dependencies(harfbuzz-gpu harfbuzz)
+  target_link_libraries(harfbuzz-gpu harfbuzz)
+  set_target_properties(harfbuzz-gpu PROPERTIES VISIBILITY_INLINES_HIDDEN ${HB_VISIBILITY_INLINES_HIDDEN})
+
+  if (MINGW)
+    target_compile_options(harfbuzz-gpu PRIVATE "-Wa,-mbig-obj")
+  endif()
+
+  if (BUILD_SHARED_LIBS)
+    if (BUILD_FRAMEWORK)
+      list(APPEND project_headers ${gpu_project_headers})
+      set_target_properties(harfbuzz-gpu PROPERTIES
+        FRAMEWORK TRUE
+        FRAMEWORK_VERSION "${HB_VERSION}"
+        PUBLIC_HEADER "${project_headers}"
+        PRODUCT_BUNDLE_IDENTIFIER "harfbuzz.harfbuzz-gpu"
+        XCODE_ATTRIBUTE_INSTALL_PATH "@rpath"
+        OUTPUT_NAME "harfbuzz-gpu"
+        XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY ""
+        MACOSX_FRAMEWORK_IDENTIFIER "harfbuzz-gpu"
         MACOSX_FRAMEWORK_SHORT_VERSION_STRING "${HB_VERSION}"
         MACOSX_FRAMEWORK_BUNDLE_VERSION "${HB_VERSION}"
       )
@@ -591,17 +783,19 @@ if (UNIX OR MINGW OR VITA)
     if (HB_BUILD_SUBSET)
       set_target_properties(harfbuzz-subset PROPERTIES LINKER_LANGUAGE C)
     endif ()
+    if (HB_BUILD_RASTER)
+      set_target_properties(harfbuzz-raster PROPERTIES LINKER_LANGUAGE C)
+    endif ()
+    if (HB_BUILD_VECTOR)
+      set_target_properties(harfbuzz-vector PROPERTIES LINKER_LANGUAGE C)
+    endif ()
+    if (HB_BUILD_GPU)
+      set_target_properties(harfbuzz-gpu PROPERTIES LINKER_LANGUAGE C)
+    endif ()
 
     # No threadsafe statics as we do it ourselves
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-threadsafe-statics")
   endif ()
-
-  CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-  if (COMPILER_SUPPORTS_CXX11)
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-  else()
-    message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
-  endif()
 endif ()
 
 
@@ -616,7 +810,7 @@ if (HB_HAVE_GOBJECT)
   include_directories(BEFORE ${CMAKE_CURRENT_BINARY_DIR}/src)
   add_dependencies(harfbuzz-gobject harfbuzz)
   target_link_libraries(harfbuzz-gobject harfbuzz ${GOBJECT_LIBRARIES} ${THIRD_PARTY_LIBS})
-  set_target_properties(harfbuzz-gobject PROPERTIES VISIBILITY_INLINES_HIDDEN TRUE)
+  set_target_properties(harfbuzz-gobject PROPERTIES VISIBILITY_INLINES_HIDDEN ${HB_VISIBILITY_INLINES_HIDDEN})
 
   if (BUILD_SHARED_LIBS)
     if (BUILD_FRAMEWORK)
@@ -642,7 +836,7 @@ if (HB_HAVE_CAIRO)
   add_library(harfbuzz-cairo ${PROJECT_SOURCE_DIR}/src/hb-cairo.cc ${PROJECT_SOURCE_DIR}/src/hb-static.cc ${PROJECT_SOURCE_DIR}/src/hb-cairo.h)
   add_dependencies(harfbuzz-cairo harfbuzz)
   target_link_libraries(harfbuzz-cairo harfbuzz ${THIRD_PARTY_LIBS})
-  set_target_properties(harfbuzz-cairo PROPERTIES VISIBILITY_INLINES_HIDDEN TRUE)
+  set_target_properties(harfbuzz-cairo PROPERTIES VISIBILITY_INLINES_HIDDEN ${HB_VISIBILITY_INLINES_HIDDEN})
 
   if (BUILD_SHARED_LIBS)
     if (BUILD_FRAMEWORK)
@@ -871,6 +1065,60 @@ if (HB_BUILD_UTILS)
     )
     target_link_libraries(hb-info harfbuzz-gobject harfbuzz)
   endif()
+
+  if (HB_BUILD_GPU AND NOT HB_BUILD_GPU_DEMO STREQUAL "OFF")
+    find_package(OpenGL QUIET)
+    find_package(GLEW QUIET)
+    find_package(glfw3 QUIET)
+    if (OpenGL_FOUND AND GLEW_FOUND AND glfw3_FOUND)
+      add_executable(hb-gpu
+          ${PROJECT_SOURCE_DIR}/util/hb-gpu.cc
+          ${PROJECT_SOURCE_DIR}/util/gpu-output.hh
+          ${PROJECT_SOURCE_DIR}/util/gpu/demo-atlas.cc
+          ${PROJECT_SOURCE_DIR}/util/gpu/demo-buffer.cc
+          ${PROJECT_SOURCE_DIR}/util/gpu/demo-font.cc
+          ${PROJECT_SOURCE_DIR}/util/gpu/demo-glstate.cc
+          ${PROJECT_SOURCE_DIR}/util/gpu/demo-renderer-gl.cc
+          ${PROJECT_SOURCE_DIR}/util/gpu/demo-shader.cc
+          ${PROJECT_SOURCE_DIR}/util/gpu/demo-view.cc
+      )
+      target_link_libraries(hb-gpu harfbuzz-gpu harfbuzz
+                            OpenGL::GL GLEW::GLEW glfw)
+      if (APPLE)
+        target_sources(hb-gpu PRIVATE
+            ${PROJECT_SOURCE_DIR}/util/gpu/demo-metal.mm)
+        target_link_libraries(hb-gpu
+            "-framework Metal" "-framework QuartzCore"
+            "-framework Foundation" "-framework AppKit")
+      endif ()
+      if (WIN32)
+        find_library(D3D11_LIBRARY NAMES d3d11)
+        find_library(D3DCOMPILER_LIBRARY NAMES d3dcompiler)
+        target_sources(hb-gpu PRIVATE
+            ${PROJECT_SOURCE_DIR}/util/gpu/demo-renderer-d3d11.cc)
+        target_link_libraries(hb-gpu
+            "${D3D11_LIBRARY}"
+            "${D3DCOMPILER_LIBRARY}")
+      endif ()
+    else ()
+      set(_hb_gpu_demo_missing_deps)
+      if (NOT OpenGL_FOUND)
+        list(APPEND _hb_gpu_demo_missing_deps OpenGL)
+      endif ()
+      if (NOT GLEW_FOUND)
+        list(APPEND _hb_gpu_demo_missing_deps GLEW)
+      endif ()
+      if (NOT glfw3_FOUND)
+        list(APPEND _hb_gpu_demo_missing_deps glfw3)
+      endif ()
+      string(REPLACE ";" ", " _hb_gpu_demo_missing_deps "${_hb_gpu_demo_missing_deps}")
+      if (HB_BUILD_GPU_DEMO STREQUAL "ON")
+        message(FATAL_ERROR "HB_BUILD_GPU_DEMO is ON but missing dependencies: ${_hb_gpu_demo_missing_deps}")
+      else ()
+        message(STATUS "Not building hb-gpu: missing dependencies: ${_hb_gpu_demo_missing_deps}")
+      endif ()
+    endif ()
+  endif ()
 endif ()
 
 
@@ -879,6 +1127,15 @@ include (GNUInstallDirs)
 
 if (NOT SKIP_INSTALL_HEADERS AND NOT SKIP_INSTALL_ALL)
   install(FILES ${project_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/harfbuzz)
+  if (HB_BUILD_RASTER)
+    install(FILES ${raster_project_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/harfbuzz)
+  endif ()
+  if (HB_BUILD_VECTOR)
+    install(FILES ${vector_project_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/harfbuzz)
+  endif ()
+  if (HB_BUILD_GPU)
+    install(FILES ${gpu_project_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/harfbuzz)
+  endif ()
   if (HB_HAVE_GOBJECT)
     install(FILES ${hb_gobject_headers} ${hb_gobject_gen_headers} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/harfbuzz)
   endif ()
@@ -893,6 +1150,8 @@ string(REPLACE ";" " " PC_LIBS_PRIV "${PC_LIBS_PRIV}")
 # Macro to write pkg-config .pc configuration files
 macro ( make_pkgconfig_pc_file name )
   file(READ "${PROJECT_SOURCE_DIR}/src/${name}.pc.in" FSTR)
+  set(_pc_requires_private_extra "")
+  set(_pc_libs_private_extra "")
 
   string(REPLACE "%prefix%" "${CMAKE_INSTALL_PREFIX}" FSTR ${FSTR})
   string(REPLACE "%exec_prefix%" "\${prefix}" FSTR ${FSTR})
@@ -912,6 +1171,14 @@ macro ( make_pkgconfig_pc_file name )
   string(REPLACE "%VERSION%" "${HB_VERSION}" FSTR ${FSTR})
   string(REPLACE "%requires_private%" "${PC_REQUIRES_PRIV}" FSTR ${FSTR})
   string(REPLACE "%libs_private%" "${PC_LIBS_PRIV}" FSTR ${FSTR})
+  if (ARGC GREATER 1)
+    set(_pc_requires_private_extra "${ARGV1}")
+  endif ()
+  if (ARGC GREATER 2)
+    set(_pc_libs_private_extra "${ARGV2}")
+  endif ()
+  string(REPLACE "%requires_private_extra%" "${_pc_requires_private_extra}" FSTR ${FSTR})
+  string(REPLACE "%libs_private_extra%" "${_pc_libs_private_extra}" FSTR ${FSTR})
 
   file(WRITE "${PROJECT_BINARY_DIR}/${name}.pc" ${FSTR})
 
@@ -925,7 +1192,7 @@ endmacro ( make_pkgconfig_pc_file )
 # Generate hb-features.h with the features we enabled
 macro (make_hb_features_h)
   file(READ "${PROJECT_SOURCE_DIR}/src/hb-features.h.in" feature_h_in)
-  foreach(arg cairo coretext directwrite freetype gdi glib gobject graphite icu uniscribe wasm)
+  foreach(arg cairo coretext directwrite freetype gdi glib gobject graphite gpu icu raster subset uniscribe vector wasm)
     string(TOUPPER ${arg} feature_caps)
     set(feature_instring "#mesondefine HB_HAS_${feature_caps}")
     if (HB_HAVE_${feature_caps})
@@ -960,6 +1227,22 @@ if (NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL)
     list(APPEND hb_install_targets harfbuzz-subset)
     make_pkgconfig_pc_file("harfbuzz-subset")
   endif ()
+  if (HB_BUILD_RASTER)
+    list(REMOVE_DUPLICATES PC_REQUIRES_PRIV_RASTER)
+    string(REPLACE ";" ", " PC_REQUIRES_PRIV_RASTER "${PC_REQUIRES_PRIV_RASTER}")
+    list(APPEND hb_install_targets harfbuzz-raster)
+    make_pkgconfig_pc_file("harfbuzz-raster" "${PC_REQUIRES_PRIV_RASTER}")
+  endif ()
+  if (HB_BUILD_VECTOR)
+    list(REMOVE_DUPLICATES PC_REQUIRES_PRIV_VECTOR)
+    string(REPLACE ";" ", " PC_REQUIRES_PRIV_VECTOR "${PC_REQUIRES_PRIV_VECTOR}")
+    list(APPEND hb_install_targets harfbuzz-vector)
+    make_pkgconfig_pc_file("harfbuzz-vector" "${PC_REQUIRES_PRIV_VECTOR}")
+  endif ()
+  if (HB_BUILD_GPU)
+    list(APPEND hb_install_targets harfbuzz-gpu)
+    make_pkgconfig_pc_file("harfbuzz-gpu")
+  endif ()
   if (HB_BUILD_UTILS)
     if (WIN32 AND BUILD_SHARED_LIBS)
       install(TARGETS harfbuzz-subset
@@ -992,7 +1275,7 @@ if (NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL)
       ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
       LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
       RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-      FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR} 
+      FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
       COMPONENT runtime OPTIONAL
     )
     make_pkgconfig_pc_file("harfbuzz-gobject")

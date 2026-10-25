@@ -1,4 +1,4 @@
-This is kpathsea.info, produced by makeinfo version 7.2 from
+This is kpathsea.info, produced by makeinfo version 7.3 from
 kpathsea.texi.
 
 This file documents the Kpathsea library for path searching.
@@ -37,7 +37,7 @@ Kpathsea library
 ****************
 
 This manual documents the Kpathsea library for path searching.  It
-corresponds to version 6.4.2/dev, released in January 2026.
+corresponds to version 6.4.2/dev, released in April 2026.
 
 * Menu:
 
@@ -62,7 +62,7 @@ File: kpathsea.info,  Node: Introduction,  Next: unixtex.ftp,  Prev: Top,  Up: T
 **************
 
 This manual corresponds to version 6.4.2/dev of the Kpathsea library,
-released in January 2026.
+released in April 2026.
 
    The library's fundamental purpose is to return a filename from a list
 of directories specified by the user, similar to what shells do when
@@ -904,6 +904,11 @@ path element in turn, if no match is found by the normal search, and the
 path element allows for checking the filesystem, a second check is made
 for a case-insensitive match.
 
+   In practice, this means that in user directories, files will be found
+case-insensitively regardless of the underlying filesystem.  However, in
+TeX system directories, notably ‘texmf-dist’ in TeX Live, it's still
+necessary to use the correct case; ‘\input Plain.tex’ will not work.
+
    This is enabled at compile-time on Unix systems, and enabled at
 runtime by setting the configuration variable ‘texmf_casefold_search’,
 to a true value, e.g., ‘1’; this is done by default in TeX Live.
@@ -976,9 +981,9 @@ the search path is ‘.:/somedir’, and the files ‘./foobar.tex’ and
 for ‘foobar.tex’ returns ‘./foobar.tex’.  However, searching for
 ‘FooBar.TeX’ now returns ‘./foobar.tex’ instead of
 ‘/somedir/FooBar.TeX’; this is the incompatibility mentioned above.
-Also (as expected), searching for ‘FOOBAR.TEX’ (or whatever variation)
-will now return ‘./foobar.tex’, whereas before it would fail.  Searching
-for all (‘kpsewhich --all’) ‘foobar.tex’ will return both matches.
+Also, searching for ‘FOOBAR.TEX’ (or whatever variation) will now return
+‘./foobar.tex’, whereas before it would fail.  Searching for all
+(‘kpsewhich --all’) ‘foobar.tex’ will return both matches.
 
    Example #3: same as example #2, but on a case-insensitive
 (file)system: both now and previously, searching for ‘FooBar.TeX’
@@ -1005,14 +1010,15 @@ TeX Live, that is the ‘texmf-local’ and ‘texmf-dist’ trees (also
 ‘$TEXMFSYSCONFIG’ and ‘$TEXMFSYSVAR’, but those are rarely noticed).
 The rationale for this is that in practice, case mangling happens with
 user-created files, not with packages distributed as part of the TeX
-system.
+system, and it would incur a considerable speed penalty to search the
+system directories also.
 
    One more caveat: the purpose of ‘kpsewhich’ is to exercise the path
-searching in Kpathsea as it is actually done.  Therefore, as shown
-above, ‘kpsewhich --all’ will not return all matches regardless of case
-within a given path element.  If you want to find all matches in all
-directories, ‘find’ is the best tool, although the setup takes a couple
-steps:
+searching in Kpathsea as it is actually implemented.  Therefore, as
+shown above, ‘kpsewhich --all’ will not return all matches regardless of
+case within a given path element.  If you want to find all matches in
+all directories, ‘find’ is the best tool, although the setup takes a
+couple steps:
 
      kpsewhich -show-path=tex >/tmp/texpath      # search path specification
      kpsewhich -expand-path="`cat /tmp/texpath`" >/tmp/texdirs  # all dirs
@@ -1022,7 +1028,8 @@ steps:
    Sorry that it's annoyingly lengthy, but implementing this inside
 Kpathsea would be a lot of error-prone trouble for something that is
 only useful for debugging.  If your ‘find’ does not support ‘-iname’,
-you can get GNU Find from <https://gnu.org/software/findutils>.
+you can get GNU Find from <https://gnu.org/software/findutils>, or
+otherwise adapt as you wish.
 
    The casefolding search is implemented in the source file
 ‘kpathsea/pathsearch.c’.  Two implementation points:
@@ -1563,6 +1570,9 @@ their corresponding format:
 
 ‘texmf.cnf’
      ‘cnf’
+
+‘updmap.cfg’
+     ‘web2c files’
 
 ‘XDvi’
      ‘other text files’
@@ -3270,7 +3280,7 @@ Index
 * -D NUM:                                Path searching options.
                                                               (line  52)
 * -iname, find predicate:                Casefolding examples.
-                                                              (line  78)
+                                                              (line  79)
 * -L option to ls:                       ls-R.                (line  44)
 * ; translated to : in texmf.cnf:        Config files.        (line  66)
 * : may not be ::                        Searching overview.  (line  13)
@@ -3416,7 +3426,7 @@ Index
 * 8.3 filenames, using:                  mktex configuration. (line  68)
 * absolute filenames:                    Searching overview.  (line  58)
 * access system call:                    Casefolding examples.
-                                                              (line  86)
+                                                              (line  88)
 * access warnings:                       Searching overview.  (line  63)
 * AFMFONTS:                              Supported file formats.
                                                               (line  22)
@@ -3623,7 +3633,7 @@ Index
 * filesystem, case-(in)sensitive:        Casefolding rationale.
                                                               (line   6)
 * Findutils, GNU package:                Casefolding examples.
-                                                              (line  78)
+                                                              (line  79)
 * floating directories:                  Searching overview.  (line  22)
 * fmtutil:                               mktex script names.  (line  10)
 * fmtutil.cnf:                           Specially-recognized files.
@@ -4007,7 +4017,7 @@ Index
 * T42FONTS:                              Supported file formats.
                                                               (line 220)
 * tcfmgr.map:                            Specially-recognized files.
-                                                              (line  46)
+                                                              (line  49)
 * TDS:                                   TeX directory structure.
                                                               (line   6)
 * TeX directory structure:               TeX directory structure.
@@ -4061,7 +4071,7 @@ Index
                                                               (line 184)
 * TEXMF:                                 TeX directory structure.
                                                               (line   6)
-* texmf_casefold_search:                 Casefolding search.  (line  12)
+* texmf_casefold_search:                 Casefolding search.  (line  17)
 * TEXMF_OUTPUT_DIRECTORY, and missfont.log: mktex script names.
                                                               (line  39)
 * TEXMF_OUTPUT_DIRECTORY, and paranoid output files: Safe filenames.
@@ -4141,6 +4151,8 @@ Index
 * unreadable files:                      Searching overview.  (line  63)
 * unrestricted mode, for output files:   Safe filenames.      (line  13)
 * unusable ls-R warning:                 ls-R.                (line  51)
+* updmap.cfg:                            Specially-recognized files.
+                                                              (line  41)
 * usage patterns, finding:               Logging.             (line   6)
 * USE_TEXMFVAR:                          mktex configuration. (line 128)
 * USE_VARTEXFONTS:                       mktex configuration. (line 118)
@@ -4175,7 +4187,7 @@ Index
                                                               (line  21)
 * www.tug.org:                           unixtex.ftp.         (line   6)
 * XDvi:                                  Specially-recognized files.
-                                                              (line  41)
+                                                              (line  44)
 * XDVIFONTS:                             Supported file formats.
                                                               (line 258)
 * XDVIMAKEPK:                            mktex script names.  (line  32)
@@ -4185,66 +4197,66 @@ Index
 
 Tag Table:
 Node: Top1479
-Node: Introduction2265
-Node: History4372
-Node: unixtex.ftp8992
-Node: Security10474
-Node: Global font cache and security13282
-Node: TeX directory structure15263
-Node: Path searching19438
-Node: Searching overview20396
-Node: Path sources24303
-Node: Config files25573
-Node: Path expansion30621
-Node: Default expansion31590
-Node: Variable expansion33712
-Node: Tilde expansion35181
-Node: Brace expansion36229
-Node: KPSE_DOT expansion37224
-Node: Subdirectory expansion37749
-Node: Casefolding search40910
-Node: Casefolding rationale41687
-Node: Casefolding examples43045
-Node: Filename database48267
-Node: ls-R49281
-Node: Filename aliases53153
-Node: Database format54395
-Node: Invoking kpsewhich55444
-Node: kpsewhich examples56835
-Node: Path searching options57723
-Node: Specially-recognized files67986
-Node: Auxiliary tasks69461
-Node: Standard options73605
-Node: TeX support73973
-Node: Supported file formats75331
-Node: File lookup84082
-Node: Glyph lookup85887
-Node: Basic glyph lookup87035
-Node: Fontmap87943
-Node: Fallback font90554
-Node: Suppressing warnings91490
-Node: mktex scripts92653
-Node: mktex configuration93896
-Node: mktex script names99989
-Node: mktex script arguments101672
-Node: Programming102587
-Node: Programming overview103230
-Node: Calling sequence106141
-Node: Safe filenames111478
-Ref: openout_any111637
-Node: Program-specific files115467
-Node: Programming with config files116520
-Node: Reporting bugs118167
-Node: Bug checklist118845
-Node: Mailing lists122402
-Node: Debugging123079
-Node: Logging128336
-Node: Common problems130243
-Node: Unable to find files130720
-Node: Slow path searching133563
-Node: Unable to generate fonts134958
-Node: TeX or Metafont failing137494
-Node: Index138696
+Node: Introduction2263
+Node: History4368
+Node: unixtex.ftp8988
+Node: Security10470
+Node: Global font cache and security13278
+Node: TeX directory structure15259
+Node: Path searching19434
+Node: Searching overview20392
+Node: Path sources24299
+Node: Config files25569
+Node: Path expansion30617
+Node: Default expansion31586
+Node: Variable expansion33708
+Node: Tilde expansion35177
+Node: Brace expansion36225
+Node: KPSE_DOT expansion37220
+Node: Subdirectory expansion37745
+Node: Casefolding search40906
+Node: Casefolding rationale41976
+Node: Casefolding examples43334
+Node: Filename database48668
+Node: ls-R49682
+Node: Filename aliases53554
+Node: Database format54796
+Node: Invoking kpsewhich55845
+Node: kpsewhich examples57236
+Node: Path searching options58124
+Node: Specially-recognized files68387
+Node: Auxiliary tasks69903
+Node: Standard options74047
+Node: TeX support74415
+Node: Supported file formats75773
+Node: File lookup84524
+Node: Glyph lookup86329
+Node: Basic glyph lookup87477
+Node: Fontmap88385
+Node: Fallback font90996
+Node: Suppressing warnings91932
+Node: mktex scripts93095
+Node: mktex configuration94338
+Node: mktex script names100431
+Node: mktex script arguments102114
+Node: Programming103029
+Node: Programming overview103672
+Node: Calling sequence106583
+Node: Safe filenames111920
+Ref: openout_any112079
+Node: Program-specific files115909
+Node: Programming with config files116962
+Node: Reporting bugs118609
+Node: Bug checklist119287
+Node: Mailing lists122844
+Node: Debugging123521
+Node: Logging128778
+Node: Common problems130685
+Node: Unable to find files131162
+Node: Slow path searching134005
+Node: Unable to generate fonts135400
+Node: TeX or Metafont failing137936
+Node: Index139138
 
 End Tag Table
 
