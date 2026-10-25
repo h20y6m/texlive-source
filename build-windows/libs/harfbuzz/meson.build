@@ -68,6 +68,7 @@ harfbuzz_sources = [
   harfbuzz_tree / 'src/hb-subset-table-other.cc',
   harfbuzz_tree / 'src/hb-subset-table-var.cc',
   harfbuzz_tree / 'src/hb-subset.cc',
+  harfbuzz_tree / 'src/hb-depend.cc',
 ]
 
 

@@ -10,6 +10,8 @@ REPLACEMENTS = [
     (r'mpmp\.h', r'pmpmp.h'),
     (r'mplib\.h', r'pmplib.h'),
     (r'mpstrings\.h', r'pmpstrings.h'),
+    (r'tfmin\.h', r'ptfmin.h'),
+    (r'TFMIN_H', r'PTFMIN_H'),
     # pmp_sed_math
     (r'mpmath([a-z]*)\.h', r'pmpmath\1.h'),
     # pmp_sed_ps
